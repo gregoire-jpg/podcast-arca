@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation — Revue ARCA</title>
+  <style>
+    :root {
+      --navy:    #2d3461;
+      --navy-dk: #1e2245;
+      --gold:    #c8a060;
+      --white:   #ffffff;
+      --bg:      #faf8f5;
+      --border:  #e2ddd8;
+      --muted:   #777;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: Georgia, serif; background: var(--bg); color: var(--navy); }
+    button { cursor: pointer; }
+
+    /* ── Header ── */
+    .pa-header { background: var(--navy); padding: 60px 24px 50px; text-align: center; }
+    .pa-header .eyebrow { font: .65em/1 Arial; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; display: block; }
+    .pa-header h1 { font: normal 2.8em/1 Georgia; letter-spacing: 6px; text-transform: uppercase; color: var(--white); margin-bottom: 18px; }
+    .pa-header-rule { width: 44px; height: 2px; background: var(--gold); margin: 0 auto 18px; }
+    .pa-header p { font: italic 1em/1 Georgia; color: rgba(255,255,255,.55); letter-spacing: 1px; }
+
+    /* ── Filter bar ── */
+    .pa-filter-bar { background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 90; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+    .pa-filter-tabs { display: flex; justify-content: center; }
+    .pa-tab { padding: 17px 35px; font: .7em/1 Arial; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); background: none; border: none; border-bottom: 3px solid transparent; transition: color .2s, border-color .2s; }
+    .pa-tab:hover { color: var(--navy); }
+    .pa-tab.active { color: var(--navy); border-bottom-color: var(--gold); font-weight: 700; }
+
+    /* ── Sub-filters ── */
+    .pa-sub { background: #f3f0ea; border-bottom: 1px solid var(--border); padding: 18px 20px; text-align: center; display: none; }
+    .pa-sub.on { display: block; }
+    .pa-sub-label { display: block; font: .65em/1 Arial; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .pa-chip { display: inline-block; margin: 3px; padding: 6px 16px; border: 1px solid var(--navy); border-radius: 20px; font: .85em/1 Georgia; color: var(--navy); background: var(--white); transition: background .18s, color .18s; cursor: pointer; }
+    .pa-chip:hover, .pa-chip.active { background: var(--navy); color: var(--white); }
+    .pa-chip-count { opacity: .6; font-size: .85em; }
+
+    /* ── Type selector bar ── */
+    .pa-type-bar { background: var(--navy-dk); padding: 0; display: flex; justify-content: center; }
+    .pa-type-btn { padding: 12px 28px; background: none; border: none; border-bottom: 2px solid transparent; color: rgba(255,255,255,.45); font: .72em/1 Arial; letter-spacing: 2px; text-transform: uppercase; transition: color .2s, border-color .2s; cursor: pointer; }
+    .pa-type-btn:hover { color: rgba(255,255,255,.8); }
+    .pa-type-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    /* ── Document list ── */
+    .pa-container { max-width: 880px; margin: 0 auto; padding: 8px 24px 80px; }
+
+    .pa-section-header { padding: 40px 0 16px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+    .pa-section-num { display: block; font: .62em/1 Arial; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+    .pa-section-title { font: normal 1.6em/1.2 Georgia; color: var(--navy); margin-bottom: 5px; }
+    .pa-section-rule { width: 28px; height: 1px; background: var(--gold); margin-top: 14px; opacity: .5; }
+
+    .pa-doc-row { display: flex; align-items: flex-start; gap: 14px; padding: 14px 10px; border-bottom: 1px solid var(--border); border-radius: 4px; margin: 0 -10px; transition: background .15s; }
+    .pa-doc-row:hover { background: rgba(45,52,97,.04); }
+    .pa-doc-row.has-link { cursor: pointer; }
+    .pa-doc-row.has-link:hover .pa-doc-title { color: var(--gold); }
+
+    .pa-doc-icon { font-size: 1.2em; color: var(--gold); flex-shrink: 0; width: 24px; text-align: center; margin-top: 2px; }
+    .pa-doc-body { flex: 1; min-width: 0; }
+    .pa-doc-title { font: .97em/1.35 Georgia; color: var(--navy); margin-bottom: 3px; }
+    .pa-doc-meta { font: .72em/1 Arial; color: var(--muted); }
+    .pa-doc-tag { display: inline-block; border: 1px solid var(--border); border-radius: 10px; padding: 2px 8px; font-size: .9em; margin-left: 4px; }
+    .pa-doc-dl { font: .72em/1 Arial; color: var(--gold); text-decoration: none; flex-shrink: 0; white-space: nowrap; padding: 4px 8px; border: 1px solid var(--gold); border-radius: 4px; transition: background .15s; }
+    .pa-doc-dl:hover { background: var(--gold); color: var(--navy); }
+
+    /* ── Empty ── */
+    .pa-state { text-align: center; padding: 70px 24px; font: italic 1em/1.6 Georgia; color: var(--muted); }
+
+    /* ── Footer ── */
+    .pa-footer { background: var(--navy-dk); border-top: 1px solid rgba(255,255,255,.07); text-align: center; padding: 22px; font: .68em/1 Arial; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,.25); }
+
+    @media (max-width: 600px) {
+      .pa-header h1 { font-size: 2em; }
+      .pa-tab { padding: 14px 16px; font-size: .62em; }
+      .pa-type-btn { padding: 10px 14px; font-size: .62em; }
+      .pa-container { padding: 0 14px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="pa-header">
+  <span class="eyebrow">Revue ARCA</span>
+  <h1>Documentation</h1>
+  <div class="pa-header-rule"></div>
+  <p>Articles · Livres · Revues · Lectures</p>
+</div>
+
+<!-- Type de document -->
+<div class="pa-type-bar">
+  <button class="pa-type-btn active" data-type="tous">Tous</button>
+  <button class="pa-type-btn" data-type="article">Articles</button>
+  <button class="pa-type-btn" data-type="livre">Livres</button>
+  <button class="pa-type-btn" data-type="revue">Revue ARCA</button>
+  <button class="pa-type-btn" data-type="lus-pour-vous">Lus pour vous</button>
+</div>
+
+<!-- Filter bar -->
+<div class="pa-filter-bar">
+  <div class="pa-filter-tabs">
+    <button class="pa-tab active" data-view="categorie">Par Catégorie</button>
+    <button class="pa-tab"        data-view="auteur">Par Auteur</button>
+    <button class="pa-tab"        data-view="sujet">Par Sujet</button>
+  </div>
+</div>
+
+<div class="pa-sub on" id="sub-categorie"></div>
+<div class="pa-sub"    id="sub-auteur"></div>
+<div class="pa-sub"    id="sub-sujet"></div>
+
+<!-- Document list -->
+<div class="pa-container">
+  <div class="pa-state" id="pa-list">Chargement…</div>
+</div>
+
+<div class="pa-footer">&copy; Académie de Thélème — Tous droits réservés</div>
+
+<script>
+(function () {
+  var S = { docs: [], config: {}, view: 'categorie', filter: 'tous', type: 'tous' };
+  var $ = function(id) { return document.getElementById(id); };
+
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  /* ── Icons par type ── */
+  var ICONS = { article: '📄', livre: '📖', revue: '📰', 'lus-pour-vous': '👁' };
+
+  /* ── Init ── */
+  function init() {
+    Promise.all([
+      fetch('https://podcast-arca.netlify.app/documents.json?' + Date.now()).then(function(r){ return r.json(); }),
+      fetch('https://podcast-arca.netlify.app/config-docs.json?' + Date.now()).then(function(r){ return r.json(); }).catch(function(){ return {}; })
+    ]).then(function(res) {
+      S.docs   = res[0];
+      S.config = res[1];
+      buildSubFilters();
+      render();
+    }).catch(function() {
+      $('pa-list').innerHTML = '<div class="pa-state">Impossible de charger la documentation.</div>';
+    });
+
+    /* Type buttons */
+    document.querySelectorAll('.pa-type-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        S.type   = this.dataset.type;
+        S.filter = 'tous';
+        document.querySelectorAll('.pa-type-btn').forEach(function(b){ b.classList.remove('active'); });
+        this.classList.add('active');
+        resetSubFilters();
+        render();
+      });
+    });
+
+    /* View tabs */
+    document.querySelectorAll('.pa-tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        S.view   = this.dataset.view;
+        S.filter = 'tous';
+        document.querySelectorAll('.pa-tab').forEach(function(t){ t.classList.remove('active'); });
+        this.classList.add('active');
+        $('sub-categorie').classList.toggle('on', S.view === 'categorie');
+        $('sub-auteur').classList.toggle('on',    S.view === 'auteur');
+        $('sub-sujet').classList.toggle('on',     S.view === 'sujet');
+        resetSubFilters();
+        render();
+      });
+    });
+
+    /* Sub-filter chips */
+    ['sub-categorie','sub-auteur','sub-sujet'].forEach(function(id) {
+      $(id).addEventListener('click', function(e) {
+        var chip = e.target.closest('.pa-chip');
+        if (!chip) return;
+        S.filter = chip.dataset.val;
+        $(id).querySelectorAll('.pa-chip').forEach(function(c){ c.classList.remove('active'); });
+        chip.classList.add('active');
+        render();
+      });
+    });
+  }
+
+  function resetSubFilters() {
+    ['sub-categorie','sub-auteur','sub-sujet'].forEach(function(id) {
+      var btns = $(id).querySelectorAll('.pa-chip');
+      btns.forEach(function(b){ b.classList.remove('active'); });
+      if (btns[0]) btns[0].classList.add('active');
+    });
+  }
+
+  /* ── Build sub-filters ── */
+  function buildSubFilters() {
+    /* Catégories */
+    var cats = {}, authors = {}, subjects = {};
+    S.docs.forEach(function(d) {
+      cats[d.category]    = (cats[d.category]    || 0) + 1;
+      subjects[d.subject] = (subjects[d.subject] || 0) + 1;
+      (d.authors || []).forEach(function(a) {
+        authors[a] = (authors[a] || 0) + 1;
+      });
+    });
+
+    function chips(map, type) {
+      var total = S.docs.length;
+      var html  = '<span class="pa-sub-label">Choisir une ' + type + '</span>' +
+        '<button class="pa-chip active" data-type="' + type + '" data-val="tous">Tous <span class="pa-chip-count">(' + total + ')</span></button>';
+      Object.keys(map).sort().forEach(function(k) {
+        html += '<button class="pa-chip" data-type="' + type + '" data-val="' + esc(k) + '">' + esc(k) + ' <span class="pa-chip-count">(' + map[k] + ')</span></button>';
+      });
+      return html;
+    }
+
+    $('sub-categorie').innerHTML = chips(cats,    'categorie');
+    $('sub-auteur').innerHTML    = chips(authors, 'auteur');
+    $('sub-sujet').innerHTML     = chips(subjects,'sujet');
+  }
+
+  /* ── Filter ── */
+  function visible() {
+    return S.docs.filter(function(d) {
+      if (S.type   !== 'tous' && d.type     !== S.type)   return false;
+      if (S.filter === 'tous') return true;
+      if (S.view   === 'categorie') return d.category === S.filter;
+      if (S.view   === 'auteur')    return (d.authors || []).indexOf(S.filter) !== -1;
+      if (S.view   === 'sujet')     return d.subject  === S.filter;
+      return true;
+    });
+  }
+
+  /* ── Render ── */
+  function render() {
+    var docs = visible();
+    var list = $('pa-list');
+    if (!docs.length) { list.innerHTML = '<div class="pa-state">Aucun document pour cette sélection.</div>'; return; }
+
+    var html = '';
+
+    if (S.view === 'categorie' && S.filter === 'tous') {
+      /* Grouper par catégorie */
+      var groups = {}, order = [];
+      docs.forEach(function(d) {
+        if (!groups[d.category]) { groups[d.category] = []; order.push(d.category); }
+        groups[d.category].push(d);
+      });
+      order.forEach(function(cat) {
+        html += '<div class="pa-section-header">' +
+          '<div class="pa-section-title">' + esc(cat) + '</div>' +
+          '<div class="pa-section-rule"></div></div>';
+        groups[cat].forEach(function(d) { html += docRow(d); });
+      });
+    } else {
+      /* Flat list */
+      var headerTitle = S.filter !== 'tous' ? S.filter : '';
+      if (headerTitle) {
+        html += '<div class="pa-section-header"><div class="pa-section-title">' + esc(headerTitle) + '</div><div class="pa-section-rule"></div></div>';
+      }
+      docs.forEach(function(d) { html += docRow(d); });
+    }
+
+    list.innerHTML = html;
+
+    /* Liens de téléchargement */
+    list.querySelectorAll('.pa-doc-dl').forEach(function(a) {
+      a.addEventListener('click', function(e) { e.stopPropagation(); });
+    });
+  }
+
+  function docRow(doc) {
+    var icon    = ICONS[doc.type] || '📄';
+    var meta    = [doc.author_display, doc.publication, doc.year].filter(Boolean).join(' · ');
+    var dlBtn   = doc.dropbox_url
+      ? '<a class="pa-doc-dl" href="' + esc(doc.dropbox_url) + '" target="_blank">⬇ Télécharger</a>'
+      : '<span class="pa-doc-dl" style="opacity:.3;border-style:dashed;cursor:default;">bientôt</span>';
+
+    return '<div class="pa-doc-row' + (doc.dropbox_url ? ' has-link' : '') + '">' +
+      '<div class="pa-doc-icon">' + icon + '</div>' +
+      '<div class="pa-doc-body">' +
+        '<div class="pa-doc-title">' + esc(doc.title) + '</div>' +
+        (meta ? '<div class="pa-doc-meta">' + esc(meta) + '</div>' : '') +
+      '</div>' +
+      dlBtn +
+    '</div>';
+  }
+
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
+})();
+</script>
+</body>
+</html>
