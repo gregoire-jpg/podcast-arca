@@ -290,6 +290,11 @@
   </div>
 </div>
 
+<!-- Sub-filter: playlists -->
+<div class="pa-sub on" id="sub-playlist">
+  <span class="pa-sub-label">Choisir une playlist</span>
+</div>
+
 <!-- Sub-filter: auteurs -->
 <div class="pa-sub" id="sub-auteur">
   <span class="pa-sub-label">Choisir un auteur</span>
@@ -372,11 +377,8 @@
 
 <script>
 (function () {
-  /* ─── State ─── */
-  var S = { episodes: [], config: {}, idx: -1, view: "playlist", filter: "tous" };
-  var audio = document.getElementById("pa-audio");
-
-  /* ─── DOM shortcuts ─── */
+  var S = { episodes: [], config: {}, idx: -1, view: "playlist", filter: "recent" };
+  var audio   = document.getElementById("pa-audio");
   var $ = function (id) { return document.getElementById(id); };
   var list    = $("pa-list");
   var player  = $("pa-player");
@@ -384,7 +386,6 @@
   var track   = $("pa-track");
   var btnPlay = $("btn-play");
 
-  /* ─── Init ─── */
   function init() {
     Promise.all([
       fetch("episodes.json").then(function (r) { return r.json(); }),
@@ -398,27 +399,25 @@
       list.innerHTML = '<div class="pa-state">Impossible de charger les épisodes.</div>';
     });
 
-    /* Filter tabs */
     document.querySelectorAll(".pa-tab").forEach(function (tab) {
       tab.addEventListener("click", function () {
         S.view   = this.dataset.view;
-        S.filter = "tous";
+        S.filter = S.view === "playlist" ? "recent" : "tous";
         document.querySelectorAll(".pa-tab").forEach(function (t) { t.classList.remove("active"); });
         this.classList.add("active");
-        $("sub-auteur").classList.toggle("on", S.view === "auteur");
-        $("sub-sujet").classList.toggle("on",  S.view === "sujet");
-        /* Reset sub-chips */
-        ["auteur","sujet"].forEach(function (type) {
-          document.querySelectorAll("#sub-" + type + " .pa-chip").forEach(function (c) { c.classList.remove("active"); });
-          var first = document.querySelector("#sub-" + type + " .pa-chip");
-          if (first) first.classList.add("active");
+        $("sub-playlist").classList.toggle("on", S.view === "playlist");
+        $("sub-auteur").classList.toggle("on",   S.view === "auteur");
+        $("sub-sujet").classList.toggle("on",    S.view === "sujet");
+        ["playlist","auteur","sujet"].forEach(function (type) {
+          var btns = document.querySelectorAll("#sub-" + type + " .pa-chip");
+          btns.forEach(function (b) { b.classList.remove("active"); });
+          if (btns[0]) btns[0].classList.add("active");
         });
         render();
       });
     });
 
-    /* Sub-filter chips (delegated) */
-    ["sub-auteur","sub-sujet"].forEach(function (id) {
+    ["sub-playlist","sub-auteur","sub-sujet"].forEach(function (id) {
       $(id).addEventListener("click", function (e) {
         var chip = e.target.closest(".pa-chip");
         if (!chip) return;
@@ -429,22 +428,17 @@
       });
     });
 
-    /* Player controls */
     btnPlay.addEventListener("click", togglePlay);
     $("btn-prev").addEventListener("click",  function () { jumpEp(-1); });
     $("btn-next").addEventListener("click",  function () { jumpEp(+1); });
     $("btn-back").addEventListener("click",  function () { audio.currentTime -= 15; });
     $("btn-fwd").addEventListener("click",   function () { audio.currentTime += 15; });
     $("pa-speed").addEventListener("change", function () { audio.playbackRate = parseFloat(this.value); });
-
-    /* Progress bar seek */
     track.addEventListener("click", function (e) {
       if (!audio.duration) return;
-      var rect  = track.getBoundingClientRect();
+      var rect = track.getBoundingClientRect();
       audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
     });
-
-    /* Audio events */
     audio.addEventListener("timeupdate",     updateProgress);
     audio.addEventListener("loadedmetadata", function () { $("pa-dur").textContent = fmtTime(audio.duration); });
     audio.addEventListener("play",  function () { btnPlay.textContent = "⏸"; });
@@ -452,112 +446,128 @@
     audio.addEventListener("ended", function () { jumpEp(+1); });
   }
 
-  /* ─── Build dynamic sub-filter chips ─── */
   function buildSubFilters() {
     var cfg = S.config;
 
+    /* Playlists */
+    var seen = {}, playlists = [];
+    S.episodes.forEach(function (ep) {
+      if (ep.playlist_slug && !seen[ep.playlist_slug]) {
+        seen[ep.playlist_slug] = true;
+        playlists.push({ slug: ep.playlist_slug, title: ep.playlist_title });
+      }
+    });
+    var plHtml = '<span class="pa-sub-label">Choisir une playlist</span>' +
+      '<button class="pa-chip active" data-type="playlist" data-val="recent">★ Derniers épisodes</button>' +
+      '<button class="pa-chip" data-type="playlist" data-val="tous">Toutes</button>';
+    playlists.forEach(function (pl) {
+      plHtml += '<button class="pa-chip" data-type="playlist" data-val="' + pl.slug + '">' + esc(pl.title) + '</button>';
+    });
+    $("sub-playlist").innerHTML = plHtml;
+
     /* Auteurs */
-    var aContainer = $("sub-auteur");
     var aHtml = '<span class="pa-sub-label">Choisir un auteur</span>' +
-                '<button class="pa-chip active" data-type="auteur" data-val="tous">Tous</button>';
+      '<button class="pa-chip active" data-type="auteur" data-val="tous">Tous</button>';
     Object.keys(cfg.authors || {}).forEach(function (key) {
       aHtml += '<button class="pa-chip" data-type="auteur" data-val="' + key + '">' + cfg.authors[key] + '</button>';
     });
-    aContainer.innerHTML = aHtml;
+    $("sub-auteur").innerHTML = aHtml;
 
     /* Sujets */
-    var sContainer = $("sub-sujet");
     var sHtml = '<span class="pa-sub-label">Choisir un sujet</span>' +
-                '<button class="pa-chip active" data-type="sujet" data-val="tous">Tous</button>';
+      '<button class="pa-chip active" data-type="sujet" data-val="tous">Tous</button>';
     Object.keys(cfg.subjects || {}).forEach(function (key) {
       sHtml += '<button class="pa-chip" data-type="sujet" data-val="' + key + '">' + cfg.subjects[key] + '</button>';
     });
-    sContainer.innerHTML = sHtml;
+    $("sub-sujet").innerHTML = sHtml;
   }
 
-  /* ─── Filtering ─── */
   function visible() {
-    if (S.view === "playlist" || S.filter === "tous") return S.episodes;
-    if (S.view === "auteur") {
-      return S.episodes.filter(function (ep) { return (ep.authors || []).indexOf(S.filter) !== -1; });
+    if (S.view === "playlist") {
+      if (S.filter === "recent") return S.episodes.slice(0, 5);
+      if (S.filter === "tous")   return S.episodes;
+      return S.episodes.filter(function (ep) { return ep.playlist_slug === S.filter; });
     }
+    if (S.filter === "tous") return S.episodes;
+    if (S.view === "auteur") return S.episodes.filter(function (ep) { return (ep.authors || []).indexOf(S.filter) !== -1; });
     return S.episodes.filter(function (ep) { return ep.subject === S.filter; });
   }
 
-  /* ─── Render episode list ─── */
   function render() {
     var eps = visible();
     if (!eps.length) {
       list.innerHTML = '<div class="pa-state">Aucun épisode pour cette sélection.</div>';
       return;
     }
-
     var html = "";
-    if (S.view === "playlist") {
-      /* Grouped by playlist */
-      var groups = {};
-      var order  = [];
+
+    if (S.view === "playlist" && S.filter === "tous") {
+      /* Toutes les playlists groupées */
+      var groups = {}, order = [];
       eps.forEach(function (ep) {
         var slug = ep.playlist_slug || "default";
         if (!groups[slug]) { groups[slug] = []; order.push(slug); }
         groups[slug].push(ep);
       });
-
       var roman = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
       order.forEach(function (slug, gi) {
-        var group = groups[slug];
-        var first = group[0];
-        var authorLabels = (first.authors || []).map(function (a) {
-          return (S.config.authors || {})[a] || a;
-        }).join(" · ");
-
+        var group = groups[slug], first = group[0];
+        var authorLabels = (first.authors || []).map(function (a) { return (S.config.authors || {})[a] || a; }).join(" · ");
         html += '<div class="pa-group-header">' +
           '<span class="pa-group-num">Playlist ' + (roman[gi] || gi+1) + '</span>' +
           '<div class="pa-group-title">' + esc(first.playlist_title) + '</div>' +
           (authorLabels ? '<div class="pa-group-sub">par ' + esc(authorLabels) + '</div>' : '') +
           '<div class="pa-group-rule"></div></div>';
-
-        group.forEach(function (ep, i) {
-          html += epRow(ep, i + 1);
-        });
+        group.forEach(function (ep, i) { html += epRow(ep, i + 1); });
       });
     } else {
+      /* Liste plate avec en-tête contextuel */
+      var headerTitle = "", headerSub = "";
+      if (S.view === "playlist" && S.filter === "recent") {
+        headerTitle = "Derniers épisodes";
+        headerSub   = "Les 5 dernières publications toutes playlists confondues";
+      } else if (S.view === "playlist") {
+        var f = eps[0];
+        if (f) {
+          headerTitle = f.playlist_title;
+          var al = (f.authors || []).map(function (a) { return (S.config.authors || {})[a] || a; }).join(" · ");
+          headerSub = al ? "par " + al : "";
+        }
+      } else if (S.filter !== "tous") {
+        headerTitle = S.view === "auteur"
+          ? ((S.config.authors || {})[S.filter] || S.filter)
+          : ((S.config.subjects || {})[S.filter] || S.filter);
+      }
+      if (headerTitle) {
+        html += '<div class="pa-group-header">' +
+          '<div class="pa-group-title">' + esc(headerTitle) + '</div>' +
+          (headerSub ? '<div class="pa-group-sub">' + esc(headerSub) + '</div>' : '') +
+          '<div class="pa-group-rule"></div></div>';
+      }
       eps.forEach(function (ep, i) { html += epRow(ep, i + 1); });
     }
 
     list.innerHTML = html;
     highlightPlaying();
-
-    /* Attach click listeners */
     list.querySelectorAll(".pa-ep-row").forEach(function (row) {
-      row.addEventListener("click", function () {
-        var idx = parseInt(this.dataset.idx, 10);
-        playEp(idx);
-      });
+      row.addEventListener("click", function () { playEp(parseInt(this.dataset.idx, 10)); });
     });
   }
 
   function epRow(ep, num) {
     var idx = S.episodes.indexOf(ep);
-    var authors = (ep.authors || []).map(function (a) {
-      return (S.config.authors || {})[a] || a;
-    }).join(", ");
+    var authors = (ep.authors || []).map(function (a) { return (S.config.authors || {})[a] || a; }).join(", ");
     var isPlaying = (idx === S.idx);
     var thumb = ep.image_url
       ? '<img class="pa-row-thumb" src="' + esc(ep.image_url) + '" alt="" loading="lazy">'
       : '<div class="pa-row-thumb" style="background:#e2ddd8;border-radius:4px;"></div>';
-
+    var showPlaylist = S.view !== "playlist" || S.filter === "recent" || S.filter === "tous";
     return '<div class="pa-ep-row' + (isPlaying ? ' playing' : '') + '" data-idx="' + idx + '">' +
       '<div class="pa-row-play-icon">' + (isPlaying ? '▶' : '') + '</div>' +
-      '<div class="pa-row-num">' + num + '</div>' +
-      thumb +
-      '<div class="pa-row-info">' +
-        '<div class="pa-row-title">' + esc(ep.title) + '</div>' +
-        '<div class="pa-row-meta">' + esc(authors) +
-          (ep.playlist_title && S.view !== "playlist" ? ' · ' + esc(ep.playlist_title) : '') + '</div>' +
-      '</div>' +
-      '<div class="pa-row-dur">' + esc(ep.duration_fmt || "") + '</div>' +
-    '</div>';
+      '<div class="pa-row-num">' + num + '</div>' + thumb +
+      '<div class="pa-row-info"><div class="pa-row-title">' + esc(ep.title) + '</div>' +
+      '<div class="pa-row-meta">' + esc(authors) + (showPlaylist && ep.playlist_title ? ' · ' + esc(ep.playlist_title) : '') + '</div></div>' +
+      '<div class="pa-row-dur">' + esc(ep.duration_fmt || "") + '</div></div>';
   }
 
   function highlightPlaying() {

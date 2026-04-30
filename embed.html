@@ -185,6 +185,9 @@
   </div>
 </div>
 
+<div class="pa-sub on" id="sub-playlist">
+  <span class="pa-sub-label">Choisir une playlist</span>
+</div>
 <div class="pa-sub" id="sub-auteur">
   <span class="pa-sub-label">Choisir un auteur</span>
   <button class="pa-chip active" data-type="auteur" data-val="tous">Tous</button>
@@ -240,7 +243,7 @@
 
 <script>
 (function () {
-  var S = { episodes: [], config: {}, idx: -1, view: "playlist", filter: "tous" };
+  var S = { episodes: [], config: {}, idx: -1, view: "playlist", filter: "recent" };
   var audio   = document.getElementById("pa-audio");
   var $ = function (id) { return document.getElementById(id); };
   var list    = $("pa-list");
@@ -273,22 +276,23 @@
     document.querySelectorAll(".pa-tab").forEach(function (tab) {
       tab.addEventListener("click", function () {
         S.view   = this.dataset.view;
-        S.filter = "tous";
+        S.filter = S.view === "playlist" ? "recent" : "tous";
         document.querySelectorAll(".pa-tab").forEach(function (t) { t.classList.remove("active"); });
         this.classList.add("active");
-        $("sub-auteur").classList.toggle("on", S.view === "auteur");
-        $("sub-sujet").classList.toggle("on",  S.view === "sujet");
-        ["auteur","sujet"].forEach(function (type) {
-          document.querySelectorAll("#sub-" + type + " .pa-chip").forEach(function (c) { c.classList.remove("active"); });
-          var first = document.querySelector("#sub-" + type + " .pa-chip");
-          if (first) first.classList.add("active");
+        $("sub-playlist").classList.toggle("on", S.view === "playlist");
+        $("sub-auteur").classList.toggle("on",   S.view === "auteur");
+        $("sub-sujet").classList.toggle("on",    S.view === "sujet");
+        ["playlist","auteur","sujet"].forEach(function (type) {
+          var btns = document.querySelectorAll("#sub-" + type + " .pa-chip");
+          btns.forEach(function (b) { b.classList.remove("active"); });
+          if (btns[0]) btns[0].classList.add("active");
         });
         render();
         setTimeout(notifyHeight, 100);
       });
     });
 
-    ["sub-auteur","sub-sujet"].forEach(function (id) {
+    ["sub-playlist","sub-auteur","sub-sujet"].forEach(function (id) {
       $(id).addEventListener("click", function (e) {
         var chip = e.target.closest(".pa-chip");
         if (!chip) return;
@@ -320,22 +324,42 @@
 
   function buildSubFilters() {
     var cfg = S.config;
-    var aContainer = $("sub-auteur");
+
+    var seen = {}, playlists = [];
+    S.episodes.forEach(function (ep) {
+      if (ep.playlist_slug && !seen[ep.playlist_slug]) {
+        seen[ep.playlist_slug] = true;
+        playlists.push({ slug: ep.playlist_slug, title: ep.playlist_title });
+      }
+    });
+    var plHtml = '<span class="pa-sub-label">Choisir une playlist</span>' +
+      '<button class="pa-chip active" data-type="playlist" data-val="recent">★ Derniers épisodes</button>' +
+      '<button class="pa-chip" data-type="playlist" data-val="tous">Toutes</button>';
+    playlists.forEach(function (pl) {
+      plHtml += '<button class="pa-chip" data-type="playlist" data-val="' + pl.slug + '">' + esc(pl.title) + '</button>';
+    });
+    $("sub-playlist").innerHTML = plHtml;
+
     var aHtml = '<span class="pa-sub-label">Choisir un auteur</span><button class="pa-chip active" data-type="auteur" data-val="tous">Tous</button>';
     Object.keys(cfg.authors || {}).forEach(function (key) {
       aHtml += '<button class="pa-chip" data-type="auteur" data-val="' + key + '">' + cfg.authors[key] + '</button>';
     });
-    aContainer.innerHTML = aHtml;
-    var sContainer = $("sub-sujet");
+    $("sub-auteur").innerHTML = aHtml;
+
     var sHtml = '<span class="pa-sub-label">Choisir un sujet</span><button class="pa-chip active" data-type="sujet" data-val="tous">Tous</button>';
     Object.keys(cfg.subjects || {}).forEach(function (key) {
       sHtml += '<button class="pa-chip" data-type="sujet" data-val="' + key + '">' + cfg.subjects[key] + '</button>';
     });
-    sContainer.innerHTML = sHtml;
+    $("sub-sujet").innerHTML = sHtml;
   }
 
   function visible() {
-    if (S.view === "playlist" || S.filter === "tous") return S.episodes;
+    if (S.view === "playlist") {
+      if (S.filter === "recent") return S.episodes.slice(0, 5);
+      if (S.filter === "tous")   return S.episodes;
+      return S.episodes.filter(function (ep) { return ep.playlist_slug === S.filter; });
+    }
+    if (S.filter === "tous") return S.episodes;
     if (S.view === "auteur") return S.episodes.filter(function (ep) { return (ep.authors || []).indexOf(S.filter) !== -1; });
     return S.episodes.filter(function (ep) { return ep.subject === S.filter; });
   }
@@ -344,7 +368,8 @@
     var eps = visible();
     if (!eps.length) { list.innerHTML = '<div class="pa-state">Aucun épisode pour cette sélection.</div>'; return; }
     var html = "";
-    if (S.view === "playlist") {
+
+    if (S.view === "playlist" && S.filter === "tous") {
       var groups = {}, order = [];
       eps.forEach(function (ep) {
         var slug = ep.playlist_slug || "default";
@@ -362,6 +387,27 @@
         group.forEach(function (ep, i) { html += epRow(ep, i + 1); });
       });
     } else {
+      var headerTitle = "", headerSub = "";
+      if (S.view === "playlist" && S.filter === "recent") {
+        headerTitle = "Derniers épisodes";
+        headerSub   = "Les 5 dernières publications toutes playlists confondues";
+      } else if (S.view === "playlist") {
+        var f = eps[0];
+        if (f) {
+          headerTitle = f.playlist_title;
+          var al = (f.authors || []).map(function (a) { return (S.config.authors || {})[a] || a; }).join(" · ");
+          headerSub = al ? "par " + al : "";
+        }
+      } else if (S.filter !== "tous") {
+        headerTitle = S.view === "auteur"
+          ? ((S.config.authors || {})[S.filter] || S.filter)
+          : ((S.config.subjects || {})[S.filter] || S.filter);
+      }
+      if (headerTitle) {
+        html += '<div class="pa-group-header"><div class="pa-group-title">' + esc(headerTitle) + '</div>' +
+          (headerSub ? '<div class="pa-group-sub">' + esc(headerSub) + '</div>' : '') +
+          '<div class="pa-group-rule"></div></div>';
+      }
       eps.forEach(function (ep, i) { html += epRow(ep, i + 1); });
     }
     list.innerHTML = html;
