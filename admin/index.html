@@ -118,7 +118,7 @@
     .ep-card {
       background: white; border-radius: 10px; margin-bottom: 12px;
       box-shadow: 0 1px 4px rgba(0,0,0,.07);
-      overflow: hidden; transition: box-shadow .2s;
+      transition: box-shadow .2s;
     }
     .ep-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,.12); }
     .ep-card.dirty { border-left: 3px solid var(--gold); }
@@ -161,10 +161,10 @@
     }
     .btn-add-author:hover { background: rgba(45,52,97,.06); }
     .author-dropdown {
-      position: absolute; top: calc(100% + 4px); left: 0; z-index: 50;
+      position: fixed; z-index: 9999;
       background: white; border: 1px solid var(--border); border-radius: 8px;
-      box-shadow: 0 4px 16px rgba(0,0,0,.15); min-width: 220px; display: none;
-      padding: 8px 0;
+      box-shadow: 0 4px 20px rgba(0,0,0,.18); min-width: 240px; display: none;
+      padding: 8px 0; max-height: 300px; overflow-y: auto;
     }
     .author-dropdown.open { display: block; }
     .author-dropdown input {
@@ -482,12 +482,20 @@
       });
     });
 
-    // Add author button → toggle dropdown
+    // Add author button → toggle dropdown with fixed positioning
     var addBtn = div.querySelector(".btn-add-author");
     var dd     = div.querySelector(".author-dropdown");
     addBtn.addEventListener("click", function (e) {
       e.stopPropagation();
-      dd.classList.toggle("open");
+      var wasOpen = dd.classList.contains("open");
+      document.querySelectorAll(".author-dropdown.open").forEach(function (d) { d.classList.remove("open"); });
+      if (!wasOpen) {
+        var rect = addBtn.getBoundingClientRect();
+        dd.style.top  = (rect.bottom + window.scrollY + 4) + "px";
+        dd.style.left = rect.left + "px";
+        dd.classList.add("open");
+        dd.querySelector(".author-search").focus();
+      }
     });
 
     // Author search filter
