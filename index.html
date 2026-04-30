@@ -238,14 +238,15 @@
       grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
       gap: 18px;
     }
+
+    /* Carte standard */
     .pa-pl-card {
       background: var(--white); border-radius: 12px; overflow: hidden;
       cursor: pointer; border: 2px solid transparent;
       box-shadow: 0 2px 10px rgba(45,52,97,.08);
-      transition: transform .2s, box-shadow .2s, border-color .2s;
+      transition: transform .2s, box-shadow .2s;
     }
     .pa-pl-card:hover { transform: translateY(-5px); box-shadow: 0 10px 28px rgba(45,52,97,.18); }
-    .pa-pl-card.featured { border-color: var(--gold); }
     .pa-pl-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: var(--navy); display: block; }
     .pa-pl-thumb-collage { display: grid; grid-template-columns: 1fr 1fr; aspect-ratio: 16/9; overflow: hidden; }
     .pa-pl-thumb-collage img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -258,6 +259,92 @@
     .pa-pl-name { font: normal .95em/1.35 Georgia, serif; color: var(--navy); margin-bottom: 5px; }
     .pa-pl-info { font: .72em/1.4 Arial, sans-serif; color: var(--muted); }
     .pa-pl-count { color: var(--gold); font-weight: bold; }
+
+    /* ── Carte Nouveautés (bannière pleine largeur) ── */
+    .pa-featured-card {
+      grid-column: 1 / -1;
+      background: var(--navy);
+      border-radius: 16px;
+      cursor: pointer;
+      overflow: hidden;
+      display: flex;
+      min-height: 200px;
+      box-shadow: 0 6px 30px rgba(45,52,97,.25);
+      transition: transform .25s, box-shadow .25s;
+      position: relative;
+    }
+    .pa-featured-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 40px rgba(45,52,97,.35);
+    }
+    .pa-featured-collage {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      width: 280px;
+      min-width: 280px;
+      flex-shrink: 0;
+    }
+    .pa-featured-collage img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .pa-featured-collage .pa-featured-ph {
+      background: var(--navy-dk);
+    }
+    .pa-featured-body {
+      flex: 1;
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+    .pa-featured-body::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(200,160,96,.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .pa-featured-badge {
+      display: inline-block;
+      background: var(--gold);
+      color: var(--navy-dk);
+      font: bold .65em/1 Arial, sans-serif;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 5px 12px; border-radius: 4px;
+      margin-bottom: 14px; align-self: flex-start;
+    }
+    .pa-featured-title {
+      font: normal 1.6em/1.2 Georgia, serif;
+      color: var(--white);
+      margin-bottom: 16px;
+      letter-spacing: 1px;
+    }
+    .pa-featured-list { list-style: none; margin-bottom: 20px; }
+    .pa-featured-list li {
+      font: .82em/1 Arial, sans-serif;
+      color: rgba(255,255,255,.65);
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .pa-featured-list li::before { content: "▶  "; color: var(--gold); font-size: .8em; }
+    .pa-featured-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--gold); color: var(--navy-dk);
+      font: bold .82em/1 Arial, sans-serif;
+      padding: 10px 20px; border-radius: 8px;
+      align-self: flex-start;
+      transition: background .2s;
+    }
+    .pa-featured-card:hover .pa-featured-cta { background: #dab87a; }
+
+    @media (max-width: 600px) {
+      .pa-featured-card { flex-direction: column; }
+      .pa-featured-collage { width: 100%; min-width: unset; height: 160px; }
+      .pa-featured-body { padding: 20px; }
+      .pa-featured-title { font-size: 1.2em; }
+    }
 
     /* Back button */
     .pa-back-btn {
@@ -603,15 +690,29 @@
       }
       counts[ep.playlist_slug] = (counts[ep.playlist_slug] || 0) + 1;
     });
-    var recentThumbs = S.episodes.slice(0, 4).map(function (ep) {
-      return ep.image_url ? '<img src="' + esc(ep.image_url) + '" alt="" loading="lazy">' : '<div style="background:var(--navy-dk)"></div>';
+
+    /* ── Bannière Nouveautés ── */
+    var recent5 = S.episodes.slice(0, 5);
+    var collage = recent5.slice(0, 4).map(function (ep) {
+      return ep.image_url
+        ? '<img src="' + esc(ep.image_url) + '" alt="" loading="lazy">'
+        : '<div class="pa-featured-ph"></div>';
     }).join("");
-    var html = '<div class="pa-pl-card featured" data-slug="recent">' +
-      '<div class="pa-pl-thumb-collage">' + recentThumbs + '</div>' +
-      '<div class="pa-pl-body"><div class="pa-pl-badge">★ Nouveautés</div>' +
-      '<div class="pa-pl-name">Derniers épisodes</div>' +
-      '<div class="pa-pl-info"><span class="pa-pl-count">5 derniers</span> — toutes playlists</div>' +
-      '</div></div>';
+    var epList = recent5.map(function (ep) {
+      return '<li>' + esc(ep.title) + '</li>';
+    }).join("");
+
+    var html = '<div class="pa-featured-card" data-slug="recent">' +
+      '<div class="pa-featured-collage">' + collage + '</div>' +
+      '<div class="pa-featured-body">' +
+        '<span class="pa-featured-badge">★ Nouveautés</span>' +
+        '<div class="pa-featured-title">Derniers épisodes</div>' +
+        '<ul class="pa-featured-list">' + epList + '</ul>' +
+        '<span class="pa-featured-cta">Écouter maintenant →</span>' +
+      '</div>' +
+    '</div>';
+
+    /* ── Cartes playlists ── */
     playlists.forEach(function (pl) {
       var count   = counts[pl.slug] || 0;
       var authors = (pl.ep.authors || []).map(function (a) { return (S.config.authors || {})[a] || a; }).join(", ");
@@ -623,8 +724,9 @@
         '<div class="pa-pl-info"><span class="pa-pl-count">' + count + ' épisode' + (count > 1 ? 's' : '') + '</span>' +
         (authors ? ' · ' + esc(authors) : '') + '</div></div></div>';
     });
+
     plGrid.innerHTML = html;
-    plGrid.querySelectorAll(".pa-pl-card").forEach(function (card) {
+    plGrid.querySelectorAll(".pa-featured-card, .pa-pl-card").forEach(function (card) {
       card.addEventListener("click", function () { S.filter = this.dataset.slug; render(); });
     });
   }
