@@ -264,85 +264,78 @@
     .pa-featured-card {
       grid-column: 1 / -1;
       background: var(--navy);
-      border-radius: 16px;
+      border-radius: 14px;
       cursor: pointer;
       overflow: hidden;
       display: flex;
-      min-height: 200px;
-      box-shadow: 0 6px 30px rgba(45,52,97,.25);
-      transition: transform .25s, box-shadow .25s;
-      position: relative;
+      min-height: 210px;
+      box-shadow: 0 4px 24px rgba(45,52,97,.15);
+      transition: box-shadow .3s;
     }
     .pa-featured-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 14px 40px rgba(45,52,97,.35);
+      box-shadow: 0 10px 40px rgba(45,52,97,.28);
     }
     .pa-featured-collage {
       display: grid;
       grid-template-columns: 1fr 1fr;
       grid-template-rows: 1fr 1fr;
-      width: 280px;
-      min-width: 280px;
+      width: 260px; min-width: 260px;
       flex-shrink: 0;
-    }
-    .pa-featured-collage img {
-      width: 100%; height: 100%; object-fit: cover; display: block;
-    }
-    .pa-featured-collage .pa-featured-ph {
-      background: var(--navy-dk);
-    }
-    .pa-featured-body {
-      flex: 1;
-      padding: 28px 32px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
       position: relative;
     }
-    .pa-featured-body::before {
+    .pa-featured-collage::after {
       content: "";
       position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(200,160,96,.08) 0%, transparent 60%);
-      pointer-events: none;
+      background: linear-gradient(to right, transparent 50%, var(--navy) 100%);
     }
-    .pa-featured-badge {
-      display: inline-block;
-      background: var(--gold);
-      color: var(--navy-dk);
-      font: bold .65em/1 Arial, sans-serif;
-      letter-spacing: 2px; text-transform: uppercase;
-      padding: 5px 12px; border-radius: 4px;
-      margin-bottom: 14px; align-self: flex-start;
+    .pa-featured-collage img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .pa-featured-ph { background: var(--navy-dk); }
+
+    .pa-featured-body {
+      flex: 1; padding: 32px 36px 32px 20px;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .pa-featured-eyebrow {
+      font: .62em/1 Arial, sans-serif;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 12px;
     }
     .pa-featured-title {
-      font: normal 1.6em/1.2 Georgia, serif;
-      color: var(--white);
-      margin-bottom: 16px;
-      letter-spacing: 1px;
+      font: normal 1.55em/1.15 Georgia, serif;
+      color: var(--white); margin-bottom: 18px; letter-spacing: .5px;
     }
-    .pa-featured-list { list-style: none; margin-bottom: 20px; }
+    .pa-featured-list { list-style: none; margin-bottom: 22px; }
     .pa-featured-list li {
-      font: .82em/1 Arial, sans-serif;
-      color: rgba(255,255,255,.65);
-      padding: 5px 0;
-      border-bottom: 1px solid rgba(255,255,255,.07);
+      font: .78em/1 Arial, sans-serif;
+      color: rgba(255,255,255,.5);
+      padding: 5px 0 5px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      position: relative;
     }
-    .pa-featured-list li::before { content: "▶  "; color: var(--gold); font-size: .8em; }
+    .pa-featured-list li::before {
+      content: "";
+      position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+      width: 4px; height: 4px; border-radius: 50%; background: var(--gold);
+    }
     .pa-featured-cta {
       display: inline-flex; align-items: center; gap: 8px;
-      background: var(--gold); color: var(--navy-dk);
-      font: bold .82em/1 Arial, sans-serif;
-      padding: 10px 20px; border-radius: 8px;
+      color: var(--gold);
+      font: .75em/1 Arial, sans-serif; letter-spacing: 1.5px; text-transform: uppercase;
+      border-bottom: 1px solid rgba(200,160,96,.4);
+      padding-bottom: 2px;
       align-self: flex-start;
-      transition: background .2s;
+      transition: border-color .2s, letter-spacing .2s;
     }
-    .pa-featured-card:hover .pa-featured-cta { background: #dab87a; }
+    .pa-featured-card:hover .pa-featured-cta {
+      border-color: var(--gold); letter-spacing: 2px;
+    }
 
     @media (max-width: 600px) {
       .pa-featured-card { flex-direction: column; }
-      .pa-featured-collage { width: 100%; min-width: unset; height: 160px; }
-      .pa-featured-body { padding: 20px; }
+      .pa-featured-collage { width: 100%; min-width: unset; height: 150px; }
+      .pa-featured-collage::after { background: linear-gradient(to bottom, transparent 50%, var(--navy) 100%); }
+      .pa-featured-body { padding: 20px 20px 24px; }
       .pa-featured-title { font-size: 1.2em; }
     }
 
@@ -699,16 +692,19 @@
         : '<div class="pa-featured-ph"></div>';
     }).join("");
     var epList = recent5.map(function (ep) {
-      return '<li>' + esc(ep.title) + '</li>';
+      var t = ep.title || "";
+      var dash = t.indexOf(" — ");
+      if (dash > 15) t = t.substring(0, dash);
+      return '<li>' + esc(t) + '</li>';
     }).join("");
 
     var html = '<div class="pa-featured-card" data-slug="recent">' +
       '<div class="pa-featured-collage">' + collage + '</div>' +
       '<div class="pa-featured-body">' +
-        '<span class="pa-featured-badge">★ Nouveautés</span>' +
+        '<div class="pa-featured-eyebrow">★ &nbsp; Nouveautés</div>' +
         '<div class="pa-featured-title">Derniers épisodes</div>' +
         '<ul class="pa-featured-list">' + epList + '</ul>' +
-        '<span class="pa-featured-cta">Écouter maintenant →</span>' +
+        '<span class="pa-featured-cta">Écouter maintenant &nbsp;→</span>' +
       '</div>' +
     '</div>';
 

@@ -137,19 +137,21 @@
     .pa-pl-count { color: var(--gold); font-weight: bold; }
 
     /* Bannière Nouveautés */
-    .pa-featured-card { grid-column: 1/-1; background: var(--navy); border-radius: 14px; cursor: pointer; overflow: hidden; display: flex; min-height: 180px; box-shadow: 0 6px 24px rgba(45,52,97,.25); transition: transform .25s, box-shadow .25s; }
-    .pa-featured-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(45,52,97,.35); }
-    .pa-featured-collage { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; width: 220px; min-width: 220px; flex-shrink: 0; }
+    .pa-featured-card { grid-column: 1/-1; background: var(--navy); border-radius: 14px; cursor: pointer; overflow: hidden; display: flex; min-height: 190px; box-shadow: 0 4px 20px rgba(45,52,97,.15); transition: box-shadow .3s; }
+    .pa-featured-card:hover { box-shadow: 0 10px 36px rgba(45,52,97,.28); }
+    .pa-featured-collage { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; width: 220px; min-width: 220px; flex-shrink: 0; position: relative; }
+    .pa-featured-collage::after { content:""; position:absolute; inset:0; background:linear-gradient(to right, transparent 50%, var(--navy) 100%); }
     .pa-featured-collage img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .pa-featured-ph { background: var(--navy-dk); }
-    .pa-featured-body { flex: 1; padding: 22px 24px; display: flex; flex-direction: column; justify-content: center; }
-    .pa-featured-badge { display: inline-block; background: var(--gold); color: var(--navy-dk); font: bold .6em/1 Arial, sans-serif; letter-spacing: 2px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-bottom: 10px; align-self: flex-start; }
-    .pa-featured-title { font: normal 1.3em/1.2 Georgia, serif; color: var(--white); margin-bottom: 12px; }
-    .pa-featured-list { list-style: none; margin-bottom: 16px; }
-    .pa-featured-list li { font: .78em/1 Arial, sans-serif; color: rgba(255,255,255,.6); padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,.07); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .pa-featured-list li::before { content: "▶  "; color: var(--gold); font-size: .75em; }
-    .pa-featured-cta { display: inline-flex; align-items: center; background: var(--gold); color: var(--navy-dk); font: bold .78em/1 Arial, sans-serif; padding: 8px 16px; border-radius: 6px; align-self: flex-start; }
-    @media (max-width: 500px) { .pa-featured-card { flex-direction: column; } .pa-featured-collage { width: 100%; min-width: unset; height: 130px; } .pa-featured-body { padding: 16px; } }
+    .pa-featured-body { flex: 1; padding: 24px 28px 24px 16px; display: flex; flex-direction: column; justify-content: center; }
+    .pa-featured-eyebrow { font: .6em/1 Arial, sans-serif; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+    .pa-featured-title { font: normal 1.25em/1.2 Georgia, serif; color: var(--white); margin-bottom: 14px; letter-spacing: .5px; }
+    .pa-featured-list { list-style: none; margin-bottom: 18px; }
+    .pa-featured-list li { font: .75em/1 Arial, sans-serif; color: rgba(255,255,255,.5); padding: 5px 0 5px 13px; border-bottom: 1px solid rgba(255,255,255,.06); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
+    .pa-featured-list li::before { content:""; position:absolute; left:0; top:50%; transform:translateY(-50%); width:4px; height:4px; border-radius:50%; background:var(--gold); }
+    .pa-featured-cta { display:inline-flex; align-items:center; color:var(--gold); font:.72em/1 Arial,sans-serif; letter-spacing:1.5px; text-transform:uppercase; border-bottom:1px solid rgba(200,160,96,.4); padding-bottom:2px; align-self:flex-start; transition:border-color .2s; }
+    .pa-featured-card:hover .pa-featured-cta { border-color:var(--gold); }
+    @media (max-width: 500px) { .pa-featured-card { flex-direction: column; } .pa-featured-collage { width: 100%; min-width: unset; height: 130px; } .pa-featured-collage::after { background:linear-gradient(to bottom, transparent 50%, var(--navy) 100%); } .pa-featured-body { padding: 16px; } }
 
     .pa-back-btn { display: inline-block; margin-bottom: 12px; background: none; border: none; color: var(--muted); font: .78em/1 Arial, sans-serif; cursor: pointer; padding: 0; }
     .pa-back-btn:hover { color: var(--navy); }
@@ -433,15 +435,18 @@
 
     var recent5=S.episodes.slice(0,5);
     var collage=recent5.slice(0,4).map(function(ep){return ep.image_url?'<img src="'+esc(ep.image_url)+'" alt="" loading="lazy">':'<div class="pa-featured-ph"></div>';}).join("");
-    var epList=recent5.map(function(ep){return'<li>'+esc(ep.title)+'</li>';}).join("");
+    var epList=recent5.map(function(ep){
+      var t=ep.title||""; var d=t.indexOf(" — "); if(d>15) t=t.substring(0,d);
+      return'<li>'+esc(t)+'</li>';
+    }).join("");
 
     var html='<div class="pa-featured-card" data-slug="recent">'+
       '<div class="pa-featured-collage">'+collage+'</div>'+
       '<div class="pa-featured-body">'+
-        '<span class="pa-featured-badge">★ Nouveautés</span>'+
+        '<div class="pa-featured-eyebrow">★ &nbsp; Nouveautés</div>'+
         '<div class="pa-featured-title">Derniers épisodes</div>'+
         '<ul class="pa-featured-list">'+epList+'</ul>'+
-        '<span class="pa-featured-cta">Écouter maintenant →</span>'+
+        '<span class="pa-featured-cta">Écouter maintenant &nbsp;→</span>'+
       '</div></div>';
 
     playlists.forEach(function(pl){
