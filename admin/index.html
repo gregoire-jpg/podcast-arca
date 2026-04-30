@@ -204,16 +204,18 @@
     <div style="display:flex;align-items:center">
       <div class="admin-brand">ARCA · Admin</div>
       <nav class="admin-nav">
-        <button class="nav-btn on" data-panel="episodes">Épisodes</button>
+        <button class="nav-btn on" data-panel="podcasts">Podcasts</button>
         <button class="nav-btn"    data-panel="docs">Documentation</button>
-        <button class="nav-btn"    data-panel="config">Configuration</button>
       </nav>
     </div>
     <button class="btn-logout" id="btn-logout">Déconnexion</button>
   </header>
 
-  <!-- ── ÉPISODES ── -->
-  <div class="panel on" id="panel-episodes">
+  <!-- ══ PODCASTS ══ -->
+  <div class="panel on" id="panel-podcasts">
+
+  <!-- ── Épisodes ── -->
+  <div id="panel-episodes">
     <div class="toolbar">
 
       <!-- Section 1 : Filtrer -->
@@ -361,8 +363,11 @@
     </div>
   </div>
 
-  <!-- ── CONFIGURATION ── -->
-  <div class="panel" id="panel-config">
+  <!-- ── Configuration (sous Podcasts) ── -->
+  <div id="panel-config" style="margin-top:32px">
+    <div style="font:.7em/1 Arial;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+      ⚙ Configuration — Auteurs &amp; Sujets
+    </div>
     <div class="cfg-block">
       <h2>Auteurs</h2>
       <div class="cfg-tags" id="cfg-authors"></div>
@@ -383,6 +388,8 @@
     </div>
     <button class="btn btn-gold" id="btn-save-config" style="margin-top:4px;padding:10px 24px;font-size:.9em;">💾 Sauvegarder la configuration</button>
   </div>
+
+  </div><!-- /panel-podcasts -->
 
 </div><!-- /admin -->
 
@@ -796,6 +803,9 @@ document.querySelectorAll('.nav-btn').forEach(function(btn) {
     $('panel-' + this.dataset.panel).classList.add('on');
   });
 });
+
+/* Fermer le panel config si on quitte l'onglet Podcasts — géré automatiquement car
+   panel-config est enfant de panel-podcasts, donc il se cache avec lui */
 
 /* ═══════════════════ CONFIG ═══════════════════ */
 function renderConfig() {
