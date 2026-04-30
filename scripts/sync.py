@@ -63,10 +63,30 @@ def make_dbx():
         app_secret           = os.environ["DROPBOX_APP_SECRET"],
     )
 
+CHUNK_SIZE = 40 * 1024 * 1024  # 40 MB par chunk
+
 def upload_to_dropbox(dbx, local_path, filename):
-    remote = f"{DROPBOX_DIR}/{filename}"
+    remote    = f"{DROPBOX_DIR}/{filename}"
+    file_size = os.path.getsize(local_path)
+
     with open(local_path, "rb") as f:
-        dbx.files_upload(f.read(), remote, mode=WriteMode.overwrite)
+        if file_size <= CHUNK_SIZE:
+            dbx.files_upload(f.read(), remote, mode=WriteMode.overwrite)
+        else:
+            # Upload par morceaux pour les gros fichiers
+            session = dbx.files_upload_session_start(f.read(CHUNK_SIZE))
+            cursor  = dropbox.files.UploadSessionCursor(
+                session_id=session.session_id, offset=f.tell()
+            )
+            commit = dropbox.files.CommitInfo(path=remote, mode=WriteMode.overwrite)
+            while f.tell() < file_size:
+                remaining = file_size - f.tell()
+                if remaining <= CHUNK_SIZE:
+                    dbx.files_upload_session_finish(f.read(CHUNK_SIZE), cursor, commit)
+                else:
+                    dbx.files_upload_session_append_v2(f.read(CHUNK_SIZE), cursor)
+                    cursor.offset = f.tell()
+
     try:
         res = dbx.sharing_create_shared_link_with_settings(remote)
     except ApiError as e:
@@ -87,7 +107,7 @@ def discover_playlists(channel_id, exclude_titles):
     print(f"🔍 Découverte des playlists sur la chaîne…")
 
     res = subprocess.run(
-        ["yt-dlp", "-J", "--flat-playlist", "--no-warnings", url],
+        [sys.executable, "-m", "yt_dlp", "-J", "--flat-playlist", "--no-warnings", url],
         capture_output=True, text=True, timeout=120,
     )
     if res.returncode != 0:
@@ -131,7 +151,7 @@ def rss_videos(playlist_id):
 def all_videos(playlist_id):
     """Toutes les vidéos d'une playlist via yt-dlp (mode --init)."""
     res = subprocess.run(
-        ["yt-dlp", "--flat-playlist", "--print", "%(id)s\t%(title)s",
+        [sys.executable, "-m", "yt_dlp", "--flat-playlist", "--print", "%(id)s\t%(title)s",
          "--no-warnings", f"https://www.youtube.com/playlist?list={playlist_id}"],
         capture_output=True, text=True,
     )
@@ -150,7 +170,7 @@ def process_video(video_id, pl_title, pl_slug, pl_meta):
     with tempfile.TemporaryDirectory() as tmp:
         out_tpl = os.path.join(tmp, "%(id)s.%(ext)s")
         res = subprocess.run(
-            ["yt-dlp",
+            [sys.executable, "-m", "yt_dlp",
              "--format", "bestaudio/best",
              "--extract-audio", "--audio-format", "mp3", "--audio-quality", "5",
              "--output", out_tpl,
