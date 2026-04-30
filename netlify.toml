@@ -2,19 +2,27 @@
   command = "node build-rss.js"
   publish = "."
 
-# Correct Content-Type pour le flux RSS
+# RSS feed
 [[headers]]
   for = "/rss.xml"
   [headers.values]
     Content-Type = "application/rss+xml; charset=utf-8"
 
-# Cache long pour les assets statiques
+# episodes.json accessible depuis arca-revue.com
 [[headers]]
   for = "/episodes.json"
   [headers.values]
-    Cache-Control = "public, max-age=300"    # 5 min
+    Cache-Control = "public, max-age=300"
+    Access-Control-Allow-Origin = "https://arca-revue.com"
 
+# config.json accessible depuis arca-revue.com
 [[headers]]
-  for = "/*"
+  for = "/config.json"
   [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
+    Access-Control-Allow-Origin = "https://arca-revue.com"
+
+# embed.html : autoriser l'intégration depuis arca-revue.com
+[[headers]]
+  for = "/embed.html"
+  [headers.values]
+    Content-Security-Policy = "frame-ancestors 'self' https://arca-revue.com"
