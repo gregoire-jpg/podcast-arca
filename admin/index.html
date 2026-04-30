@@ -630,7 +630,7 @@
       document.querySelectorAll(".author-dropdown.open").forEach(function (d) { d.classList.remove("open"); });
       if (!wasOpen) {
         var rect = addBtn.getBoundingClientRect();
-        dd.style.top  = (rect.bottom + window.scrollY + 4) + "px";
+        dd.style.top  = (rect.bottom + 4) + "px";
         dd.style.left = rect.left + "px";
         dd.classList.add("open");
         dd.querySelector(".author-search").focus();
