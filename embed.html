@@ -374,7 +374,7 @@
       if (S.filter === "grid")   return [];
       if (S.filter === "recent") return S.episodes.slice(0, 5);
       if (S.filter === "tous")   return S.episodes;
-      return S.episodes.filter(function (ep) { return ep.playlist_slug === S.filter; });
+      return S.episodes.filter(function (ep) { return ep.playlist_slug === S.filter; }).slice().reverse();
     }
     if (S.filter === "tous") return S.episodes;
     if (S.view === "auteur") return S.episodes.filter(function (ep) { return (ep.authors || []).indexOf(S.filter) !== -1; });
@@ -402,7 +402,7 @@
       var groups = {}, order = [];
       eps.forEach(function(ep){ var s=ep.playlist_slug||"default"; if(!groups[s]){groups[s]=[];order.push(s);}groups[s].push(ep); });
       var roman=["I","II","III","IV","V","VI","VII","VIII","IX","X"];
-      order.forEach(function(slug,gi){ var gr=groups[slug],fi=gr[0]; var al2=(fi.authors||[]).map(function(a){return(S.config.authors||{})[a]||a;}).join(" · ");
+      order.forEach(function(slug,gi){ var gr=groups[slug].slice().reverse(),fi=gr[0]; var al2=(fi.authors||[]).map(function(a){return(S.config.authors||{})[a]||a;}).join(" · ");
         html+='<div class="pa-group-header"><span class="pa-group-num">Playlist '+(roman[gi]||gi+1)+'</span><div class="pa-group-title">'+esc(fi.playlist_title)+'</div>'+(al2?'<div class="pa-group-sub">par '+esc(al2)+'</div>':'')+'<div class="pa-group-rule"></div></div>';
         gr.forEach(function(ep,i){html+=epRow(ep,i+1);});
       });

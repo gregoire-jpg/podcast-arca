@@ -560,7 +560,8 @@
       if (S.filter === "grid")   return [];
       if (S.filter === "recent") return S.episodes.slice(0, 5);
       if (S.filter === "tous")   return S.episodes;
-      return S.episodes.filter(function (ep) { return ep.playlist_slug === S.filter; });
+      /* Playlist spécifique → du plus ancien au plus récent (logique de série) */
+      return S.episodes.filter(function (ep) { return ep.playlist_slug === S.filter; }).slice().reverse();
     }
     if (S.filter === "tous") return S.episodes;
     if (S.view === "auteur") return S.episodes.filter(function (ep) { return (ep.authors || []).indexOf(S.filter) !== -1; });
@@ -602,7 +603,8 @@
       });
       var roman = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
       order.forEach(function (slug, gi) {
-        var group = groups[slug], first = group[0];
+        var group = groups[slug].slice().reverse(); /* plus ancien → plus récent */
+        var first = group[0];
         var al2 = (first.authors || []).map(function (a) { return (S.config.authors || {})[a] || a; }).join(" · ");
         html += '<div class="pa-group-header"><span class="pa-group-num">Playlist ' + (roman[gi]||gi+1) + '</span>' +
           '<div class="pa-group-title">' + esc(first.playlist_title) + '</div>' +
