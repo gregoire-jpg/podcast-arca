@@ -26,3 +26,16 @@
   for = "/embed.html"
   [headers.values]
     Content-Security-Policy = "frame-ancestors 'self' https://arca-revue.com"
+
+# documents.json accessible publiquement
+[[headers]]
+  for = "/documents.json"
+  [headers.values]
+    Cache-Control = "public, max-age=300"
+    Access-Control-Allow-Origin = "*"
+
+# docs.html accessible depuis arca-revue.com
+[[headers]]
+  for = "/docs.html"
+  [headers.values]
+    Content-Security-Policy = "frame-ancestors 'self' https://arca-revue.com"

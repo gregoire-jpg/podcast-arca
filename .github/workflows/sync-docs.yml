@@ -1,0 +1,44 @@
+name: Sync Documentation → Dropbox
+
+on:
+  workflow_dispatch:   # Lancer manuellement depuis l'onglet Actions sur GitHub
+    inputs:
+      force:
+        description: "Forcer le re-téléchargement de tous les documents"
+        required: false
+        default: "false"
+        type: boolean
+
+jobs:
+  sync-docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installer les dépendances
+        run: pip install requests beautifulsoup4 dropbox
+
+      - name: Synchronisation documentation
+        env:
+          DROPBOX_APP_KEY:       ${{ secrets.DROPBOX_APP_KEY }}
+          DROPBOX_APP_SECRET:    ${{ secrets.DROPBOX_APP_SECRET }}
+          DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
+        run: python scripts/sync-docs.py
+
+      - name: Commit documents.json si modifié
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add documents.json
+          git diff --staged --quiet \
+            || git commit -m "sync-docs: $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
