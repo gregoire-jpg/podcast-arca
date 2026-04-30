@@ -53,23 +53,24 @@ CATEGORIES = {
         "Divers":                          "/documentation/articles-1/divers/",
         "Islam":                           "/documentation/articles-1/islam/",
         "Néerlandais":                     "/documentation/articles-1/artikels-in-het-nederlands/",
-        "Néophytes":                       "/documentation/articles-1/neophoytes-debutants/",
+        "Néophytes":                       "/documentation/articles-1/neophytes/",
     },
     "livres": {
         "Livres": "/documentation/livres/",
     },
     "revue": {
+        # La page principale liste des sous-pages → crawl 2 niveaux
         "Revue ARCA": "/documentation/telechargements/",
     },
     "lus-pour-vous": {
-        "Alchimie":    "/documentation/lus-pour-vous/alchimie/",
-        "Christianisme":"/documentation/lus-pour-vous/christianisme/",
-        "Classiques":  "/documentation/lus-pour-vous/classiques/",
-        "Divers":      "/documentation/lus-pour-vous/divers/",
-        "Égypte":      "/documentation/lus-pour-vous/egypte/",
-        "Hermétisme":  "/documentation/lus-pour-vous/hermetisme/",
-        "Islam":       "/documentation/lus-pour-vous/islam/",
-        "Judaïsme":    "/documentation/lus-pour-vous/judaisme/",
+        "Alchimie":     "/documentation/lus-pour-vous/alchimie-1/",
+        "Christianisme":"/documentation/lus-pour-vous/christianisme-1/",
+        "Classiques":   "/documentation/lus-pour-vous/classiques-1/",
+        "Divers":       "/documentation/lus-pour-vous/divers-1/",
+        "Égypte":       "/documentation/lus-pour-vous/egypte/",
+        "Hermétisme":   "/documentation/lus-pour-vous/hermetisme-1/",
+        "Islam":        "/documentation/lus-pour-vous/islam-1/",
+        "Judaïsme":     "/documentation/lus-pour-vous/judaisme-1/",
     },
 }
 
@@ -147,11 +148,52 @@ def upload_to_dropbox(dbx, local_path, remote_path):
 
 # ──────────────────── Crawling ────────────────────
 
+def _extract_file_links(soup, seen):
+    """Extrait les liens ?layout=file ou .pdf d'un objet BeautifulSoup."""
+    links = []
+    for a in soup.find_all("a", href=True):
+        href = a["href"]
+        text = a.get_text(strip=True)
+
+        if "?layout=file" in href:
+            full = href if href.startswith("http") else BASE_URL + href
+            if full not in seen:
+                seen.add(full)
+                slug  = href.split("?")[0].rstrip("/").split("/")[-1]
+                title = text or slug.replace("-", " ").title()
+                links.append({"url": full, "title": title})
+
+        elif href.lower().endswith(".pdf"):
+            full = href if href.startswith("http") else BASE_URL + href
+            if full not in seen:
+                seen.add(full)
+                links.append({"url": full, "title": text or Path(href).stem})
+
+    return links
+
+
+def _get_doc_subpages(soup, base_url):
+    """Retourne les URLs des sous-pages de documentation (1 niveau)."""
+    subpages = []
+    for a in soup.find_all("a", href=True):
+        href = a["href"]
+        full = href if href.startswith("http") else BASE_URL + href
+        # Sous-page de documentation non terminée par un mot-clé de nav
+        if (
+            "/documentation/" in full
+            and full.rstrip("/") != base_url.rstrip("/")
+            and "?layout=file" not in full
+            and not any(k in full for k in ["/connexion", "/sinscrire", "/oublie", "/lp-profile"])
+        ):
+            subpages.append(full)
+    return list(dict.fromkeys(subpages))  # dédoublonner en conservant l'ordre
+
+
 def get_pdf_links(sess, url):
     """Extrait tous les liens de documents d'une page ARCA.
 
-    Le site ARCA utilise le pattern ?layout=file pour servir les fichiers.
-    Ex: https://arca-revue.com/documentation/.../slug/?layout=file
+    Crawle automatiquement les sous-pages si aucun ?layout=file n'est trouvé
+    (cas de la Revue ARCA où chaque numéro est une sous-page séparée).
     """
     try:
         r = sess.get(url, timeout=30)
@@ -160,30 +202,27 @@ def get_pdf_links(sess, url):
         print(f"  ⚠  Impossible d'accéder à {url} : {e}")
         return []
 
-    soup = BeautifulSoup(r.text, "html.parser")
-    links = []
-    seen = set()
+    soup  = BeautifulSoup(r.text, "html.parser")
+    seen  = set()
+    links = _extract_file_links(soup, seen)
 
-    for a in soup.find_all("a", href=True):
-        href = a["href"]
-        text = a.get_text(strip=True)
-
-        # Format ARCA : ?layout=file (principal)
-        if "?layout=file" in href:
-            full = href if href.startswith("http") else BASE_URL + href
-            if full not in seen:
-                seen.add(full)
-                # Extraire le titre depuis le slug si le texte est vide
-                slug = href.rstrip("/").rstrip("?layout=file").split("/")[-1].split("?")[0]
-                title = text or slug.replace("-", " ").title()
-                links.append({"url": full, "title": title})
-
-        # Lien direct vers un PDF (fallback)
-        elif href.lower().endswith(".pdf"):
-            full = href if href.startswith("http") else BASE_URL + href
-            if full not in seen:
-                seen.add(full)
-                links.append({"url": full, "title": text or Path(href).stem})
+    # Aucun fichier trouvé en direct → crawler les sous-pages (1 niveau)
+    if not links:
+        subpages = _get_doc_subpages(soup, url)
+        if subpages:
+            print(f"  → {len(subpages)} sous-page(s) à explorer…")
+        for sub_url in subpages:
+            try:
+                sub_r    = sess.get(sub_url, timeout=30)
+                sub_r.raise_for_status()
+                sub_soup = BeautifulSoup(sub_r.text, "html.parser")
+                sub_links = _extract_file_links(sub_soup, seen)
+                links.extend(sub_links)
+                if sub_links:
+                    print(f"    ✓ {sub_url.split('/')[-2]} → {len(sub_links)} fichier(s)")
+                time.sleep(0.3)
+            except Exception as e:
+                print(f"    ⚠  {sub_url} : {e}")
 
     return links
 
