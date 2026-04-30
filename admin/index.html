@@ -91,19 +91,31 @@
 
     /* ── Toolbar ── */
     .toolbar {
-      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-      margin-bottom: 24px; background: white; padding: 16px 20px;
+      margin-bottom: 24px; background: white;
       border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      overflow: hidden;
     }
-    .toolbar input[type="text"] {
-      flex: 1; min-width: 200px; padding: 8px 12px;
-      border: 1px solid var(--border); border-radius: 6px; font-size: .9em;
+    .toolbar-row {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      padding: 14px 20px;
     }
-    .toolbar select {
-      padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px;
-      font-size: .9em; background: white;
+    .toolbar-row + .toolbar-row {
+      border-top: 1px solid var(--border);
+      background: #faf9f7;
     }
-    .toolbar label { display: flex; align-items: center; gap: 6px; font-size: .85em; color: var(--muted); cursor: pointer; }
+    .toolbar-section-label {
+      font: .68em/1 Arial, sans-serif; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); white-space: nowrap; flex-shrink: 0;
+    }
+    .toolbar-row input[type="text"] {
+      flex: 1; min-width: 150px; padding: 7px 11px;
+      border: 1px solid var(--border); border-radius: 6px; font-size: .88em;
+    }
+    .toolbar-row select {
+      padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px;
+      font-size: .88em; background: white;
+    }
+    .toolbar-row label { display: flex; align-items: center; gap: 6px; font-size: .85em; color: var(--muted); cursor: pointer; }
     .btn-save-all {
       margin-left: auto; padding: 10px 24px; background: var(--navy); color: white;
       border: none; border-radius: 8px; font-weight: bold; font-size: .9em;
@@ -311,33 +323,45 @@
   <!-- Épisodes -->
   <div class="admin-tab active" id="tab-episodes">
     <div class="toolbar">
-      <input type="text" id="filter-search" placeholder="Rechercher un épisode…">
-      <select id="filter-playlist">
-        <option value="">Toutes les playlists</option>
-      </select>
-      <label>
-        <input type="checkbox" id="filter-nometa">
-        Sans métadonnées seulement
-      </label>
-      <div class="toolbar-sep"></div>
-      <select id="bulk-pl-select" title="Assigner à une playlist">
-        <option value="">Playlist… (assignation en masse)</option>
-      </select>
-      <select id="bulk-author-select">
-        <option value="">+ Auteur</option>
-      </select>
-      <select id="bulk-subject-select">
-        <option value="">+ Sujet</option>
-      </select>
-      <button class="btn-delete-pl" id="btn-bulk-assign" style="background:var(--navy);border-color:var(--navy);color:white;">Appliquer</button>
-      <div class="toolbar-sep"></div>
-      <select id="delete-pl-select" title="Supprimer une playlist">
-        <option value="">🗑 Supprimer une playlist…</option>
-      </select>
-      <button class="btn-delete-pl" id="btn-delete-pl">Supprimer</button>
-      <div class="toolbar-sep"></div>
-      <span class="save-status" id="save-status"></span>
-      <button class="btn-save-all" id="btn-save-all">💾 Sauvegarder</button>
+
+      <!-- Ligne 1 : Filtres d'affichage -->
+      <div class="toolbar-row">
+        <span class="toolbar-section-label">Filtrer</span>
+        <input type="text" id="filter-search" placeholder="Rechercher dans les titres…">
+        <select id="filter-playlist">
+          <option value="">Toutes les playlists</option>
+        </select>
+        <label>
+          <input type="checkbox" id="filter-nometa">
+          Sans métadonnées seulement
+        </label>
+        <span class="save-status" id="save-status"></span>
+        <button class="btn-save-all" id="btn-save-all">💾 Sauvegarder</button>
+      </div>
+
+      <!-- Ligne 2 : Assignation en masse -->
+      <div class="toolbar-row">
+        <span class="toolbar-section-label">Assigner en masse</span>
+        <input type="text" id="bulk-keyword" placeholder="Mot-clé dans le titre…" style="max-width:180px;">
+        <select id="bulk-pl-select">
+          <option value="">Toutes les playlists</option>
+        </select>
+        <select id="bulk-author-select">
+          <option value="">+ Auteur</option>
+        </select>
+        <select id="bulk-subject-select">
+          <option value="">+ Sujet</option>
+        </select>
+        <button class="btn-delete-pl" id="btn-bulk-assign" style="background:var(--navy);border-color:var(--navy);color:white;white-space:nowrap;">
+          Appliquer aux résultats
+        </button>
+        <div class="toolbar-sep"></div>
+        <select id="delete-pl-select">
+          <option value="">🗑 Supprimer une playlist…</option>
+        </select>
+        <button class="btn-delete-pl" id="btn-delete-pl">Supprimer</button>
+      </div>
+
     </div>
     <div id="episodes-list"><div class="admin-state">Chargement…</div></div>
   </div>
@@ -742,28 +766,48 @@
     });
   });
 
-  /* ── Assigner auteur/sujet à toute une playlist ── */
+  /* ── Assigner en masse avec filtre par mot-clé et/ou playlist ── */
   document.getElementById("btn-bulk-assign").addEventListener("click", function () {
     var slug    = document.getElementById("bulk-pl-select").value;
+    var keyword = document.getElementById("bulk-keyword").value.trim().toLowerCase();
     var authKey = document.getElementById("bulk-author-select").value;
     var subjKey = document.getElementById("bulk-subject-select").value;
-    if (!slug) { toast("Choisis une playlist", "error"); return; }
-    if (!authKey && !subjKey) { toast("Choisis au moins un auteur ou un sujet", "error"); return; }
 
-    var eps = state.episodes.filter(function (ep) { return ep.playlist_slug === slug; });
-    eps.forEach(function (ep) {
-      var idx2 = state.episodes.indexOf(ep);
-      if (authKey && !(ep.authors || []).includes(authKey)) {
-        state.episodes[idx2].authors = (ep.authors || []).concat(authKey);
-      }
-      if (subjKey) {
-        state.episodes[idx2].subject = subjKey;
-      }
-      state.dirty.add(idx2);
+    if (!authKey && !subjKey) { toast("Choisis au moins un auteur ou un sujet à assigner", "error"); return; }
+    if (!slug && !keyword)    { toast("Précise au moins une playlist ou un mot-clé", "error"); return; }
+
+    var eps = state.episodes.filter(function (ep) {
+      var matchPl  = !slug    || ep.playlist_slug === slug;
+      var matchKw  = !keyword || (ep.title || "").toLowerCase().indexOf(keyword) !== -1;
+      return matchPl && matchKw;
     });
-    renderEpisodes();
-    updateSaveStatus();
-    toast(eps.length + " épisode(s) mis à jour — clique Sauvegarder pour confirmer");
+
+    if (!eps.length) { toast("Aucun épisode ne correspond à ces critères", "error"); return; }
+
+    var msg = eps.length + " épisode(s)" +
+      (keyword ? ' contenant "' + keyword + '"' : "") +
+      (slug ? " dans " + (document.getElementById("bulk-pl-select").options[document.getElementById("bulk-pl-select").selectedIndex].text) : "");
+
+    confirm(
+      "Assigner les métadonnées ?",
+      msg + (authKey ? " → auteur : " + ((state.config.authors || {})[authKey] || authKey) : "") +
+            (subjKey ? " → sujet : " + ((state.config.subjects || {})[subjKey] || subjKey) : ""),
+      function () {
+        eps.forEach(function (ep) {
+          var idx2 = state.episodes.indexOf(ep);
+          if (authKey && !(ep.authors || []).includes(authKey)) {
+            state.episodes[idx2].authors = (ep.authors || []).concat(authKey);
+          }
+          if (subjKey) {
+            state.episodes[idx2].subject = subjKey;
+          }
+          state.dirty.add(idx2);
+        });
+        renderEpisodes();
+        updateSaveStatus();
+        toast(eps.length + " épisode(s) mis à jour — clique Sauvegarder pour confirmer");
+      }
+    );
   });
 
   /* ── Supprimer une playlist ── */
