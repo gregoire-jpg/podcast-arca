@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Podcasts — Revue ARCA</title>
+  <style>
+    /* ── Reset & Variables ── */
+    :root {
+      --navy:    #2d3461;
+      --navy-dk: #1e2245;
+      --gold:    #c8a060;
+      --white:   #ffffff;
+      --bg:      #faf8f5;
+      --border:  #e2ddd8;
+      --muted:   #777;
+      --radius:  8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: Georgia, serif; background: var(--bg); color: var(--navy); }
+    button { cursor: pointer; }
+    img { display: block; }
+
+    /* ── Header ── */
+    .pa-header {
+      background: var(--navy);
+      padding: 60px 24px 50px;
+      text-align: center;
+    }
+    .pa-header .eyebrow {
+      font: 600 .65em/1 Arial, sans-serif;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+    .pa-header h1 {
+      font: normal 2.8em/1 Georgia, serif;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 18px;
+    }
+    .pa-header-rule { width: 44px; height: 2px; background: var(--gold); margin: 0 auto 18px; }
+    .pa-header p {
+      font: italic 1em/1 Georgia, serif;
+      color: rgba(255,255,255,.55);
+      letter-spacing: 1px;
+    }
+
+    /* ── Filter bar ── */
+    .pa-filter-bar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 90;
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    }
+    .pa-filter-tabs { display: flex; justify-content: center; }
+    .pa-tab {
+      padding: 17px 40px;
+      font: .7em/1 Arial, sans-serif;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--muted);
+      background: none; border: none;
+      border-bottom: 3px solid transparent;
+      transition: color .2s, border-color .2s;
+    }
+    .pa-tab:hover { color: var(--navy); }
+    .pa-tab.active { color: var(--navy); border-bottom-color: var(--gold); font-weight: 700; }
+
+    /* ── Sub-filters ── */
+    .pa-sub {
+      background: #f3f0ea;
+      border-bottom: 1px solid var(--border);
+      padding: 20px 24px;
+      text-align: center;
+      display: none;
+    }
+    .pa-sub.on { display: block; }
+    .pa-sub-label {
+      display: block;
+      font: .65em/1 Arial, sans-serif;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 12px;
+    }
+    .pa-chip {
+      display: inline-block; margin: 4px;
+      padding: 6px 18px;
+      border: 1px solid var(--navy); border-radius: 20px;
+      font: .87em/1 Georgia, serif; color: var(--navy);
+      background: var(--white);
+      transition: background .18s, color .18s;
+    }
+    .pa-chip:hover, .pa-chip.active { background: var(--navy); color: var(--white); }
+
+    /* ── Player ── */
+    .pa-player {
+      background: var(--navy);
+      padding: 28px 32px 24px;
+      display: none;
+    }
+    .pa-player.on { display: block; }
+    .pa-player-inner { max-width: 820px; margin: 0 auto; }
+
+    .pa-ep-info { display: flex; gap: 18px; align-items: flex-start; margin-bottom: 22px; }
+    .pa-ep-thumb {
+      width: 80px; height: 80px; border-radius: 6px;
+      object-fit: cover; flex-shrink: 0;
+      background: var(--navy-dk);
+    }
+    .pa-ep-thumb-ph {
+      width: 80px; height: 80px; border-radius: 6px; flex-shrink: 0;
+      background: var(--navy-dk);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8em; color: rgba(255,255,255,.2);
+    }
+    .pa-ep-meta { flex: 1; min-width: 0; }
+    .pa-ep-title {
+      font: normal 1.15em/1.35 Georgia, serif;
+      color: var(--white); margin-bottom: 6px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .pa-ep-author { font: .8em/1 Arial, sans-serif; color: var(--gold); margin-bottom: 4px; }
+    .pa-ep-playlist { font: italic .8em/1 Georgia, serif; color: rgba(255,255,255,.45); }
+
+    /* Progress */
+    .pa-progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .pa-time { font: .75em/1 Arial, sans-serif; color: rgba(255,255,255,.5); min-width: 38px; }
+    .pa-time.end { text-align: right; }
+    .pa-progress-track {
+      flex: 1; height: 4px; background: rgba(255,255,255,.15);
+      border-radius: 2px; position: relative; cursor: pointer;
+    }
+    .pa-progress-fill {
+      height: 100%; background: var(--gold); border-radius: 2px;
+      width: 0%; transition: width .1s linear; pointer-events: none;
+    }
+    .pa-progress-thumb {
+      position: absolute; top: 50%; right: -6px;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--gold); transform: translateY(-50%);
+      opacity: 0; transition: opacity .15s; pointer-events: none;
+    }
+    .pa-progress-track:hover .pa-progress-thumb { opacity: 1; }
+
+    /* Controls */
+    .pa-controls { display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .pa-btn {
+      background: none; border: none; color: rgba(255,255,255,.7);
+      font-size: 1.1em; padding: 6px 8px;
+      transition: color .15s, transform .1s;
+    }
+    .pa-btn:hover { color: var(--white); transform: scale(1.1); }
+    .pa-btn-play {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--gold); border: none; color: var(--navy);
+      font-size: 1.2em; display: flex; align-items: center; justify-content: center;
+      transition: background .15s, transform .1s;
+    }
+    .pa-btn-play:hover { background: var(--gold-light, #dab87a); transform: scale(1.06); }
+    .pa-speed {
+      background: rgba(255,255,255,.1); border: none; border-radius: 4px;
+      color: rgba(255,255,255,.6); padding: 4px 8px;
+      font: .75em/1 Arial, sans-serif; cursor: pointer;
+      transition: background .15s; margin-left: 8px;
+    }
+    .pa-speed:hover { background: rgba(255,255,255,.2); color: var(--white); }
+
+    /* ── Episode list ── */
+    .pa-list { max-width: 820px; margin: 0 auto; padding: 0 24px 80px; }
+
+    /* Playlist group header */
+    .pa-group-header {
+      padding: 50px 0 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+    .pa-group-num {
+      font: .62em/1 Arial, sans-serif;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: var(--gold); display: block; margin-bottom: 10px;
+    }
+    .pa-group-title {
+      font: normal 1.7em/1.2 Georgia, serif;
+      color: var(--navy); letter-spacing: 1px; margin-bottom: 6px;
+    }
+    .pa-group-sub {
+      font: italic .88em/1 Georgia, serif; color: var(--muted);
+    }
+    .pa-group-rule { width: 28px; height: 1px; background: var(--gold); margin-top: 14px; opacity: .5; }
+
+    /* Episode row */
+    .pa-ep-row {
+      display: flex; align-items: center; gap: 16px;
+      padding: 14px 12px; border-bottom: 1px solid var(--border);
+      cursor: pointer; transition: background .15s;
+      border-radius: 4px; margin: 0 -12px;
+    }
+    .pa-ep-row:hover { background: rgba(45,52,97,.05); }
+    .pa-ep-row.playing { background: rgba(45,52,97,.08); }
+
+    .pa-row-num {
+      font: .7em/1 Arial, sans-serif; color: var(--muted);
+      min-width: 22px; text-align: center;
+    }
+    .pa-row-thumb {
+      width: 52px; height: 52px; border-radius: 4px;
+      object-fit: cover; flex-shrink: 0;
+    }
+    .pa-row-info { flex: 1; min-width: 0; }
+    .pa-row-title {
+      font: .97em/1.35 Georgia, serif; color: var(--navy);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+    .pa-row-meta {
+      font: .72em/1 Arial, sans-serif; color: var(--muted);
+    }
+    .pa-row-dur {
+      font: .75em/1 Arial, sans-serif; color: var(--muted);
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .pa-row-play-icon {
+      font-size: .85em; color: var(--gold); flex-shrink: 0; width: 16px; text-align: center;
+    }
+
+    /* Empty / loading states */
+    .pa-state {
+      text-align: center; padding: 70px 24px;
+      font: italic 1em/1.6 Georgia, serif; color: var(--muted);
+    }
+
+    /* ── Platforms ── */
+    .pa-platforms {
+      background: var(--navy-dk); padding: 55px 24px; text-align: center;
+    }
+    .pa-platforms h2 {
+      font: .68em/1 Arial, sans-serif;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 28px;
+    }
+    .pa-plat-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+    .pa-plat-btn {
+      display: inline-flex; align-items: center; gap: 9px;
+      background: var(--white); color: var(--navy);
+      text-decoration: none; padding: 11px 20px;
+      border-radius: 6px;
+      font: 700 .83em/1 Arial, sans-serif; letter-spacing: .5px;
+      transition: opacity .2s, transform .2s;
+    }
+    .pa-plat-btn:hover { opacity: .88; transform: translateY(-2px); }
+    .pa-plat-btn img { width: 20px; height: 20px; }
+
+    /* ── Footer ── */
+    .pa-footer {
+      background: var(--navy-dk); border-top: 1px solid rgba(255,255,255,.07);
+      text-align: center; padding: 20px;
+      font: .68em/1 Arial, sans-serif; letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(255,255,255,.25);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .pa-header h1    { font-size: 2em; }
+      .pa-tab          { padding: 15px 16px; font-size: .62em; }
+      .pa-player       { padding: 20px 16px 18px; }
+      .pa-list         { padding: 0 12px 60px; }
+      .pa-ep-thumb     { width: 60px; height: 60px; }
+      .pa-ep-thumb-ph  { width: 60px; height: 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<div class="pa-header">
+  <div class="eyebrow">Revue ARCA</div>
+  <h1>Podcasts</h1>
+  <div class="pa-header-rule"></div>
+  <p>Explorations philosophiques &amp; ésotériques</p>
+</div>
+
+<!-- ── Filter bar ── -->
+<div class="pa-filter-bar">
+  <div class="pa-filter-tabs">
+    <button class="pa-tab active" data-view="playlist">Par Playlist</button>
+    <button class="pa-tab"        data-view="auteur">Par Auteur</button>
+    <button class="pa-tab"        data-view="sujet">Par Sujet</button>
+  </div>
+</div>
+
+<!-- Sub-filter: auteurs -->
+<div class="pa-sub" id="sub-auteur">
+  <span class="pa-sub-label">Choisir un auteur</span>
+  <button class="pa-chip active" data-type="auteur" data-val="tous">Tous</button>
+</div>
+
+<!-- Sub-filter: sujets -->
+<div class="pa-sub" id="sub-sujet">
+  <span class="pa-sub-label">Choisir un sujet</span>
+  <button class="pa-chip active" data-type="sujet" data-val="tous">Tous</button>
+</div>
+
+<!-- ── Player ── -->
+<div class="pa-player" id="pa-player">
+  <div class="pa-player-inner">
+    <div class="pa-ep-info">
+      <div class="pa-ep-thumb-ph" id="pa-thumb-ph">♪</div>
+      <img class="pa-ep-thumb" id="pa-thumb" src="" alt="" style="display:none">
+      <div class="pa-ep-meta">
+        <div class="pa-ep-title"  id="pa-ep-title">—</div>
+        <div class="pa-ep-author" id="pa-ep-author"></div>
+        <div class="pa-ep-playlist" id="pa-ep-pl"></div>
+      </div>
+    </div>
+
+    <div class="pa-progress-row">
+      <span class="pa-time" id="pa-cur">0:00</span>
+      <div class="pa-progress-track" id="pa-track">
+        <div class="pa-progress-fill" id="pa-fill"></div>
+        <div class="pa-progress-thumb" id="pa-thumb-dot"></div>
+      </div>
+      <span class="pa-time end" id="pa-dur">0:00</span>
+    </div>
+
+    <div class="pa-controls">
+      <button class="pa-btn" id="btn-prev"  title="Épisode précédent">⏮</button>
+      <button class="pa-btn" id="btn-back"  title="−15 s">↩15</button>
+      <button class="pa-btn-play" id="btn-play">▶</button>
+      <button class="pa-btn" id="btn-fwd"   title="+15 s">15↪</button>
+      <button class="pa-btn" id="btn-next"  title="Épisode suivant">⏭</button>
+      <select class="pa-speed" id="pa-speed">
+        <option value="0.75">0.75×</option>
+        <option value="1"    selected>1×</option>
+        <option value="1.25">1.25×</option>
+        <option value="1.5">1.5×</option>
+        <option value="2">2×</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- ── Episode list ── -->
+<div class="pa-list" id="pa-list">
+  <div class="pa-state">Chargement des épisodes…</div>
+</div>
+
+<!-- ── Platforms ── -->
+<div class="pa-platforms">
+  <h2>Disponible sur vos plateformes préférées</h2>
+  <div class="pa-plat-grid">
+    <a href="https://podcasts.apple.com/us/podcast/arca-revue-2/id1892843376" target="_blank" class="pa-plat-btn">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Podcasts_%28iOS%29.svg" alt="">Apple Podcasts
+    </a>
+    <a href="https://open.spotify.com/show/2NbiU1EcwhgJMWqIITwd0K" target="_blank" class="pa-plat-btn">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/Spotify_icon.svg" alt="">Spotify
+    </a>
+    <a href="https://www.deezer.com/show/1002875731" target="_blank" class="pa-plat-btn">
+      <img src="https://cdn.worldvectorlogo.com/logos/deezer-2.svg" alt="">Deezer
+    </a>
+    <a href="https://music.amazon.com/podcasts/2875dd04-4e7f-4965-bdc5-9afd1ba84c1c" target="_blank" class="pa-plat-btn">
+      <img src="https://cdn.worldvectorlogo.com/logos/amazon-music.svg" alt="">Amazon Music
+    </a>
+  </div>
+</div>
+
+<!-- ── Footer ── -->
+<div class="pa-footer">&copy; Académie de Thélème — Tous droits réservés</div>
+
+<audio id="pa-audio" preload="metadata"></audio>
+
+<script>
+(function () {
+  /* ─── State ─── */
+  var S = { episodes: [], config: {}, idx: -1, view: "playlist", filter: "tous" };
+  var audio = document.getElementById("pa-audio");
+
+  /* ─── DOM shortcuts ─── */
+  var $ = function (id) { return document.getElementById(id); };
+  var list    = $("pa-list");
+  var player  = $("pa-player");
+  var fill    = $("pa-fill");
+  var track   = $("pa-track");
+  var btnPlay = $("btn-play");
+
+  /* ─── Init ─── */
+  function init() {
+    Promise.all([
+      fetch("episodes.json").then(function (r) { return r.json(); }),
+      fetch("config.json").then(function (r)   { return r.json(); })
+    ]).then(function (res) {
+      S.episodes = res[0];
+      S.config   = res[1];
+      buildSubFilters();
+      render();
+    }).catch(function () {
+      list.innerHTML = '<div class="pa-state">Impossible de charger les épisodes.</div>';
+    });
+
+    /* Filter tabs */
+    document.querySelectorAll(".pa-tab").forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        S.view   = this.dataset.view;
+        S.filter = "tous";
+        document.querySelectorAll(".pa-tab").forEach(function (t) { t.classList.remove("active"); });
+        this.classList.add("active");
+        $("sub-auteur").classList.toggle("on", S.view === "auteur");
+        $("sub-sujet").classList.toggle("on",  S.view === "sujet");
+        /* Reset sub-chips */
+        ["auteur","sujet"].forEach(function (type) {
+          document.querySelectorAll("#sub-" + type + " .pa-chip").forEach(function (c) { c.classList.remove("active"); });
+          var first = document.querySelector("#sub-" + type + " .pa-chip");
+          if (first) first.classList.add("active");
+        });
+        render();
+      });
+    });
+
+    /* Sub-filter chips (delegated) */
+    ["sub-auteur","sub-sujet"].forEach(function (id) {
+      $(id).addEventListener("click", function (e) {
+        var chip = e.target.closest(".pa-chip");
+        if (!chip) return;
+        S.filter = chip.dataset.val;
+        $(id).querySelectorAll(".pa-chip").forEach(function (c) { c.classList.remove("active"); });
+        chip.classList.add("active");
+        render();
+      });
+    });
+
+    /* Player controls */
+    btnPlay.addEventListener("click", togglePlay);
+    $("btn-prev").addEventListener("click",  function () { jumpEp(-1); });
+    $("btn-next").addEventListener("click",  function () { jumpEp(+1); });
+    $("btn-back").addEventListener("click",  function () { audio.currentTime -= 15; });
+    $("btn-fwd").addEventListener("click",   function () { audio.currentTime += 15; });
+    $("pa-speed").addEventListener("change", function () { audio.playbackRate = parseFloat(this.value); });
+
+    /* Progress bar seek */
+    track.addEventListener("click", function (e) {
+      if (!audio.duration) return;
+      var rect  = track.getBoundingClientRect();
+      audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+    });
+
+    /* Audio events */
+    audio.addEventListener("timeupdate",     updateProgress);
+    audio.addEventListener("loadedmetadata", function () { $("pa-dur").textContent = fmtTime(audio.duration); });
+    audio.addEventListener("play",  function () { btnPlay.textContent = "⏸"; });
+    audio.addEventListener("pause", function () { btnPlay.textContent = "▶"; });
+    audio.addEventListener("ended", function () { jumpEp(+1); });
+  }
+
+  /* ─── Build dynamic sub-filter chips ─── */
+  function buildSubFilters() {
+    var cfg = S.config;
+
+    /* Auteurs */
+    var aContainer = $("sub-auteur");
+    var aHtml = '<span class="pa-sub-label">Choisir un auteur</span>' +
+                '<button class="pa-chip active" data-type="auteur" data-val="tous">Tous</button>';
+    Object.keys(cfg.authors || {}).forEach(function (key) {
+      aHtml += '<button class="pa-chip" data-type="auteur" data-val="' + key + '">' + cfg.authors[key] + '</button>';
+    });
+    aContainer.innerHTML = aHtml;
+
+    /* Sujets */
+    var sContainer = $("sub-sujet");
+    var sHtml = '<span class="pa-sub-label">Choisir un sujet</span>' +
+                '<button class="pa-chip active" data-type="sujet" data-val="tous">Tous</button>';
+    Object.keys(cfg.subjects || {}).forEach(function (key) {
+      sHtml += '<button class="pa-chip" data-type="sujet" data-val="' + key + '">' + cfg.subjects[key] + '</button>';
+    });
+    sContainer.innerHTML = sHtml;
+  }
+
+  /* ─── Filtering ─── */
+  function visible() {
+    if (S.view === "playlist" || S.filter === "tous") return S.episodes;
+    if (S.view === "auteur") {
+      return S.episodes.filter(function (ep) { return (ep.authors || []).indexOf(S.filter) !== -1; });
+    }
+    return S.episodes.filter(function (ep) { return ep.subject === S.filter; });
+  }
+
+  /* ─── Render episode list ─── */
+  function render() {
+    var eps = visible();
+    if (!eps.length) {
+      list.innerHTML = '<div class="pa-state">Aucun épisode pour cette sélection.</div>';
+      return;
+    }
+
+    var html = "";
+    if (S.view === "playlist") {
+      /* Grouped by playlist */
+      var groups = {};
+      var order  = [];
+      eps.forEach(function (ep) {
+        var slug = ep.playlist_slug || "default";
+        if (!groups[slug]) { groups[slug] = []; order.push(slug); }
+        groups[slug].push(ep);
+      });
+
+      var roman = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
+      order.forEach(function (slug, gi) {
+        var group = groups[slug];
+        var first = group[0];
+        var authorLabels = (first.authors || []).map(function (a) {
+          return (S.config.authors || {})[a] || a;
+        }).join(" · ");
+
+        html += '<div class="pa-group-header">' +
+          '<span class="pa-group-num">Playlist ' + (roman[gi] || gi+1) + '</span>' +
+          '<div class="pa-group-title">' + esc(first.playlist_title) + '</div>' +
+          (authorLabels ? '<div class="pa-group-sub">par ' + esc(authorLabels) + '</div>' : '') +
+          '<div class="pa-group-rule"></div></div>';
+
+        group.forEach(function (ep, i) {
+          html += epRow(ep, i + 1);
+        });
+      });
+    } else {
+      eps.forEach(function (ep, i) { html += epRow(ep, i + 1); });
+    }
+
+    list.innerHTML = html;
+    highlightPlaying();
+
+    /* Attach click listeners */
+    list.querySelectorAll(".pa-ep-row").forEach(function (row) {
+      row.addEventListener("click", function () {
+        var idx = parseInt(this.dataset.idx, 10);
+        playEp(idx);
+      });
+    });
+  }
+
+  function epRow(ep, num) {
+    var idx = S.episodes.indexOf(ep);
+    var authors = (ep.authors || []).map(function (a) {
+      return (S.config.authors || {})[a] || a;
+    }).join(", ");
+    var isPlaying = (idx === S.idx);
+    var thumb = ep.image_url
+      ? '<img class="pa-row-thumb" src="' + esc(ep.image_url) + '" alt="" loading="lazy">'
+      : '<div class="pa-row-thumb" style="background:#e2ddd8;border-radius:4px;"></div>';
+
+    return '<div class="pa-ep-row' + (isPlaying ? ' playing' : '') + '" data-idx="' + idx + '">' +
+      '<div class="pa-row-play-icon">' + (isPlaying ? '▶' : '') + '</div>' +
+      '<div class="pa-row-num">' + num + '</div>' +
+      thumb +
+      '<div class="pa-row-info">' +
+        '<div class="pa-row-title">' + esc(ep.title) + '</div>' +
+        '<div class="pa-row-meta">' + esc(authors) +
+          (ep.playlist_title && S.view !== "playlist" ? ' · ' + esc(ep.playlist_title) : '') + '</div>' +
+      '</div>' +
+      '<div class="pa-row-dur">' + esc(ep.duration_fmt || "") + '</div>' +
+    '</div>';
+  }
+
+  function highlightPlaying() {
+    list.querySelectorAll(".pa-ep-row").forEach(function (row) {
+      var active = parseInt(row.dataset.idx, 10) === S.idx;
+      row.classList.toggle("playing", active);
+      row.querySelector(".pa-row-play-icon").textContent = active ? "▶" : "";
+    });
+  }
+
+  /* ─── Playback ─── */
+  function playEp(idx) {
+    if (idx < 0 || idx >= S.episodes.length) return;
+    var ep = S.episodes[idx];
+    if (!ep.audio_url) return;
+
+    S.idx = idx;
+    audio.src = ep.audio_url;
+    audio.playbackRate = parseFloat($("pa-speed").value);
+    audio.play();
+
+    /* Update player UI */
+    $("pa-ep-title").textContent  = ep.title || "—";
+    $("pa-ep-author").textContent = (ep.authors || []).map(function (a) {
+      return (S.config.authors || {})[a] || a;
+    }).join(" · ");
+    $("pa-ep-pl").textContent = ep.playlist_title || "";
+
+    if (ep.image_url) {
+      $("pa-thumb").src = ep.image_url;
+      $("pa-thumb").style.display = "block";
+      $("pa-thumb-ph").style.display = "none";
+    } else {
+      $("pa-thumb").style.display = "none";
+      $("pa-thumb-ph").style.display = "flex";
+    }
+
+    player.classList.add("on");
+    updateProgress();
+    highlightPlaying();
+  }
+
+  function togglePlay() {
+    if (!audio.src) return;
+    audio.paused ? audio.play() : audio.pause();
+  }
+
+  function jumpEp(delta) {
+    var eps = visible();
+    var cur = eps.find(function (e) { return S.episodes.indexOf(e) === S.idx; });
+    var ci  = cur ? eps.indexOf(cur) : -1;
+    var next = eps[ci + delta];
+    if (next) playEp(S.episodes.indexOf(next));
+  }
+
+  /* ─── Progress ─── */
+  function updateProgress() {
+    if (!audio.duration) return;
+    var pct = (audio.currentTime / audio.duration) * 100;
+    fill.style.width = pct + "%";
+    $("pa-thumb-dot").style.right = (100 - pct) / 100 * track.offsetWidth - 6 + "px";
+    /* override right with left for simplicity */
+    $("pa-thumb-dot").style.right = "auto";
+    $("pa-thumb-dot").style.left  = "calc(" + pct + "% - 6px)";
+    $("pa-cur").textContent = fmtTime(audio.currentTime);
+  }
+
+  function fmtTime(s) {
+    if (isNaN(s) || !s) return "0:00";
+    var h = Math.floor(s / 3600);
+    var m = Math.floor((s % 3600) / 60);
+    var sec = Math.floor(s % 60);
+    if (h) return h + ":" + pad(m) + ":" + pad(sec);
+    return m + ":" + pad(sec);
+  }
+
+  function pad(n) { return n < 10 ? "0" + n : String(n); }
+  function esc(s) { return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  /* ─── Start ─── */
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

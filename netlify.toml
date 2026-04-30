@@ -1,0 +1,20 @@
+[build]
+  command = "node build-rss.js"
+  publish = "."
+
+# Correct Content-Type pour le flux RSS
+[[headers]]
+  for = "/rss.xml"
+  [headers.values]
+    Content-Type = "application/rss+xml; charset=utf-8"
+
+# Cache long pour les assets statiques
+[[headers]]
+  for = "/episodes.json"
+  [headers.values]
+    Cache-Control = "public, max-age=300"    # 5 min
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"

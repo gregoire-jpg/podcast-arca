@@ -1,0 +1,5 @@
+rss.xml
+__pycache__/
+*.pyc
+.env
+node_modules/

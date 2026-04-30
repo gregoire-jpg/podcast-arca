@@ -1,0 +1,70 @@
+{
+  "channel_id": "UCAUcSMZ0IB2Kr03hMoOIeFg",
+
+  "podcast": {
+    "title": "Revue ARCA",
+    "subtitle": "Explorations philosophiques & ésotériques",
+    "description": "Espace dédié aux chercheurs et aux croyants de toutes les Traditions. Notre vocation est de constituer un lieu d'échange et de recherche, afin de (re)découvrir l'Unité essentielle des Traditions spirituelles, religieuses et philosophiques.",
+    "website": "https://podcast-arca.netlify.app",
+    "email": "contact@revue-arca.be",
+    "author": "Académie de Thélème",
+    "image_url": "https://VOTRE_LOGO_URL.jpg",
+    "language": "fr",
+    "category": "Religion & Spirituality"
+  },
+
+  "exclude_playlists": [
+    "Apprendre l'Hébreu biblique"
+  ],
+
+  "playlist_metadata": {
+    "REMPLACER_PAR_ID_PHEDRE": {
+      "authors": ["pierre"],
+      "subject": "philosophie"
+    },
+    "REMPLACER_PAR_ID_CONFERENCES": {
+      "authors": ["stephane-feye", "remy-dechambre", "odile-dapsens"],
+      "subject": "conferences"
+    },
+    "REMPLACER_PAR_ID_VAUGHAN": {
+      "authors": ["odile-dapsens"],
+      "subject": "esoterisme"
+    },
+    "REMPLACER_PAR_ID_LETTRE": {
+      "authors": ["adel-arcalibrairie"],
+      "subject": "initiation"
+    },
+    "REMPLACER_PAR_ID_CABALE": {
+      "authors": ["caroline-thuysbaert", "stephane-feye"],
+      "subject": "cabale"
+    },
+    "REMPLACER_PAR_ID_MORT": {
+      "authors": ["hans-van-kasteel"],
+      "subject": "philosophie"
+    },
+    "REMPLACER_PAR_ID_HERMETISME": {
+      "authors": ["academie"],
+      "subject": "hermetisme"
+    }
+  },
+
+  "authors": {
+    "pierre":              "Pierre",
+    "stephane-feye":       "Stéphane Feye",
+    "remy-dechambre":      "Remy Dechambre",
+    "odile-dapsens":       "Odile Dapsens",
+    "adel-arcalibrairie":  "Adel Arcalibrairie",
+    "caroline-thuysbaert": "Caroline Thuysbaert",
+    "hans-van-kasteel":    "Hans van Kasteel",
+    "academie":            "Académie de Thélème"
+  },
+
+  "subjects": {
+    "philosophie": "Philosophie",
+    "conferences": "Conférences",
+    "esoterisme":  "Ésotérisme",
+    "initiation":  "Initiation",
+    "cabale":      "Cabale",
+    "hermetisme":  "Hermétisme"
+  }
+}
