@@ -317,10 +317,16 @@ def main():
 
                 print(f"   ⬇  {title[:50]}")
 
-                # Dossier Dropbox
-                remote_dir  = f"{DROPBOX_ROOT}/{doc_type}/{cat_name}"
-                filename    = slugify(title) + ".pdf"
-                remote_path = f"{remote_dir}/{filename}"
+                # Dossier Dropbox — arborescence miroir du site ARCA
+                filename = slugify(title) + ".pdf"
+                if doc_type == "article":
+                    remote_path = f"{DROPBOX_ROOT}/Articles/{cat_name}/{filename}"
+                elif doc_type == "livre":
+                    remote_path = f"{DROPBOX_ROOT}/Livres/{filename}"
+                elif doc_type == "revue":
+                    remote_path = f"{DROPBOX_ROOT}/Revue ARCA/{filename}"
+                else:  # lus-pour-vous
+                    remote_path = f"{DROPBOX_ROOT}/Lus pour vous/{cat_name}/{filename}"
 
                 dropbox_url = ""
 

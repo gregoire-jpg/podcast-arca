@@ -1,0 +1,24 @@
+name: Migrate Documentation Dropbox Structure
+
+on:
+  workflow_dispatch:
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install dropbox
+
+      - name: Déplacer les fichiers sur Dropbox
+        env:
+          DROPBOX_APP_KEY:       ${{ secrets.DROPBOX_APP_KEY }}
+          DROPBOX_APP_SECRET:    ${{ secrets.DROPBOX_APP_SECRET }}
+          DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
+        run: python scripts/migrate-docs-dropbox.py

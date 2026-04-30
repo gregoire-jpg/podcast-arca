@@ -6,69 +6,104 @@
   <title>Documentation — Revue ARCA</title>
   <style>
     :root {
-      --navy:    #2d3461;
-      --navy-dk: #1e2245;
+      --navy:    #2d3461; --navy-dk: #1e2245;
       --gold:    #c8a060;
-      --white:   #ffffff;
-      --bg:      #faf8f5;
-      --border:  #e2ddd8;
-      --muted:   #777;
+      --white:   #ffffff; --bg: #faf8f5;
+      --border:  #e2ddd8; --muted: #777;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
     body { font-family: Georgia, serif; background: var(--bg); color: var(--navy); }
     button { cursor: pointer; }
 
     /* ── Header ── */
     .pa-header { background: var(--navy); padding: 60px 24px 50px; text-align: center; }
-    .pa-header .eyebrow { font: .65em/1 Arial; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; display: block; }
+    .pa-eyebrow { display: block; font: .65em/1 Arial; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
     .pa-header h1 { font: normal 2.8em/1 Georgia; letter-spacing: 6px; text-transform: uppercase; color: var(--white); margin-bottom: 18px; }
-    .pa-header-rule { width: 44px; height: 2px; background: var(--gold); margin: 0 auto 18px; }
+    .pa-rule { width: 44px; height: 2px; background: var(--gold); margin: 0 auto 18px; }
     .pa-header p { font: italic 1em/1 Georgia; color: rgba(255,255,255,.55); letter-spacing: 1px; }
 
     /* ── Filter bar ── */
     .pa-filter-bar { background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 90; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
     .pa-filter-tabs { display: flex; justify-content: center; }
-    .pa-tab { padding: 17px 35px; font: .7em/1 Arial; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); background: none; border: none; border-bottom: 3px solid transparent; transition: color .2s, border-color .2s; }
+    .pa-tab { padding: 16px 32px; font: .7em/1 Arial; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); background: none; border: none; border-bottom: 3px solid transparent; transition: color .2s, border-color .2s; }
     .pa-tab:hover { color: var(--navy); }
     .pa-tab.active { color: var(--navy); border-bottom-color: var(--gold); font-weight: 700; }
 
-    /* ── Sub-filters ── */
-    .pa-sub { background: #f3f0ea; border-bottom: 1px solid var(--border); padding: 18px 20px; text-align: center; display: none; }
+    /* Sub-filters */
+    .pa-sub { background: #f3f0ea; border-bottom: 1px solid var(--border); padding: 16px 20px; text-align: center; display: none; }
     .pa-sub.on { display: block; }
     .pa-sub-label { display: block; font: .65em/1 Arial; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
     .pa-chip { display: inline-block; margin: 3px; padding: 6px 16px; border: 1px solid var(--navy); border-radius: 20px; font: .85em/1 Georgia; color: var(--navy); background: var(--white); transition: background .18s, color .18s; cursor: pointer; }
     .pa-chip:hover, .pa-chip.active { background: var(--navy); color: var(--white); }
     .pa-chip-count { opacity: .6; font-size: .85em; }
 
-    /* ── Type selector bar ── */
-    .pa-type-bar { background: var(--navy-dk); padding: 0; display: flex; justify-content: center; }
-    .pa-type-btn { padding: 12px 28px; background: none; border: none; border-bottom: 2px solid transparent; color: rgba(255,255,255,.45); font: .72em/1 Arial; letter-spacing: 2px; text-transform: uppercase; transition: color .2s, border-color .2s; cursor: pointer; }
-    .pa-type-btn:hover { color: rgba(255,255,255,.8); }
-    .pa-type-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+    /* ── Container ── */
+    .pa-container { max-width: 900px; margin: 0 auto; padding: 28px 24px 80px; }
 
-    /* ── Document list ── */
-    .pa-container { max-width: 880px; margin: 0 auto; padding: 8px 24px 80px; }
+    /* ── Section cards (niveau 1 : Revue / Articles / Livres / Lus) ── */
+    .section-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; }
 
-    .pa-section-header { padding: 40px 0 16px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
-    .pa-section-num { display: block; font: .62em/1 Arial; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
-    .pa-section-title { font: normal 1.6em/1.2 Georgia; color: var(--navy); margin-bottom: 5px; }
-    .pa-section-rule { width: 28px; height: 1px; background: var(--gold); margin-top: 14px; opacity: .5; }
+    .section-card {
+      background: var(--white); border-radius: 12px; overflow: hidden;
+      cursor: pointer; border: 2px solid transparent;
+      box-shadow: 0 2px 10px rgba(45,52,97,.08);
+      transition: transform .2s, box-shadow .2s;
+      display: flex; flex-direction: column;
+    }
+    .section-card:hover { transform: translateY(-5px); box-shadow: 0 10px 28px rgba(45,52,97,.18); }
+    .section-card.featured { border-color: var(--gold); }
 
-    .pa-doc-row { display: flex; align-items: flex-start; gap: 14px; padding: 14px 10px; border-bottom: 1px solid var(--border); border-radius: 4px; margin: 0 -10px; transition: background .15s; }
-    .pa-doc-row:hover { background: rgba(45,52,97,.04); }
-    .pa-doc-row.has-link { cursor: pointer; }
-    .pa-doc-row.has-link:hover .pa-doc-title { color: var(--gold); }
+    .sc-icon { background: var(--navy); padding: 28px; text-align: center; font-size: 2.2em; }
+    .sc-body { padding: 16px; flex: 1; }
+    .sc-title { font: normal 1em/1.3 Georgia; color: var(--navy); margin-bottom: 6px; }
+    .sc-count { font: .72em/1 Arial; color: var(--gold); font-weight: bold; }
+    .sc-desc  { font: italic .75em/1.4 Arial; color: var(--muted); margin-top: 4px; }
 
-    .pa-doc-icon { font-size: 1.2em; color: var(--gold); flex-shrink: 0; width: 24px; text-align: center; margin-top: 2px; }
-    .pa-doc-body { flex: 1; min-width: 0; }
-    .pa-doc-title { font: .97em/1.35 Georgia; color: var(--navy); margin-bottom: 3px; }
-    .pa-doc-meta { font: .72em/1 Arial; color: var(--muted); }
-    .pa-doc-tag { display: inline-block; border: 1px solid var(--border); border-radius: 10px; padding: 2px 8px; font-size: .9em; margin-left: 4px; }
-    .pa-doc-dl { font: .72em/1 Arial; color: var(--gold); text-decoration: none; flex-shrink: 0; white-space: nowrap; padding: 4px 8px; border: 1px solid var(--gold); border-radius: 4px; transition: background .15s; }
-    .pa-doc-dl:hover { background: var(--gold); color: var(--navy); }
+    /* ── Category cards (niveau 2) ── */
+    .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
 
-    /* ── Empty ── */
+    .cat-card {
+      background: var(--white); border-radius: 10px; overflow: hidden;
+      cursor: pointer; border: 1px solid var(--border);
+      box-shadow: 0 1px 6px rgba(45,52,97,.06);
+      transition: transform .18s, box-shadow .18s, border-color .18s;
+      padding: 16px;
+    }
+    .cat-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(45,52,97,.14); border-color: var(--gold); }
+    .cat-card-title { font: normal .92em/1.3 Georgia; color: var(--navy); margin-bottom: 4px; }
+    .cat-card-count  { font: .7em/1 Arial; color: var(--gold); font-weight: bold; }
+
+    /* ── Breadcrumb ── */
+    .breadcrumb { display: flex; align-items: center; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; }
+    .bc-btn { background: none; border: none; font: .78em/1 Arial; color: var(--muted); padding: 0; transition: color .2s; }
+    .bc-btn:hover { color: var(--navy); }
+    .bc-sep { color: var(--border); font-size: .8em; }
+    .bc-current { font: .78em/1 Arial; color: var(--navy); }
+
+    /* ── Document rows ── */
+    .doc-list { margin-top: 4px; }
+    .doc-row {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 13px 10px; border-bottom: 1px solid var(--border);
+      border-radius: 4px; margin: 0 -10px;
+      transition: background .15s;
+    }
+    .doc-row:hover { background: rgba(45,52,97,.04); }
+    .doc-icon { font-size: 1.1em; color: var(--gold); flex-shrink: 0; width: 22px; text-align: center; margin-top: 2px; }
+    .doc-body { flex: 1; min-width: 0; }
+    .doc-title { font: .95em/1.35 Georgia; color: var(--navy); margin-bottom: 3px; }
+    .doc-meta  { font: .72em/1 Arial; color: var(--muted); }
+    .doc-dl {
+      display: inline-flex; align-items: center; gap: 5px;
+      font: .72em/1 Arial; color: var(--gold); text-decoration: none;
+      flex-shrink: 0; white-space: nowrap;
+      padding: 4px 10px; border: 1px solid var(--gold); border-radius: 4px;
+      transition: background .15s, color .15s;
+    }
+    .doc-dl:hover { background: var(--gold); color: var(--navy); }
+    .doc-dl-soon { opacity: .3; font: .7em/1 Arial; color: var(--muted); flex-shrink: 0; white-space: nowrap; }
+
+    /* ── Vide ── */
     .pa-state { text-align: center; padding: 70px 24px; font: italic 1em/1.6 Georgia; color: var(--muted); }
 
     /* ── Footer ── */
@@ -76,108 +111,83 @@
 
     @media (max-width: 600px) {
       .pa-header h1 { font-size: 2em; }
-      .pa-tab { padding: 14px 16px; font-size: .62em; }
-      .pa-type-btn { padding: 10px 14px; font-size: .62em; }
-      .pa-container { padding: 0 14px 60px; }
+      .pa-tab { padding: 13px 16px; font-size: .62em; }
+      .pa-container { padding: 16px 14px 60px; }
     }
   </style>
 </head>
 <body>
 
-<!-- Header -->
 <div class="pa-header">
-  <span class="eyebrow">Revue ARCA</span>
+  <span class="pa-eyebrow">Revue ARCA</span>
   <h1>Documentation</h1>
-  <div class="pa-header-rule"></div>
+  <div class="pa-rule"></div>
   <p>Articles · Livres · Revues · Lectures</p>
 </div>
 
-<!-- Type de document -->
-<div class="pa-type-bar">
-  <button class="pa-type-btn active" data-type="tous">Tous</button>
-  <button class="pa-type-btn" data-type="article">Articles</button>
-  <button class="pa-type-btn" data-type="livre">Livres</button>
-  <button class="pa-type-btn" data-type="revue">Revue ARCA</button>
-  <button class="pa-type-btn" data-type="lus-pour-vous">Lus pour vous</button>
-</div>
-
-<!-- Filter bar -->
 <div class="pa-filter-bar">
   <div class="pa-filter-tabs">
-    <button class="pa-tab active" data-view="categorie">Par Catégorie</button>
+    <button class="pa-tab active" data-view="browse">Parcourir</button>
     <button class="pa-tab"        data-view="auteur">Par Auteur</button>
     <button class="pa-tab"        data-view="sujet">Par Sujet</button>
   </div>
 </div>
 
-<div class="pa-sub on" id="sub-categorie"></div>
-<div class="pa-sub"    id="sub-auteur"></div>
-<div class="pa-sub"    id="sub-sujet"></div>
+<div class="pa-sub" id="sub-auteur"></div>
+<div class="pa-sub" id="sub-sujet"></div>
 
-<!-- Document list -->
-<div class="pa-container">
-  <div class="pa-state" id="pa-list">Chargement…</div>
+<div class="pa-container" id="pa-main">
+  <div class="pa-state">Chargement…</div>
 </div>
 
 <div class="pa-footer">&copy; Académie de Thélème — Tous droits réservés</div>
 
 <script>
 (function () {
-  var S = { docs: [], config: {}, view: 'categorie', filter: 'tous', type: 'tous' };
-  var $ = function(id) { return document.getElementById(id); };
+  /* ── State ── */
+  var D = { docs: [], view: 'browse', filter: 'tous', level: 'home', section: '', category: '' };
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-  /* ── Icons par type ── */
-  var ICONS = { article: '📄', livre: '📖', revue: '📰', 'lus-pour-vous': '👁' };
+  /* ── Sections ── */
+  var SECTIONS = [
+    { id: 'revue',        label: 'Revue ARCA',    icon: '📰', desc: 'Les 7 numéros complets de la revue' },
+    { id: 'article',      label: 'Articles',       icon: '📄', desc: 'Articles classés par thème' },
+    { id: 'livre',        label: 'Livres',         icon: '📖', desc: 'Ouvrages hermétiques et philosophiques' },
+    { id: 'lus-pour-vous',label: 'Lus pour vous',  icon: '👁', desc: 'Sélection de lectures commentées' },
+  ];
 
   /* ── Init ── */
   function init() {
     Promise.all([
       fetch('https://podcast-arca.netlify.app/documents.json?' + Date.now()).then(function(r){ return r.json(); }),
-      fetch('https://podcast-arca.netlify.app/config-docs.json?' + Date.now()).then(function(r){ return r.json(); }).catch(function(){ return {}; })
     ]).then(function(res) {
-      S.docs   = res[0];
-      S.config = res[1];
+      D.docs = res[0];
       buildSubFilters();
       render();
-    }).catch(function() {
-      $('pa-list').innerHTML = '<div class="pa-state">Impossible de charger la documentation.</div>';
+    }).catch(function(e) {
+      $('pa-main').innerHTML = '<div class="pa-state">Impossible de charger la documentation.</div>';
     });
 
-    /* Type buttons */
-    document.querySelectorAll('.pa-type-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        S.type   = this.dataset.type;
-        S.filter = 'tous';
-        document.querySelectorAll('.pa-type-btn').forEach(function(b){ b.classList.remove('active'); });
-        this.classList.add('active');
-        resetSubFilters();
-        render();
-      });
-    });
-
-    /* View tabs */
     document.querySelectorAll('.pa-tab').forEach(function(tab) {
       tab.addEventListener('click', function() {
-        S.view   = this.dataset.view;
-        S.filter = 'tous';
+        D.view   = this.dataset.view;
+        D.filter = 'tous';
+        D.level  = 'home'; D.section = ''; D.category = '';
         document.querySelectorAll('.pa-tab').forEach(function(t){ t.classList.remove('active'); });
         this.classList.add('active');
-        $('sub-categorie').classList.toggle('on', S.view === 'categorie');
-        $('sub-auteur').classList.toggle('on',    S.view === 'auteur');
-        $('sub-sujet').classList.toggle('on',     S.view === 'sujet');
-        resetSubFilters();
+        $('sub-auteur').classList.toggle('on', D.view === 'auteur');
+        $('sub-sujet').classList.toggle('on',  D.view === 'sujet');
+        resetChips();
         render();
       });
     });
 
-    /* Sub-filter chips */
-    ['sub-categorie','sub-auteur','sub-sujet'].forEach(function(id) {
+    ['sub-auteur','sub-sujet'].forEach(function(id) {
       $(id).addEventListener('click', function(e) {
         var chip = e.target.closest('.pa-chip');
         if (!chip) return;
-        S.filter = chip.dataset.val;
+        D.filter = chip.dataset.val;
         $(id).querySelectorAll('.pa-chip').forEach(function(c){ c.classList.remove('active'); });
         chip.classList.add('active');
         render();
@@ -185,106 +195,164 @@
     });
   }
 
-  function resetSubFilters() {
-    ['sub-categorie','sub-auteur','sub-sujet'].forEach(function(id) {
+  function resetChips() {
+    ['sub-auteur','sub-sujet'].forEach(function(id) {
       var btns = $(id).querySelectorAll('.pa-chip');
       btns.forEach(function(b){ b.classList.remove('active'); });
       if (btns[0]) btns[0].classList.add('active');
     });
   }
 
-  /* ── Build sub-filters ── */
+  /* ── Sub-filters ── */
   function buildSubFilters() {
-    /* Catégories */
-    var cats = {}, authors = {}, subjects = {};
-    S.docs.forEach(function(d) {
-      cats[d.category]    = (cats[d.category]    || 0) + 1;
-      subjects[d.subject] = (subjects[d.subject] || 0) + 1;
-      (d.authors || []).forEach(function(a) {
-        authors[a] = (authors[a] || 0) + 1;
-      });
+    var authorCounts = {}, subjectCounts = {}, total = D.docs.length;
+    D.docs.forEach(function(d) {
+      if (d.subject) subjectCounts[d.subject] = (subjectCounts[d.subject]||0)+1;
+      (d.authors||[]).forEach(function(a){ authorCounts[a]=(authorCounts[a]||0)+1; });
     });
-
-    function chips(map, type) {
-      var total = S.docs.length;
-      var html  = '<span class="pa-sub-label">Choisir une ' + type + '</span>' +
-        '<button class="pa-chip active" data-type="' + type + '" data-val="tous">Tous <span class="pa-chip-count">(' + total + ')</span></button>';
-      Object.keys(map).sort().forEach(function(k) {
-        html += '<button class="pa-chip" data-type="' + type + '" data-val="' + esc(k) + '">' + esc(k) + ' <span class="pa-chip-count">(' + map[k] + ')</span></button>';
+    function chips(map, type, cfg) {
+      var html = '<span class="pa-sub-label">Choisir ' + (type==='auteur'?'un auteur':'un sujet') + '</span>' +
+        '<button class="pa-chip active" data-type="'+type+'" data-val="tous">Tous <span class="pa-chip-count">('+total+')</span></button>';
+      Object.keys(map).sort().forEach(function(k){
+        if (!map[k]) return;
+        html += '<button class="pa-chip" data-type="'+type+'" data-val="'+esc(k)+'">'+esc(k)+' <span class="pa-chip-count">('+map[k]+')</span></button>';
       });
       return html;
     }
-
-    $('sub-categorie').innerHTML = chips(cats,    'categorie');
-    $('sub-auteur').innerHTML    = chips(authors, 'auteur');
-    $('sub-sujet').innerHTML     = chips(subjects,'sujet');
-  }
-
-  /* ── Filter ── */
-  function visible() {
-    return S.docs.filter(function(d) {
-      if (S.type   !== 'tous' && d.type     !== S.type)   return false;
-      if (S.filter === 'tous') return true;
-      if (S.view   === 'categorie') return d.category === S.filter;
-      if (S.view   === 'auteur')    return (d.authors || []).indexOf(S.filter) !== -1;
-      if (S.view   === 'sujet')     return d.subject  === S.filter;
-      return true;
-    });
+    $('sub-auteur').innerHTML = chips(authorCounts, 'auteur');
+    $('sub-sujet').innerHTML  = chips(subjectCounts,'sujet');
   }
 
   /* ── Render ── */
   function render() {
-    var docs = visible();
-    var list = $('pa-list');
-    if (!docs.length) { list.innerHTML = '<div class="pa-state">Aucun document pour cette sélection.</div>'; return; }
+    var main = $('pa-main');
+    if (D.view !== 'browse') { renderFlat(main); return; }
+    if (D.level === 'home')     { renderHome(main);     return; }
+    if (D.level === 'section')  { renderSection(main);  return; }
+    if (D.level === 'category') { renderDocs(main);     return; }
+  }
 
-    var html = '';
-
-    if (S.view === 'categorie' && S.filter === 'tous') {
-      /* Grouper par catégorie */
-      var groups = {}, order = [];
-      docs.forEach(function(d) {
-        if (!groups[d.category]) { groups[d.category] = []; order.push(d.category); }
-        groups[d.category].push(d);
+  /* ── Niveau 1 : Accueil — 4 grandes sections ── */
+  function renderHome(main) {
+    var counts = {};
+    D.docs.forEach(function(d){ counts[d.type] = (counts[d.type]||0)+1; });
+    var html = '<div class="section-grid">';
+    SECTIONS.forEach(function(s) {
+      html += '<div class="section-card" data-section="'+s.id+'">' +
+        '<div class="sc-icon">'+s.icon+'</div>' +
+        '<div class="sc-body">' +
+          '<div class="sc-title">'+esc(s.label)+'</div>' +
+          '<div class="sc-count">'+(counts[s.id]||0)+' document(s)</div>' +
+          '<div class="sc-desc">'+esc(s.desc)+'</div>' +
+        '</div></div>';
+    });
+    html += '</div>';
+    main.innerHTML = html;
+    main.querySelectorAll('.section-card').forEach(function(card) {
+      card.addEventListener('click', function() {
+        D.section = this.dataset.section;
+        var hasCategories = D.section === 'article' || D.section === 'lus-pour-vous';
+        D.level = hasCategories ? 'section' : 'category';
+        render();
       });
-      order.forEach(function(cat) {
-        html += '<div class="pa-section-header">' +
-          '<div class="pa-section-title">' + esc(cat) + '</div>' +
-          '<div class="pa-section-rule"></div></div>';
-        groups[cat].forEach(function(d) { html += docRow(d); });
-      });
-    } else {
-      /* Flat list */
-      var headerTitle = S.filter !== 'tous' ? S.filter : '';
-      if (headerTitle) {
-        html += '<div class="pa-section-header"><div class="pa-section-title">' + esc(headerTitle) + '</div><div class="pa-section-rule"></div></div>';
-      }
-      docs.forEach(function(d) { html += docRow(d); });
-    }
-
-    list.innerHTML = html;
-
-    /* Liens de téléchargement */
-    list.querySelectorAll('.pa-doc-dl').forEach(function(a) {
-      a.addEventListener('click', function(e) { e.stopPropagation(); });
     });
   }
 
-  function docRow(doc) {
-    var icon    = ICONS[doc.type] || '📄';
-    var meta    = [doc.author_display, doc.publication, doc.year].filter(Boolean).join(' · ');
-    var dlBtn   = doc.dropbox_url
-      ? '<a class="pa-doc-dl" href="' + esc(doc.dropbox_url) + '" target="_blank">⬇ Télécharger</a>'
-      : '<span class="pa-doc-dl" style="opacity:.3;border-style:dashed;cursor:default;">bientôt</span>';
+  /* ── Niveau 2 : Catégories d'une section ── */
+  function renderSection(main) {
+    var sectionDocs = D.docs.filter(function(d){ return d.type === D.section; });
+    var cats = {}, order = [];
+    sectionDocs.forEach(function(d){
+      if (!cats[d.category]) { cats[d.category] = 0; order.push(d.category); }
+      cats[d.category]++;
+    });
+    var sLabel = (SECTIONS.find(function(s){ return s.id===D.section; })||{}).label || D.section;
+    var html = breadcrumb([{label:'Accueil',level:'home'},{label:sLabel}]);
+    html += '<div class="cat-grid">';
+    order.forEach(function(cat) {
+      html += '<div class="cat-card" data-cat="'+esc(cat)+'">' +
+        '<div class="cat-card-title">'+esc(cat)+'</div>' +
+        '<div class="cat-card-count">'+cats[cat]+' document(s)</div>' +
+        '</div>';
+    });
+    html += '</div>';
+    main.innerHTML = html;
+    main.querySelector('.bc-btn') && main.querySelector('.bc-btn').addEventListener('click', function() { D.level='home'; render(); });
+    main.querySelectorAll('.cat-card').forEach(function(card) {
+      card.addEventListener('click', function() {
+        D.category = this.dataset.cat;
+        D.level = 'category';
+        render();
+      });
+    });
+  }
 
-    return '<div class="pa-doc-row' + (doc.dropbox_url ? ' has-link' : '') + '">' +
-      '<div class="pa-doc-icon">' + icon + '</div>' +
-      '<div class="pa-doc-body">' +
-        '<div class="pa-doc-title">' + esc(doc.title) + '</div>' +
-        (meta ? '<div class="pa-doc-meta">' + esc(meta) + '</div>' : '') +
-      '</div>' +
-      dlBtn +
-    '</div>';
+  /* ── Niveau 3 : Liste de documents ── */
+  function renderDocs(main) {
+    var docs = D.docs.filter(function(d){
+      if (d.type !== D.section) return false;
+      if (D.level === 'category' && D.section !== 'revue' && D.section !== 'livre' && d.category !== D.category) return false;
+      return true;
+    });
+    var sLabel = (SECTIONS.find(function(s){ return s.id===D.section; })||{}).label || D.section;
+    var crumbs = [{label:'Accueil',level:'home'}];
+    if (D.section === 'article' || D.section === 'lus-pour-vous') {
+      crumbs.push({label:sLabel,level:'section'});
+      crumbs.push({label:D.category});
+    } else {
+      crumbs.push({label:sLabel});
+    }
+    var html = breadcrumb(crumbs);
+    html += '<div class="doc-list">';
+    docs.forEach(function(d) { html += docRow(d); });
+    html += '</div>';
+    main.innerHTML = html;
+    main.querySelectorAll('.bc-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        D.level = this.dataset.target;
+        render();
+      });
+    });
+  }
+
+  /* ── Vue plate (Par Auteur / Par Sujet) ── */
+  function renderFlat(main) {
+    var docs = D.docs.filter(function(d) {
+      if (D.filter === 'tous') return true;
+      if (D.view === 'auteur') return (d.authors||[]).indexOf(D.filter) !== -1;
+      return d.subject === D.filter;
+    });
+    if (!docs.length) { main.innerHTML = '<div class="pa-state">Aucun document pour cette sélection.</div>'; return; }
+    var html = '<div class="doc-list">';
+    docs.forEach(function(d) { html += docRow(d); });
+    html += '</div>';
+    main.innerHTML = html;
+  }
+
+  /* ── Helpers ── */
+  function breadcrumb(crumbs) {
+    var html = '<div class="breadcrumb">';
+    crumbs.forEach(function(c, i) {
+      if (i < crumbs.length - 1) {
+        html += '<button class="bc-btn" data-target="'+(c.level||'home')+'">'+esc(c.label)+'</button><span class="bc-sep">›</span>';
+      } else {
+        html += '<span class="bc-current">'+esc(c.label)+'</span>';
+      }
+    });
+    return html + '</div>';
+  }
+
+  function docRow(doc) {
+    var meta = [doc.author_display, doc.publication, doc.year].filter(Boolean).join(' · ');
+    var dl = doc.dropbox_url
+      ? '<a class="doc-dl" href="'+esc(doc.dropbox_url)+'" target="_blank" onclick="event.stopPropagation()">⬇ Télécharger</a>'
+      : '<span class="doc-dl-soon">bientôt</span>';
+    return '<div class="doc-row">' +
+      '<div class="doc-icon">📄</div>' +
+      '<div class="doc-body">' +
+        '<div class="doc-title">'+esc(doc.title)+'</div>' +
+        (meta ? '<div class="doc-meta">'+esc(meta)+'</div>' : '') +
+      '</div>' + dl + '</div>';
   }
 
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
