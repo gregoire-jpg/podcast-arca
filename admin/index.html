@@ -51,11 +51,41 @@
     .panel { display: none; padding: 28px; max-width: 1080px; margin: 0 auto; }
     .panel.on { display: block; }
 
-    /* ── Toolbar ── */
-    .toolbar { background: var(--white); border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 22px; overflow: hidden; }
-    .t-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 18px; }
-    .t-row + .t-row { border-top: 1px solid var(--border); background: #faf9f7; }
-    .t-label { font: .65em/1 Arial; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); white-space: nowrap; min-width: 80px; flex-shrink: 0; }
+    /* ── Toolbar — 3 sections distinctes ── */
+    .toolbar { border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 22px; overflow: hidden; }
+
+    .t-row {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      padding: 13px 20px;
+      border-left: 4px solid transparent;
+    }
+
+    /* Section 1 — Filtrer : fond blanc, accent navy */
+    .t-row.t-filter {
+      background: var(--white);
+      border-left-color: var(--navy);
+    }
+    /* Section 2 — Assigner : fond bleu très clair, accent gold */
+    .t-row.t-bulk {
+      background: #f0f1f8;
+      border-left-color: var(--gold);
+      border-top: 1px solid var(--border);
+    }
+    /* Section 3 — Supprimer playlist : fond rouge très clair, accent red */
+    .t-row.t-delete {
+      background: #fdf3f2;
+      border-left-color: var(--red);
+      border-top: 1px solid var(--border);
+    }
+
+    .t-label {
+      font: bold .62em/1 Arial; letter-spacing: 2px; text-transform: uppercase;
+      white-space: nowrap; min-width: 100px; flex-shrink: 0;
+    }
+    .t-filter .t-label  { color: var(--navy); }
+    .t-bulk   .t-label  { color: #8a7030; }
+    .t-delete .t-label  { color: var(--red); }
+
     .t-input  { padding: 7px 11px; border: 1px solid var(--border); border-radius: 6px; font-size: .87em; background: var(--white); }
     .t-select { padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: .87em; background: var(--white); }
     .t-check  { display: flex; align-items: center; gap: 6px; font-size: .84em; color: var(--muted); cursor: pointer; }
@@ -185,8 +215,8 @@
   <div class="panel on" id="panel-episodes">
     <div class="toolbar">
 
-      <!-- Filtrer l'affichage -->
-      <div class="t-row">
+      <!-- Section 1 : Filtrer -->
+      <div class="t-row t-filter">
         <span class="t-label">Filtrer</span>
         <input class="t-input" type="text" id="q-search" placeholder="Rechercher dans les titres…" style="flex:1;min-width:180px">
         <select class="t-select" id="q-playlist"><option value="">Toutes les playlists</option></select>
@@ -196,17 +226,21 @@
         <button class="btn btn-navy btn-save" id="btn-save">💾 Sauvegarder</button>
       </div>
 
-      <!-- Assigner en masse -->
-      <div class="t-row">
-        <span class="t-label">En masse</span>
-        <input class="t-input" type="text" id="bulk-kw" placeholder="Mot-clé…" style="max-width:150px">
+      <!-- Section 2 : Assigner en masse -->
+      <div class="t-row t-bulk">
+        <span class="t-label">Assigner</span>
+        <input class="t-input" type="text" id="bulk-kw" placeholder="Mot-clé…" style="max-width:140px">
         <select class="t-select" id="bulk-pl"><option value="">Toutes les playlists</option></select>
         <select class="t-select" id="bulk-author"><option value="">+ Auteur</option></select>
         <select class="t-select" id="bulk-subject"><option value="">+ Sujet</option></select>
-        <button class="btn btn-navy" id="btn-bulk">Appliquer</button>
-        <span class="t-spacer"></span>
-        <select class="t-select" id="del-pl-sel"><option value="">🗑 Supprimer une playlist…</option></select>
-        <button class="btn btn-danger" id="btn-del-pl">Supprimer</button>
+        <button class="btn btn-navy" id="btn-bulk">Appliquer aux résultats</button>
+      </div>
+
+      <!-- Section 3 : Supprimer une playlist -->
+      <div class="t-row t-delete">
+        <span class="t-label">Supprimer</span>
+        <select class="t-select" id="del-pl-sel" style="flex:1"><option value="">Choisir une playlist à supprimer…</option></select>
+        <button class="btn btn-danger" id="btn-del-pl">🗑 Supprimer cette playlist</button>
       </div>
 
     </div>
