@@ -1,25 +1,25 @@
 [build]
   command = "node build-rss.js"
   publish = "."
+  functions = "netlify/functions"
 
-# RSS feed
+# RSS
 [[headers]]
   for = "/rss.xml"
   [headers.values]
     Content-Type = "application/rss+xml; charset=utf-8"
 
-# episodes.json accessible depuis arca-revue.com
+# JSON accessible depuis arca-revue.com et l'admin
 [[headers]]
   for = "/episodes.json"
   [headers.values]
-    Cache-Control = "public, max-age=300"
-    Access-Control-Allow-Origin = "https://arca-revue.com"
+    Cache-Control = "public, max-age=60"
+    Access-Control-Allow-Origin = "*"
 
-# config.json accessible depuis arca-revue.com
 [[headers]]
   for = "/config.json"
   [headers.values]
-    Access-Control-Allow-Origin = "https://arca-revue.com"
+    Access-Control-Allow-Origin = "*"
 
 # embed.html : autoriser l'intégration depuis arca-revue.com
 [[headers]]

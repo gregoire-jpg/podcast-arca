@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Revue ARCA Podcasts</title>
+  <style>
+    :root {
+      --navy:   #2d3461;
+      --navy-dk:#1e2245;
+      --gold:   #c8a060;
+      --white:  #ffffff;
+      --bg:     #f4f2ef;
+      --border: #ddd8d0;
+      --muted:  #888;
+      --red:    #c0392b;
+      --green:  #27ae60;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: var(--bg); color: var(--navy); min-height: 100vh; }
+    button { cursor: pointer; font-family: inherit; }
+    input, select, textarea { font-family: inherit; }
+
+    /* ── Login ── */
+    .login-screen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; background: var(--navy-dk);
+    }
+    .login-box {
+      background: white; border-radius: 12px; padding: 48px 40px;
+      width: 360px; text-align: center;
+      box-shadow: 0 8px 40px rgba(0,0,0,.3);
+    }
+    .login-logo {
+      font: normal 1.1em/1 Georgia, serif;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 8px;
+    }
+    .login-title {
+      font: bold 1.5em/1 Arial, sans-serif;
+      color: var(--navy); margin-bottom: 32px;
+    }
+    .login-input {
+      width: 100%; padding: 12px 16px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 1em; margin-bottom: 16px;
+      outline: none; transition: border-color .2s;
+    }
+    .login-input:focus { border-color: var(--navy); }
+    .login-btn {
+      width: 100%; padding: 12px; background: var(--navy); color: white;
+      border: none; border-radius: 8px; font-size: 1em; font-weight: bold;
+      transition: background .2s;
+    }
+    .login-btn:hover { background: var(--navy-dk); }
+    .login-error {
+      margin-top: 12px; color: var(--red); font-size: .85em; display: none;
+    }
+
+    /* ── Admin shell ── */
+    .admin-shell { display: none; }
+
+    .admin-header {
+      background: var(--navy-dk); padding: 0 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+    .admin-header-left { display: flex; align-items: center; gap: 32px; }
+    .admin-brand {
+      font: normal .85em/1 Georgia, serif;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--gold); padding: 18px 0;
+    }
+    .admin-nav-btn {
+      padding: 18px 4px; background: none; border: none; border-bottom: 3px solid transparent;
+      color: rgba(255,255,255,.5); font-size: .8em; letter-spacing: 1.5px;
+      text-transform: uppercase; transition: color .2s, border-color .2s;
+    }
+    .admin-nav-btn:hover { color: white; }
+    .admin-nav-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+    .admin-logout {
+      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+      color: rgba(255,255,255,.6); padding: 7px 16px; border-radius: 6px;
+      font-size: .78em; transition: background .2s;
+    }
+    .admin-logout:hover { background: rgba(255,255,255,.15); color: white; }
+
+    /* ── Tabs ── */
+    .admin-tab { display: none; padding: 32px; max-width: 1100px; margin: 0 auto; }
+    .admin-tab.active { display: block; }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      margin-bottom: 24px; background: white; padding: 16px 20px;
+      border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+    .toolbar input[type="text"] {
+      flex: 1; min-width: 200px; padding: 8px 12px;
+      border: 1px solid var(--border); border-radius: 6px; font-size: .9em;
+    }
+    .toolbar select {
+      padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px;
+      font-size: .9em; background: white;
+    }
+    .toolbar label { display: flex; align-items: center; gap: 6px; font-size: .85em; color: var(--muted); cursor: pointer; }
+    .btn-save-all {
+      margin-left: auto; padding: 10px 24px; background: var(--navy); color: white;
+      border: none; border-radius: 8px; font-weight: bold; font-size: .9em;
+      transition: background .2s; white-space: nowrap;
+    }
+    .btn-save-all:hover { background: var(--navy-dk); }
+    .btn-save-all.saving { background: var(--muted); cursor: wait; }
+    .btn-save-all.saved  { background: var(--green); }
+    .save-status { font-size: .82em; color: var(--muted); }
+
+    /* ── Episode card ── */
+    .ep-card {
+      background: white; border-radius: 10px; margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.07);
+      overflow: hidden; transition: box-shadow .2s;
+    }
+    .ep-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,.12); }
+    .ep-card.dirty { border-left: 3px solid var(--gold); }
+    .ep-card-inner { display: flex; gap: 16px; padding: 16px 20px; align-items: flex-start; }
+
+    .ep-thumb {
+      width: 72px; height: 72px; border-radius: 6px; object-fit: cover;
+      flex-shrink: 0; background: var(--bg);
+    }
+    .ep-main { flex: 1; min-width: 0; }
+    .ep-title {
+      font: bold .95em/1.3 Arial, sans-serif; color: var(--navy);
+      margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ep-playlist { font-size: .75em; color: var(--gold); margin-bottom: 10px; }
+
+    .ep-fields { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
+    .ep-field { display: flex; flex-direction: column; gap: 6px; }
+    .ep-field label { font-size: .72em; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+
+    /* Author chips */
+    .author-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .author-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; background: var(--navy); color: white;
+      border-radius: 16px; font-size: .8em;
+    }
+    .author-chip-remove {
+      background: none; border: none; color: rgba(255,255,255,.6);
+      padding: 0; font-size: 1em; line-height: 1; transition: color .15s;
+    }
+    .author-chip-remove:hover { color: white; }
+
+    /* Add author */
+    .author-add { position: relative; }
+    .btn-add-author {
+      padding: 4px 10px; border: 1px dashed var(--navy); border-radius: 16px;
+      background: none; color: var(--navy); font-size: .8em;
+      transition: background .15s;
+    }
+    .btn-add-author:hover { background: rgba(45,52,97,.06); }
+    .author-dropdown {
+      position: absolute; top: calc(100% + 4px); left: 0; z-index: 50;
+      background: white; border: 1px solid var(--border); border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.15); min-width: 220px; display: none;
+      padding: 8px 0;
+    }
+    .author-dropdown.open { display: block; }
+    .author-dropdown input {
+      width: calc(100% - 16px); margin: 0 8px 6px; padding: 6px 10px;
+      border: 1px solid var(--border); border-radius: 6px; font-size: .85em;
+    }
+    .author-dropdown-item {
+      padding: 7px 14px; font-size: .85em; cursor: pointer;
+      transition: background .15s;
+    }
+    .author-dropdown-item:hover { background: var(--bg); }
+    .author-dropdown-add {
+      padding: 7px 14px; font-size: .85em; color: var(--gold); cursor: pointer;
+      border-top: 1px solid var(--border); font-style: italic;
+    }
+    .author-dropdown-add:hover { background: var(--bg); }
+
+    /* Subject select */
+    .subject-select {
+      padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px;
+      font-size: .85em; background: white; color: var(--navy); min-width: 160px;
+    }
+
+    /* ── Config tab ── */
+    .config-section {
+      background: white; border-radius: 10px; padding: 24px;
+      margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.07);
+    }
+    .config-section h2 {
+      font-size: .8em; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 16px;
+    }
+    .config-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .config-item {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border: 1px solid var(--border); border-radius: 20px;
+      font-size: .87em; background: var(--bg);
+    }
+    .config-item-key { color: var(--muted); font-size: .78em; margin-left: 4px; }
+    .config-item-remove {
+      background: none; border: none; color: var(--muted); font-size: 1.1em;
+      padding: 0; transition: color .15s;
+    }
+    .config-item-remove:hover { color: var(--red); }
+    .config-add-row { display: flex; gap: 10px; align-items: center; }
+    .config-add-row input {
+      padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px;
+      font-size: .88em; width: 180px;
+    }
+    .config-add-row input::placeholder { color: var(--muted); }
+    .btn-config-add {
+      padding: 8px 16px; background: var(--navy); color: white;
+      border: none; border-radius: 6px; font-size: .85em; font-weight: bold;
+    }
+    .btn-config-save {
+      margin-top: 20px; padding: 10px 24px; background: var(--gold); color: var(--navy-dk);
+      border: none; border-radius: 8px; font-weight: bold; font-size: .9em;
+    }
+
+    /* ── Empty / loading ── */
+    .admin-state {
+      text-align: center; padding: 60px 20px;
+      color: var(--muted); font-style: italic;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 1000;
+      padding: 14px 22px; border-radius: 8px; color: white;
+      font-weight: bold; font-size: .9em;
+      box-shadow: 0 4px 16px rgba(0,0,0,.2);
+      transform: translateY(80px); opacity: 0;
+      transition: transform .3s, opacity .3s;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: var(--green); }
+    .toast.error   { background: var(--red); }
+
+    @media (max-width: 700px) {
+      .admin-tab { padding: 16px; }
+      .ep-card-inner { flex-direction: column; }
+      .ep-thumb { width: 100%; height: 160px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Login ── -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Revue ARCA</div>
+    <div class="login-title">Administration Podcasts</div>
+    <input class="login-input" type="password" id="login-pwd" placeholder="Mot de passe" autocomplete="current-password">
+    <button class="login-btn" id="login-btn">Se connecter</button>
+    <div class="login-error" id="login-error">Mot de passe incorrect.</div>
+  </div>
+</div>
+
+<!-- ── Admin shell ── -->
+<div class="admin-shell" id="admin-shell">
+
+  <div class="admin-header">
+    <div class="admin-header-left">
+      <div class="admin-brand">ARCA · Admin</div>
+      <button class="admin-nav-btn active" data-tab="episodes">Épisodes</button>
+      <button class="admin-nav-btn" data-tab="config">Configuration</button>
+    </div>
+    <button class="admin-logout" id="btn-logout">Déconnexion</button>
+  </div>
+
+  <!-- Épisodes -->
+  <div class="admin-tab active" id="tab-episodes">
+    <div class="toolbar">
+      <input type="text" id="filter-search" placeholder="Rechercher un épisode…">
+      <select id="filter-playlist">
+        <option value="">Toutes les playlists</option>
+      </select>
+      <label>
+        <input type="checkbox" id="filter-nometa">
+        Sans métadonnées seulement
+      </label>
+      <span class="save-status" id="save-status"></span>
+      <button class="btn-save-all" id="btn-save-all">💾 Sauvegarder</button>
+    </div>
+    <div id="episodes-list"><div class="admin-state">Chargement…</div></div>
+  </div>
+
+  <!-- Configuration -->
+  <div class="admin-tab" id="tab-config">
+    <div class="config-section">
+      <h2>Auteurs</h2>
+      <div class="config-list" id="cfg-authors-list"></div>
+      <div class="config-add-row">
+        <input type="text" id="cfg-new-author-name" placeholder="Nom affiché  (ex: Marie Dupont)">
+        <input type="text" id="cfg-new-author-key"  placeholder="Clé  (ex: marie-dupont)">
+        <button class="btn-config-add" id="cfg-add-author">Ajouter</button>
+      </div>
+    </div>
+    <div class="config-section">
+      <h2>Sujets</h2>
+      <div class="config-list" id="cfg-subjects-list"></div>
+      <div class="config-add-row">
+        <input type="text" id="cfg-new-subject-name" placeholder="Nom affiché  (ex: Alchimie)">
+        <input type="text" id="cfg-new-subject-key"  placeholder="Clé  (ex: alchimie)">
+        <button class="btn-config-add" id="cfg-add-subject">Ajouter</button>
+      </div>
+    </div>
+    <button class="btn-config-save" id="btn-save-config">💾 Sauvegarder la configuration</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  var BASE   = "https://podcast-arca.netlify.app";
+  var FUNC   = "/.netlify/functions/save-file";
+
+  var state  = { episodes: [], config: {}, pwd: "", dirty: new Set() };
+
+  /* ── Toast ── */
+  function toast(msg, type) {
+    var t = document.getElementById("toast");
+    t.textContent = msg;
+    t.className = "toast " + (type || "success") + " show";
+    setTimeout(function () { t.classList.remove("show"); }, 3500);
+  }
+
+  /* ── Login ── */
+  function tryLogin() {
+    var pwd = document.getElementById("login-pwd").value.trim();
+    if (!pwd) return;
+    state.pwd = pwd;
+    sessionStorage.setItem("arca_admin_pwd", pwd);
+    loadData();
+  }
+
+  document.getElementById("login-btn").addEventListener("click", tryLogin);
+  document.getElementById("login-pwd").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") tryLogin();
+  });
+
+  document.getElementById("btn-logout").addEventListener("click", function () {
+    sessionStorage.removeItem("arca_admin_pwd");
+    location.reload();
+  });
+
+  /* ── Nav tabs ── */
+  document.querySelectorAll(".admin-nav-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".admin-nav-btn").forEach(function (b) { b.classList.remove("active"); });
+      document.querySelectorAll(".admin-tab").forEach(function (t) { t.classList.remove("active"); });
+      this.classList.add("active");
+      document.getElementById("tab-" + this.dataset.tab).classList.add("active");
+    });
+  });
+
+  /* ── Load data ── */
+  function loadData() {
+    Promise.all([
+      fetch(BASE + "/episodes.json?" + Date.now()).then(function (r) { return r.json(); }),
+      fetch(BASE + "/config.json?"   + Date.now()).then(function (r) { return r.json(); })
+    ]).then(function (res) {
+      state.episodes = res[0];
+      state.config   = res[1];
+      showAdmin();
+      renderEpisodes();
+      renderConfig();
+    }).catch(function (err) {
+      document.getElementById("login-error").style.display = "block";
+      document.getElementById("login-error").textContent = "Erreur de chargement : " + err.message;
+    });
+  }
+
+  function showAdmin() {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("admin-shell").style.display  = "block";
+    // Playlist filter options
+    var sel = document.getElementById("filter-playlist");
+    var seen = {};
+    state.episodes.forEach(function (ep) {
+      if (ep.playlist_slug && !seen[ep.playlist_slug]) {
+        seen[ep.playlist_slug] = true;
+        var opt = document.createElement("option");
+        opt.value = ep.playlist_slug;
+        opt.textContent = ep.playlist_title;
+        sel.appendChild(opt);
+      }
+    });
+  }
+
+  /* ── Render episodes ── */
+  var searchVal = "", playlistVal = "", noMetaOnly = false;
+
+  document.getElementById("filter-search").addEventListener("input", function () {
+    searchVal = this.value.toLowerCase(); renderEpisodes();
+  });
+  document.getElementById("filter-playlist").addEventListener("change", function () {
+    playlistVal = this.value; renderEpisodes();
+  });
+  document.getElementById("filter-nometa").addEventListener("change", function () {
+    noMetaOnly = this.checked; renderEpisodes();
+  });
+
+  function renderEpisodes() {
+    var eps = state.episodes.filter(function (ep) {
+      if (searchVal   && ep.title.toLowerCase().indexOf(searchVal) === -1) return false;
+      if (playlistVal && ep.playlist_slug !== playlistVal)                  return false;
+      if (noMetaOnly  && ep.authors && ep.authors.length > 0 && ep.subject) return false;
+      return true;
+    });
+
+    var container = document.getElementById("episodes-list");
+    if (!eps.length) {
+      container.innerHTML = '<div class="admin-state">Aucun épisode trouvé.</div>';
+      return;
+    }
+
+    container.innerHTML = "";
+    eps.forEach(function (ep) {
+      container.appendChild(buildEpCard(ep));
+    });
+
+    updateSaveStatus();
+  }
+
+  function buildEpCard(ep) {
+    var idx = state.episodes.indexOf(ep);
+    var div = document.createElement("div");
+    div.className = "ep-card" + (state.dirty.has(idx) ? " dirty" : "");
+    div.dataset.idx = idx;
+
+    var authors = ep.authors || [];
+    var subject = ep.subject || "";
+    var date    = ep.published_at ? ep.published_at.substring(0, 10) : "";
+
+    div.innerHTML =
+      '<div class="ep-card-inner">' +
+        (ep.image_url ? '<img class="ep-thumb" src="' + esc(ep.image_url) + '" alt="" loading="lazy">' : '<div class="ep-thumb"></div>') +
+        '<div class="ep-main">' +
+          '<div class="ep-title" title="' + esc(ep.title) + '">' + esc(ep.title) + '</div>' +
+          '<div class="ep-playlist">' + esc(ep.playlist_title || "") + (date ? " · " + date : "") + '</div>' +
+          '<div class="ep-fields">' +
+            '<div class="ep-field">' +
+              '<label>Auteurs</label>' +
+              '<div class="author-chips" data-idx="' + idx + '">' +
+                buildAuthorChips(authors, idx) +
+                '<div class="author-add">' +
+                  '<button class="btn-add-author" data-idx="' + idx + '">+ Ajouter</button>' +
+                  '<div class="author-dropdown" id="dropdown-' + idx + '">' +
+                    '<input type="text" placeholder="Filtrer…" class="author-search">' +
+                    buildAuthorDropdownItems(authors) +
+                  '</div>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="ep-field">' +
+              '<label>Sujet</label>' +
+              buildSubjectSelect(subject, idx) +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    // Events
+    // Author remove
+    div.querySelectorAll(".author-chip-remove").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var aKey = this.dataset.key;
+        var ep2  = state.episodes[idx];
+        ep2.authors = (ep2.authors || []).filter(function (a) { return a !== aKey; });
+        markDirty(idx);
+        refreshCard(idx);
+      });
+    });
+
+    // Add author button → toggle dropdown
+    var addBtn = div.querySelector(".btn-add-author");
+    var dd     = div.querySelector(".author-dropdown");
+    addBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      dd.classList.toggle("open");
+    });
+
+    // Author search filter
+    var searchInput = div.querySelector(".author-search");
+    searchInput.addEventListener("input", function () {
+      var q = this.value.toLowerCase();
+      dd.querySelectorAll(".author-dropdown-item").forEach(function (item) {
+        item.style.display = item.dataset.key.indexOf(q) !== -1 || item.textContent.toLowerCase().indexOf(q) !== -1 ? "" : "none";
+      });
+    });
+
+    // Author dropdown select
+    dd.querySelectorAll(".author-dropdown-item").forEach(function (item) {
+      item.addEventListener("click", function () {
+        var key = this.dataset.key;
+        var ep2 = state.episodes[idx];
+        if (!(ep2.authors || []).includes(key)) {
+          ep2.authors = (ep2.authors || []).concat(key);
+          markDirty(idx);
+        }
+        dd.classList.remove("open");
+        refreshCard(idx);
+      });
+    });
+
+    // Add custom author
+    var addCustom = div.querySelector(".author-dropdown-add");
+    if (addCustom) {
+      addCustom.addEventListener("click", function () {
+        var val = searchInput.value.trim();
+        if (!val) return;
+        var key = slugify(val);
+        // Add to config if not exists
+        if (!state.config.authors) state.config.authors = {};
+        if (!state.config.authors[key]) state.config.authors[key] = val;
+        // Add to episode
+        var ep2 = state.episodes[idx];
+        if (!(ep2.authors || []).includes(key)) {
+          ep2.authors = (ep2.authors || []).concat(key);
+          markDirty(idx);
+        }
+        dd.classList.remove("open");
+        refreshCard(idx);
+        renderConfig();
+      });
+    }
+
+    // Subject change
+    var subjectSel = div.querySelector(".subject-select");
+    if (subjectSel) {
+      subjectSel.addEventListener("change", function () {
+        state.episodes[idx].subject = this.value;
+        markDirty(idx);
+        div.classList.add("dirty");
+        updateSaveStatus();
+      });
+    }
+
+    return div;
+  }
+
+  function buildAuthorChips(authors, idx) {
+    return authors.map(function (key) {
+      var name = (state.config.authors || {})[key] || key;
+      return '<span class="author-chip">' + esc(name) +
+        '<button class="author-chip-remove" data-key="' + esc(key) + '" title="Retirer">×</button>' +
+        '</span>';
+    }).join("");
+  }
+
+  function buildAuthorDropdownItems(currentAuthors) {
+    var items = Object.keys(state.config.authors || {}).map(function (key) {
+      var disabled = currentAuthors.includes(key) ? ' style="opacity:.4;pointer-events:none"' : "";
+      return '<div class="author-dropdown-item" data-key="' + key + '"' + disabled + '>' +
+        state.config.authors[key] + '</div>';
+    }).join("");
+    return items + '<div class="author-dropdown-add">+ Ajouter un nouvel auteur…</div>';
+  }
+
+  function buildSubjectSelect(current, idx) {
+    var opts = '<option value="">— Aucun sujet —</option>';
+    Object.keys(state.config.subjects || {}).forEach(function (key) {
+      opts += '<option value="' + key + '"' + (current === key ? " selected" : "") + '>' +
+        state.config.subjects[key] + '</option>';
+    });
+    return '<select class="subject-select" data-idx="' + idx + '">' + opts + '</select>';
+  }
+
+  function refreshCard(idx) {
+    var existing = document.querySelector(".ep-card[data-idx='" + idx + "']");
+    if (!existing) return;
+    var fresh = buildEpCard(state.episodes[idx]);
+    existing.replaceWith(fresh);
+    updateSaveStatus();
+  }
+
+  function markDirty(idx) {
+    state.dirty.add(idx);
+    var card = document.querySelector(".ep-card[data-idx='" + idx + "']");
+    if (card) card.classList.add("dirty");
+  }
+
+  function updateSaveStatus() {
+    var s = document.getElementById("save-status");
+    s.textContent = state.dirty.size > 0 ? state.dirty.size + " modification(s) non sauvegardée(s)" : "";
+  }
+
+  /* ── Save episodes ── */
+  document.getElementById("btn-save-all").addEventListener("click", function () {
+    var btn = this;
+    btn.textContent = "Sauvegarde…";
+    btn.classList.add("saving");
+
+    fetch(FUNC, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: state.pwd, filename: "episodes.json", data: state.episodes })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (res) {
+      if (res.success) {
+        state.dirty.clear();
+        document.querySelectorAll(".ep-card.dirty").forEach(function (c) { c.classList.remove("dirty"); });
+        btn.textContent = "✓ Sauvegardé";
+        btn.classList.remove("saving"); btn.classList.add("saved");
+        updateSaveStatus();
+        toast("Épisodes sauvegardés ! Netlify redéploie dans ~30s.");
+        setTimeout(function () { btn.textContent = "💾 Sauvegarder"; btn.classList.remove("saved"); }, 3000);
+      } else {
+        toast(res.error || "Erreur inconnue", "error");
+        btn.textContent = "💾 Sauvegarder"; btn.classList.remove("saving");
+      }
+    })
+    .catch(function (err) {
+      toast("Erreur réseau : " + err.message, "error");
+      btn.textContent = "💾 Sauvegarder"; btn.classList.remove("saving");
+    });
+  });
+
+  /* ── Config tab ── */
+  function renderConfig() {
+    renderConfigList("cfg-authors-list",  state.config.authors  || {}, "author");
+    renderConfigList("cfg-subjects-list", state.config.subjects || {}, "subject");
+  }
+
+  function renderConfigList(containerId, map, type) {
+    var container = document.getElementById(containerId);
+    container.innerHTML = "";
+    Object.keys(map).forEach(function (key) {
+      var div = document.createElement("div");
+      div.className = "config-item";
+      div.innerHTML = esc(map[key]) + '<span class="config-item-key">(' + esc(key) + ')</span>' +
+        '<button class="config-item-remove" data-key="' + key + '" data-type="' + type + '">×</button>';
+      div.querySelector(".config-item-remove").addEventListener("click", function () {
+        if (type === "author")  delete state.config.authors[key];
+        if (type === "subject") delete state.config.subjects[key];
+        renderConfig();
+      });
+      container.appendChild(div);
+    });
+  }
+
+  document.getElementById("cfg-add-author").addEventListener("click", function () {
+    var name = document.getElementById("cfg-new-author-name").value.trim();
+    var key  = document.getElementById("cfg-new-author-key").value.trim() || slugify(name);
+    if (!name || !key) { toast("Remplis le nom et la clé", "error"); return; }
+    if (!state.config.authors) state.config.authors = {};
+    state.config.authors[key] = name;
+    document.getElementById("cfg-new-author-name").value = "";
+    document.getElementById("cfg-new-author-key").value  = "";
+    renderConfig();
+  });
+
+  document.getElementById("cfg-add-subject").addEventListener("click", function () {
+    var name = document.getElementById("cfg-new-subject-name").value.trim();
+    var key  = document.getElementById("cfg-new-subject-key").value.trim() || slugify(name);
+    if (!name || !key) { toast("Remplis le nom et la clé", "error"); return; }
+    if (!state.config.subjects) state.config.subjects = {};
+    state.config.subjects[key] = name;
+    document.getElementById("cfg-new-subject-name").value = "";
+    document.getElementById("cfg-new-subject-key").value  = "";
+    renderConfig();
+  });
+
+  document.getElementById("btn-save-config").addEventListener("click", function () {
+    var btn = this;
+    btn.textContent = "Sauvegarde…";
+    fetch(FUNC, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: state.pwd, filename: "config.json", data: state.config })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (res) {
+      if (res.success) {
+        toast("Configuration sauvegardée !");
+        btn.textContent = "💾 Sauvegarder la configuration";
+      } else {
+        toast(res.error || "Erreur", "error");
+        btn.textContent = "💾 Sauvegarder la configuration";
+      }
+    });
+  });
+
+  /* ── Close dropdowns on click outside ── */
+  document.addEventListener("click", function () {
+    document.querySelectorAll(".author-dropdown.open").forEach(function (d) { d.classList.remove("open"); });
+  });
+
+  /* ── Utils ── */
+  function esc(s) {
+    return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+  function slugify(t) {
+    t = t.toLowerCase();
+    [["àâä","a"],["éèêë","e"],["îï","i"],["ôö","o"],["ùûü","u"],["ç","c"]].forEach(function(p){
+      p[0].split("").forEach(function(c){ t = t.split(c).join(p[1]); });
+    });
+    return t.replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+  }
+
+  /* ── Auto-login from session ── */
+  var saved = sessionStorage.getItem("arca_admin_pwd");
+  if (saved) {
+    state.pwd = saved;
+    loadData();
+  }
+
+})();
+</script>
+</body>
+</html>
