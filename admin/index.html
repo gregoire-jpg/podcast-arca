@@ -5,932 +5,701 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin — Revue ARCA Podcasts</title>
   <style>
+    /* ── Variables ── */
     :root {
-      --navy:   #2d3461;
-      --navy-dk:#1e2245;
-      --gold:   #c8a060;
-      --white:  #ffffff;
-      --bg:     #f4f2ef;
-      --border: #ddd8d0;
-      --muted:  #888;
-      --red:    #c0392b;
-      --green:  #27ae60;
+      --navy: #2d3461; --navy-dk: #1e2245;
+      --gold: #c8a060;
+      --white: #ffffff; --bg: #f4f2ef;
+      --border: #ddd8d0; --muted: #888;
+      --red: #c0392b; --green: #27ae60;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; background: var(--bg); color: var(--navy); min-height: 100vh; }
-    button { cursor: pointer; font-family: inherit; }
-    input, select, textarea { font-family: inherit; }
+    button, input, select { font-family: inherit; }
+    button { cursor: pointer; }
 
     /* ── Login ── */
-    .login-screen {
-      display: flex; align-items: center; justify-content: center;
-      min-height: 100vh; background: var(--navy-dk);
-    }
-    .login-box {
-      background: white; border-radius: 12px; padding: 48px 40px;
-      width: 360px; text-align: center;
-      box-shadow: 0 8px 40px rgba(0,0,0,.3);
-    }
-    .login-logo {
-      font: normal 1.1em/1 Georgia, serif;
-      letter-spacing: 4px; text-transform: uppercase;
-      color: var(--gold); margin-bottom: 8px;
-    }
-    .login-title {
-      font: bold 1.5em/1 Arial, sans-serif;
-      color: var(--navy); margin-bottom: 32px;
-    }
-    .login-input {
-      width: 100%; padding: 12px 16px; border: 1px solid var(--border);
-      border-radius: 8px; font-size: 1em; margin-bottom: 16px;
-      outline: none; transition: border-color .2s;
-    }
+    .login-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--navy-dk); }
+    .login-box  { background: var(--white); border-radius: 14px; padding: 48px 40px; width: 360px; text-align: center; box-shadow: 0 8px 40px rgba(0,0,0,.3); }
+    .login-logo  { font: .65em/1 Arial; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+    .login-title { font: bold 1.5em/1 Arial; color: var(--navy); margin-bottom: 32px; }
+    .login-input { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 1em; margin-bottom: 14px; outline: none; }
     .login-input:focus { border-color: var(--navy); }
-    .login-btn {
-      width: 100%; padding: 12px; background: var(--navy); color: white;
-      border: none; border-radius: 8px; font-size: 1em; font-weight: bold;
-      transition: background .2s;
-    }
+    .login-btn { width: 100%; padding: 12px; background: var(--navy); color: var(--white); border: none; border-radius: 8px; font-size: 1em; font-weight: bold; transition: background .2s; }
     .login-btn:hover { background: var(--navy-dk); }
-    .login-error {
-      margin-top: 12px; color: var(--red); font-size: .85em; display: none;
-    }
+    .login-err { margin-top: 12px; color: var(--red); font-size: .85em; display: none; }
 
     /* ── Admin shell ── */
-    .admin-shell { display: none; }
+    .admin { display: none; }
 
+    /* Header */
     .admin-header {
-      background: var(--navy-dk); padding: 0 32px;
+      background: var(--navy-dk); padding: 0 28px;
       display: flex; align-items: center; justify-content: space-between;
       position: sticky; top: 0; z-index: 100;
       box-shadow: 0 2px 10px rgba(0,0,0,.3);
     }
-    .admin-header-left { display: flex; align-items: center; gap: 32px; }
-    .admin-brand {
-      font: normal .85em/1 Georgia, serif;
-      letter-spacing: 3px; text-transform: uppercase;
-      color: var(--gold); padding: 18px 0;
-    }
-    .admin-nav-btn {
-      padding: 18px 4px; background: none; border: none; border-bottom: 3px solid transparent;
-      color: rgba(255,255,255,.5); font-size: .8em; letter-spacing: 1.5px;
-      text-transform: uppercase; transition: color .2s, border-color .2s;
-    }
-    .admin-nav-btn:hover { color: white; }
-    .admin-nav-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
-    .admin-logout {
-      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
-      color: rgba(255,255,255,.6); padding: 7px 16px; border-radius: 6px;
-      font-size: .78em; transition: background .2s;
-    }
-    .admin-logout:hover { background: rgba(255,255,255,.15); color: white; }
+    .admin-brand { font: .8em/1 Georgia, serif; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); padding: 18px 0; margin-right: 20px; }
+    .admin-nav   { display: flex; }
+    .nav-btn { padding: 18px 16px; background: none; border: none; border-bottom: 3px solid transparent; color: rgba(255,255,255,.5); font-size: .78em; letter-spacing: 1.5px; text-transform: uppercase; transition: color .2s, border-color .2s; }
+    .nav-btn:hover { color: var(--white); }
+    .nav-btn.on { color: var(--gold); border-bottom-color: var(--gold); }
+    .btn-logout { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); color: rgba(255,255,255,.6); padding: 7px 16px; border-radius: 6px; font-size: .78em; transition: background .2s; }
+    .btn-logout:hover { background: rgba(255,255,255,.15); color: var(--white); }
 
-    /* ── Tabs ── */
-    .admin-tab { display: none; padding: 32px; max-width: 1100px; margin: 0 auto; }
-    .admin-tab.active { display: block; }
+    /* Panels */
+    .panel { display: none; padding: 28px; max-width: 1080px; margin: 0 auto; }
+    .panel.on { display: block; }
 
     /* ── Toolbar ── */
-    .toolbar {
-      margin-bottom: 24px; background: white;
-      border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.08);
-      overflow: hidden;
-    }
-    .toolbar-row {
-      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-      padding: 14px 20px;
-    }
-    .toolbar-row + .toolbar-row {
-      border-top: 1px solid var(--border);
-      background: #faf9f7;
-    }
-    .toolbar-section-label {
-      font: .68em/1 Arial, sans-serif; letter-spacing: 2px; text-transform: uppercase;
-      color: var(--muted); white-space: nowrap; flex-shrink: 0;
-    }
-    .toolbar-row input[type="text"] {
-      flex: 1; min-width: 150px; padding: 7px 11px;
-      border: 1px solid var(--border); border-radius: 6px; font-size: .88em;
-    }
-    .toolbar-row select {
-      padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px;
-      font-size: .88em; background: white;
-    }
-    .toolbar-row label { display: flex; align-items: center; gap: 6px; font-size: .85em; color: var(--muted); cursor: pointer; }
-    .btn-save-all {
-      margin-left: auto; padding: 10px 24px; background: var(--navy); color: white;
-      border: none; border-radius: 8px; font-weight: bold; font-size: .9em;
-      transition: background .2s; white-space: nowrap;
-    }
-    .btn-save-all:hover { background: var(--navy-dk); }
-    .btn-save-all.saving { background: var(--muted); cursor: wait; }
-    .btn-save-all.saved  { background: var(--green); }
-    .save-status { font-size: .82em; color: var(--muted); }
+    .toolbar { background: var(--white); border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 22px; overflow: hidden; }
+    .t-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 18px; }
+    .t-row + .t-row { border-top: 1px solid var(--border); background: #faf9f7; }
+    .t-label { font: .65em/1 Arial; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); white-space: nowrap; min-width: 80px; flex-shrink: 0; }
+    .t-input  { padding: 7px 11px; border: 1px solid var(--border); border-radius: 6px; font-size: .87em; background: var(--white); }
+    .t-select { padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: .87em; background: var(--white); }
+    .t-check  { display: flex; align-items: center; gap: 6px; font-size: .84em; color: var(--muted); cursor: pointer; }
+    .t-spacer { flex: 1; }
 
-    /* ── Episode card ── */
-    .ep-card {
-      background: white; border-radius: 10px; margin-bottom: 12px;
-      box-shadow: 0 1px 4px rgba(0,0,0,.07);
-      transition: box-shadow .2s;
-    }
+    /* ── Buttons ── */
+    .btn { padding: 8px 16px; border-radius: 6px; font-size: .85em; font-weight: bold; border: none; white-space: nowrap; transition: background .2s, opacity .2s; }
+    .btn-navy   { background: var(--navy); color: var(--white); }
+    .btn-navy:hover { background: var(--navy-dk); }
+    .btn-danger { background: none; border: 1px solid var(--red); color: var(--red); }
+    .btn-danger:hover { background: var(--red); color: var(--white); }
+    .btn-gold   { background: var(--gold); color: var(--navy-dk); }
+    .btn-save { padding: 10px 22px; font-size: .9em; }
+    .btn-save.saving { background: var(--muted) !important; cursor: wait; }
+    .btn-save.saved  { background: var(--green) !important; }
+    .save-status { font-size: .8em; color: var(--muted); }
+
+    /* ── Episode cards ── */
+    .ep-card { background: var(--white); border-radius: 10px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.07); transition: box-shadow .2s; }
     .ep-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,.12); }
     .ep-card.dirty { border-left: 3px solid var(--gold); }
-    .ep-card-inner { display: flex; gap: 16px; padding: 16px 20px; align-items: flex-start; }
+    .ep-inner { display: flex; gap: 14px; padding: 14px 18px; align-items: flex-start; }
+    .ep-thumb { width: 68px; height: 68px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: var(--bg); }
+    .ep-body  { flex: 1; min-width: 0; }
+    .ep-head  { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
+    .ep-title { font: bold .92em/1.3 Arial; color: var(--navy); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ep-sub   { font: .72em/1 Arial; color: var(--gold); margin-bottom: 10px; }
+    .ep-fields{ display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
+    .ep-field { display: flex; flex-direction: column; gap: 5px; }
+    .ep-field label { font: .65em/1 Arial; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
 
-    .ep-thumb {
-      width: 72px; height: 72px; border-radius: 6px; object-fit: cover;
-      flex-shrink: 0; background: var(--bg);
-    }
-    .ep-main { flex: 1; min-width: 0; }
-    .ep-title {
-      font: bold .95em/1.3 Arial, sans-serif; color: var(--navy);
-      margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .ep-playlist { font-size: .75em; color: var(--gold); margin-bottom: 10px; }
-
-    .ep-fields { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
-    .ep-field { display: flex; flex-direction: column; gap: 6px; }
-    .ep-field label { font-size: .72em; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
-
-    /* Author chips */
-    .author-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-    .author-chip {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 4px 10px; background: var(--navy); color: white;
-      border-radius: 16px; font-size: .8em;
-    }
-    .author-chip-remove {
-      background: none; border: none; color: rgba(255,255,255,.6);
-      padding: 0; font-size: 1em; line-height: 1; transition: color .15s;
-    }
-    .author-chip-remove:hover { color: white; }
-
-    /* Add author */
-    .author-add { position: relative; }
-    .btn-add-author {
-      padding: 4px 10px; border: 1px dashed var(--navy); border-radius: 16px;
-      background: none; color: var(--navy); font-size: .8em;
-      transition: background .15s;
-    }
-    .btn-add-author:hover { background: rgba(45,52,97,.06); }
-    .author-dropdown {
-      position: fixed; z-index: 9999;
-      background: white; border: 1px solid var(--border); border-radius: 8px;
-      box-shadow: 0 4px 20px rgba(0,0,0,.18); min-width: 240px; display: none;
-      padding: 8px 0; max-height: 300px; overflow-y: auto;
-    }
-    .author-dropdown.open { display: block; }
-    .author-dropdown input {
-      width: calc(100% - 16px); margin: 0 8px 6px; padding: 6px 10px;
-      border: 1px solid var(--border); border-radius: 6px; font-size: .85em;
-    }
-    .author-dropdown-item {
-      padding: 7px 14px; font-size: .85em; cursor: pointer;
-      transition: background .15s;
-    }
-    .author-dropdown-item:hover { background: var(--bg); }
-    .author-dropdown-add {
-      padding: 7px 14px; font-size: .85em; color: var(--gold); cursor: pointer;
-      border-top: 1px solid var(--border); font-style: italic;
-    }
-    .author-dropdown-add:hover { background: var(--bg); }
+    /* Chips */
+    .chips { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+    .chip  { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: var(--navy); color: var(--white); border-radius: 14px; font-size: .78em; }
+    .chip-x { background: none; border: none; color: rgba(255,255,255,.55); font-size: 1.1em; padding: 0; line-height: 1; transition: color .15s; }
+    .chip-x:hover { color: var(--white); }
+    .btn-add-chip { padding: 4px 10px; border: 1px dashed var(--navy); border-radius: 14px; background: none; color: var(--navy); font-size: .78em; transition: background .15s; }
+    .btn-add-chip:hover { background: rgba(45,52,97,.06); }
 
     /* Subject select */
-    .subject-select {
-      padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px;
-      font-size: .85em; background: white; color: var(--navy); min-width: 160px;
-    }
+    .subject-sel { padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: .84em; background: var(--white); min-width: 160px; }
 
-    /* ── Config tab ── */
-    .config-section {
-      background: white; border-radius: 10px; padding: 24px;
-      margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.07);
-    }
-    .config-section h2 {
-      font-size: .8em; letter-spacing: 2px; text-transform: uppercase;
-      color: var(--gold); margin-bottom: 16px;
-    }
-    .config-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-    .config-item {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 6px 14px; border: 1px solid var(--border); border-radius: 20px;
-      font-size: .87em; background: var(--bg);
-    }
-    .config-item-key { color: var(--muted); font-size: .78em; margin-left: 4px; }
-    .config-item-remove {
-      background: none; border: none; color: var(--muted); font-size: 1.1em;
-      padding: 0; transition: color .15s;
-    }
-    .config-item-remove:hover { color: var(--red); }
-    .config-add-row { display: flex; gap: 10px; align-items: center; }
-    .config-add-row input {
-      padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px;
-      font-size: .88em; width: 180px;
-    }
-    .config-add-row input::placeholder { color: var(--muted); }
-    .btn-config-add {
-      padding: 8px 16px; background: var(--navy); color: white;
-      border: none; border-radius: 6px; font-size: .85em; font-weight: bold;
-    }
-    .btn-config-save {
-      margin-top: 20px; padding: 10px 24px; background: var(--gold); color: var(--navy-dk);
-      border: none; border-radius: 8px; font-weight: bold; font-size: .9em;
-    }
+    /* Delete episode */
+    .btn-del-ep { background: none; border: none; color: #ccc; font-size: 1em; padding: 4px 6px; border-radius: 4px; flex-shrink: 0; transition: color .15s, background .15s; }
+    .btn-del-ep:hover { color: var(--red); background: rgba(192,57,43,.08); }
 
-    /* ── Delete buttons ── */
-    .btn-delete-ep {
-      background: none; border: none; color: #ccc;
-      font-size: 1.1em; padding: 6px 8px; flex-shrink: 0; margin-left: 8px;
-      border-radius: 6px; transition: background .15s, color .15s; cursor: pointer;
-    }
-    .btn-delete-ep:hover { color: var(--red); background: rgba(192,57,43,.08); }
+    /* Empty */
+    .empty { text-align: center; padding: 60px 20px; font: italic 1em/1.6 Georgia; color: var(--muted); }
 
-    .toolbar-sep { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
+    /* ── Config ── */
+    .cfg-block { background: var(--white); border-radius: 10px; padding: 22px; margin-bottom: 18px; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
+    .cfg-block h2 { font: .75em/1 Arial; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+    .cfg-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .cfg-tag  { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border: 1px solid var(--border); border-radius: 20px; font-size: .85em; background: var(--bg); }
+    .cfg-tag-key { color: var(--muted); font-size: .75em; }
+    .cfg-tag-x { background: none; border: none; color: var(--muted); font-size: 1.1em; padding: 0; transition: color .15s; }
+    .cfg-tag-x:hover { color: var(--red); }
+    .cfg-add { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+    .cfg-add input { padding: 7px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: .86em; width: 200px; }
 
-    .btn-delete-pl {
-      padding: 9px 14px; background: none; border: 1px solid var(--red);
-      color: var(--red); border-radius: 6px; font-size: .82em; white-space: nowrap;
-      transition: background .15s, color .15s;
+    /* ── Author dropdown (body-level) ── */
+    .author-dd {
+      position: fixed; z-index: 9999;
+      background: var(--white); border: 1px solid var(--border); border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.18);
+      min-width: 230px; max-height: 280px; overflow-y: auto;
+      display: none; padding: 8px 0;
     }
-    .btn-delete-pl:hover { background: var(--red); color: white; }
+    .author-dd.on { display: block; }
+    .dd-search { width: calc(100% - 16px); margin: 0 8px 6px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: .84em; }
+    .dd-item   { padding: 7px 14px; font-size: .84em; cursor: pointer; transition: background .15s; }
+    .dd-item:hover { background: var(--bg); }
+    .dd-item.used  { opacity: .35; pointer-events: none; }
+    .dd-custom { padding: 7px 14px; font-size: .84em; color: var(--gold); cursor: pointer; font-style: italic; border-top: 1px solid var(--border); }
+    .dd-custom:hover { background: var(--bg); }
 
-    /* Confirm overlay */
-    .confirm-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 2000;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .confirm-box {
-      background: white; border-radius: 12px; padding: 32px 28px;
-      max-width: 380px; width: 90%; text-align: center;
-      box-shadow: 0 8px 40px rgba(0,0,0,.25);
-    }
+    /* ── Confirm ── */
+    .confirm-mask { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+    .confirm-box  { background: var(--white); border-radius: 12px; padding: 32px 28px; max-width: 380px; width: 90%; text-align: center; box-shadow: 0 8px 40px rgba(0,0,0,.25); }
     .confirm-box h3 { font-size: 1.1em; color: var(--navy); margin-bottom: 10px; }
-    .confirm-box p  { font-size: .88em; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
-    .confirm-btns   { display: flex; gap: 10px; justify-content: center; }
+    .confirm-box p  { font-size: .87em; color: var(--muted); margin-bottom: 24px; line-height: 1.55; }
+    .confirm-btns { display: flex; gap: 10px; justify-content: center; }
     .confirm-cancel { padding: 10px 22px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; font-size: .9em; }
-    .confirm-ok     { padding: 10px 22px; background: var(--red); color: white; border: none; border-radius: 8px; font-size: .9em; font-weight: bold; }
-
-    /* ── Empty / loading ── */
-    .admin-state {
-      text-align: center; padding: 60px 20px;
-      color: var(--muted); font-style: italic;
-    }
+    .confirm-ok { padding: 10px 22px; color: var(--white); border: none; border-radius: 8px; font-size: .9em; font-weight: bold; }
 
     /* ── Toast ── */
-    .toast {
-      position: fixed; bottom: 24px; right: 24px; z-index: 1000;
-      padding: 14px 22px; border-radius: 8px; color: white;
-      font-weight: bold; font-size: .9em;
-      box-shadow: 0 4px 16px rgba(0,0,0,.2);
-      transform: translateY(80px); opacity: 0;
-      transition: transform .3s, opacity .3s;
-    }
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .toast.success { background: var(--green); }
-    .toast.error   { background: var(--red); }
+    .toast { position: fixed; bottom: 22px; right: 22px; z-index: 3000; padding: 13px 20px; border-radius: 8px; color: var(--white); font-weight: bold; font-size: .88em; box-shadow: 0 4px 16px rgba(0,0,0,.2); transform: translateY(70px); opacity: 0; transition: transform .3s, opacity .3s; pointer-events: none; }
+    .toast.on  { transform: translateY(0); opacity: 1; }
+    .toast.ok  { background: var(--green); }
+    .toast.err { background: var(--red); }
 
     @media (max-width: 700px) {
-      .admin-tab { padding: 16px; }
-      .ep-card-inner { flex-direction: column; }
-      .ep-thumb { width: 100%; height: 160px; }
+      .panel { padding: 14px; }
+      .ep-inner { flex-direction: column; }
+      .ep-thumb { width: 100%; height: 140px; }
     }
   </style>
 </head>
 <body>
 
-<!-- ── Login ── -->
-<div class="login-screen" id="login-screen">
+<!-- ══ LOGIN ══ -->
+<div class="login-wrap" id="login-wrap">
   <div class="login-box">
     <div class="login-logo">Revue ARCA</div>
     <div class="login-title">Administration Podcasts</div>
     <input class="login-input" type="password" id="login-pwd" placeholder="Mot de passe" autocomplete="current-password">
     <button class="login-btn" id="login-btn">Se connecter</button>
-    <div class="login-error" id="login-error">Mot de passe incorrect.</div>
+    <p class="login-err" id="login-err"></p>
   </div>
 </div>
 
-<!-- ── Admin shell ── -->
-<div class="admin-shell" id="admin-shell">
+<!-- ══ ADMIN ══ -->
+<div class="admin" id="admin">
 
-  <div class="admin-header">
-    <div class="admin-header-left">
+  <header class="admin-header">
+    <div style="display:flex;align-items:center">
       <div class="admin-brand">ARCA · Admin</div>
-      <button class="admin-nav-btn active" data-tab="episodes">Épisodes</button>
-      <button class="admin-nav-btn" data-tab="config">Configuration</button>
+      <nav class="admin-nav">
+        <button class="nav-btn on" data-panel="episodes">Épisodes</button>
+        <button class="nav-btn"    data-panel="config">Configuration</button>
+      </nav>
     </div>
-    <button class="admin-logout" id="btn-logout">Déconnexion</button>
-  </div>
+    <button class="btn-logout" id="btn-logout">Déconnexion</button>
+  </header>
 
-  <!-- Épisodes -->
-  <div class="admin-tab active" id="tab-episodes">
+  <!-- ── ÉPISODES ── -->
+  <div class="panel on" id="panel-episodes">
     <div class="toolbar">
 
-      <!-- Ligne 1 : Filtres d'affichage -->
-      <div class="toolbar-row">
-        <span class="toolbar-section-label">Filtrer</span>
-        <input type="text" id="filter-search" placeholder="Rechercher dans les titres…">
-        <select id="filter-playlist">
-          <option value="">Toutes les playlists</option>
-        </select>
-        <label>
-          <input type="checkbox" id="filter-nometa">
-          Sans métadonnées seulement
-        </label>
+      <!-- Filtrer l'affichage -->
+      <div class="t-row">
+        <span class="t-label">Filtrer</span>
+        <input class="t-input" type="text" id="q-search" placeholder="Rechercher dans les titres…" style="flex:1;min-width:180px">
+        <select class="t-select" id="q-playlist"><option value="">Toutes les playlists</option></select>
+        <label class="t-check"><input type="checkbox" id="q-nometa">&nbsp;Sans métadonnées</label>
+        <span class="t-spacer"></span>
         <span class="save-status" id="save-status"></span>
-        <button class="btn-save-all" id="btn-save-all">💾 Sauvegarder</button>
+        <button class="btn btn-navy btn-save" id="btn-save">💾 Sauvegarder</button>
       </div>
 
-      <!-- Ligne 2 : Assignation en masse -->
-      <div class="toolbar-row">
-        <span class="toolbar-section-label">Assigner en masse</span>
-        <input type="text" id="bulk-keyword" placeholder="Mot-clé dans le titre…" style="max-width:180px;">
-        <select id="bulk-pl-select">
-          <option value="">Toutes les playlists</option>
-        </select>
-        <select id="bulk-author-select">
-          <option value="">+ Auteur</option>
-        </select>
-        <select id="bulk-subject-select">
-          <option value="">+ Sujet</option>
-        </select>
-        <button class="btn-delete-pl" id="btn-bulk-assign" style="background:var(--navy);border-color:var(--navy);color:white;white-space:nowrap;">
-          Appliquer aux résultats
-        </button>
-        <div class="toolbar-sep"></div>
-        <select id="delete-pl-select">
-          <option value="">🗑 Supprimer une playlist…</option>
-        </select>
-        <button class="btn-delete-pl" id="btn-delete-pl">Supprimer</button>
+      <!-- Assigner en masse -->
+      <div class="t-row">
+        <span class="t-label">En masse</span>
+        <input class="t-input" type="text" id="bulk-kw" placeholder="Mot-clé…" style="max-width:150px">
+        <select class="t-select" id="bulk-pl"><option value="">Toutes les playlists</option></select>
+        <select class="t-select" id="bulk-author"><option value="">+ Auteur</option></select>
+        <select class="t-select" id="bulk-subject"><option value="">+ Sujet</option></select>
+        <button class="btn btn-navy" id="btn-bulk">Appliquer</button>
+        <span class="t-spacer"></span>
+        <select class="t-select" id="del-pl-sel"><option value="">🗑 Supprimer une playlist…</option></select>
+        <button class="btn btn-danger" id="btn-del-pl">Supprimer</button>
       </div>
 
     </div>
-    <div id="episodes-list"><div class="admin-state">Chargement…</div></div>
+    <div id="ep-list"><div class="empty">Chargement…</div></div>
   </div>
 
-  <!-- Configuration -->
-  <div class="admin-tab" id="tab-config">
-    <div class="config-section">
+  <!-- ── CONFIGURATION ── -->
+  <div class="panel" id="panel-config">
+    <div class="cfg-block">
       <h2>Auteurs</h2>
-      <div class="config-list" id="cfg-authors-list"></div>
-      <div class="config-add-row">
-        <input type="text" id="cfg-new-author-name" placeholder="Nom affiché  (ex: Marie Dupont)">
-        <input type="text" id="cfg-new-author-key"  placeholder="Clé  (ex: marie-dupont)">
-        <button class="btn-config-add" id="cfg-add-author">Ajouter</button>
+      <div class="cfg-tags" id="cfg-authors"></div>
+      <div class="cfg-add">
+        <input type="text" id="new-author-name" placeholder="Nom affiché  (ex : Marie Dupont)">
+        <input type="text" id="new-author-key"  placeholder="Clé  (ex : marie-dupont)">
+        <button class="btn btn-navy" id="btn-add-author">Ajouter</button>
       </div>
     </div>
-    <div class="config-section">
+    <div class="cfg-block">
       <h2>Sujets</h2>
-      <div class="config-list" id="cfg-subjects-list"></div>
-      <div class="config-add-row">
-        <input type="text" id="cfg-new-subject-name" placeholder="Nom affiché  (ex: Alchimie)">
-        <input type="text" id="cfg-new-subject-key"  placeholder="Clé  (ex: alchimie)">
-        <button class="btn-config-add" id="cfg-add-subject">Ajouter</button>
+      <div class="cfg-tags" id="cfg-subjects"></div>
+      <div class="cfg-add">
+        <input type="text" id="new-subject-name" placeholder="Nom affiché  (ex : Alchimie)">
+        <input type="text" id="new-subject-key"  placeholder="Clé  (ex : alchimie)">
+        <button class="btn btn-navy" id="btn-add-subject">Ajouter</button>
       </div>
     </div>
-    <button class="btn-config-save" id="btn-save-config">💾 Sauvegarder la configuration</button>
+    <button class="btn btn-gold" id="btn-save-config" style="margin-top:4px;padding:10px 24px;font-size:.9em;">💾 Sauvegarder la configuration</button>
   </div>
 
+</div><!-- /admin -->
+
+<!-- Dropdown auteur partagé -->
+<div class="author-dd" id="author-dd">
+  <input type="text" class="dd-search" id="dd-search" placeholder="Filtrer…">
+  <div id="dd-items"></div>
+  <div class="dd-custom" id="dd-custom">+ Ajouter un nouvel auteur…</div>
 </div>
 
-<div class="toast" id="toast"></div>
-<div class="confirm-overlay" id="confirm-overlay" style="display:none;">
+<!-- Confirm dialog -->
+<div class="confirm-mask" id="confirm-mask" style="display:none">
   <div class="confirm-box">
     <h3 id="confirm-title"></h3>
     <p  id="confirm-msg"></p>
     <div class="confirm-btns">
       <button class="confirm-cancel" id="confirm-cancel">Annuler</button>
-      <button class="confirm-ok"     id="confirm-ok">Supprimer</button>
+      <button class="confirm-ok"     id="confirm-ok">OK</button>
     </div>
   </div>
 </div>
 
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
 <script>
-(function () {
-  var BASE   = "https://podcast-arca.netlify.app";
-  var FUNC   = "/.netlify/functions/save-file";
+'use strict';
 
-  var state  = { episodes: [], config: {}, pwd: "", dirty: new Set() };
+/* ═══════════════════ STATE ═══════════════════ */
+var S = { episodes: [], config: {}, pwd: '', dirty: new Set() };
 
-  /* ── Toast ── */
-  function toast(msg, type) {
-    var t = document.getElementById("toast");
-    t.textContent = msg;
-    t.className = "toast " + (type || "success") + " show";
-    setTimeout(function () { t.classList.remove("show"); }, 3500);
-  }
+/* ═══════════════════ UTILS ═══════════════════ */
+var $ = function(id) { return document.getElementById(id); };
 
-  /* ── Confirm dialog ── */
-  function confirm(title, msg, onOk, opts) {
-    opts = opts || {};
-    var okLabel = opts.okLabel || "Confirmer";
-    var okColor = opts.okColor || "var(--navy)";
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
-    var overlay = document.getElementById("confirm-overlay");
-    document.getElementById("confirm-title").textContent = title;
-    document.getElementById("confirm-msg").textContent   = msg;
-    var okBtn = document.getElementById("confirm-ok");
-    okBtn.textContent = okLabel;
-    okBtn.style.background = okColor;
-    overlay.style.display = "flex";
-    okBtn.onclick = function () {
-      overlay.style.display = "none";
-      onOk();
-    };
-    document.getElementById("confirm-cancel").onclick = function () {
-      overlay.style.display = "none";
-    };
-  }
-
-  /* ── Login ── */
-  function tryLogin() {
-    var pwd = document.getElementById("login-pwd").value.trim();
-    if (!pwd) return;
-    state.pwd = pwd;
-    sessionStorage.setItem("arca_admin_pwd", pwd);
-    loadData();
-  }
-
-  document.getElementById("login-btn").addEventListener("click", tryLogin);
-  document.getElementById("login-pwd").addEventListener("keydown", function (e) {
-    if (e.key === "Enter") tryLogin();
+function slugify(t) {
+  t = t.toLowerCase();
+  [['àâä','a'],['éèêë','e'],['îï','i'],['ôö','o'],['ùûü','u'],['ç','c']].forEach(function(p) {
+    p[0].split('').forEach(function(c) { t = t.split(c).join(p[1]); });
   });
+  return t.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
 
-  document.getElementById("btn-logout").addEventListener("click", function () {
-    sessionStorage.removeItem("arca_admin_pwd");
-    location.reload();
+function toast(msg, type) {
+  var el = $('toast');
+  el.textContent = msg;
+  el.className = 'toast on ' + (type || 'ok');
+  clearTimeout(el._t);
+  el._t = setTimeout(function() { el.classList.remove('on'); }, 3500);
+}
+
+function dialog(title, msg, onOk, opts) {
+  opts = opts || {};
+  $('confirm-title').textContent = title;
+  $('confirm-msg').textContent   = msg;
+  var ok = $('confirm-ok');
+  ok.textContent       = opts.label || 'Confirmer';
+  ok.style.background  = opts.color || 'var(--navy)';
+  $('confirm-mask').style.display = 'flex';
+  ok.onclick = function() { $('confirm-mask').style.display = 'none'; onOk(); };
+  $('confirm-cancel').onclick = function() { $('confirm-mask').style.display = 'none'; };
+}
+
+/* ═══════════════════ API ═══════════════════ */
+function saveFile(filename, data, cb) {
+  fetch('/.netlify/functions/save-file', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: S.pwd, filename: filename, data: data })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(res) { cb(res.success ? null : (res.error || 'Erreur')); })
+  .catch(function(e) { cb(e.message); });
+}
+
+/* ═══════════════════ AUTH ═══════════════════ */
+function tryLogin() {
+  var pwd = $('login-pwd').value.trim();
+  if (!pwd) return;
+  S.pwd = pwd;
+  sessionStorage.setItem('arca_pwd', pwd);
+  loadData();
+}
+
+$('login-btn').addEventListener('click', tryLogin);
+$('login-pwd').addEventListener('keydown', function(e) { if (e.key === 'Enter') tryLogin(); });
+$('btn-logout').addEventListener('click', function() { sessionStorage.removeItem('arca_pwd'); location.reload(); });
+
+/* ═══════════════════ LOAD ═══════════════════ */
+function loadData() {
+  var base = 'https://podcast-arca.netlify.app';
+  Promise.all([
+    fetch(base + '/episodes.json?' + Date.now()).then(function(r) { return r.json(); }),
+    fetch(base + '/config.json?'   + Date.now()).then(function(r) { return r.json(); })
+  ]).then(function(res) {
+    S.episodes = res[0];
+    S.config   = res[1];
+    initAdmin();
+  }).catch(function(e) {
+    var err = $('login-err');
+    err.textContent = 'Erreur de chargement : ' + e.message;
+    err.style.display = 'block';
   });
+}
 
-  /* ── Nav tabs ── */
-  document.querySelectorAll(".admin-nav-btn").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      document.querySelectorAll(".admin-nav-btn").forEach(function (b) { b.classList.remove("active"); });
-      document.querySelectorAll(".admin-tab").forEach(function (t) { t.classList.remove("active"); });
-      this.classList.add("active");
-      document.getElementById("tab-" + this.dataset.tab).classList.add("active");
-    });
-  });
+function initAdmin() {
+  $('login-wrap').style.display = 'none';
+  $('admin').style.display      = 'block';
+  populateSelects();
+  renderEpisodes();
+  renderConfig();
+}
 
-  /* ── Load data ── */
-  function loadData() {
-    Promise.all([
-      fetch(BASE + "/episodes.json?" + Date.now()).then(function (r) { return r.json(); }),
-      fetch(BASE + "/config.json?"   + Date.now()).then(function (r) { return r.json(); })
-    ]).then(function (res) {
-      state.episodes = res[0];
-      state.config   = res[1];
-      showAdmin();
-      renderEpisodes();
-      renderConfig();
-    }).catch(function (err) {
-      document.getElementById("login-error").style.display = "block";
-      document.getElementById("login-error").textContent = "Erreur de chargement : " + err.message;
-    });
-  }
-
-  function showAdmin() {
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("admin-shell").style.display  = "block";
-    // Populate playlist filter + delete selects
-    var seen = {};
-    var playlists = [];
-    state.episodes.forEach(function (ep) {
-      if (ep.playlist_slug && !seen[ep.playlist_slug]) {
-        seen[ep.playlist_slug] = true;
-        playlists.push({ slug: ep.playlist_slug, title: ep.playlist_title });
-      }
-    });
-    var filterSel = document.getElementById("filter-playlist");
-    var deleteSel = document.getElementById("delete-pl-select");
-    var bulkSel  = document.getElementById("bulk-pl-select");
-    var bulkAuth = document.getElementById("bulk-author-select");
-    var bulkSubj = document.getElementById("bulk-subject-select");
-
-    playlists.forEach(function (pl) {
-      var o1 = document.createElement("option"); o1.value = pl.slug; o1.textContent = pl.title; filterSel.appendChild(o1);
-      var o2 = document.createElement("option"); o2.value = pl.slug; o2.textContent = pl.title; deleteSel.appendChild(o2);
-      var o3 = document.createElement("option"); o3.value = pl.slug; o3.textContent = pl.title; bulkSel.appendChild(o3);
-    });
-    Object.keys(state.config.authors || {}).forEach(function (key) {
-      var o = document.createElement("option"); o.value = key; o.textContent = state.config.authors[key]; bulkAuth.appendChild(o);
-    });
-    Object.keys(state.config.subjects || {}).forEach(function (key) {
-      var o = document.createElement("option"); o.value = key; o.textContent = state.config.subjects[key]; bulkSubj.appendChild(o);
-    });
-  }
-
-  /* ── Render episodes ── */
-  var searchVal = "", playlistVal = "", noMetaOnly = false;
-
-  document.getElementById("filter-search").addEventListener("input", function () {
-    searchVal = this.value.toLowerCase(); renderEpisodes();
-  });
-  document.getElementById("filter-playlist").addEventListener("change", function () {
-    playlistVal = this.value; renderEpisodes();
-  });
-  document.getElementById("filter-nometa").addEventListener("change", function () {
-    noMetaOnly = this.checked; renderEpisodes();
-  });
-
-  function renderEpisodes() {
-    var eps = state.episodes.filter(function (ep) {
-      if (searchVal   && ep.title.toLowerCase().indexOf(searchVal) === -1) return false;
-      if (playlistVal && ep.playlist_slug !== playlistVal)                  return false;
-      if (noMetaOnly  && ep.authors && ep.authors.length > 0 && ep.subject) return false;
-      return true;
-    });
-
-    var container = document.getElementById("episodes-list");
-    if (!eps.length) {
-      container.innerHTML = '<div class="admin-state">Aucun épisode trouvé.</div>';
-      return;
+/* ═══════════════════ SELECTS ═══════════════════ */
+function populateSelects() {
+  var seen = {}, pls = [];
+  S.episodes.forEach(function(ep) {
+    if (ep.playlist_slug && !seen[ep.playlist_slug]) {
+      seen[ep.playlist_slug] = true;
+      pls.push({ slug: ep.playlist_slug, title: ep.playlist_title });
     }
+  });
 
-    container.innerHTML = "";
-    eps.forEach(function (ep) {
-      container.appendChild(buildEpCard(ep));
+  ['q-playlist', 'bulk-pl', 'del-pl-sel'].forEach(function(id) {
+    pls.forEach(function(pl) {
+      var o = document.createElement('option');
+      o.value = pl.slug; o.textContent = pl.title;
+      $(id).appendChild(o);
     });
+  });
 
-    updateSaveStatus();
-  }
+  Object.keys(S.config.authors  || {}).forEach(function(k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = S.config.authors[k]; $('bulk-author').appendChild(o);
+  });
+  Object.keys(S.config.subjects || {}).forEach(function(k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = S.config.subjects[k]; $('bulk-subject').appendChild(o);
+  });
+}
 
-  function buildEpCard(ep) {
-    var idx = state.episodes.indexOf(ep);
-    var div = document.createElement("div");
-    div.className = "ep-card" + (state.dirty.has(idx) ? " dirty" : "");
-    div.dataset.idx = idx;
+/* ═══════════════════ FILTER ═══════════════════ */
+var F = { search: '', playlist: '', noMeta: false };
 
-    var authors = ep.authors || [];
-    var subject = ep.subject || "";
-    var date    = ep.published_at ? ep.published_at.substring(0, 10) : "";
+$('q-search').addEventListener('input',   function() { F.search   = this.value.toLowerCase(); renderEpisodes(); });
+$('q-playlist').addEventListener('change',function() { F.playlist = this.value;               renderEpisodes(); });
+$('q-nometa').addEventListener('change',  function() { F.noMeta   = this.checked;             renderEpisodes(); });
 
-    div.innerHTML =
-      '<div class="ep-card-inner">' +
-        (ep.image_url ? '<img class="ep-thumb" src="' + esc(ep.image_url) + '" alt="" loading="lazy">' : '<div class="ep-thumb"></div>') +
-        '<div class="ep-main">' +
-          '<div style="display:flex;align-items:flex-start;gap:8px">' +
-            '<div class="ep-title" title="' + esc(ep.title) + '" style="flex:1">' + esc(ep.title) + '</div>' +
-            '<button class="btn-delete-ep" title="Supprimer cet épisode">🗑</button>' +
-          '</div>' +
-          '<div class="ep-playlist">' + esc(ep.playlist_title || "") + (date ? " · " + date : "") + '</div>' +
-          '<div class="ep-fields">' +
-            '<div class="ep-field">' +
-              '<label>Auteurs</label>' +
-              '<div class="author-chips" data-idx="' + idx + '">' +
-                buildAuthorChips(authors, idx) +
-                '<div class="author-add">' +
-                  '<button class="btn-add-author" data-idx="' + idx + '">+ Ajouter</button>' +
-                  '<div class="author-dropdown" id="dropdown-' + idx + '">' +
-                    '<input type="text" placeholder="Filtrer…" class="author-search">' +
-                    buildAuthorDropdownItems(authors) +
-                  '</div>' +
-                '</div>' +
-              '</div>' +
-            '</div>' +
-            '<div class="ep-field">' +
-              '<label>Sujet</label>' +
-              buildSubjectSelect(subject, idx) +
-            '</div>' +
-          '</div>' +
+function filtered() {
+  return S.episodes.filter(function(ep) {
+    if (F.search   && (ep.title || '').toLowerCase().indexOf(F.search) === -1) return false;
+    if (F.playlist && ep.playlist_slug !== F.playlist) return false;
+    if (F.noMeta   && (ep.authors || []).length > 0 && ep.subject)            return false;
+    return true;
+  });
+}
+
+/* ═══════════════════ EPISODES RENDER ═══════════════════ */
+function renderEpisodes() {
+  var eps  = filtered();
+  var list = $('ep-list');
+  if (!eps.length) { list.innerHTML = '<div class="empty">Aucun épisode trouvé.</div>'; return; }
+  list.innerHTML = '';
+  eps.forEach(function(ep) { list.appendChild(buildCard(ep)); });
+  updateStatus();
+}
+
+function buildCard(ep) {
+  var idx     = S.episodes.indexOf(ep);
+  var authors = ep.authors || [];
+  var date    = (ep.published_at || '').substring(0, 10);
+
+  var chips = authors.map(function(k) {
+    var name = (S.config.authors || {})[k] || k;
+    return '<span class="chip">' + esc(name) +
+      '<button class="chip-x" data-key="' + esc(k) + '" title="Retirer">×</button></span>';
+  }).join('') + '<button class="btn-add-chip" data-idx="' + idx + '">+ Ajouter</button>';
+
+  var subjOpts = '<option value="">— Aucun —</option>';
+  Object.keys(S.config.subjects || {}).forEach(function(k) {
+    subjOpts += '<option value="' + k + '"' + (ep.subject === k ? ' selected' : '') + '>' + esc(S.config.subjects[k]) + '</option>';
+  });
+
+  var div = document.createElement('div');
+  div.className   = 'ep-card' + (S.dirty.has(idx) ? ' dirty' : '');
+  div.dataset.idx = idx;
+  div.innerHTML =
+    '<div class="ep-inner">' +
+      (ep.image_url ? '<img class="ep-thumb" src="' + esc(ep.image_url) + '" alt="" loading="lazy">' : '<div class="ep-thumb"></div>') +
+      '<div class="ep-body">' +
+        '<div class="ep-head">' +
+          '<div class="ep-title" title="' + esc(ep.title) + '">' + esc(ep.title) + '</div>' +
+          '<button class="btn-del-ep" title="Supprimer cet épisode">🗑</button>' +
         '</div>' +
-      '</div>';
+        '<div class="ep-sub">' + esc(ep.playlist_title || '') + (date ? ' · ' + date : '') + '</div>' +
+        '<div class="ep-fields">' +
+          '<div class="ep-field"><label>Auteurs</label><div class="chips">' + chips + '</div></div>' +
+          '<div class="ep-field"><label>Sujet</label><select class="subject-sel">' + subjOpts + '</select></div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
 
-    // Events
-    // Delete episode
-    div.querySelector(".btn-delete-ep").addEventListener("click", function (e) {
-      e.stopPropagation();
-      confirm(
-        "Supprimer cet épisode ?",
-        ep.title,
-        function () {
-          state.episodes.splice(idx, 1);
-          renderEpisodes();
-          updateSaveStatus();
-          toast("Épisode supprimé — clique Sauvegarder pour confirmer");
-        },
-        { okLabel: "Supprimer", okColor: "var(--red)" }
-      );
+  // Remove author
+  div.querySelectorAll('.chip-x').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var k = this.dataset.key;
+      S.episodes[idx].authors = (S.episodes[idx].authors || []).filter(function(a) { return a !== k; });
+      markDirty(idx);
+      refreshCard(idx);
     });
+  });
 
-    // Author remove
-    div.querySelectorAll(".author-chip-remove").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var aKey = this.dataset.key;
-        var ep2  = state.episodes[idx];
-        ep2.authors = (ep2.authors || []).filter(function (a) { return a !== aKey; });
-        markDirty(idx);
-        refreshCard(idx);
-      });
+  // Add author → shared dropdown
+  div.querySelector('.btn-add-chip').addEventListener('click', function(e) {
+    e.stopPropagation();
+    openDD(this, idx);
+  });
+
+  // Subject
+  div.querySelector('.subject-sel').addEventListener('change', function() {
+    S.episodes[idx].subject = this.value;
+    markDirty(idx);
+    div.classList.add('dirty');
+    updateStatus();
+  });
+
+  // Delete episode
+  div.querySelector('.btn-del-ep').addEventListener('click', function(e) {
+    e.stopPropagation();
+    dialog('Supprimer cet épisode ?', ep.title, function() {
+      S.episodes.splice(idx, 1);
+      renderEpisodes();
+      toast('Épisode supprimé — Sauvegarder pour confirmer');
+    }, { label: 'Supprimer', color: 'var(--red)' });
+  });
+
+  return div;
+}
+
+function refreshCard(idx) {
+  var old = document.querySelector('.ep-card[data-idx="' + idx + '"]');
+  if (old) old.replaceWith(buildCard(S.episodes[idx]));
+}
+
+function markDirty(idx) {
+  S.dirty.add(idx);
+  var c = document.querySelector('.ep-card[data-idx="' + idx + '"]');
+  if (c) c.classList.add('dirty');
+  updateStatus();
+}
+
+function updateStatus() {
+  $('save-status').textContent = S.dirty.size ? S.dirty.size + ' modification(s) non sauvegardée(s)' : '';
+}
+
+/* ═══════════════════ SAVE EPISODES ═══════════════════ */
+$('btn-save').addEventListener('click', function() {
+  var btn = this;
+  btn.textContent = 'Sauvegarde…'; btn.classList.add('saving');
+  saveFile('episodes.json', S.episodes, function(err) {
+    btn.classList.remove('saving');
+    if (err) { toast('Erreur : ' + err, 'err'); return; }
+    S.dirty.clear();
+    document.querySelectorAll('.ep-card.dirty').forEach(function(c) { c.classList.remove('dirty'); });
+    updateStatus();
+    btn.textContent = '✓ Sauvegardé'; btn.classList.add('saved');
+    toast('Sauvegardé ! Netlify redéploie dans ~30s.');
+    setTimeout(function() { btn.textContent = '💾 Sauvegarder'; btn.classList.remove('saved'); }, 3000);
+  });
+});
+
+/* ═══════════════════ BULK ASSIGN ═══════════════════ */
+$('btn-bulk').addEventListener('click', function() {
+  var kw   = $('bulk-kw').value.trim().toLowerCase();
+  var plSl = $('bulk-pl').value;
+  var auth = $('bulk-author').value;
+  var subj = $('bulk-subject').value;
+
+  if (!auth && !subj) { toast('Choisis un auteur ou un sujet à assigner', 'err'); return; }
+  if (!kw   && !plSl) { toast('Précise un mot-clé ou une playlist', 'err');       return; }
+
+  var eps = S.episodes.filter(function(ep) {
+    return (!plSl || ep.playlist_slug === plSl) && (!kw || (ep.title || '').toLowerCase().indexOf(kw) !== -1);
+  });
+  if (!eps.length) { toast('Aucun épisode ne correspond', 'err'); return; }
+
+  var plName   = plSl ? $('bulk-pl').options[$('bulk-pl').selectedIndex].text : '';
+  var authName = auth ? ((S.config.authors  || {})[auth] || auth) : '';
+  var subjName = subj ? ((S.config.subjects || {})[subj] || subj) : '';
+  var detail   = eps.length + ' épisode(s)' +
+    (kw     ? ' contenant "' + kw + '"' : '') +
+    (plSl   ? ' dans ' + plName         : '') +
+    (authName ? ' → ' + authName        : '') +
+    (subjName ? ' → ' + subjName        : '');
+
+  dialog('Assigner les métadonnées ?', detail, function() {
+    eps.forEach(function(ep) {
+      var i = S.episodes.indexOf(ep);
+      if (auth && !(ep.authors || []).includes(auth)) { S.episodes[i].authors = (ep.authors || []).concat(auth); }
+      if (subj) S.episodes[i].subject = subj;
+      markDirty(i);
     });
+    renderEpisodes();
+    toast(eps.length + ' épisode(s) mis à jour — Sauvegarder pour confirmer');
+  }, { label: 'Appliquer', color: 'var(--navy)' });
+});
 
-    // Add author button → toggle dropdown with fixed positioning
-    var addBtn = div.querySelector(".btn-add-author");
-    var dd     = div.querySelector(".author-dropdown");
-    addBtn.addEventListener("click", function (e) {
-      e.stopPropagation();
-      var wasOpen = dd.classList.contains("open");
-      document.querySelectorAll(".author-dropdown.open").forEach(function (d) { d.classList.remove("open"); });
-      if (!wasOpen) {
-        var rect = addBtn.getBoundingClientRect();
-        dd.style.top  = (rect.bottom + 4) + "px";
-        dd.style.left = rect.left + "px";
-        dd.classList.add("open");
-        dd.querySelector(".author-search").focus();
+/* ═══════════════════ DELETE PLAYLIST ═══════════════════ */
+$('btn-del-pl').addEventListener('click', function() {
+  var sel   = $('del-pl-sel');
+  var slug  = sel.value;
+  if (!slug) { toast('Choisis une playlist à supprimer', 'err'); return; }
+  var title = sel.options[sel.selectedIndex].text;
+  var count = S.episodes.filter(function(ep) { return ep.playlist_slug === slug; }).length;
+  dialog('Supprimer la playlist ?', '« ' + title + ' » — ' + count + ' épisode(s). Irréversible après sauvegarde.', function() {
+    S.episodes = S.episodes.filter(function(ep) { return ep.playlist_slug !== slug; });
+    ['q-playlist', 'bulk-pl', 'del-pl-sel'].forEach(function(id) {
+      var s = $(id);
+      for (var i = s.options.length - 1; i >= 0; i--) { if (s.options[i].value === slug) s.remove(i); }
+    });
+    sel.value = '';
+    renderEpisodes();
+    toast(count + ' épisode(s) supprimé(s) — Sauvegarder pour confirmer');
+  }, { label: 'Supprimer', color: 'var(--red)' });
+});
+
+/* ═══════════════════ AUTHOR DROPDOWN (body-level) ═══════════════════ */
+var _dd    = $('author-dd');
+var _ddIdx = -1;
+
+function openDD(btn, idx) {
+  _ddIdx = idx;
+  var current = S.episodes[idx].authors || [];
+
+  $('dd-items').innerHTML = Object.keys(S.config.authors || {}).map(function(k) {
+    var used = current.indexOf(k) !== -1;
+    return '<div class="dd-item' + (used ? ' used' : '') + '" data-key="' + esc(k) + '">' +
+      esc(S.config.authors[k]) + (used ? ' ✓' : '') + '</div>';
+  }).join('');
+
+  $('dd-items').querySelectorAll('.dd-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      var k    = this.dataset.key;
+      var ep   = S.episodes[_ddIdx];
+      if (ep && (ep.authors || []).indexOf(k) === -1) {
+        ep.authors = (ep.authors || []).concat(k);
+        markDirty(_ddIdx);
+        refreshCard(_ddIdx);
       }
-    });
-
-    // Author search filter
-    var searchInput = div.querySelector(".author-search");
-    searchInput.addEventListener("input", function () {
-      var q = this.value.toLowerCase();
-      dd.querySelectorAll(".author-dropdown-item").forEach(function (item) {
-        item.style.display = item.dataset.key.indexOf(q) !== -1 || item.textContent.toLowerCase().indexOf(q) !== -1 ? "" : "none";
-      });
-    });
-
-    // Author dropdown select
-    dd.querySelectorAll(".author-dropdown-item").forEach(function (item) {
-      item.addEventListener("click", function () {
-        var key = this.dataset.key;
-        var ep2 = state.episodes[idx];
-        if (!(ep2.authors || []).includes(key)) {
-          ep2.authors = (ep2.authors || []).concat(key);
-          markDirty(idx);
-        }
-        dd.classList.remove("open");
-        refreshCard(idx);
-      });
-    });
-
-    // Add custom author
-    var addCustom = div.querySelector(".author-dropdown-add");
-    if (addCustom) {
-      addCustom.addEventListener("click", function () {
-        var val = searchInput.value.trim();
-        if (!val) return;
-        var key = slugify(val);
-        // Add to config if not exists
-        if (!state.config.authors) state.config.authors = {};
-        if (!state.config.authors[key]) state.config.authors[key] = val;
-        // Add to episode
-        var ep2 = state.episodes[idx];
-        if (!(ep2.authors || []).includes(key)) {
-          ep2.authors = (ep2.authors || []).concat(key);
-          markDirty(idx);
-        }
-        dd.classList.remove("open");
-        refreshCard(idx);
-        renderConfig();
-      });
-    }
-
-    // Subject change
-    var subjectSel = div.querySelector(".subject-select");
-    if (subjectSel) {
-      subjectSel.addEventListener("change", function () {
-        state.episodes[idx].subject = this.value;
-        markDirty(idx);
-        div.classList.add("dirty");
-        updateSaveStatus();
-      });
-    }
-
-    return div;
-  }
-
-  function buildAuthorChips(authors, idx) {
-    return authors.map(function (key) {
-      var name = (state.config.authors || {})[key] || key;
-      return '<span class="author-chip">' + esc(name) +
-        '<button class="author-chip-remove" data-key="' + esc(key) + '" title="Retirer">×</button>' +
-        '</span>';
-    }).join("");
-  }
-
-  function buildAuthorDropdownItems(currentAuthors) {
-    var items = Object.keys(state.config.authors || {}).map(function (key) {
-      var disabled = currentAuthors.includes(key) ? ' style="opacity:.4;pointer-events:none"' : "";
-      return '<div class="author-dropdown-item" data-key="' + key + '"' + disabled + '>' +
-        state.config.authors[key] + '</div>';
-    }).join("");
-    return items + '<div class="author-dropdown-add">+ Ajouter un nouvel auteur…</div>';
-  }
-
-  function buildSubjectSelect(current, idx) {
-    var opts = '<option value="">— Aucun sujet —</option>';
-    Object.keys(state.config.subjects || {}).forEach(function (key) {
-      opts += '<option value="' + key + '"' + (current === key ? " selected" : "") + '>' +
-        state.config.subjects[key] + '</option>';
-    });
-    return '<select class="subject-select" data-idx="' + idx + '">' + opts + '</select>';
-  }
-
-  function refreshCard(idx) {
-    var existing = document.querySelector(".ep-card[data-idx='" + idx + "']");
-    if (!existing) return;
-    var fresh = buildEpCard(state.episodes[idx]);
-    existing.replaceWith(fresh);
-    updateSaveStatus();
-  }
-
-  function markDirty(idx) {
-    state.dirty.add(idx);
-    var card = document.querySelector(".ep-card[data-idx='" + idx + "']");
-    if (card) card.classList.add("dirty");
-  }
-
-  function updateSaveStatus() {
-    var s = document.getElementById("save-status");
-    s.textContent = state.dirty.size > 0 ? state.dirty.size + " modification(s) non sauvegardée(s)" : "";
-  }
-
-  /* ── Save episodes ── */
-  document.getElementById("btn-save-all").addEventListener("click", function () {
-    var btn = this;
-    btn.textContent = "Sauvegarde…";
-    btn.classList.add("saving");
-
-    fetch(FUNC, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: state.pwd, filename: "episodes.json", data: state.episodes })
-    })
-    .then(function (r) { return r.json(); })
-    .then(function (res) {
-      if (res.success) {
-        state.dirty.clear();
-        document.querySelectorAll(".ep-card.dirty").forEach(function (c) { c.classList.remove("dirty"); });
-        btn.textContent = "✓ Sauvegardé";
-        btn.classList.remove("saving"); btn.classList.add("saved");
-        updateSaveStatus();
-        toast("Épisodes sauvegardés ! Netlify redéploie dans ~30s.");
-        setTimeout(function () { btn.textContent = "💾 Sauvegarder"; btn.classList.remove("saved"); }, 3000);
-      } else {
-        toast(res.error || "Erreur inconnue", "error");
-        btn.textContent = "💾 Sauvegarder"; btn.classList.remove("saving");
-      }
-    })
-    .catch(function (err) {
-      toast("Erreur réseau : " + err.message, "error");
-      btn.textContent = "💾 Sauvegarder"; btn.classList.remove("saving");
+      _dd.classList.remove('on');
     });
   });
 
-  /* ── Assigner en masse avec filtre par mot-clé et/ou playlist ── */
-  document.getElementById("btn-bulk-assign").addEventListener("click", function () {
-    var slug    = document.getElementById("bulk-pl-select").value;
-    var keyword = document.getElementById("bulk-keyword").value.trim().toLowerCase();
-    var authKey = document.getElementById("bulk-author-select").value;
-    var subjKey = document.getElementById("bulk-subject-select").value;
+  var search = $('dd-search');
+  search.value = '';
+  $('dd-items').querySelectorAll('.dd-item').forEach(function(i) { i.style.display = ''; });
+  $('dd-custom').style.display = 'none';
 
-    if (!authKey && !subjKey) { toast("Choisis au moins un auteur ou un sujet à assigner", "error"); return; }
-    if (!slug && !keyword)    { toast("Précise au moins une playlist ou un mot-clé", "error"); return; }
+  var rect = btn.getBoundingClientRect();
+  _dd.style.top  = (rect.bottom + 4) + 'px';
+  _dd.style.left = rect.left + 'px';
+  _dd.classList.add('on');
+  search.focus();
+}
 
-    var eps = state.episodes.filter(function (ep) {
-      var matchPl  = !slug    || ep.playlist_slug === slug;
-      var matchKw  = !keyword || (ep.title || "").toLowerCase().indexOf(keyword) !== -1;
-      return matchPl && matchKw;
-    });
-
-    if (!eps.length) { toast("Aucun épisode ne correspond à ces critères", "error"); return; }
-
-    var msg = eps.length + " épisode(s)" +
-      (keyword ? ' contenant "' + keyword + '"' : "") +
-      (slug ? " dans " + (document.getElementById("bulk-pl-select").options[document.getElementById("bulk-pl-select").selectedIndex].text) : "");
-
-    confirm(
-      "Assigner les métadonnées ?",
-      msg + (authKey ? " → auteur : " + ((state.config.authors || {})[authKey] || authKey) : "") +
-            (subjKey ? " → sujet : " + ((state.config.subjects || {})[subjKey] || subjKey) : ""),
-      function () {
-        eps.forEach(function (ep) {
-          var idx2 = state.episodes.indexOf(ep);
-          if (authKey && !(ep.authors || []).includes(authKey)) {
-            state.episodes[idx2].authors = (ep.authors || []).concat(authKey);
-          }
-          if (subjKey) {
-            state.episodes[idx2].subject = subjKey;
-          }
-          state.dirty.add(idx2);
-        });
-        renderEpisodes();
-        updateSaveStatus();
-        toast(eps.length + " épisode(s) mis à jour — clique Sauvegarder pour confirmer");
-      },
-      { okLabel: "Appliquer", okColor: "var(--navy)" }
-    );
+$('dd-search').addEventListener('input', function() {
+  var q = this.value.toLowerCase();
+  $('dd-items').querySelectorAll('.dd-item').forEach(function(it) {
+    it.style.display = (it.dataset.key.indexOf(q) !== -1 || it.textContent.toLowerCase().indexOf(q) !== -1) ? '' : 'none';
   });
+  $('dd-custom').style.display = q ? '' : 'none';
+});
 
-  /* ── Supprimer une playlist ── */
-  document.getElementById("btn-delete-pl").addEventListener("click", function () {
-    var sel   = document.getElementById("delete-pl-select");
-    var slug  = sel.value;
-    var title = slug ? sel.options[sel.selectedIndex].textContent : "";
-    if (!slug) { toast("Choisis une playlist à supprimer", "error"); return; }
-    var count = state.episodes.filter(function (ep) { return ep.playlist_slug === slug; }).length;
-    confirm(
-      "Supprimer la playlist ?",
-      "« " + title + " » contient " + count + " épisode(s). Action irréversible après sauvegarde.",
-      function () {
-        state.episodes = state.episodes.filter(function (ep) { return ep.playlist_slug !== slug; });
-        [document.getElementById("delete-pl-select"), document.getElementById("filter-playlist")].forEach(function (s) {
-          for (var i = s.options.length - 1; i >= 0; i--) { if (s.options[i].value === slug) s.remove(i); }
-        });
-        sel.value = "";
-        renderEpisodes();
-        toast(count + " épisode(s) supprimé(s) — clique Sauvegarder pour confirmer");
-      },
-      { okLabel: "Supprimer", okColor: "var(--red)" }
-    );
-  });
-
-  /* ── Config tab ── */
-  function renderConfig() {
-    renderConfigList("cfg-authors-list",  state.config.authors  || {}, "author");
-    renderConfigList("cfg-subjects-list", state.config.subjects || {}, "subject");
+$('dd-custom').addEventListener('click', function() {
+  var val = $('dd-search').value.trim();
+  if (!val) return;
+  var key = slugify(val);
+  if (!S.config.authors) S.config.authors = {};
+  if (!S.config.authors[key]) S.config.authors[key] = val;
+  var ep = S.episodes[_ddIdx];
+  if (ep && (ep.authors || []).indexOf(key) === -1) {
+    ep.authors = (ep.authors || []).concat(key);
+    markDirty(_ddIdx);
   }
+  _dd.classList.remove('on');
+  refreshCard(_ddIdx);
+  renderConfig();
+});
 
-  function renderConfigList(containerId, map, type) {
-    var container = document.getElementById(containerId);
-    container.innerHTML = "";
-    Object.keys(map).forEach(function (key) {
-      var div = document.createElement("div");
-      div.className = "config-item";
-      div.innerHTML = esc(map[key]) + '<span class="config-item-key">(' + esc(key) + ')</span>' +
-        '<button class="config-item-remove" data-key="' + key + '" data-type="' + type + '">×</button>';
-      div.querySelector(".config-item-remove").addEventListener("click", function () {
-        if (type === "author")  delete state.config.authors[key];
-        if (type === "subject") delete state.config.subjects[key];
-        renderConfig();
-      });
-      container.appendChild(div);
-    });
+document.addEventListener('click', function(e) {
+  if (_dd.classList.contains('on') && !_dd.contains(e.target) && !e.target.classList.contains('btn-add-chip')) {
+    _dd.classList.remove('on');
   }
+});
 
-  document.getElementById("cfg-add-author").addEventListener("click", function () {
-    var name = document.getElementById("cfg-new-author-name").value.trim();
-    var key  = document.getElementById("cfg-new-author-key").value.trim() || slugify(name);
-    if (!name || !key) { toast("Remplis le nom et la clé", "error"); return; }
-    if (!state.config.authors) state.config.authors = {};
-    state.config.authors[key] = name;
-    document.getElementById("cfg-new-author-name").value = "";
-    document.getElementById("cfg-new-author-key").value  = "";
-    renderConfig();
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { _dd.classList.remove('on'); $('confirm-mask').style.display = 'none'; }
+});
+
+/* ═══════════════════ TAB NAVIGATION ═══════════════════ */
+document.querySelectorAll('.nav-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('on'); });
+    document.querySelectorAll('.panel').forEach(function(p)   { p.classList.remove('on'); });
+    this.classList.add('on');
+    $('panel-' + this.dataset.panel).classList.add('on');
   });
+});
 
-  document.getElementById("cfg-add-subject").addEventListener("click", function () {
-    var name = document.getElementById("cfg-new-subject-name").value.trim();
-    var key  = document.getElementById("cfg-new-subject-key").value.trim() || slugify(name);
-    if (!name || !key) { toast("Remplis le nom et la clé", "error"); return; }
-    if (!state.config.subjects) state.config.subjects = {};
-    state.config.subjects[key] = name;
-    document.getElementById("cfg-new-subject-name").value = "";
-    document.getElementById("cfg-new-subject-key").value  = "";
-    renderConfig();
-  });
+/* ═══════════════════ CONFIG ═══════════════════ */
+function renderConfig() {
+  renderCfgList('cfg-authors',  S.config.authors  || {}, 'author');
+  renderCfgList('cfg-subjects', S.config.subjects || {}, 'subject');
+}
 
-  document.getElementById("btn-save-config").addEventListener("click", function () {
-    var btn = this;
-    btn.textContent = "Sauvegarde…";
-    fetch(FUNC, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: state.pwd, filename: "config.json", data: state.config })
-    })
-    .then(function (r) { return r.json(); })
-    .then(function (res) {
-      if (res.success) {
-        toast("Configuration sauvegardée !");
-        btn.textContent = "💾 Sauvegarder la configuration";
-      } else {
-        toast(res.error || "Erreur", "error");
-        btn.textContent = "💾 Sauvegarder la configuration";
-      }
+function renderCfgList(id, map, type) {
+  var c = $(id);
+  c.innerHTML = Object.keys(map).map(function(k) {
+    return '<div class="cfg-tag">' + esc(map[k]) +
+      '<span class="cfg-tag-key">(' + esc(k) + ')</span>' +
+      '<button class="cfg-tag-x" data-key="' + esc(k) + '" data-type="' + type + '">×</button></div>';
+  }).join('');
+  c.querySelectorAll('.cfg-tag-x').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (this.dataset.type === 'author')  delete S.config.authors[this.dataset.key];
+      if (this.dataset.type === 'subject') delete S.config.subjects[this.dataset.key];
+      renderConfig();
     });
   });
+}
 
-  /* ── Close dropdowns on click outside ── */
-  document.addEventListener("click", function () {
-    document.querySelectorAll(".author-dropdown.open").forEach(function (d) { d.classList.remove("open"); });
+$('btn-add-author').addEventListener('click', function() {
+  var name = $('new-author-name').value.trim();
+  var key  = $('new-author-key').value.trim() || slugify(name);
+  if (!name || !key) { toast('Remplis le nom et la clé', 'err'); return; }
+  if (!S.config.authors) S.config.authors = {};
+  S.config.authors[key] = name;
+  $('new-author-name').value = ''; $('new-author-key').value = '';
+  renderConfig();
+});
+
+$('btn-add-subject').addEventListener('click', function() {
+  var name = $('new-subject-name').value.trim();
+  var key  = $('new-subject-key').value.trim() || slugify(name);
+  if (!name || !key) { toast('Remplis le nom et la clé', 'err'); return; }
+  if (!S.config.subjects) S.config.subjects = {};
+  S.config.subjects[key] = name;
+  $('new-subject-name').value = ''; $('new-subject-key').value = '';
+  renderConfig();
+});
+
+$('btn-save-config').addEventListener('click', function() {
+  var btn = this; btn.textContent = 'Sauvegarde…';
+  saveFile('config.json', S.config, function(err) {
+    btn.textContent = '💾 Sauvegarder la configuration';
+    if (err) toast('Erreur : ' + err, 'err');
+    else toast('Configuration sauvegardée !');
   });
+});
 
-  /* ── Utils ── */
-  function esc(s) {
-    return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-  }
-  function slugify(t) {
-    t = t.toLowerCase();
-    [["àâä","a"],["éèêë","e"],["îï","i"],["ôö","o"],["ùûü","u"],["ç","c"]].forEach(function(p){
-      p[0].split("").forEach(function(c){ t = t.split(c).join(p[1]); });
-    });
-    return t.replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-  }
-
-  /* ── Auto-login from session ── */
-  var saved = sessionStorage.getItem("arca_admin_pwd");
-  if (saved) {
-    state.pwd = saved;
-    loadData();
-  }
-
+/* ═══════════════════ INIT ═══════════════════ */
+(function() {
+  var saved = sessionStorage.getItem('arca_pwd');
+  if (saved) { S.pwd = saved; loadData(); }
 })();
 </script>
 </body>
