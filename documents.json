@@ -1,923 +1,5 @@
 [
   {
-    "id": "arca-01",
-    "title": "ARCA Revue N° 1 (2016)",
-    "type": "revue",
-    "category": "Revue ARCA",
-    "authors": [],
-    "author_display": "",
-    "subject": "revue",
-    "publication": "ARCA 1",
-    "year": "2016",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "arca-02",
-    "title": "ARCA Revue N° 2 (2018)",
-    "type": "revue",
-    "category": "Revue ARCA",
-    "authors": [],
-    "author_display": "",
-    "subject": "revue",
-    "publication": "ARCA 2",
-    "year": "2018",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "arca-03",
-    "title": "ARCA Revue N° 3 (2019)",
-    "type": "revue",
-    "category": "Revue ARCA",
-    "authors": [],
-    "author_display": "",
-    "subject": "revue",
-    "publication": "ARCA 3",
-    "year": "2019",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "arca-04",
-    "title": "ARCA Revue N° 4 (2021)",
-    "type": "revue",
-    "category": "Revue ARCA",
-    "authors": [],
-    "author_display": "",
-    "subject": "revue",
-    "publication": "ARCA 4",
-    "year": "2021",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "arca-05",
-    "title": "ARCA Revue N° 5 (2022)",
-    "type": "revue",
-    "category": "Revue ARCA",
-    "authors": [],
-    "author_display": "",
-    "subject": "revue",
-    "publication": "ARCA 5",
-    "year": "2022",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "arca-06",
-    "title": "ARCA Revue N° 6 (2023)",
-    "type": "revue",
-    "category": "Revue ARCA",
-    "authors": [],
-    "author_display": "",
-    "subject": "revue",
-    "publication": "ARCA 6",
-    "year": "2023",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "arca-07",
-    "title": "ARCA Revue N° 7 (2025)",
-    "type": "revue",
-    "category": "Revue ARCA",
-    "authors": [],
-    "author_display": "",
-    "subject": "revue",
-    "publication": "ARCA 7",
-    "year": "2025",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "alch-adel-chamir-couleurs",
-    "title": "Petite présentation des couleurs alchimiques",
-    "type": "article",
-    "category": "Alchimie",
-    "authors": [
-      "adel-chamir"
-    ],
-    "author_display": "Adel Chamir",
-    "subject": "alchimie",
-    "publication": "ARCA 7",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "alch-alain-bique-alambics",
-    "title": "Alambics et aludels, les instruments alchimiques",
-    "type": "article",
-    "category": "Alchimie",
-    "authors": [
-      "alain-bique"
-    ],
-    "author_display": "Alain Bique",
-    "subject": "alchimie",
-    "publication": "ARCA 3",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "alch-coppin-chute-icare",
-    "title": "La chute d'Icare",
-    "type": "article",
-    "category": "Alchimie",
-    "authors": [
-      "n-coppin"
-    ],
-    "author_display": "N. Coppin",
-    "subject": "alchimie",
-    "publication": "Via Hermetica 2",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "alch-hooghvorst-refais-boue",
-    "title": "Refais la boue et cuis la",
-    "type": "article",
-    "category": "Alchimie",
-    "authors": [
-      "e-dhooghvorst"
-    ],
-    "author_display": "E. d'Hooghvorst",
-    "subject": "alchimie",
-    "publication": "Via Hermetica 1",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "alch-dapsens-calid-morien",
-    "title": "Les Entretiens de Calid et Morien",
-    "type": "article",
-    "category": "Alchimie",
-    "authors": [
-      "marion-dapsens"
-    ],
-    "author_display": "Marion Dapsens",
-    "subject": "alchimie",
-    "publication": "ARCA 2",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "alch-feye-conseil-alchymique",
-    "title": "Petit conseil Alchymique",
-    "type": "article",
-    "category": "Alchimie",
-    "authors": [
-      "stephane-feye"
-    ],
-    "author_display": "S. Feye",
-    "subject": "alchimie",
-    "publication": "",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "alch-feye-pythagorisme",
-    "title": "Pythagorisme et alchimie — conférence 14 12 2007",
-    "type": "article",
-    "category": "Alchimie",
-    "authors": [
-      "stephane-feye"
-    ],
-    "author_display": "S. Feye",
-    "subject": "alchimie",
-    "publication": "",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "alch-newton-dapsens-pierre",
-    "title": "Quelques questions concernant la pierre des philosophes",
-    "type": "article",
-    "category": "Alchimie",
-    "authors": [
-      "isaac-newton",
-      "odile-dapsens"
-    ],
-    "author_display": "Isaac Newton & Odile Dapsens",
-    "subject": "alchimie",
-    "publication": "ARCA 6",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "alch-newton-feye-lion-vert",
-    "title": "La chasse au Lion Vert, poème alchimique",
-    "type": "article",
-    "category": "Alchimie",
-    "authors": [
-      "isaac-newton",
-      "alexandre-feye"
-    ],
-    "author_display": "Isaac Newton & Alexandre Feye",
-    "subject": "alchimie",
-    "publication": "ARCA 4",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "alch-philalethe-rubis",
-    "title": "Bref Manuel pour obtenir le rubis céleste",
-    "type": "article",
-    "category": "Alchimie",
-    "authors": [
-      "irenee-philalethe"
-    ],
-    "author_display": "Irénée Philalèthe",
-    "subject": "alchimie",
-    "publication": "ARCA 1",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "alch-wolsky-mathematique",
-    "title": "La Mathématique hermétique dévoilée",
-    "type": "article",
-    "category": "Alchimie",
-    "authors": [
-      "samuel-wolsky"
-    ],
-    "author_display": "Samuel Wolsky",
-    "subject": "alchimie",
-    "publication": "ARCA 1",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "alch-orduna-cattiaux-cosmopolite",
-    "title": "Louis Cattiaux et le Cosmopolite",
-    "type": "article",
-    "category": "Alchimie",
-    "authors": [
-      "m-orduna"
-    ],
-    "author_display": "M. Orduna",
-    "subject": "alchimie",
-    "publication": "Via Hermetica 3",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "herm-agrippa-soleil-lune",
-    "title": "Du soleil et de la lune",
-    "type": "article",
-    "category": "Hermétisme",
-    "authors": [
-      "agrippa"
-    ],
-    "author_display": "Agrippa",
-    "subject": "hermetisme",
-    "publication": "",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "herm-hooghvorst-e-pythagorisme",
-    "title": "Le pythagorisme ésotérique — Conférence",
-    "type": "article",
-    "category": "Hermétisme",
-    "authors": [
-      "e-dhooghvorst"
-    ],
-    "author_display": "E. d'Hooghvorst",
-    "subject": "hermetisme",
-    "publication": "Miroir d'Isis 16",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "herm-hooghvorst-ch-voie-hermes",
-    "title": "La voie d'Hermès",
-    "type": "article",
-    "category": "Hermétisme",
-    "authors": [
-      "ch-dhooghvorst"
-    ],
-    "author_display": "Ch. d'Hooghvorst",
-    "subject": "hermetisme",
-    "publication": "Fil d'Ariane 67-68",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "herm-hooghvorst-ch-paracelse",
-    "title": "Thèmes chrétiens chez Paracelse",
-    "type": "article",
-    "category": "Hermétisme",
-    "authors": [
-      "ch-dhooghvorst"
-    ],
-    "author_display": "Ch. d'Hooghvorst",
-    "subject": "hermetisme",
-    "publication": "ARCA 4",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "herm-dapsens-verbe-merveilles",
-    "title": "Le Verbe qui fait des Merveilles",
-    "type": "article",
-    "category": "Hermétisme",
-    "authors": [
-      "odile-dapsens"
-    ],
-    "author_display": "O. Dapsens",
-    "subject": "hermetisme",
-    "publication": "Revue ecclésiastique",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "herm-coppin-magie-verbe",
-    "title": "La magie ou l'art du Verbe",
-    "type": "article",
-    "category": "Hermétisme",
-    "authors": [
-      "l-de-coppin"
-    ],
-    "author_display": "L. de Coppin",
-    "subject": "hermetisme",
-    "publication": "ARCA 1",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "herm-dory-enfant-pain",
-    "title": "L'enfant dans la pâte à pain, ou de l'invention du levain",
-    "type": "article",
-    "category": "Hermétisme",
-    "authors": [
-      "anne-dory"
-    ],
-    "author_display": "A. D'Ory",
-    "subject": "hermetisme",
-    "publication": "ARCA 5",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "chr-thuysbaert-grignion",
-    "title": "Hommage à saint Louis-Marie Grignion de Montfort",
-    "type": "article",
-    "category": "Christianisme",
-    "authors": [
-      "caroline-thuysbaert"
-    ],
-    "author_display": "C. Thuysbaert",
-    "subject": "christianisme",
-    "publication": "ARCA 1",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "chr-dapsens-jean-1",
-    "title": "L'Évangile selon saint Jean (1e partie)",
-    "type": "article",
-    "category": "Christianisme",
-    "authors": [
-      "odile-dapsens"
-    ],
-    "author_display": "O. Dapsens",
-    "subject": "christianisme",
-    "publication": "ARCA 4",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "chr-dapsens-jean-2",
-    "title": "L'Évangile selon saint Jean (2e partie)",
-    "type": "article",
-    "category": "Christianisme",
-    "authors": [
-      "odile-dapsens"
-    ],
-    "author_display": "O. Dapsens",
-    "subject": "christianisme",
-    "publication": "ARCA 5",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "chr-dapsens-jean-3",
-    "title": "L'évangile de Jean (3e partie)",
-    "type": "article",
-    "category": "Christianisme",
-    "authors": [
-      "odile-dapsens"
-    ],
-    "author_display": "O. Dapsens",
-    "subject": "christianisme",
-    "publication": "ARCA 7",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "chr-feye-symbolisme-nicolas",
-    "title": "Le Symbolisme de saint Nicolas",
-    "type": "article",
-    "category": "Christianisme",
-    "authors": [
-      "stephane-feye"
-    ],
-    "author_display": "S. Feye",
-    "subject": "christianisme",
-    "publication": "ARCA 2",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "chr-thuysbaert-cure-ars",
-    "title": "Le Saint Curé d'Ars, Jean-Baptiste-Marie Vianney",
-    "type": "article",
-    "category": "Christianisme",
-    "authors": [
-      "caroline-thuysbaert"
-    ],
-    "author_display": "C. Thuysbaert",
-    "subject": "christianisme",
-    "publication": "ARCA 1",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "clas-kasteel-virgile-alch",
-    "title": "Virgile commenté par les alchimistes",
-    "type": "article",
-    "category": "Classiques",
-    "authors": [
-      "hans-van-kasteel"
-    ],
-    "author_display": "H. van Kasteel",
-    "subject": "classiques",
-    "publication": "Via Hermetica",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "clas-kasteel-denys",
-    "title": "Denys l'Aréopagite",
-    "type": "article",
-    "category": "Classiques",
-    "authors": [
-      "hans-van-kasteel"
-    ],
-    "author_display": "H. van Kasteel",
-    "subject": "classiques",
-    "publication": "ARCA 2",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "clas-kasteel-orphee-trinite",
-    "title": "Orphée et la Trinité",
-    "type": "article",
-    "category": "Classiques",
-    "authors": [
-      "hans-van-kasteel"
-    ],
-    "author_display": "H. van Kasteel",
-    "subject": "classiques",
-    "publication": "ARCA 6",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "clas-kasteel-mort-philosophes",
-    "title": "LA MORT d'après les Philosophes",
-    "type": "article",
-    "category": "Classiques",
-    "authors": [
-      "hans-van-kasteel"
-    ],
-    "author_display": "H. van Kasteel",
-    "subject": "classiques",
-    "publication": "",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "clas-feye-ya-t-il-philosophie",
-    "title": "Y a-t-il une philosophie ? (Conférence)",
-    "type": "article",
-    "category": "Classiques",
-    "authors": [
-      "stephane-feye"
-    ],
-    "author_display": "S. Feye",
-    "subject": "classiques",
-    "publication": "ARCA 2",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "clas-forget-commentaire-virgile",
-    "title": "Commentaire sur Virgile",
-    "type": "article",
-    "category": "Classiques",
-    "authors": [
-      "a-forget"
-    ],
-    "author_display": "A. Forget",
-    "subject": "classiques",
-    "publication": "ARCA 1",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "msg-amadou-message-retrouve",
-    "title": "À propos du Message Retrouvé",
-    "type": "article",
-    "category": "Louis Cattiaux & Message Retrouvé",
-    "authors": [
-      "r-amadou"
-    ],
-    "author_display": "R. Amadou",
-    "subject": "message-retrouve",
-    "publication": "",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "msg-arola-art-pictural",
-    "title": "L'Art pictural de Louis Cattiaux",
-    "type": "article",
-    "category": "Louis Cattiaux & Message Retrouvé",
-    "authors": [
-      "r-arola"
-    ],
-    "author_display": "R. Arola",
-    "subject": "message-retrouve",
-    "publication": "",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "msg-cattiaux-matiere",
-    "title": "La Matière",
-    "type": "article",
-    "category": "Louis Cattiaux & Message Retrouvé",
-    "authors": [
-      "louis-cattiaux"
-    ],
-    "author_display": "L. Cattiaux",
-    "subject": "message-retrouve",
-    "publication": "ARCA 3",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "msg-hooghvorst-ch-message-herm",
-    "title": "Le Message hermétique retrouvé expliqué par Philalèthe",
-    "type": "article",
-    "category": "Louis Cattiaux & Message Retrouvé",
-    "authors": [
-      "ch-dhooghvorst"
-    ],
-    "author_display": "Ch. d'Hooghvorst",
-    "subject": "message-retrouve",
-    "publication": "",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "msg-hooghvorst-ch-verbe-perdu",
-    "title": "Le Verbe perdu et retrouvé",
-    "type": "article",
-    "category": "Louis Cattiaux & Message Retrouvé",
-    "authors": [
-      "ch-dhooghvorst"
-    ],
-    "author_display": "Ch. d'Hooghvorst",
-    "subject": "message-retrouve",
-    "publication": "Colloque Canseliet",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "msg-dapsens-predictions",
-    "title": "Les prédictions de Louis Cattiaux",
-    "type": "article",
-    "category": "Louis Cattiaux & Message Retrouvé",
-    "authors": [
-      "odile-dapsens"
-    ],
-    "author_display": "O. Dapsens",
-    "subject": "message-retrouve",
-    "publication": "ARCA 5",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "msg-feye-interview-cattiaux",
-    "title": "Interview sur Louis Cattiaux et son œuvre",
-    "type": "article",
-    "category": "Louis Cattiaux & Message Retrouvé",
-    "authors": [
-      "stephane-feye"
-    ],
-    "author_display": "S. Feye",
-    "subject": "message-retrouve",
-    "publication": "ARCA 7",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "jud-dapsens-joseph-egypte",
-    "title": "Joseph ministre en Égypte",
-    "type": "article",
-    "category": "Judaïsme",
-    "authors": [
-      "odile-dapsens"
-    ],
-    "author_display": "O. Dapsens",
-    "subject": "judaisme",
-    "publication": "ARCA 1",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "jud-thuysbaert-nahmanide",
-    "title": "Nahmanide et son commentaire cabalistique sur Genèse XLIX, 33",
-    "type": "article",
-    "category": "Judaïsme",
-    "authors": [
-      "caroline-thuysbaert"
-    ],
-    "author_display": "C. Thuysbaert",
-    "subject": "judaisme",
-    "publication": "ARCA 3",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "jud-feye-buisson-ardent",
-    "title": "Le buisson ardent",
-    "type": "article",
-    "category": "Judaïsme",
-    "authors": [
-      "e-feye"
-    ],
-    "author_display": "E. Feye",
-    "subject": "judaisme",
-    "publication": "ARCA 5",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "jud-hooghvorst-zohar",
-    "title": "Conférence sur le Zohar",
-    "type": "article",
-    "category": "Judaïsme",
-    "authors": [
-      "e-dhooghvorst"
-    ],
-    "author_display": "E. d'Hooghvorst",
-    "subject": "judaisme",
-    "publication": "",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "isl-hooghvorst-jesus-musulmans",
-    "title": "Jésus chez les musulmans",
-    "type": "article",
-    "category": "Islam",
-    "authors": [
-      "e-dhooghvorst"
-    ],
-    "author_display": "E. d'Hooghvorst",
-    "subject": "islam",
-    "publication": "Beya 10",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "isl-martinez-introduction",
-    "title": "Introduction à l'Islam",
-    "type": "article",
-    "category": "Islam",
-    "authors": [
-      "v-martinez"
-    ],
-    "author_display": "V. Martinez",
-    "subject": "islam",
-    "publication": "ARCA 6",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "isl-masterton-spiritualite-chiite",
-    "title": "Comprendre la spiritualité d'un point de vue chiite",
-    "type": "article",
-    "category": "Islam",
-    "authors": [
-      "r-masterton"
-    ],
-    "author_display": "R. Masterton",
-    "subject": "islam",
-    "publication": "ARCA 3",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "div-dechambre-art-predire",
-    "title": "L'Art de prédire et nous",
-    "type": "article",
-    "category": "Divers",
-    "authors": [
-      "remy-dechambre"
-    ],
-    "author_display": "R. Dechambre",
-    "subject": "divers",
-    "publication": "ARCA 5",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "div-hooghvorst-ch-quete",
-    "title": "La Quête",
-    "type": "article",
-    "category": "Divers",
-    "authors": [
-      "ch-dhooghvorst"
-    ],
-    "author_display": "Ch. d'Hooghvorst",
-    "subject": "divers",
-    "publication": "ARCA 3",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "liv-cattiaux-message-retrouve-fr",
-    "title": "Le Message Retrouvé",
-    "type": "livre",
-    "category": "Livres",
-    "authors": [
-      "louis-cattiaux"
-    ],
-    "author_display": "Louis Cattiaux",
-    "subject": "message-retrouve",
-    "publication": "Éditions Beya, 2024",
-    "year": "2024",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "liv-cattiaux-message-retrouve-en",
-    "title": "The Message Rediscovered",
-    "type": "livre",
-    "category": "Livres",
-    "authors": [
-      "louis-cattiaux"
-    ],
-    "author_display": "Louis Cattiaux",
-    "subject": "message-retrouve",
-    "publication": "Beya, 2005",
-    "year": "2005",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "liv-eckartshausen-nuee",
-    "title": "La nuée sur la sanctuaire",
-    "type": "livre",
-    "category": "Livres",
-    "authors": [
-      "karl-von-eckartshausen"
-    ],
-    "author_display": "Karl von Eckartshausen",
-    "subject": "hermetisme",
-    "publication": "Maradan, 1819",
-    "year": "1819",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "liv-apulee-ane-or",
-    "title": "L'âne d'or",
-    "type": "livre",
-    "category": "Livres",
-    "authors": [
-      "apulee"
-    ],
-    "author_display": "Apulée",
-    "subject": "classiques",
-    "publication": "Paris, Bastien, 1822",
-    "year": "1822",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "liv-villars-comte-gabalis",
-    "title": "Le Comte de Gabalis ou Entretiens sur les Sciences secrètes",
-    "type": "livre",
-    "category": "Livres",
-    "authors": [
-      "montfaucon-de-villars"
-    ],
-    "author_display": "Montfaucon de Villars",
-    "subject": "hermetisme",
-    "publication": "",
-    "year": "",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "liv-vigenere-feu-sel",
-    "title": "Traité du Feu et du Sel",
-    "type": "livre",
-    "category": "Livres",
-    "authors": [
-      "blaise-de-vigenere"
-    ],
-    "author_display": "Blaise de Vigenère",
-    "subject": "alchimie",
-    "publication": "L'Angelier, 1618",
-    "year": "1618",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "liv-lopoukhine-eglise-interieure",
-    "title": "Quelques traits de l'église intérieure",
-    "type": "livre",
-    "category": "Livres",
-    "authors": [
-      "lopoukhine"
-    ],
-    "author_display": "Lopoukhine",
-    "subject": "christianisme",
-    "publication": "St.-Petersburg, 1799",
-    "year": "1799",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
-    "id": "liv-douzetemps-mystere-croix",
-    "title": "Le Mystère de la Croix",
-    "type": "livre",
-    "category": "Livres",
-    "authors": [
-      "douzetemps"
-    ],
-    "author_display": "Douzetemps",
-    "subject": "christianisme",
-    "publication": "1860",
-    "year": "1860",
-    "dropbox_url": "",
-    "source_url": ""
-  },
-  {
     "id": "pdfadel-chamir-petite-presentation-des-couleurs-alchimiques-arca-7",
     "title": "pdfAdel Chamir - Petite présentation des couleurs alchimiques - ARCA 7",
     "type": "articles",
@@ -927,7 +9,7 @@
     "subject": "alchimie",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/ab4fw1hg850lpbnqnchio/pdfadel-chamir-petite-presentation-des-couleurs-alchimiques-arca-7.pdf?rlkey=xj6ompydilujuakplyjxnysrt&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/alchimie/adel-chamir-petite-presentation-des-couleurs-alchimiques-arca-7-1/?layout=file"
   },
   {
@@ -940,7 +22,7 @@
     "subject": "alchimie",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/1j6qhddbr3mw3j51smbcy/pdfbique-a-alambics-et-aludels-les-instruments-alchimiques-arca-3pdf.pdf?rlkey=g2qpa6j0rt0ms2lykmsz5i4kb&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/alchimie/bique-alain-alambics-et-aludels-les-instruments-alchimiques-arca-3pdf/?layout=file"
   },
   {
@@ -953,7 +35,7 @@
     "subject": "alchimie",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/mep30k8wn9x3qltatyz2e/pdfcoppin-n-la-chute-dicare-via-hermetica-2.pdf?rlkey=m98460z8wtu3n9iz1svzz97n5&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/alchimie/coppin-n-la-chute-dicare-via-hermetica-2/?layout=file"
   },
   {
@@ -966,7 +48,7 @@
     "subject": "alchimie",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/0w52e6cus25xrcqptqr01/pdfdhooghvorst-e-refais-la-boue-et-cuis-la-via-hermetica-1.pdf?rlkey=ownv17pghacb68v3dyrsn4gy5&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/alchimie/dhooghvorst-e-refais-la-boue-et-cuis-la-via-hermetica-1/?layout=file"
   },
   {
@@ -979,7 +61,7 @@
     "subject": "alchimie",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/29uhw314b8e9nlh79oub1/pdfdapsens-m-les-entretiens-de-calid-et-morien-arca-2pdf.pdf?rlkey=sxjm66ctq39b5xlah69gdb6l1&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/alchimie/dapsens-marion-les-entretiens-de-calid-et-morien-arca-2pdf/?layout=file"
   },
   {
@@ -992,7 +74,7 @@
     "subject": "alchimie",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/s2zoxkiie0i98yt9ru3ci/pdfde-lophem-a-promethee-alchimique.pdf?rlkey=0gimmceudsm762hedwxjt0yva&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/alchimie/de-lophem-a-promethee-alchimique/?layout=file"
   },
   {
@@ -1005,7 +87,7 @@
     "subject": "alchimie",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/9ozjpigtfl2yhiojz9ntm/pdffeye-s-petit-conseil-alchymique.pdf?rlkey=a9iyknxmqrnt6we8ndotng1ls&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/alchimie/feye-s-petit-conseil-alchymique/?layout=file"
   },
   {
@@ -1018,7 +100,7 @@
     "subject": "alchimie",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/mzuc1jfoi9se87ju9n79y/pdffeye-s-pythagorisme-et-alchimie-conference-14-12-2007.pdf?rlkey=l8c9komchno6plnaii0i27kw7&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/alchimie/feye-s-pythagorisme-et-alchimie-conference-14-12-2007/?layout=file"
   },
   {
@@ -1031,7 +113,7 @@
     "subject": "alchimie",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/lztilmn1p6c5ah3xw6esu/pdfgloria-mundi-preface-dhooghvorst-ch.pdf?rlkey=te9tqn5auhvzmsx2m70z4yd7q&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/alchimie/gloria-mundi-preface-ch/?layout=file"
   },
   {
@@ -1044,7 +126,7 @@
     "subject": "alchimie",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/6ddtjx4gu8rba15v9mwr2/pdfle-songe-vert-beya.pdf?rlkey=6tionkrjptgs03l8ktd8oous9&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/alchimie/le-songe-vert-beya/?layout=file"
   },
   {
@@ -1057,7 +139,7 @@
     "subject": "alchimie",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/rg0fyv4y1d8pdgmeskriy/pdfnewton-troublante-affaire-curieuse-anecdote.pdf?rlkey=oajmbnwnt1n5rydarhbm5urfj&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/alchimie/newton-troublante-affaire-curieuse-anecdote/?layout=file"
   },
   {
@@ -1070,7 +152,7 @@
     "subject": "alchimie",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/8ddr6zps2sifbfg0g2cs0/pdfnewton-isaac-et-dapsens-o-quelques-questions-concernant-la-pierre-des-philoso.pdf?rlkey=va6cvxcvvlb2i0vebhx8xocqf&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/alchimie/newton-isaac-et-dapsens-odile-quelques-questions-concernant-la-pierre-des-philosophes-arca-6-nspdf/?layout=file"
   },
   {
@@ -1083,7 +165,7 @@
     "subject": "alchimie",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/7f1wp8jccumkvls5uyr4x/pdfnewton-isaac-et-feye-a-la-chasse-au-lion-vert-poeme-alchimique-arca-4pdf.pdf?rlkey=8bpmkv0bplle02i7f0w68k3wp&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/alchimie/newton-isaac-et-feye-alexandre-la-chasse-au-lion-vert-poeme-alchimique-arca-4pdf/?layout=file"
   },
   {
@@ -1096,7 +178,7 @@
     "subject": "alchimie",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/5bvak64c4n17bhr9jghub/pdforduna-m-louis-cattiaux-et-le-cosmopolite-via-hermetica-3.pdf?rlkey=be4orsqj4nx1jch2lsb0h6834&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/alchimie/orduna-m-louis-cattiaux-et-le-cosmopolite-via-hermetica-3/?layout=file"
   },
   {
@@ -1109,7 +191,7 @@
     "subject": "alchimie",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/m4wm0t62yevrio2ulyg3o/pdfphilalethe-irenee-bref-manuel-pour-obtenir-le-rubis-celeste-arca-1pdf.pdf?rlkey=3jvmvyjn30nzovb5iw7sgxqkg&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/alchimie/philalethe-irenee-bref-manuel-pour-obtenir-le-rubis-celeste-arca-1pdf/?layout=file"
   },
   {
@@ -1122,7 +204,7 @@
     "subject": "alchimie",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/22vr9splx1566ufjgpvv6/pdfwolsky-samuel-la-mathematique-hermetique-devoilee-arca-1pdf.pdf?rlkey=qg5t7yk97a742djwnntuzi65u&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/alchimie/wolsky-samuel-la-mathematique-hermetique-devoilee-arca-1pdf/?layout=file"
   },
   {
@@ -1135,7 +217,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/mdz5g9j3qkvcq1ptyo3s9/pdfagrippa-du-soleil-et-de-la-lune.pdf?rlkey=n60h5y5xj76qlrqx4bjvnn6uf&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/agrippa-du-soleil-et-de-la-lune/?layout=file"
   },
   {
@@ -1148,7 +230,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/1i84swh1b3sd62ihq65d9/pdfalmurida-a-propos-de-lacte-de-manger-arca-1pdf.pdf?rlkey=br3p0d0gmk8x8o1h3eim78hja&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/almurida-a-propos-de-lacte-de-manger-arca-1/?layout=file"
   },
   {
@@ -1161,7 +243,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/0nu3gbhvuryn1utycx3mp/pdfarola-r-lalphabet-de-bruno-del-marmol-arca-3pdf.pdf?rlkey=zgq7v9aqu6k59bw33697i9pcr&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/arola-raimon-lalphabet-de-bruno-del-marmol-arca-3pdf/?layout=file"
   },
   {
@@ -1174,7 +256,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/q3izw0o5eq88wdauhlfkz/pdfarola-r-la-mort-initiatique-fil-dariane-57-58.pdf?rlkey=helxszfro2nd62q58byyj493c&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/arola-r-la-mort-initiatique-fil-dariane-57-58/?layout=file"
   },
   {
@@ -1187,7 +269,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/nmuaasbx21tqlppiyiz5f/pdfdaligny-a-le-hachmal-ou-lor-vivant-arca-2pdf.pdf?rlkey=3okm2rzqgbehu5pzji3av0ccd&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/daligny-alexina-le-hachmal-ou-lor-vivant-arca-2pdf/?layout=file"
   },
   {
@@ -1200,7 +282,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/tmn9jyt7g3dpms2mrqmpo/pdfdhooghvorst-ch-concordance-myth-hermet-de-fabre-preface.pdf?rlkey=z9lotugukt4mv7s01vo0krfza&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/dhooghvorst-ch-concordance-myth-hermet-de-fabre-preface/?layout=file"
   },
   {
@@ -1213,7 +295,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/iidos60dhnk0hkpso89sz/pdfdhooghvorst-ch-la-voie-dhermes-fil-dariane-67-68.pdf?rlkey=z3qj0fozjdr4lkvmj48i7kpd4&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/dhooghvorst-ch-la-voie-dhermes-fil-dariane-67-68/?layout=file"
   },
   {
@@ -1226,7 +308,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/m884scydfwpxdj2z607np/pdfdhooghvorst-charles-themes-chretiens-chez-paracelse-arca-4pdf.pdf?rlkey=peqmrc4b10draykr9zk1hx09p&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/dhooghvorst-charles-themes-chretiens-chez-paracelses-arca-4pdf/?layout=file"
   },
   {
@@ -1239,7 +321,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/llg7dcw2gr8czzhekzvyr/pdfdhooghvorst-e-bons-vux-a-un-ami-conte-hermetique.pdf?rlkey=na7f2hnsyonshu0qu02k6hyd6&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/dhooghvorst-e-bons-voeux-a-un-ami-conte-hermetique/?layout=file"
   },
   {
@@ -1252,7 +334,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/6ufg7en01qpnl31spm7ey/pdfdhooghvorst-e-le-pythagorisme-esoterique-conference-miroir-disis-16.pdf?rlkey=nu55ek2isw492tv11pwpo09e9&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/dhooghvorst-e-le-pythagorisme-esoterique-conference-miroir-disis-16/?layout=file"
   },
   {
@@ -1265,7 +347,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/yb2xa9zj5k1nw4uu8bbs8/pdfdhooghvorst-e-ordo-ab-chao-via-hermetica-v.pdf?rlkey=w2korzxe7f1gli8k5qyquttyt&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/dhooghvorst-e-ordo-ab-chao-via-hermetica-v/?layout=file"
   },
   {
@@ -1278,7 +360,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/ix79b05z959v559ma0jkw/pdfdory-anne-lenfant-dans-la-pate-a-pain-ou-de-linvention-du-levain-arca-5pdf.pdf?rlkey=filoni2v50i80echlwkcu22gs&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/dory-anne-lenfant-dans-la-pate-a-pain-ou-de-linvention-du-levain-arca-5pdf/?layout=file"
   },
   {
@@ -1291,7 +373,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/77h8nn887gpo0h05q5cyw/pdfdapsens-o-le-verbe-qui-fait-des-merveilles-revue-ecclesiastique.pdf?rlkey=siw5nrfaml9f2o9nxk1p3xij9&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/dapsens-o-le-verbe-qui-fait-des-merveilles-revue-ecclesiastique/?layout=file"
   },
   {
@@ -1304,7 +386,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/ht5w5cqn6753hctakh1o7/pdfde-coppin-l-la-magie-ou-lart-du-verbe-arca-1pdf.pdf?rlkey=hdx9vn4l3l1ma8nwqpa349n9g&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/de-coppin-lorraine-la-magie-ou-lart-du-verbe-arca-1/?layout=file"
   },
   {
@@ -1317,7 +399,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/rd7hs2hbf7ed5otv53zjn/pdfde-coppin-l-le-rire-veritablement-catholique-arca-3pdf.pdf?rlkey=3g36vypeg6c6eja8vjobeet2g&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/de-coppin-lorraine-le-rire-veritablement-catholique-arca-3pdf/?layout=file"
   },
   {
@@ -1330,7 +412,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/uxyidvltca29dh88akz9p/pdfde-lophem-a-promethee-alchymique-arca-4pdf.pdf?rlkey=3r53hr74zr04vazlvcx4ntg3w&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/de-lophem-antoine-promethee-alchymique-arca-4pdf/?layout=file"
   },
   {
@@ -1343,7 +425,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/3vre5wp48wzg2vwin7jes/pdfde-lophem-o-la-corne-arca-5pdf.pdf?rlkey=2g98m9ffaocohcshs37yr48wa&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/de-lophem-oriane-la-corne-arca-5pdf/?layout=file"
   },
   {
@@ -1356,7 +438,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/s6tq9fr8vec3d51l7az48/pdfde-meeus-a-ed-le-sens-des-mots-arca-7pdf.pdf?rlkey=hctnsomch0zy820qm0rsn0wq7&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/de-meeus-a-ed-le-sens-des-mots-arca-7pdf/?layout=file"
   },
   {
@@ -1369,7 +451,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/5jya1nn61l8a9j13wbbsc/pdfde-meeus-a-la-blancheur-arca-2pdf.pdf?rlkey=r39f7tlmo9vuxktgd3kbm6eye&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/de-meeus-arnau-la-blancheur-arca-2pdf/?layout=file"
   },
   {
@@ -1382,7 +464,7 @@
     "subject": "hermetisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/bzn288ewha4m1ndq6l4gj/pdfde-meeus-a-la-main-1e-partie-arca-4pdf.pdf?rlkey=4g91rrksq4f3vc1ja4np4qnkk&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/hermetisme/de-meeus-arnau-la-main-1e-partie-arca-4pdf/?layout=file"
   },
   {
@@ -1395,7 +477,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/z2qbtkrzmlzidzu2bxwqv/pdfcharpentier-a-aywiers-une-abbaye-disparue.pdf?rlkey=ed4pyucfek2il5oxd8ixqiwb7&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/charpentier-a-aywiers-une-abbaye-disparue/?layout=file"
   },
   {
@@ -1408,7 +490,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/wtpl6w3vnegh2qysfad87/pdfdansembourg-j-m-la-discipline-du-secret-fil-dariane-2.pdf?rlkey=lze3spprnmj3aen5p4zz9q5cf&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/dansembourg-j-m-la-discipline-du-secret-fil-dariane-2/?layout=file"
   },
   {
@@ -1421,7 +503,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/nxctrz9anhql2lh2jsp43/pdfdansembourg-j-m-these-de-rene-guenon-fil-dariane-39.pdf?rlkey=3xag0wh1dekzu98up09pxizss&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/dansembourg-j-m-these-de-rene-guenon-fil-dariane-39/?layout=file"
   },
   {
@@ -1434,7 +516,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/0y4zmc3i9443ejl5vzf7s/pdfdhooghvorst-e-la-foi-miroir-disis-24.pdf?rlkey=740g7fly8q7h51e1meg9kzwpr&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/dhooghvorst-e-la-foi-miroir-disis-24/?layout=file"
   },
   {
@@ -1447,7 +529,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/wu8d3i44yllt8i5w09r4l/pdfdhooghvorst-e-sainte-colombe-et-le-pape-alexandre-vi-fil-dariane-20.pdf?rlkey=10wpy893xh9t2kcllzuhx5vx0&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/dhooghvorst-e-sainte-colombe-et-le-pape-alexandre-vi-fil-dariane-20/?layout=file"
   },
   {
@@ -1460,7 +542,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/b93oxxsmvha56go7243ca/pdfdapsens-o-levangile-de-jean-3e-partie-arca-7pdf.pdf?rlkey=npnumc05ajosbkijx5msyi6sf&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/dapsens-o-levangile-de-jean-3e-partie-arca-7pdf/?layout=file"
   },
   {
@@ -1473,7 +555,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/m1spggod4kz962id9nx2j/pdfdapsens-o-levangile-de-jean-a-la-lumiere-du-message-retrouve-arca-6-nspdf.pdf?rlkey=pbwacy4pots6tx1w4vmuis1me&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/dapsens-odile-levangile-de-jean-a-la-lumiere-du-message-retrouve-arca-6-nspdf/?layout=file"
   },
   {
@@ -1486,7 +568,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/3cv6fjmxends4jhp6fygv/pdfdapsens-o-levangile-selon-saint-jean-1e-partie-arca-4pdf.pdf?rlkey=1rydyj1z6reciybzlo1100zzk&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/dapsens-odile-levangile-selon-saint-jean-1e-partie-arca-4pdf/?layout=file"
   },
   {
@@ -1499,7 +581,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/k0m4dyvrlwyriabfwd77w/pdfdapsens-o-levangile-selon-saint-jean-2e-partie-arca-5pdf.pdf?rlkey=efatq0v09tist403983uxn1ng&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/dapsens-odile-levangile-selon-saint-jean-2e-partie-arca-5pdf/?layout=file"
   },
   {
@@ -1512,7 +594,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/fr2pt3uiebshf6vjrw1xw/pdfde-coppin-l-le-rire-veritablement-catholique-arca-3.pdf?rlkey=p1zrzy3bm63qcjo0300amzxwp&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/de-coppin-l-le-rire-veritablement-catholique-arca-3/?layout=file"
   },
   {
@@ -1525,7 +607,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/3bk3w2gs886ecdm1jvol2/pdffeye-s-a-propos-du-cure-dars-fil-dariane-28.pdf?rlkey=fxelsb6ptq4s3517g0xhehwkf&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/feye-s-a-propos-du-cure-dars-fil-dariane-28/?layout=file"
   },
   {
@@ -1538,7 +620,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/ijyu11cnj05uaoe8n9kxv/pdffeye-s-la-femme-nous-rend-fous-la-puerta-76.pdf?rlkey=00m9fys5h6el4v5a9fp3902lh&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/feye-s-la-femme-nous-rend-fous-la-puerta-76/?layout=file"
   },
   {
@@ -1551,7 +633,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/vrvpzomj0vlh5rmgxxozh/pdffeye-s-le-symbolisme-de-saint-nicolas-arca-2.pdf?rlkey=0xtf33fjpkgkrgjahmmix9s7v&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/feye-s-le-symbolisme-de-saint-nicolas-arca-2/?layout=file"
   },
   {
@@ -1564,7 +646,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/kaszp4l8k04fsxdz9i9wf/pdfforget-a-la-vierge-marie-au-fil-du-temps-arca-3pdf.pdf?rlkey=fzberasyf52zfrh73wi5maa6h&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/forget-alienor-la-vierge-marie-au-fil-du-temps-arca-3pdf/?layout=file"
   },
   {
@@ -1577,7 +659,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/c8jexfnw983cdk2qhonz1/pdflynx-a-saint-augustin-et-les-apparitions-fil-dariane-42.pdf?rlkey=2tl51a85q6mia7wox1mimfm8a&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/lynx-a-saint-augustin-et-les-apparitions-fil-dariane-42/?layout=file"
   },
   {
@@ -1590,7 +672,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/oq9409s2risgfw25qfdq0/pdfthuysbaert-c-cherchez-moi-et-vivez-arca-4.pdf?rlkey=7585ayl2qhf86d72h6ahjtigl&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/thuysbaert-c-cherchez-moi-et-vivez-arca-4/?layout=file"
   },
   {
@@ -1603,7 +685,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/1pjeelv573jhbrvsb6e4r/pdfthuysbaert-c-hommage-a-saint-louis-marie-grignion-de-montfort-arca-1pdf.pdf?rlkey=z6895o59n4cqkf57y8owgp2i5&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/thuysbaert-caroline-hommage-a-saint-louis-marie-grignion-de-montfort-arca-1pdf/?layout=file"
   },
   {
@@ -1616,7 +698,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/f8c8gu8unr7yvid0a0c0w/pdfthuysbaert-c-le-printemps-dans-la-tradition-judeo-chretienne-la-puerta-73.pdf?rlkey=3fhj29bm0em1a9rn0osjkd3tu&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/thuysbaert-c-le-printemps-dans-la-tradition-judeo-chretienne-la-puerta-73/?layout=file"
   },
   {
@@ -1629,7 +711,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/oph26uzbb6aqpwp4e2d70/pdfthuysbaert-c-le-saint-cure-dars-jean-baptiste-marie-vianney-arca-1pdf.pdf?rlkey=dvm8hiqlw7bnprrcve0k5mjaa&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/thuysbaert-caroline-le-saint-cure-dars-jean-baptiste-marie-vianney-arca-1pdf/?layout=file"
   },
   {
@@ -1642,7 +724,7 @@
     "subject": "christianisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/5te520hh50tdtp38prj8m/pdfthuysbaert-c-les-paiens-decryptes-par-un-jesuite-arca-3pdf.pdf?rlkey=42yvrv85klcfermmkqhfgpvmr&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/christianisme/thuysbaert-caroline-les-paiens-decryptes-par-un-jesuite-arca-3pdf/?layout=file"
   },
   {
@@ -1655,7 +737,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/0gnyg7j2u2fqv7kg2nz2c/pdfcoppin-n-la-chute-dicare-arca-6-nspdf.pdf?rlkey=3s1p1s4mmp0kdgcppb9iuf45q&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/coppin-nadine-la-chute-dicare-arca-6-nspdf/?layout=file"
   },
   {
@@ -1668,7 +750,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/cftwuy4audcdlblm2snxt/pdfdhooghvorst-ch-le-mystere-de-pan.pdf?rlkey=kwsfdszmywo0limixblgmuisk&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/dhooghvorst-ch-le-mystere-de-pan/?layout=file"
   },
   {
@@ -1681,7 +763,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/exatgpfglqkgz0y05b8wu/pdfdel-tilo-c-la-tradition-ecrite-des-anciens-egyptiens-arca-6-nspdf.pdf?rlkey=n44hdfer022incl74c4fchm5g&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/del-tilo-carlos-la-tradition-ecrite-des-anciens-egyptiens-arca-6-nspdf/?layout=file"
   },
   {
@@ -1694,7 +776,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/0k6nrk0uq7xk66wcwrv5h/pdffeye-s-porphyre-fil-dariane-2.pdf?rlkey=gr6koext33xdhmub0alyxzd2v&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/feye-s-porphyre-fil-dariane-2/?layout=file"
   },
   {
@@ -1707,7 +789,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/n3p89m43j46qzag4o286w/pdffeye-s-chute-dhephaistos-fil-dariane-12.pdf?rlkey=q37h8bu80s40olqepsxdgjnwb&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/feye-s-chute-dhephaistos-fil-dariane-12/?layout=file"
   },
   {
@@ -1720,7 +802,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/q18t4cup0932h8ijs43cs/pdffeye-s-lharmonie-miroir-disis-22.pdf?rlkey=d9o9h34jb8nnekdskeem61qv3&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/feye-s-lharmonie-miroir-disis-22/?layout=file"
   },
   {
@@ -1733,7 +815,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/awhjvsc223itopqgj46g7/pdffeye-s-y-a-t-il-une-philosophie-conference-arca-2.pdf?rlkey=iji0dd7qkgylj0v5qhyy6hs5s&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/feye-s-y-a-t-il-une-philosophie-arca-2/?layout=file"
   },
   {
@@ -1746,7 +828,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/c56vdzx2nktg2qnbaecyr/pdfforget-a-commentaire-sur-virgile-arca-1pdf.pdf?rlkey=kcmtbpeso3cqgjuusqmnpghud&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/forget-alienor-commentaire-sur-virgile-arca-1pdf/?layout=file"
   },
   {
@@ -1759,7 +841,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/1t8anpljs81tlh4ayjd1b/pdffroidebise-c-virgile-presente-par-maier-fil-dariane-3.pdf?rlkey=xjq6mkzgq62lfy0npuoj9a3kc&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/froidebise-c-virgile-presente-par-maier-fil-dariane-3/?layout=file"
   },
   {
@@ -1772,7 +854,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/ij3rmyrx0yu8r2lkj30el/pdflynxe-a-la-vraie-histoire-du-quichotte-arca-2pdf.pdf?rlkey=ihxaez56eirdzwfty33z5s33y&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/lynxe-a-la-vraie-histoire-du-quichotte-arca-2pdf/?layout=file"
   },
   {
@@ -1785,7 +867,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/4hxkvvco730ys33yt3hp5/pdfmarie-anne-diane-et-acteon-arca-7pdf.pdf?rlkey=2humo1ymxuak53kwxqr9bgdh3&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/marie-anne-diane-et-acteon-arca-7pdf/?layout=file"
   },
   {
@@ -1798,7 +880,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/o1zo7gplk46ewdb43cm8n/pdfmoieuf-a-les-mutacions-dovide-arca-4pdf.pdf?rlkey=u1ow61skmyom34ej95zgrktfw&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/moieuf-aubin-les-mutacions-dovide-arca-4pdf/?layout=file"
   },
   {
@@ -1811,7 +893,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/30cqcd9bvygmvlcxni6ra/pdfsanchez-p-les-vetements-daphrodite-arca-2pdf.pdf?rlkey=eda8mlr6of9q6i5184aq3ydqx&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/sanchez-pere-les-vetements-daphrodite-arca-2pdf/?layout=file"
   },
   {
@@ -1824,7 +906,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/6dlyh52i52qaqk0yl6me4/pdfvan-de-roos-r-le-prologue-du-roman-de-la-rose-de-guillaume-de-lorris-arca-4pd.pdf?rlkey=zewbp3sn88pd4nd1j0740olqf&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/van-de-roos-romane-le-prologue-du-roman-de-la-rose-de-guillaume-de-lorris-arca-4pdf/?layout=file"
   },
   {
@@ -1837,7 +919,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/8p3qpcztisazkx2ck7t41/pdfvan-kasteel-h-virgile-commente-par-les-alchimistes-via-hermetica.pdf?rlkey=rjb785zhcbt90rmugyvtkajjn&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/van-kasteel-h-virgile-commente-par-les-alchimistes-via-hermetica/?layout=file"
   },
   {
@@ -1850,7 +932,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/pw2uoy9yipurfnz34mpfr/pdfvan-kasteel-h-denys-lareopagite-arca-2pdf.pdf?rlkey=fv5z0pq46mlcdjo8j9nezphkm&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/h-v-k-denys-lareopagite-arca-2pdf/?layout=file"
   },
   {
@@ -1863,7 +945,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/fcrbgy7zafdlxu46zmtk7/pdfvan-kasteel-h-bracesco-mythologue-via-hermetica.pdf?rlkey=11pbfnir6anqx4yivuvts89wy&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/van-kasteel-h-bracesco-mythologue-via-hermetica/?layout=file"
   },
   {
@@ -1876,7 +958,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/l6350j02ys1p5cofx9p49/pdfvan-kasteel-h-introduction-a-la-mythologie-via-hermetica.pdf?rlkey=8lpxagwxczgzv3xv0k46vuwbv&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/van-kasteel-h-introduction-a-la-mythologie-via-hermetica/?layout=file"
   },
   {
@@ -1889,7 +971,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/0nttnu7bj7248mfsw2xt3/pdfvan-kasteel-h-la-mort-dapres-les-philosophes-arca-youtube.pdf?rlkey=jjdxj7bitkvkrc7ti6xex2d02&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/van-kasteel-h-la-mort-dapres-les-philosophes/?layout=file"
   },
   {
@@ -1902,7 +984,7 @@
     "subject": "classiques",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/ltx0zz0jbh2e5j3myuvd6/pdfvan-kasteel-h-orphee-et-la-trinite-arca-6-nspdf.pdf?rlkey=euhs17cjazg8dgcwz4sjnprr3&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/classiques/van-kasteel-hans-orphee-et-la-trinite-arca-6-nspdf/?layout=file"
   },
   {
@@ -1915,7 +997,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/tpewf1tmgu633w9kt2c37/pdfamadou-r-a-propos-du-message-retrouve.pdf?rlkey=890ryc635ex61acdxz4yavm64&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/amadou-r-a-propos-du-message-retrouve/?layout=file"
   },
   {
@@ -1928,7 +1010,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/6v0jrr5am2w3c05f78z4q/pdfarola-r-lart-pictural-de-louis-cattiaux.pdf?rlkey=plht7sex00a338pypx679hara&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/arola-r-lart-pictural-de-louis-cattiaux/?layout=file"
   },
   {
@@ -1941,7 +1023,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/7g0s832erpw5r5ym9qdce/pdfbois-graves-de-louis-cattiaux.pdf?rlkey=v954gw3tjek09yc7yuhg2bqho&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/bois-graves-de-louis-cattiaux/?layout=file"
   },
   {
@@ -1954,7 +1036,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/e3ah41c6xl8e4gq39wflo/pdfbolla-c-article-sur-le-mr.pdf?rlkey=djgznxszhfh71hkejzkyoidtz&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/article-sur-le-mr-de-c-bolla-sur-le-mr/?layout=file"
   },
   {
@@ -1967,7 +1049,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/0md7nvwlphy35llfxpdbm/pdfcattiaux-l-la-matiere-arca-3pdf.pdf?rlkey=titz8014rsd53riocjm0ixra2&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/cattiaux-louis-la-matiere-arca-3pdf/?layout=file"
   },
   {
@@ -1980,7 +1062,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/jj9jqbwp798bjdowetn5e/pdfcattiaux-l-lettre-a-un-abbe-ami-arca-6-nspdf.pdf?rlkey=irdpq8j3as1exhkxvbo6iikfd&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/cattiaux-louis-lettre-a-un-abbe-ami-arca-6-nspdf/?layout=file"
   },
   {
@@ -1993,7 +1075,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/gti1rvrmrmxtdadcmmawy/pdfdhooghvorst-ch-luvre-de-la-cabale-ou-uvre-messianique.pdf?rlkey=lnpup594cr6w1sjhny12mphyt&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/dhooghvorst-ch-loeuvre-de-la-cabale-ou-oeuvre-messianique/?layout=file"
   },
   {
@@ -2006,7 +1088,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/bfzdhsk8vrpggf0jvmg9l/pdfdhooghvorst-ch-le-message-hermetique-retrouve-explique-par-philalethe.pdf?rlkey=8pb4y2m2df7swsq3zf1upriwu&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/dhooghvorst-ch-le-message-hermetique-retrouve-explique-par-philalethe/?layout=file"
   },
   {
@@ -2019,7 +1101,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/sgn07qpjleke0o62z4yl4/pdfdhooghvorst-ch-le-message-retrouve-de-louis-cattiaux-epignosis.pdf?rlkey=6vvddx6j4w4bgsa1r3b65cc8i&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/dhooghvorst-ch-le-message-retrouve-de-louis-cattiaux-epignosis/?layout=file"
   },
   {
@@ -2032,7 +1114,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/74f8x3bmxp0ttiugbpek1/pdfdhooghvorst-ch-le-verbe-perdu-et-retrouve-colloque-canseliet.pdf?rlkey=58gdh5fhbwcr50chruywv4err&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/dhooghvorst-ch-le-verbe-perdu-et-retrouve-colloque-canseliet/?layout=file"
   },
   {
@@ -2045,7 +1127,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/adttlq8p3m8et0bo5tit5/pdfdhooghvorst-ch-louis-cattiaux-son-uvre-conference-fnac.pdf?rlkey=o6rzrviv05zyxylp0qqjfgkdz&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/dhooghvorst-ch-louis-cattiaux-son-oeuvre-conference-fnac/?layout=file"
   },
   {
@@ -2058,7 +1140,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/j65kshei88qjd68gl95rs/pdfdhooghvorst-e-et-ch-presentation-du-mr.pdf?rlkey=t8vwszrg2nz2zihowrwsqfitz&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/dhooghvorst-e-et-ch-presentation-mr/?layout=file"
   },
   {
@@ -2071,7 +1153,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/ec78d9a9p1piur17ws0s9/pdfdapsens-o-intro-cattiaux-vu-par-la-presse-arca-5pdf.pdf?rlkey=wef6bqobgf9m5c8y470okviok&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/dapsens-odile-intro-cattiaux-vu-par-la-presse-arca-5pdf/?layout=file"
   },
   {
@@ -2084,7 +1166,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/sgsujcmdpmnabhbnbu8lx/pdfdapsens-o-intro-les-predictions-de-louis-cattiaux-arca-5pdf.pdf?rlkey=b3p0748b3xmcc8sj7ywe13vvc&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/dapsens-odile-intro-les-predictions-de-louis-cattiaux-arca-5pdf/?layout=file"
   },
   {
@@ -2097,7 +1179,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/r1zxbvjeak9hwet3htt5f/pdfdapsens-o-la-magie-dans-loeuvre-de-louis-cattiaux-peintre-et-hermetiste-arca.pdf?rlkey=tjgzdw8anxgps1m6r8iws51mt&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/dapsens-odile-la-magie-dans-loeuvre-de-louis-cattiaux-peintre-et-hermetiste-arca-3pdf/?layout=file"
   },
   {
@@ -2110,7 +1192,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/exodhslwwubxh6t4ylvnc/pdfde-coppin-l-quelques-lumieres-sur-le-verset-i-1-du-message-retrouve-1e-partie.pdf?rlkey=w1mmm9jclg5ktniwr9ukwmsd0&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/de-coppin-lorraine-quelques-lumieres-sur-le-verset-i-1-du-message-retrouve-1e-partie-arca-4pdf/?layout=file"
   },
   {
@@ -2123,7 +1205,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/u5i3i0o543onudfzu2bns/pdfde-coppin-l-quelques-lumieres-sur-le-verset-i-1-du-message-retrouve-2e-partie.pdf?rlkey=vz1f2a8g7qgv7nisi37542d1c&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/de-coppin-lorraine-quelques-lumieres-sur-le-verset-i-1-du-message-retrouve-2e-partie-arca-5pdf/?layout=file"
   },
   {
@@ -2136,7 +1218,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/eaq7hin9u5h3ed65dl421/pdfde-meeus-g-et-o-a-propos-des-epigraphes-du-livre-i-du-message-retrouve-arca-3.pdf?rlkey=4cnzh4e99odlbsbl5dxqwxji0&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/de-meeus-gregoire-et-odile-a-propos-des-epigraphes-du-livre-i-du-message-retrouve-arca-3pdf/?layout=file"
   },
   {
@@ -2149,7 +1231,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/7gd2zawfzsz5ugbi82s1c/pdfdessins-en-noir-et-blanc-de-louis-cattiaux.pdf?rlkey=rbj39qylxym6uexyoevc3oty7&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/dessins-en-noir-et-blanc-de-louis-cattiaux/?layout=file"
   },
   {
@@ -2162,7 +1244,7 @@
     "subject": "louis-cattiaux-message-retrouve",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/aa4e9aqifxqdk299g7vff/pdffeye-s-interview-sur-louis-cattiaux-et-son-oeuvre-arca-7pdf.pdf?rlkey=fmsml0h7p29syjyux1c4kspbs&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/louis-cattiaux-et-le-message-retrouve/feye-s-interview-sur-louis-cattiaux-et-son-oeuvre-arca-7pdf/?layout=file"
   },
   {
@@ -2175,7 +1257,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/zaqfebyhn62kpzfkhn0c5/pdfadel-dou-vient-le-nom-hebreu.pdf?rlkey=0rgiubo6txubgnpkuc9a2sprv&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/adel-dou-vient-le-nom-hebreu/?layout=file"
   },
   {
@@ -2188,7 +1270,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/0folgokb8po7fvv6cvz7e/pdfadel-chamir-genese-et-symbolisme-de-la-lettre-he-arca-7pdf.pdf?rlkey=rj4y1uss1z4k6wtzgc90rz2bi&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/adel-chamir-genese-et-symbolisme-de-la-lettre-he-arca-7pdf/?layout=file"
   },
   {
@@ -2201,7 +1283,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/zofvc9ift0ejlumgxuaey/pdfashlag-le-desir-de-cabale-1.pdf?rlkey=o2xfr9tskza36ub5xxck4yw63&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/ashlag-le-desir-de-cabale-1/?layout=file"
   },
   {
@@ -2214,7 +1296,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/rnu23nh810dwy97uoojct/pdfashlag-le-desir-de-cabale-2.pdf?rlkey=ujg7csjl88vokl3l9suj8t9ia&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/ashlag-le-desir-de-cabale-2/?layout=file"
   },
   {
@@ -2227,7 +1309,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/fz63w066kr8daqwmy4a55/pdfashlag-le-desir-de-cabale-3.pdf?rlkey=mhvuv544p85s1o3j8ktnbofqs&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/ashlag-le-desir-de-cabale-3/?layout=file"
   },
   {
@@ -2240,7 +1322,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/hn6hees4mlum78x5ozi9v/pdfashlag-le-desir-de-cabale-4.pdf?rlkey=mknwsrqldkmur61irl7grht2r&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/ashlag-le-desir-de-cabale-4/?layout=file"
   },
   {
@@ -2253,7 +1335,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/0izaqzufw1w3t7si1tbjg/pdfashlag-le-desir-de-cabale-5.pdf?rlkey=79a3c00891a61ckh8yt7agxid&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/ashlag-le-desir-de-cabale-5/?layout=file"
   },
   {
@@ -2266,7 +1348,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/m45gtuu1sw8a9i5d3n5d4/pdfbono-p-parlons-de-la-torah-arca-3pdf.pdf?rlkey=r503ymn5fnfb7hcodrpyy2ry2&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/bono-pierre-parlons-de-la-torah-arca-3pdf/?layout=file"
   },
   {
@@ -2279,7 +1361,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/dwdqmzut8elc2027ha7ac/pdfdhooghvorst-e-conference-sur-le-zohar.pdf?rlkey=5s802g999v2hz37bcpzlzdcoz&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/dhooghvorst-conference-sur-le-zohar/?layout=file"
   },
   {
@@ -2292,7 +1374,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/nulf4ksbm15mae0bmgmh6/pdfdapsens-o-joseph-ministre-en-egypte-arca-1pdf.pdf?rlkey=h74xp55ziauibew7y65p8eppg&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/dapsens-odile-joseph-ministre-en-egypte-arca-1/?layout=file"
   },
   {
@@ -2305,7 +1387,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/30bngzoxo04xbnv7ya0sa/pdfdapsens-o-le-fils-de-samael-arca-3pdf.pdf?rlkey=klocoj67232lqlfs1j4pv8khe&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/dapsens-odile-le-fils-de-samael-arca-3pdf/?layout=file"
   },
   {
@@ -2318,7 +1400,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/8ka6w12k4b615pfj94kll/pdfdapsens-o-le-tout-puissant-arca-4pdf.pdf?rlkey=0y2q4v009yp35z6dyc5cdvovi&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/dapsens-odile-le-tout-puissant-arca-4pdf/?layout=file"
   },
   {
@@ -2331,7 +1413,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/h087bsg6lqrtymmh4bgao/pdfde-meeus-m-f-moise-et-le-charbon-ardent-arca-4pdf.pdf?rlkey=guys1ok0us0h0kz1elor08qt2&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/de-meeus-marie-fe-moise-et-le-charbon-ardent-arca-4pdf/?layout=file"
   },
   {
@@ -2344,7 +1426,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/m6e93th20wynouv7wkuvi/pdffeye-e-le-buisson-ardent-arca-5pdf.pdf?rlkey=mulbmmq3hb4vgohj3hz6ydqu2&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/feye-emmanuelle-le-buisson-ardent-arca-5pdf/?layout=file"
   },
   {
@@ -2357,7 +1439,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/4w258do50egivre36vk3c/pdffeye-h-joseph-et-la-femme-de-putiphar-arca-4pdf.pdf?rlkey=qb9nbgra18asuphkw66p28v0z&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/feye-helene-joseph-et-la-femme-de-putiphar-arca-4pdf/?layout=file"
   },
   {
@@ -2370,7 +1452,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/f8ze25gm1khpqursl3c7e/pdffeye-h-joseph-eut-un-songe-arca-4pdf.pdf?rlkey=p3xt8kd9rxdyw65polsuist0o&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/feye-helene-joseph-eut-un-songe-arca-4pdf/?layout=file"
   },
   {
@@ -2383,7 +1465,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/j8qiht4unxhy2jygpnatd/pdffeye-h-joseph-jete-dans-la-citerne-arca-4pdf.pdf?rlkey=b6sw8p23t5s1w5jsaqinueeoo&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/feye-helene-joseph-jete-dans-la-citerne-arca-4pdf/?layout=file"
   },
   {
@@ -2396,7 +1478,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/buzh9o1y2nisp1omd77v7/pdfle-forestier-j-s-pourquoi-etudier-lhebreu-biblique-arca-3pdf.pdf?rlkey=t990m2awc94mnaows95yc0oa7&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/le-forestier-j-s-pourquoi-etudier-lhebreu-biblique-arca-3pdf/?layout=file"
   },
   {
@@ -2409,7 +1491,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/5h1cdomye2yfkqw6e6rrv/pdflohest-j-c-loracle-dans-la-tradition-hebraique.pdf?rlkey=vceuz5f0u49yd5tfbgh1plrfw&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/lohest-j-c-loracle-dans-la-tradition-hebraique/?layout=file"
   },
   {
@@ -2422,7 +1504,7 @@
     "subject": "judaisme",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/wwuaf3s64ave062nnafer/pdfthuysbaert-c-nahmanide-et-son-commentaire-cabalistique-sur-genese-xlix-33-arc.pdf?rlkey=htpvka0yak35ac1xy7hsbzs6b&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/judaisme/thuysbaert-caroline-nahmanide-et-son-commentaire-cabalistique-sur-genese-xlix-33-arca-3pdf/?layout=file"
   },
   {
@@ -2435,7 +1517,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/bq20qu31v8kn217iieu8n/pdfadel-a-propos-du-mr-i-11-arca-3pdf.pdf?rlkey=n7mmm5gtb8alie45rg53wef5k&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/adel-a-propos-du-mr-i-aa-arca-3pdf/?layout=file"
   },
   {
@@ -2448,7 +1530,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/28psdxw0053dzxnrn3p6x/pdfalmurida-le-message-retrouve-et-leventuelle-organisation-dune-nouvelle-societ.pdf?rlkey=xnjk01f8q0v0vicqvi5fhv7ye&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/almurida-le-message-retrouve-et-leventuelle-organisation-dune-nouvelle-societe-arca-1/?layout=file"
   },
   {
@@ -2461,7 +1543,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/xv44241re5ayacv8zvq9g/pdfaux-portes-de-saint-pierre-quizz-arca-2pdf.pdf?rlkey=imnxf5roiscrfnyb7vtqoosyf&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/aux-portes-de-saint-pierre-quizz-arca-2pdf/?layout=file"
   },
   {
@@ -2474,7 +1556,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/u71glbvlsyp4rizqjursl/pdfbono-pierre-et-s-c-quelques-poemes-arca-3pdf.pdf?rlkey=vnutg61ufh50dnmavrzgwrk48&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/bono-pierre-et-s-c-quelques-poemes-arca-3pdf/?layout=file"
   },
   {
@@ -2487,7 +1569,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/gyvr9pykl5vpnzvke5ub4/pdfcorrespondance-demmanuel-dhooghvorst-et-serge-lebbal-arca-4pdf.pdf?rlkey=ugwyz36ub8pi86g0cyoi6x2k1&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/correspondance-lemmanuel-dhooghvorst-et-serge-lebbal-arca-4pdf/?layout=file"
   },
   {
@@ -2500,7 +1582,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/ynkw2mwsx9s6z4d5fi3rw/pdfdhooghvorst-ch-lillustre-laveuse-de-vaisselle-fil-dariane-50.pdf?rlkey=o9nkuc5txdsv92d6pvt9hdptq&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/dhooghvorst-ch-lillustre-laveuse-de-vaisselle-fil-dariane-50/?layout=file"
   },
   {
@@ -2513,7 +1595,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/r33wbyw1qxs4z5mtpuyw2/pdfdhooghvorst-ch-le-fil-de-la-filiation-des-fils-dhermes-arca-5pdf.pdf?rlkey=nqfbgtxhf00a41bk4tpfpwfnr&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/dhooghvorst-charles-le-fil-de-la-filiation-des-fils-dhermes-arca-5pdf/?layout=file"
   },
   {
@@ -2526,7 +1608,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/1l86d5h91xw400bxjyz4h/pdfdhooghvorst-ch-miguel-de-cervantes-fil-dariane-46-47.pdf?rlkey=yb9do4es8mlrpzeene5h1q3ar&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/dhooghvorst-ch-miguel-de-cervantes-fil-dariane-46-47/?layout=file"
   },
   {
@@ -2539,7 +1621,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/3udhh9nbc9ix2qau0amxa/pdfdhooghvorst-charles-la-quete-arca-3pdf.pdf?rlkey=gkk2tjo5btpldlwsukdbz6tpo&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/dhooghvorst-charles-la-quete-arca-3pdf/?layout=file"
   },
   {
@@ -2552,7 +1634,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/qvgsfho12r354wlr50xnr/pdfde-montjoyeux-dom-salluste-lhorloge-de-la-nuit-et-du-jour-de-dieu-arca-5pdf.pdf?rlkey=l8gtf6axoorbq97quhi7f2utu&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/de-montjoyeux-dom-salluste-lhorloge-de-la-nuit-et-du-jour-de-dieu-arca-5pdf/?layout=file"
   },
   {
@@ -2565,7 +1647,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/ndagg143m2apn3ea6b3eq/pdfdechambre-r-lart-de-predire-et-nous-arca-5pdf.pdf?rlkey=ohavd33i2tdd06in29f1ofoyi&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/dechambre-r-lart-de-predire-et-nous-arca-5pdf/?layout=file"
   },
   {
@@ -2578,7 +1660,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/we5z7i2qm6zqb1zsk1xs5/pdfdel-tilo-c-bodas-camacho-fil-dariane-57-58.pdf?rlkey=6zydt4omt1q5jxy572lf1shlq&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/del-tilo-c-bodas-camacho-fil-dariane-57-58/?layout=file"
   },
   {
@@ -2591,7 +1673,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/nkua7l46o804vgw1a8ny0/pdfdelfosse-thys-a-le-rejet-de-la-cabale-arca-6-nspdf.pdf?rlkey=cygfw55i99np99g8r0dor8s5e&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/delfosse-thys-a-le-rejet-de-la-cabale-arca-6-nspdf/?layout=file"
   },
   {
@@ -2604,7 +1686,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/gkpflbcw2cj94e5xouu88/pdfeucles-andre-salmon-1881-1969-arca-5pdf.pdf?rlkey=m17u7txymt63fjff7v1tfyknt&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/eucles-andre-salmon-1881-1969-arca-5pdf/?layout=file"
   },
   {
@@ -2617,7 +1699,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/it8ej2wnmfte8xl6fo1od/pdfeucles-fable-tonkinoise-arca-5pdf.pdf?rlkey=zxxo9pzd47o4clzk8hi9k614z&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/eucles-fable-tonkinoise-arca-5pdf/?layout=file"
   },
   {
@@ -2630,7 +1712,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/na9z503vis1n3pkhttwl7/pdfeucles-pseudo-haikus-arca-4pdf.pdf?rlkey=dqpels6c9s05qo6ko1gn05mt0&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/eucles-pseudo-haikus-arca-4pdf/?layout=file"
   },
   {
@@ -2643,7 +1725,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/ute88k3fa7q7ar9yk2yf3/pdfeucles-transcription-assez-libre-dune-fable-de-la-fontaine-arca-4pdf.pdf?rlkey=fe9465mfncv31zew3376y045z&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/eucles-transcription-assez-libre-dune-fable-de-la-fontaine-arca-4pdf/?layout=file"
   },
   {
@@ -2656,7 +1738,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/i1ks13ijbhusx81obfjnk/pdfextraits-de-lettres-demmanuel-dhooghvorst-a-bryan-quarles-van-ufford-arca-5pd.pdf?rlkey=zfavtqvn0fhrzimqsro2o12yd&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/extraits-de-lettres-demmanuel-dhooghvorst-a-bryan-quarles-van-ufford-arca-5pdf/?layout=file"
   },
   {
@@ -2669,7 +1751,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/ycs90m9shmj9q9ukmjdl4/pdffenili-piero-rene-guenon-et-la-reincarnation-arca-2pdf.pdf?rlkey=pnio20phrz3fszmoicfmlc0mx&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/fenili-piero-rene-guenon-et-la-reincarnation-arca-2pdf/?layout=file"
   },
   {
@@ -2682,7 +1764,7 @@
     "subject": "divers",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/juh9i4qeu1v4vs77yl348/pdffeye-a-troublante-affaire-curieuse-anecdote-arca-3pdf.pdf?rlkey=ojnrqx4oz1zr57nun292qh16y&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/divers/feye-alexandre-troublante-affaire-curieuse-anecdote-arca-3pdf/?layout=file"
   },
   {
@@ -2695,7 +1777,7 @@
     "subject": "islam",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/d3uzwxs8sxwmrgk98lepl/pdfa-a-linterpretation-esoterique-du-coran-beya.pdf?rlkey=ebuyw4zvr0me8vohb4x7stmnh&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/islam/a-a-linterpretation-esoterique-coran-beya/?layout=file"
   },
   {
@@ -2708,7 +1790,7 @@
     "subject": "islam",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/o3qkr4ijv75vot56jex64/pdfamir-al-nahl-la-foi-arca-7pdf.pdf?rlkey=db5mnioaqdyok0agc7w3mxq8g&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/islam/amir-al-nahl-la-foi-arca-7pdf/?layout=file"
   },
   {
@@ -2721,7 +1803,7 @@
     "subject": "islam",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/p9hg3cfgfuvdsxn0momp8/pdfdhooghvorst-e-jesus-chez-les-musulmans-beya-10.pdf?rlkey=olf82vex4txz340nj7jkaip52&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/islam/dhooghvorst-e-jesus-chez-les-musulmans-beya-10/?layout=file"
   },
   {
@@ -2734,7 +1816,7 @@
     "subject": "islam",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/za7g7grp4fshqdo4a665n/pdfgeant-vert-moise-a-la-peche-arca-7pdf.pdf?rlkey=uz1scgd5925fe9ld1sx565k2r&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/islam/geant-vert-moise-a-la-peche-arca-7pdf/?layout=file"
   },
   {
@@ -2747,7 +1829,7 @@
     "subject": "islam",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/y1ydyh95hge6s9yvs67so/pdfmartinez-v-introduction-a-lislam-arca-6-nspdf.pdf?rlkey=pt0sizz0ud984yfbuk81jbfx2&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/islam/martinez-victor-introduction-a-lislam-arca-6-nspdf/?layout=file"
   },
   {
@@ -2760,7 +1842,7 @@
     "subject": "islam",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/jjbjd9mou1ooo51v5s5m4/pdfmasterton-r-comprendre-la-spiritualite-dun-point-de-vue-chiite-arca-3pdf.pdf?rlkey=slgiw8dgc23ra7pbwo6us1dw8&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/islam/masterton-rebecca-comprendre-la-spiritualite-dun-point-de-vue-chiite-arca-3pdf/?layout=file"
   },
   {
@@ -2773,7 +1855,7 @@
     "subject": "islam",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/x1e11wfonc46m8jw96z9u/pdfsohravardi-shaykh-al-ishraq-shihaboddin-yahya-le-recit-de-larchange-empourpre.pdf?rlkey=y3pe9ephls0njpmgfv0enqryd&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/islam/sohravardi-shaykh-al-ishraq-shihaboddin-yahya-le-recit-de-larchange-empourpre/?layout=file"
   },
   {
@@ -2786,7 +1868,7 @@
     "subject": "neerlandais",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/n4q3yvxfufj2fnd71j04c/pdfbrief-aan-de-neofiet-finaal.pdf?rlkey=ay2euingnevvv8a3jcz9xguby&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/artikels-in-het-nederlands/brief-aan-de-neofiet-finaal/?layout=file"
   },
   {
@@ -2799,7 +1881,7 @@
     "subject": "neerlandais",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/hnjyexn4zzugwaco8igvx/pdfle-forestier-j-s-de-hervonden-boodschap-la-traduction-du-message-retrouve-en.pdf?rlkey=0ow4kl3a27c0jdfw2bb4ik1ex&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/artikels-in-het-nederlands/le-forestier-j-s-de-hervonden-boodschap-la-traduction-du-message-retrouve-en-neerlandais-arca-5pdf/?layout=file"
   },
   {
@@ -2812,7 +1894,7 @@
     "subject": "neerlandais",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/7cj2t8hup7s75iqomp86o/pdfwaarom-bijbels-hebreeuws-studeren.pdf?rlkey=qjfxeeur1korcu7ibztiygcc8&dl=0",
     "source_url": "https://arca-revue.com/documentation/articles-1/artikels-in-het-nederlands/waarom-bijbels-hebreeuws-studeren/?layout=file"
   },
   {
@@ -2825,7 +1907,7 @@
     "subject": "livres",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/isqxlpxcrtwn9w4d7wibu/pdfdouzetemps-le-mystere-de-la-croix-1860.pdf?rlkey=efvwhgewnrmcsagd3yop8hs3a&dl=0",
     "source_url": "https://arca-revue.com/documentation/livres/mystere-de-la-croix/?layout=file"
   },
   {
@@ -2838,7 +1920,7 @@
     "subject": "livres",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/eaa17j6wv1f9tkatuoakm/pdfkarl-von-eckartshausen-la-nuee-sur-la-sanctuaire-maradan-1819.pdf?rlkey=4j3yxz38l69xbs0oelcixa44r&dl=0",
     "source_url": "https://arca-revue.com/documentation/livres/karl-von-eckartshausen-la-nuee-sur-la-sanctuaire-maradan-1819/?layout=file"
   },
   {
@@ -2851,7 +1933,7 @@
     "subject": "livres",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/s3lscsxq4yojd5yyy6k32/pdflane-dor-dapulee-precede-du-demon-de-socrate-paris-bastien-1822-trad-maury.pdf?rlkey=vsu4y3e2ma8c9carx1yzo9qtd&dl=0",
     "source_url": "https://arca-revue.com/documentation/livres/lane-dor-dapulee-precede-du-demon-de-socrate-paris-bastien-1822-trad-maury/?layout=file"
   },
   {
@@ -2864,7 +1946,7 @@
     "subject": "livres",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/68tqv7yrb918jzuju5dpc/pdfle-comte-de-gabalis-ou-entretiens-sur-les-sciences-secretes-precede-de-magie.pdf?rlkey=fj2ytt7sz0n77xf3tsupqy5mu&dl=0",
     "source_url": "https://arca-revue.com/documentation/livres/le-comte-de-gabalis-ou-entretiens-sur-les-sciences-secretes-precede-de-magie-et-dilettantisme-le-roman-de-montfaucon-la-rotisserie-de-la-reine-pedauque-de-doyon-lesoterisme-de-gabalis-par-p-marteau/?layout=file"
   },
   {
@@ -2877,7 +1959,7 @@
     "subject": "livres",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/udms0aa4imi0fqpz8k09m/pdflopoukhine-quelques-traits-de-leglise-interieure-st-petersbourg-1799.pdf?rlkey=l2fdd2wg99v3z0a4s4kwexutw&dl=0",
     "source_url": "https://arca-revue.com/documentation/livres/lopoukhine-quelques-traits-de-leglise-interieure-st-petersbourg-1799/?layout=file"
   },
   {
@@ -2890,7 +1972,7 @@
     "subject": "livres",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/r6l9g9lmwn47y59j1j15h/pdflouis-cattiaux-the-message-rediscovered-beya-2005.pdf?rlkey=w1it93y9vh8qkqway9wijpq7e&dl=0",
     "source_url": "https://arca-revue.com/documentation/livres/louis-cattiaux-the-message-rediscovered/?layout=file"
   },
   {
@@ -2903,7 +1985,7 @@
     "subject": "livres",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/wpy1x5hwqkcnavlc82ufr/pdflouis-cattiaux-le-message-retrouve-editions-beya-grez-doiceau-2024.pdf?rlkey=xjlbwiafdy3fgm3qlc162101r&dl=0",
     "source_url": "https://arca-revue.com/documentation/livres/louis-cattiaux-le-message-retrouve-editions-beya-grez-doiceau-2024/?layout=file"
   },
   {
@@ -2916,7 +1998,7 @@
     "subject": "livres",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/m3u0jkweor5epfocyo8cw/pdfm-haven-le-maitre-inconnu-cagliostro-etude-historique-et-critique-sur-la-haut.pdf?rlkey=mwrsyhqj3o3ygk0bigz1amfin&dl=0",
     "source_url": "https://arca-revue.com/documentation/livres/m-haven-le-maitre-inconnu-cagliostro-etude-historique-et-critique-sur-la-haute-magie-paris-dorbon-sd/?layout=file"
   },
   {
@@ -2929,7 +2011,7 @@
     "subject": "livres",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/ukt3cr5xe8ixqpq0zmi07/pdfvigenere-blaise-de-traite-du-feu-et-du-sel-langelier-1618.pdf?rlkey=9p7lwxldnz34snqlqha0122bs&dl=0",
     "source_url": "https://arca-revue.com/documentation/livres/vigenere-blaise-de-traite-du-feu-et-du-sel-langelier-1618/?layout=file"
   },
   {
@@ -2942,7 +2024,7 @@
     "subject": "egypte",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/h1npccirjy7ycjuiv84gt/pdfcarrier-c-grands-livres-funeraires-de-legypte-pharaonique.pdf?rlkey=n9goe9cdy2q0iqj5jrl3mst4w&dl=0",
     "source_url": "https://arca-revue.com/documentation/lus-pour-vous/egypte/carrier-c-grands-livres-funeraires-de-legypte-pharaonique/?layout=file"
   },
   {
@@ -2955,7 +2037,7 @@
     "subject": "egypte",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/owzaoxr32ik5rwh2wnd5k/pdfcarrier-c-textes-des-pyramides-de-legypte-ancienne-premiere-partie.pdf?rlkey=ncq9lwe0haio4u2sx14bqrtfz&dl=0",
     "source_url": "https://arca-revue.com/documentation/lus-pour-vous/egypte/carrier-c-textes-des-pyramides-de-legypte-ancienne-premiere-partie/?layout=file"
   },
   {
@@ -2968,7 +2050,7 @@
     "subject": "egypte",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/4s47vavhkaox1dw40duov/pdfcarrier-c-textes-des-pyramides-de-legypte-ancienne-suite-et-fin.pdf?rlkey=psio0tqwjj4ixwar3fzkwnzlz&dl=0",
     "source_url": "https://arca-revue.com/documentation/lus-pour-vous/egypte/carrier-c-textes-des-pyramides-de-legypte-ancienne-suite-et-fin/?layout=file"
   },
   {
@@ -2981,7 +2063,7 @@
     "subject": "egypte",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/qv6gc2186e02h903cw17r/pdfchristian-jacq-les-maximes-de-ptah-hotep.pdf?rlkey=ih4x83gfunj1betudf5qweayi&dl=0",
     "source_url": "https://arca-revue.com/documentation/lus-pour-vous/egypte/christian-jacq-les-maximes-de-ptah-hotep/?layout=file"
   },
   {
@@ -2994,7 +2076,7 @@
     "subject": "egypte",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/lf2srtf7cp40vtzc3jic2/pdfjamblique-les-mysteres-degypte.pdf?rlkey=xl89m6gt8s1ebk6tssjcyez55&dl=0",
     "source_url": "https://arca-revue.com/documentation/lus-pour-vous/egypte/jamblique-les-mysteres-degypte/?layout=file"
   },
   {
@@ -3007,7 +2089,7 @@
     "subject": "egypte",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/ulqo5xe0lgo6w2nifhevc/pdflivre-des-morts-des-anciens-egyptiens.pdf?rlkey=ff93u19els6xvs1dxlpry1gei&dl=0",
     "source_url": "https://arca-revue.com/documentation/lus-pour-vous/egypte/livre-des-morts-des-anciens-egyptiens/?layout=file"
   },
   {
@@ -3020,7 +2102,7 @@
     "subject": "egypte",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/o3oklntuwqixngr7kcg9g/pdfmayassis-s-les-livre-des-morts-de-legypte-ancienne-est-un-livre-dinitiation.pdf?rlkey=0ic0vuxw941oi1dr2qxam1h0i&dl=0",
     "source_url": "https://arca-revue.com/documentation/lus-pour-vous/egypte/mayassis-s-les-livre-des-morts-de-legypte-ancienne-est-un-livre-dinitiation/?layout=file"
   },
   {
@@ -3033,7 +2115,7 @@
     "subject": "egypte",
     "publication": "",
     "year": "",
-    "dropbox_url": "",
+    "dropbox_url": "https://dl.dropboxusercontent.com/scl/fi/q3vzbbxdl0tkt65inolt2/pdfplutarque-isis-et-osiris.pdf?rlkey=d0h56798w9ss56g9fma2mwd1x&dl=0",
     "source_url": "https://arca-revue.com/documentation/lus-pour-vous/egypte/plutarque-isis-et-osiris/?layout=file"
   }
 ]
