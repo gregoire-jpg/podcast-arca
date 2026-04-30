@@ -152,8 +152,8 @@
   /* ── Sections ── */
   var SECTIONS = [
     { id: 'revue',        label: 'Revue ARCA',    icon: '📰', desc: 'Les 7 numéros complets de la revue' },
-    { id: 'article',      label: 'Articles',       icon: '📄', desc: 'Articles classés par thème' },
-    { id: 'livre',        label: 'Livres',         icon: '📖', desc: 'Ouvrages hermétiques et philosophiques' },
+    { id: 'articles',     label: 'Articles',       icon: '📄', desc: 'Articles classés par thème' },
+    { id: 'livres',       label: 'Livres',         icon: '📖', desc: 'Ouvrages hermétiques et philosophiques' },
     { id: 'lus-pour-vous',label: 'Lus pour vous',  icon: '👁', desc: 'Sélection de lectures commentées' },
   ];
 
@@ -251,7 +251,7 @@
     main.querySelectorAll('.section-card').forEach(function(card) {
       card.addEventListener('click', function() {
         D.section = this.dataset.section;
-        var hasCategories = D.section === 'article' || D.section === 'lus-pour-vous';
+        var hasCategories = D.section === 'articles' || D.section === 'lus-pour-vous';
         D.level = hasCategories ? 'section' : 'category';
         render();
       });
@@ -260,7 +260,7 @@
 
   /* ── Niveau 2 : Catégories d'une section ── */
   function renderSection(main) {
-    var sectionDocs = D.docs.filter(function(d){ return d.type === D.section; });
+    var sectionDocs = D.docs.filter(function(d){ return d.type === D.section || d.type === D.section.replace(/s$/,''); });
     var cats = {}, order = [];
     sectionDocs.forEach(function(d){
       if (!cats[d.category]) { cats[d.category] = 0; order.push(d.category); }
@@ -290,8 +290,8 @@
   /* ── Niveau 3 : Liste de documents ── */
   function renderDocs(main) {
     var docs = D.docs.filter(function(d){
-      if (d.type !== D.section) return false;
-      if (D.level === 'category' && D.section !== 'revue' && D.section !== 'livre' && d.category !== D.category) return false;
+      if (d.type !== D.section && d.type !== D.section.replace(/s$/,'')) return false;
+      if (D.level === 'category' && D.section !== 'revue' && D.section !== 'livres' && d.category !== D.category) return false;
       return true;
     });
     var sLabel = (SECTIONS.find(function(s){ return s.id===D.section; })||{}).label || D.section;

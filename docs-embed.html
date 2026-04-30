@@ -88,10 +88,10 @@
   function notifyHeight(){window.parent.postMessage({type:'pa-docs-resize',height:document.body.scrollHeight},'https://arca-revue.com');}
 
   var SECTIONS=[
-    {id:'revue',       label:'Revue ARCA',   icon:'📰',desc:'Les numéros complets de la revue'},
-    {id:'article',     label:'Articles',      icon:'📄',desc:'Articles classés par thème'},
-    {id:'livre',       label:'Livres',        icon:'📖',desc:'Ouvrages hermétiques et philosophiques'},
-    {id:'lus-pour-vous',label:'Lus pour vous',icon:'👁',desc:'Lectures commentées'},
+    {id:'revue',        label:'Revue ARCA',   icon:'📰',desc:'Les numéros complets de la revue'},
+    {id:'articles',     label:'Articles',      icon:'📄',desc:'Articles classés par thème'},
+    {id:'livres',       label:'Livres',        icon:'📖',desc:'Ouvrages hermétiques et philosophiques'},
+    {id:'lus-pour-vous',label:'Lus pour vous', icon:'👁',desc:'Lectures commentées'},
   ];
 
   function init(){
@@ -165,14 +165,14 @@
     main.querySelectorAll('.section-card').forEach(function(c){
       c.addEventListener('click',function(){
         D.section=this.dataset.section;
-        D.level=(D.section==='article'||D.section==='lus-pour-vous')?'section':'category';
+        D.level=(D.section==='articles'||D.section==='lus-pour-vous')?'section':'category';
         render();setTimeout(notifyHeight,100);
       });
     });
   }
 
   function renderSection(main){
-    var sd=D.docs.filter(function(d){return d.type===D.section;});
+    var sd=D.docs.filter(function(d){return d.type===D.section||d.type===D.section.replace(/s$/,'');});
     var cats={},order=[];
     sd.forEach(function(d){if(!cats[d.category]){cats[d.category]=0;order.push(d.category);}cats[d.category]++;});
     var sl=(SECTIONS.find(function(s){return s.id===D.section;})||{}).label||D.section;
@@ -191,8 +191,9 @@
 
   function renderDocs(main){
     var docs=D.docs.filter(function(d){
-      if(d.type!==D.section)return false;
-      if((D.section==='article'||D.section==='lus-pour-vous')&&d.category!==D.category)return false;
+      var tMatch=d.type===D.section||d.type===D.section.replace(/s$/,'');
+      if(!tMatch)return false;
+      if((D.section==='articles'||D.section==='lus-pour-vous')&&d.category!==D.category)return false;
       return true;
     });
     var sl=(SECTIONS.find(function(s){return s.id===D.section;})||{}).label||D.section;
