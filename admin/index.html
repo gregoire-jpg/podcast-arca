@@ -250,6 +250,34 @@
     <div id="ep-list"><div class="empty">Chargement…</div></div>
   </div>
 
+  <!-- ── Configuration (sous Podcasts) ── -->
+  <div id="panel-config" style="margin-top:32px">
+    <div style="font:.7em/1 Arial;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+      ⚙ Configuration — Auteurs &amp; Sujets
+    </div>
+    <div class="cfg-block">
+      <h2>Auteurs</h2>
+      <div class="cfg-tags" id="cfg-authors"></div>
+      <div class="cfg-add">
+        <input type="text" id="new-author-name" placeholder="Nom affiché  (ex : Marie Dupont)">
+        <input type="text" id="new-author-key"  placeholder="Clé  (ex : marie-dupont)">
+        <button class="btn btn-navy" id="btn-add-author">Ajouter</button>
+      </div>
+    </div>
+    <div class="cfg-block">
+      <h2>Sujets</h2>
+      <div class="cfg-tags" id="cfg-subjects"></div>
+      <div class="cfg-add">
+        <input type="text" id="new-subject-name" placeholder="Nom affiché  (ex : Alchimie)">
+        <input type="text" id="new-subject-key"  placeholder="Clé  (ex : alchimie)">
+        <button class="btn btn-navy" id="btn-add-subject">Ajouter</button>
+      </div>
+    </div>
+    <button class="btn btn-gold" id="btn-save-config" style="margin-top:4px;padding:10px 24px;font-size:.9em;">💾 Sauvegarder la configuration</button>
+  </div>
+
+  </div><!-- /panel-podcasts -->
+
   <!-- ── DOCUMENTATION ── -->
   <div class="panel" id="panel-docs">
     <div class="toolbar">
@@ -362,34 +390,6 @@
       </div>
     </div>
   </div>
-
-  <!-- ── Configuration (sous Podcasts) ── -->
-  <div id="panel-config" style="margin-top:32px">
-    <div style="font:.7em/1 Arial;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);">
-      ⚙ Configuration — Auteurs &amp; Sujets
-    </div>
-    <div class="cfg-block">
-      <h2>Auteurs</h2>
-      <div class="cfg-tags" id="cfg-authors"></div>
-      <div class="cfg-add">
-        <input type="text" id="new-author-name" placeholder="Nom affiché  (ex : Marie Dupont)">
-        <input type="text" id="new-author-key"  placeholder="Clé  (ex : marie-dupont)">
-        <button class="btn btn-navy" id="btn-add-author">Ajouter</button>
-      </div>
-    </div>
-    <div class="cfg-block">
-      <h2>Sujets</h2>
-      <div class="cfg-tags" id="cfg-subjects"></div>
-      <div class="cfg-add">
-        <input type="text" id="new-subject-name" placeholder="Nom affiché  (ex : Alchimie)">
-        <input type="text" id="new-subject-key"  placeholder="Clé  (ex : alchimie)">
-        <button class="btn btn-navy" id="btn-add-subject">Ajouter</button>
-      </div>
-    </div>
-    <button class="btn btn-gold" id="btn-save-config" style="margin-top:4px;padding:10px 24px;font-size:.9em;">💾 Sauvegarder la configuration</button>
-  </div>
-
-  </div><!-- /panel-podcasts -->
 
 </div><!-- /admin -->
 
