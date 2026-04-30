@@ -189,11 +189,24 @@ def _get_doc_subpages(soup, base_url):
     return list(dict.fromkeys(subpages))  # dédoublonner en conservant l'ordre
 
 
+def _get_pagination_urls(soup, base_url):
+    """Retourne les URLs de pagination (?limit=20&offset=X)."""
+    pages = []
+    base = base_url.split("?")[0].rstrip("/")
+    for a in soup.find_all("a", href=True):
+        href = a["href"]
+        if "offset=" in href and "limit=" in href:
+            full = href if href.startswith("http") else BASE_URL + href
+            if full not in pages:
+                pages.append(full)
+    return pages
+
+
 def get_pdf_links(sess, url):
     """Extrait tous les liens de documents d'une page ARCA.
 
-    Crawle automatiquement les sous-pages si aucun ?layout=file n'est trouvé
-    (cas de la Revue ARCA où chaque numéro est une sous-page séparée).
+    - Gère la pagination (?limit=20&offset=X)
+    - Crawle les sous-pages si aucun fichier direct (ex: Revue ARCA)
     """
     try:
         r = sess.get(url, timeout=30)
@@ -206,7 +219,22 @@ def get_pdf_links(sess, url):
     seen  = set()
     links = _extract_file_links(soup, seen)
 
-    # Aucun fichier trouvé en direct → crawler les sous-pages (1 niveau)
+    # Pagination : récupérer toutes les pages suivantes
+    page_urls = _get_pagination_urls(soup, url)
+    if page_urls:
+        print(f"  → {len(page_urls)} page(s) supplémentaire(s) détectée(s)…")
+    for page_url in page_urls:
+        try:
+            pr   = sess.get(page_url, timeout=30)
+            pr.raise_for_status()
+            psoup = BeautifulSoup(pr.text, "html.parser")
+            pl    = _extract_file_links(psoup, seen)
+            links.extend(pl)
+            time.sleep(0.3)
+        except Exception as e:
+            print(f"    ⚠  {page_url} : {e}")
+
+    # Aucun fichier trouvé → crawler les sous-pages (ex: Revue ARCA par numéro)
     if not links:
         subpages = _get_doc_subpages(soup, url)
         if subpages:
