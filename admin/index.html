@@ -224,6 +224,39 @@
       border: none; border-radius: 8px; font-weight: bold; font-size: .9em;
     }
 
+    /* ── Delete buttons ── */
+    .btn-delete-ep {
+      background: none; border: none; color: #ccc;
+      font-size: 1.1em; padding: 6px 8px; flex-shrink: 0; margin-left: 8px;
+      border-radius: 6px; transition: background .15s, color .15s; cursor: pointer;
+    }
+    .btn-delete-ep:hover { color: var(--red); background: rgba(192,57,43,.08); }
+
+    .toolbar-sep { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
+
+    .btn-delete-pl {
+      padding: 9px 14px; background: none; border: 1px solid var(--red);
+      color: var(--red); border-radius: 6px; font-size: .82em; white-space: nowrap;
+      transition: background .15s, color .15s;
+    }
+    .btn-delete-pl:hover { background: var(--red); color: white; }
+
+    /* Confirm overlay */
+    .confirm-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 2000;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .confirm-box {
+      background: white; border-radius: 12px; padding: 32px 28px;
+      max-width: 380px; width: 90%; text-align: center;
+      box-shadow: 0 8px 40px rgba(0,0,0,.25);
+    }
+    .confirm-box h3 { font-size: 1.1em; color: var(--navy); margin-bottom: 10px; }
+    .confirm-box p  { font-size: .88em; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+    .confirm-btns   { display: flex; gap: 10px; justify-content: center; }
+    .confirm-cancel { padding: 10px 22px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; font-size: .9em; }
+    .confirm-ok     { padding: 10px 22px; background: var(--red); color: white; border: none; border-radius: 8px; font-size: .9em; font-weight: bold; }
+
     /* ── Empty / loading ── */
     .admin-state {
       text-align: center; padding: 60px 20px;
@@ -286,6 +319,23 @@
         <input type="checkbox" id="filter-nometa">
         Sans métadonnées seulement
       </label>
+      <div class="toolbar-sep"></div>
+      <select id="bulk-pl-select" title="Assigner à une playlist">
+        <option value="">Playlist… (assignation en masse)</option>
+      </select>
+      <select id="bulk-author-select">
+        <option value="">+ Auteur</option>
+      </select>
+      <select id="bulk-subject-select">
+        <option value="">+ Sujet</option>
+      </select>
+      <button class="btn-delete-pl" id="btn-bulk-assign" style="background:var(--navy);border-color:var(--navy);color:white;">Appliquer</button>
+      <div class="toolbar-sep"></div>
+      <select id="delete-pl-select" title="Supprimer une playlist">
+        <option value="">🗑 Supprimer une playlist…</option>
+      </select>
+      <button class="btn-delete-pl" id="btn-delete-pl">Supprimer</button>
+      <div class="toolbar-sep"></div>
       <span class="save-status" id="save-status"></span>
       <button class="btn-save-all" id="btn-save-all">💾 Sauvegarder</button>
     </div>
@@ -318,6 +368,16 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="confirm-overlay" id="confirm-overlay" style="display:none;">
+  <div class="confirm-box">
+    <h3 id="confirm-title"></h3>
+    <p  id="confirm-msg"></p>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" id="confirm-cancel">Annuler</button>
+      <button class="confirm-ok"     id="confirm-ok">Supprimer</button>
+    </div>
+  </div>
+</div>
 
 <script>
 (function () {
@@ -332,6 +392,21 @@
     t.textContent = msg;
     t.className = "toast " + (type || "success") + " show";
     setTimeout(function () { t.classList.remove("show"); }, 3500);
+  }
+
+  /* ── Confirm dialog ── */
+  function confirm(title, msg, onOk) {
+    var overlay = document.getElementById("confirm-overlay");
+    document.getElementById("confirm-title").textContent = title;
+    document.getElementById("confirm-msg").textContent   = msg;
+    overlay.style.display = "flex";
+    document.getElementById("confirm-ok").onclick = function () {
+      overlay.style.display = "none";
+      onOk();
+    };
+    document.getElementById("confirm-cancel").onclick = function () {
+      overlay.style.display = "none";
+    };
   }
 
   /* ── Login ── */
@@ -383,17 +458,31 @@
   function showAdmin() {
     document.getElementById("login-screen").style.display = "none";
     document.getElementById("admin-shell").style.display  = "block";
-    // Playlist filter options
-    var sel = document.getElementById("filter-playlist");
+    // Populate playlist filter + delete selects
     var seen = {};
+    var playlists = [];
     state.episodes.forEach(function (ep) {
       if (ep.playlist_slug && !seen[ep.playlist_slug]) {
         seen[ep.playlist_slug] = true;
-        var opt = document.createElement("option");
-        opt.value = ep.playlist_slug;
-        opt.textContent = ep.playlist_title;
-        sel.appendChild(opt);
+        playlists.push({ slug: ep.playlist_slug, title: ep.playlist_title });
       }
+    });
+    var filterSel = document.getElementById("filter-playlist");
+    var deleteSel = document.getElementById("delete-pl-select");
+    var bulkSel  = document.getElementById("bulk-pl-select");
+    var bulkAuth = document.getElementById("bulk-author-select");
+    var bulkSubj = document.getElementById("bulk-subject-select");
+
+    playlists.forEach(function (pl) {
+      var o1 = document.createElement("option"); o1.value = pl.slug; o1.textContent = pl.title; filterSel.appendChild(o1);
+      var o2 = document.createElement("option"); o2.value = pl.slug; o2.textContent = pl.title; deleteSel.appendChild(o2);
+      var o3 = document.createElement("option"); o3.value = pl.slug; o3.textContent = pl.title; bulkSel.appendChild(o3);
+    });
+    Object.keys(state.config.authors || {}).forEach(function (key) {
+      var o = document.createElement("option"); o.value = key; o.textContent = state.config.authors[key]; bulkAuth.appendChild(o);
+    });
+    Object.keys(state.config.subjects || {}).forEach(function (key) {
+      var o = document.createElement("option"); o.value = key; o.textContent = state.config.subjects[key]; bulkSubj.appendChild(o);
     });
   }
 
@@ -446,7 +535,10 @@
       '<div class="ep-card-inner">' +
         (ep.image_url ? '<img class="ep-thumb" src="' + esc(ep.image_url) + '" alt="" loading="lazy">' : '<div class="ep-thumb"></div>') +
         '<div class="ep-main">' +
-          '<div class="ep-title" title="' + esc(ep.title) + '">' + esc(ep.title) + '</div>' +
+          '<div style="display:flex;align-items:flex-start;gap:8px">' +
+            '<div class="ep-title" title="' + esc(ep.title) + '" style="flex:1">' + esc(ep.title) + '</div>' +
+            '<button class="btn-delete-ep" title="Supprimer cet épisode">🗑</button>' +
+          '</div>' +
           '<div class="ep-playlist">' + esc(ep.playlist_title || "") + (date ? " · " + date : "") + '</div>' +
           '<div class="ep-fields">' +
             '<div class="ep-field">' +
@@ -471,6 +563,21 @@
       '</div>';
 
     // Events
+    // Delete episode
+    div.querySelector(".btn-delete-ep").addEventListener("click", function (e) {
+      e.stopPropagation();
+      confirm(
+        "Supprimer cet épisode ?",
+        ep.title,
+        function () {
+          state.episodes.splice(idx, 1);
+          renderEpisodes();
+          updateSaveStatus();
+          toast("Épisode supprimé — clique Sauvegarder pour confirmer");
+        }
+      );
+    });
+
     // Author remove
     div.querySelectorAll(".author-chip-remove").forEach(function (btn) {
       btn.addEventListener("click", function () {
@@ -633,6 +740,52 @@
       toast("Erreur réseau : " + err.message, "error");
       btn.textContent = "💾 Sauvegarder"; btn.classList.remove("saving");
     });
+  });
+
+  /* ── Assigner auteur/sujet à toute une playlist ── */
+  document.getElementById("btn-bulk-assign").addEventListener("click", function () {
+    var slug    = document.getElementById("bulk-pl-select").value;
+    var authKey = document.getElementById("bulk-author-select").value;
+    var subjKey = document.getElementById("bulk-subject-select").value;
+    if (!slug) { toast("Choisis une playlist", "error"); return; }
+    if (!authKey && !subjKey) { toast("Choisis au moins un auteur ou un sujet", "error"); return; }
+
+    var eps = state.episodes.filter(function (ep) { return ep.playlist_slug === slug; });
+    eps.forEach(function (ep) {
+      var idx2 = state.episodes.indexOf(ep);
+      if (authKey && !(ep.authors || []).includes(authKey)) {
+        state.episodes[idx2].authors = (ep.authors || []).concat(authKey);
+      }
+      if (subjKey) {
+        state.episodes[idx2].subject = subjKey;
+      }
+      state.dirty.add(idx2);
+    });
+    renderEpisodes();
+    updateSaveStatus();
+    toast(eps.length + " épisode(s) mis à jour — clique Sauvegarder pour confirmer");
+  });
+
+  /* ── Supprimer une playlist ── */
+  document.getElementById("btn-delete-pl").addEventListener("click", function () {
+    var sel   = document.getElementById("delete-pl-select");
+    var slug  = sel.value;
+    var title = slug ? sel.options[sel.selectedIndex].textContent : "";
+    if (!slug) { toast("Choisis une playlist à supprimer", "error"); return; }
+    var count = state.episodes.filter(function (ep) { return ep.playlist_slug === slug; }).length;
+    confirm(
+      "Supprimer la playlist ?",
+      "« " + title + " » contient " + count + " épisode(s). Action irréversible après sauvegarde.",
+      function () {
+        state.episodes = state.episodes.filter(function (ep) { return ep.playlist_slug !== slug; });
+        [document.getElementById("delete-pl-select"), document.getElementById("filter-playlist")].forEach(function (s) {
+          for (var i = s.options.length - 1; i >= 0; i--) { if (s.options[i].value === slug) s.remove(i); }
+        });
+        sel.value = "";
+        renderEpisodes();
+        toast(count + " épisode(s) supprimé(s) — clique Sauvegarder pour confirmer");
+      }
+    );
   });
 
   /* ── Config tab ── */
