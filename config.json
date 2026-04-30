@@ -13,6 +13,16 @@
     "category": "Religion & Spirituality"
   },
 
+  "seasons": {
+    "le-phedre-de-platon":                   1,
+    "conferences":                            2,
+    "thomas-vaughan-alias-eugene-philalethe": 3,
+    "la-lettre-au-neophyte":                 4,
+    "cabale-hebraique":                       5,
+    "la-mort":                               6,
+    "hermetisme":                            7
+  },
+
   "exclude_playlists": [
     "Apprendre l'Hébreu biblique"
   ],
