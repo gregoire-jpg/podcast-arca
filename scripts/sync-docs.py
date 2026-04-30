@@ -148,7 +148,11 @@ def upload_to_dropbox(dbx, local_path, remote_path):
 # ──────────────────── Crawling ────────────────────
 
 def get_pdf_links(sess, url):
-    """Extrait tous les liens PDF d'une page."""
+    """Extrait tous les liens de documents d'une page ARCA.
+
+    Le site ARCA utilise le pattern ?layout=file pour servir les fichiers.
+    Ex: https://arca-revue.com/documentation/.../slug/?layout=file
+    """
     try:
         r = sess.get(url, timeout=30)
         r.raise_for_status()
@@ -158,39 +162,49 @@ def get_pdf_links(sess, url):
 
     soup = BeautifulSoup(r.text, "html.parser")
     links = []
+    seen = set()
 
     for a in soup.find_all("a", href=True):
         href = a["href"]
         text = a.get_text(strip=True)
 
-        # Lien direct vers un PDF
-        if href.lower().endswith(".pdf"):
+        # Format ARCA : ?layout=file (principal)
+        if "?layout=file" in href:
             full = href if href.startswith("http") else BASE_URL + href
-            links.append({"url": full, "title": text or Path(href).stem})
+            if full not in seen:
+                seen.add(full)
+                # Extraire le titre depuis le slug si le texte est vide
+                slug = href.rstrip("/").rstrip("?layout=file").split("/")[-1].split("?")[0]
+                title = text or slug.replace("-", " ").title()
+                links.append({"url": full, "title": title})
 
-        # Lien vers une sous-page qui contient probablement un PDF
-        elif href.startswith("/documentation/") and not href.endswith("/"):
-            full = BASE_URL + href
-            # Crawler la sous-page pour trouver le PDF
-            try:
-                sub = sess.get(full, timeout=20)
-                sub_soup = BeautifulSoup(sub.text, "html.parser")
-                for sub_a in sub_soup.find_all("a", href=True):
-                    if sub_a["href"].lower().endswith(".pdf"):
-                        pdf_url = sub_a["href"] if sub_a["href"].startswith("http") else BASE_URL + sub_a["href"]
-                        links.append({"url": pdf_url, "title": text or sub_a.get_text(strip=True)})
-                        break
-            except Exception:
-                pass
+        # Lien direct vers un PDF (fallback)
+        elif href.lower().endswith(".pdf"):
+            full = href if href.startswith("http") else BASE_URL + href
+            if full not in seen:
+                seen.add(full)
+                links.append({"url": full, "title": text or Path(href).stem})
 
     return links
 
 def download_file(sess, url, dest_path):
-    """Télécharge un fichier depuis une URL."""
+    """Télécharge un fichier depuis une URL (suit les redirections)."""
     dest_path.parent.mkdir(parents=True, exist_ok=True)
     try:
-        r = sess.get(url, stream=True, timeout=60)
+        r = sess.get(url, stream=True, timeout=120, allow_redirects=True)
         r.raise_for_status()
+
+        # Vérifier que c'est bien un fichier (PDF ou autre binaire)
+        ct = r.headers.get("Content-Type", "")
+        if "text/html" in ct and "application/pdf" not in ct:
+            # Page HTML — le fichier n'est peut-être pas directement accessible
+            print(f"  ⚠  Reçu HTML au lieu d'un fichier (Content-Type: {ct[:50]})")
+            return False
+
+        # Adapter l'extension selon le Content-Type
+        if "application/pdf" in ct and not str(dest_path).endswith(".pdf"):
+            dest_path = dest_path.with_suffix(".pdf")
+
         with open(dest_path, "wb") as f:
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
