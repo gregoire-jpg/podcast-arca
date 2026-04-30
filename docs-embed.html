@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation — Revue ARCA</title>
+  <style>
+    :root {
+      --navy:#2d3461; --navy-dk:#1e2245; --gold:#c8a060;
+      --white:#ffffff; --bg:#faf8f5; --border:#e2ddd8; --muted:#777;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:Georgia,serif;background:var(--bg);color:var(--navy);}
+    button{cursor:pointer;}
+
+    .pa-filter-bar{background:var(--white);border-bottom:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.05);}
+    .pa-filter-tabs{display:flex;justify-content:center;}
+    .pa-tab{padding:14px 28px;font:.7em/1 Arial;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);background:none;border:none;border-bottom:3px solid transparent;transition:color .2s,border-color .2s;}
+    .pa-tab:hover{color:var(--navy);}
+    .pa-tab.active{color:var(--navy);border-bottom-color:var(--gold);font-weight:700;}
+
+    .pa-sub{background:#f3f0ea;border-bottom:1px solid var(--border);padding:14px 18px;text-align:center;display:none;}
+    .pa-sub.on{display:block;}
+    .pa-sub-label{display:block;font:.65em/1 Arial;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:9px;}
+    .pa-chip{display:inline-block;margin:3px;padding:5px 14px;border:1px solid var(--navy);border-radius:20px;font:.83em/1 Georgia;color:var(--navy);background:var(--white);transition:background .18s,color .18s;cursor:pointer;}
+    .pa-chip:hover,.pa-chip.active{background:var(--navy);color:var(--white);}
+    .pa-chip-count{opacity:.6;font-size:.85em;}
+
+    .pa-container{max-width:860px;margin:0 auto;padding:20px 20px 60px;}
+
+    .section-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:14px;}
+    .section-card{background:var(--white);border-radius:10px;overflow:hidden;cursor:pointer;border:2px solid transparent;box-shadow:0 2px 8px rgba(45,52,97,.08);transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column;}
+    .section-card:hover{transform:translateY(-4px);box-shadow:0 8px 22px rgba(45,52,97,.16);}
+    .sc-icon{background:var(--navy);padding:22px;text-align:center;font-size:2em;}
+    .sc-body{padding:14px;flex:1;}
+    .sc-title{font:normal .95em/1.3 Georgia;color:var(--navy);margin-bottom:5px;}
+    .sc-count{font:.7em/1 Arial;color:var(--gold);font-weight:bold;}
+    .sc-desc{font:italic .72em/1.4 Arial;color:var(--muted);margin-top:3px;}
+
+    .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;}
+    .cat-card{background:var(--white);border-radius:8px;border:1px solid var(--border);padding:14px;cursor:pointer;transition:transform .18s,box-shadow .18s,border-color .18s;}
+    .cat-card:hover{transform:translateY(-3px);box-shadow:0 5px 14px rgba(45,52,97,.12);border-color:var(--gold);}
+    .cat-card-title{font:normal .9em/1.3 Georgia;color:var(--navy);margin-bottom:4px;}
+    .cat-card-count{font:.7em/1 Arial;color:var(--gold);font-weight:bold;}
+
+    .breadcrumb{display:flex;align-items:center;gap:7px;margin-bottom:18px;flex-wrap:wrap;}
+    .bc-btn{background:none;border:none;font:.76em/1 Arial;color:var(--muted);padding:0;transition:color .2s;}
+    .bc-btn:hover{color:var(--navy);}
+    .bc-sep{color:var(--border);font-size:.78em;}
+    .bc-current{font:.76em/1 Arial;color:var(--navy);}
+
+    .doc-list{margin-top:4px;}
+    .doc-row{display:flex;align-items:flex-start;gap:12px;padding:12px 8px;border-bottom:1px solid var(--border);border-radius:4px;margin:0 -8px;transition:background .15s;}
+    .doc-row:hover{background:rgba(45,52,97,.04);}
+    .doc-icon{font-size:1em;color:var(--gold);flex-shrink:0;width:20px;text-align:center;margin-top:2px;}
+    .doc-body{flex:1;min-width:0;}
+    .doc-title{font:.93em/1.35 Georgia;color:var(--navy);margin-bottom:2px;}
+    .doc-meta{font:.7em/1 Arial;color:var(--muted);}
+    .doc-dl{display:inline-flex;align-items:center;gap:4px;font:.7em/1 Arial;color:var(--gold);text-decoration:none;flex-shrink:0;white-space:nowrap;padding:3px 9px;border:1px solid var(--gold);border-radius:4px;transition:background .15s,color .15s;}
+    .doc-dl:hover{background:var(--gold);color:var(--navy);}
+    .doc-dl-soon{opacity:.3;font:.68em/1 Arial;color:var(--muted);flex-shrink:0;}
+
+    .pa-state{text-align:center;padding:60px 20px;font:italic 1em/1.6 Georgia;color:var(--muted);}
+
+    @media(max-width:540px){.pa-tab{padding:12px 14px;font-size:.62em;}.pa-container{padding:14px 12px 50px;}}
+  </style>
+</head>
+<body>
+
+<div class="pa-filter-bar">
+  <div class="pa-filter-tabs">
+    <button class="pa-tab active" data-view="browse">Parcourir</button>
+    <button class="pa-tab"        data-view="auteur">Par Auteur</button>
+    <button class="pa-tab"        data-view="sujet">Par Sujet</button>
+  </div>
+</div>
+
+<div class="pa-sub" id="sub-auteur"></div>
+<div class="pa-sub" id="sub-sujet"></div>
+
+<div class="pa-container" id="pa-main"><div class="pa-state">Chargement…</div></div>
+
+<script>
+(function(){
+  var D={docs:[],view:'browse',filter:'tous',level:'home',section:'',category:''};
+  var $=function(id){return document.getElementById(id);};
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function notifyHeight(){window.parent.postMessage({type:'pa-docs-resize',height:document.body.scrollHeight},'https://arca-revue.com');}
+
+  var SECTIONS=[
+    {id:'revue',       label:'Revue ARCA',   icon:'📰',desc:'Les numéros complets de la revue'},
+    {id:'article',     label:'Articles',      icon:'📄',desc:'Articles classés par thème'},
+    {id:'livre',       label:'Livres',        icon:'📖',desc:'Ouvrages hermétiques et philosophiques'},
+    {id:'lus-pour-vous',label:'Lus pour vous',icon:'👁',desc:'Lectures commentées'},
+  ];
+
+  function init(){
+    fetch('https://podcast-arca.netlify.app/documents.json?'+Date.now()).then(function(r){return r.json();})
+    .then(function(docs){D.docs=docs;buildSubFilters();render();setTimeout(notifyHeight,300);})
+    .catch(function(){$('pa-main').innerHTML='<div class="pa-state">Impossible de charger la documentation.</div>';});
+
+    document.querySelectorAll('.pa-tab').forEach(function(tab){
+      tab.addEventListener('click',function(){
+        D.view=this.dataset.view;D.filter='tous';D.level='home';D.section='';D.category='';
+        document.querySelectorAll('.pa-tab').forEach(function(t){t.classList.remove('active');});
+        this.classList.add('active');
+        $('sub-auteur').classList.toggle('on',D.view==='auteur');
+        $('sub-sujet').classList.toggle('on',D.view==='sujet');
+        resetChips();render();setTimeout(notifyHeight,100);
+      });
+    });
+    ['sub-auteur','sub-sujet'].forEach(function(id){
+      $(id).addEventListener('click',function(e){
+        var chip=e.target.closest('.pa-chip');if(!chip)return;
+        D.filter=chip.dataset.val;
+        $(id).querySelectorAll('.pa-chip').forEach(function(c){c.classList.remove('active');});
+        chip.classList.add('active');render();setTimeout(notifyHeight,100);
+      });
+    });
+  }
+
+  function resetChips(){
+    ['sub-auteur','sub-sujet'].forEach(function(id){
+      var btns=$(id).querySelectorAll('.pa-chip');
+      btns.forEach(function(b){b.classList.remove('active');});
+      if(btns[0])btns[0].classList.add('active');
+    });
+  }
+
+  function buildSubFilters(){
+    var ac={},sc={},total=D.docs.length;
+    D.docs.forEach(function(d){
+      if(d.subject)sc[d.subject]=(sc[d.subject]||0)+1;
+      (d.authors||[]).forEach(function(a){ac[a]=(ac[a]||0)+1;});
+    });
+    function chips(map,type){
+      var h='<span class="pa-sub-label">Choisir '+(type==='auteur'?'un auteur':'un sujet')+'</span>'+
+        '<button class="pa-chip active" data-type="'+type+'" data-val="tous">Tous <span class="pa-chip-count">('+total+')</span></button>';
+      Object.keys(map).sort().forEach(function(k){if(map[k])h+='<button class="pa-chip" data-type="'+type+'" data-val="'+esc(k)+'">'+esc(k)+' <span class="pa-chip-count">('+map[k]+')</span></button>';});
+      return h;
+    }
+    $('sub-auteur').innerHTML=chips(ac,'auteur');
+    $('sub-sujet').innerHTML=chips(sc,'sujet');
+  }
+
+  function render(){
+    var main=$('pa-main');
+    if(D.view!=='browse'){renderFlat(main);return;}
+    if(D.level==='home')    {renderHome(main);return;}
+    if(D.level==='section') {renderSection(main);return;}
+    if(D.level==='category'){renderDocs(main);return;}
+  }
+
+  function renderHome(main){
+    var counts={};D.docs.forEach(function(d){counts[d.type]=(counts[d.type]||0)+1;});
+    var h='<div class="section-grid">';
+    SECTIONS.forEach(function(s){
+      h+='<div class="section-card" data-section="'+s.id+'">'+
+        '<div class="sc-icon">'+s.icon+'</div>'+
+        '<div class="sc-body"><div class="sc-title">'+esc(s.label)+'</div>'+
+        '<div class="sc-count">'+(counts[s.id]||0)+' document(s)</div>'+
+        '<div class="sc-desc">'+esc(s.desc)+'</div></div></div>';
+    });
+    main.innerHTML=h+'</div>';
+    main.querySelectorAll('.section-card').forEach(function(c){
+      c.addEventListener('click',function(){
+        D.section=this.dataset.section;
+        D.level=(D.section==='article'||D.section==='lus-pour-vous')?'section':'category';
+        render();setTimeout(notifyHeight,100);
+      });
+    });
+  }
+
+  function renderSection(main){
+    var sd=D.docs.filter(function(d){return d.type===D.section;});
+    var cats={},order=[];
+    sd.forEach(function(d){if(!cats[d.category]){cats[d.category]=0;order.push(d.category);}cats[d.category]++;});
+    var sl=(SECTIONS.find(function(s){return s.id===D.section;})||{}).label||D.section;
+    var h=bc([{label:'Accueil',target:'home'},{label:sl}])+'<div class="cat-grid">';
+    order.forEach(function(cat){
+      h+='<div class="cat-card" data-cat="'+esc(cat)+'">'+
+        '<div class="cat-card-title">'+esc(cat)+'</div>'+
+        '<div class="cat-card-count">'+cats[cat]+' document(s)</div></div>';
+    });
+    main.innerHTML=h+'</div>';
+    main.querySelectorAll('.bc-btn').forEach(attachBc);
+    main.querySelectorAll('.cat-card').forEach(function(c){
+      c.addEventListener('click',function(){D.category=this.dataset.cat;D.level='category';render();setTimeout(notifyHeight,100);});
+    });
+  }
+
+  function renderDocs(main){
+    var docs=D.docs.filter(function(d){
+      if(d.type!==D.section)return false;
+      if((D.section==='article'||D.section==='lus-pour-vous')&&d.category!==D.category)return false;
+      return true;
+    });
+    var sl=(SECTIONS.find(function(s){return s.id===D.section;})||{}).label||D.section;
+    var crumbs=[{label:'Accueil',target:'home'}];
+    if(D.section==='article'||D.section==='lus-pour-vous'){crumbs.push({label:sl,target:'section'});crumbs.push({label:D.category});}
+    else{crumbs.push({label:sl});}
+    var h=bc(crumbs)+'<div class="doc-list">';
+    docs.forEach(function(d){h+=docRow(d);});
+    main.innerHTML=h+'</div>';
+    main.querySelectorAll('.bc-btn').forEach(attachBc);
+    setTimeout(notifyHeight,100);
+  }
+
+  function renderFlat(main){
+    var docs=D.docs.filter(function(d){
+      if(D.filter==='tous')return true;
+      if(D.view==='auteur')return(d.authors||[]).indexOf(D.filter)!==-1;
+      return d.subject===D.filter;
+    });
+    if(!docs.length){main.innerHTML='<div class="pa-state">Aucun document pour cette sélection.</div>';return;}
+    var h='<div class="doc-list">';docs.forEach(function(d){h+=docRow(d);});
+    main.innerHTML=h+'</div>';setTimeout(notifyHeight,100);
+  }
+
+  function bc(crumbs){
+    var h='<div class="breadcrumb">';
+    crumbs.forEach(function(c,i){
+      if(i<crumbs.length-1)h+='<button class="bc-btn" data-target="'+(c.target||'home')+'">'+esc(c.label)+'</button><span class="bc-sep">›</span>';
+      else h+='<span class="bc-current">'+esc(c.label)+'</span>';
+    });
+    return h+'</div>';
+  }
+
+  function attachBc(btn){
+    btn.addEventListener('click',function(){D.level=this.dataset.target;render();setTimeout(notifyHeight,100);});
+  }
+
+  function docRow(doc){
+    var meta=[doc.author_display,doc.publication,doc.year].filter(Boolean).join(' · ');
+    var dl=doc.dropbox_url
+      ?'<a class="doc-dl" href="'+esc(doc.dropbox_url)+'" target="_blank" onclick="event.stopPropagation()">⬇ Télécharger</a>'
+      :'<span class="doc-dl-soon">bientôt</span>';
+    return'<div class="doc-row"><div class="doc-icon">📄</div>'+
+      '<div class="doc-body"><div class="doc-title">'+esc(doc.title)+'</div>'+
+      (meta?'<div class="doc-meta">'+esc(meta)+'</div>':'')+
+      '</div>'+dl+'</div>';
+  }
+
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
+})();
+</script>
+</body>
+</html>

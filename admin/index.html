@@ -205,6 +205,7 @@
       <div class="admin-brand">ARCA · Admin</div>
       <nav class="admin-nav">
         <button class="nav-btn on" data-panel="episodes">Épisodes</button>
+        <button class="nav-btn"    data-panel="docs">Documentation</button>
         <button class="nav-btn"    data-panel="config">Configuration</button>
       </nav>
     </div>
@@ -245,6 +246,119 @@
 
     </div>
     <div id="ep-list"><div class="empty">Chargement…</div></div>
+  </div>
+
+  <!-- ── DOCUMENTATION ── -->
+  <div class="panel" id="panel-docs">
+    <div class="toolbar">
+
+      <!-- Filtrer -->
+      <div class="t-row t-filter">
+        <span class="t-label">Filtrer</span>
+        <input class="t-input" type="text" id="dq-search" placeholder="Rechercher dans les titres…" style="flex:1;min-width:180px">
+        <select class="t-select" id="dq-type">
+          <option value="">Tous les types</option>
+          <option value="article">Articles</option>
+          <option value="livre">Livres</option>
+          <option value="revue">Revue ARCA</option>
+          <option value="lus-pour-vous">Lus pour vous</option>
+        </select>
+        <select class="t-select" id="dq-category"><option value="">Toutes les catégories</option></select>
+        <span class="t-spacer"></span>
+        <span class="save-status" id="doc-save-status"></span>
+        <button class="btn btn-navy btn-save" id="btn-save-docs">💾 Sauvegarder</button>
+      </div>
+
+      <!-- Assigner en masse -->
+      <div class="t-row t-bulk">
+        <span class="t-label">Assigner</span>
+        <input class="t-input" type="text" id="dbulk-kw" placeholder="Mot-clé…" style="max-width:140px">
+        <select class="t-select" id="dbulk-cat"><option value="">Toutes catégories</option></select>
+        <select class="t-select" id="dbulk-author"><option value="">+ Auteur</option></select>
+        <select class="t-select" id="dbulk-subject"><option value="">+ Sujet</option></select>
+        <button class="btn btn-navy" id="btn-dbulk">Appliquer aux résultats</button>
+      </div>
+
+      <!-- Supprimer une catégorie -->
+      <div class="t-row t-delete">
+        <span class="t-label">Supprimer</span>
+        <select class="t-select" id="ddel-cat-sel" style="flex:1"><option value="">Choisir une catégorie à supprimer…</option></select>
+        <button class="btn btn-danger" id="btn-ddel-cat">🗑 Supprimer cette catégorie</button>
+      </div>
+
+    </div>
+
+    <div style="margin-bottom:16px;display:flex;gap:10px;align-items:center">
+      <button class="btn btn-gold" id="btn-add-doc" style="padding:10px 20px;">+ Ajouter un document</button>
+      <span style="font:.78em/1 Arial;color:var(--muted);">Ficher PDF max ~5 MB. Au-delà, colle l'URL Dropbox directement.</span>
+    </div>
+
+    <div id="doc-list"><div class="empty">Chargement…</div></div>
+  </div>
+
+  <!-- Modale : Ajouter un document -->
+  <div class="confirm-mask" id="add-doc-mask" style="display:none">
+    <div class="confirm-box" style="max-width:520px;text-align:left;">
+      <h3 style="margin-bottom:18px;color:var(--navy)">Ajouter un document</h3>
+
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
+        <div>
+          <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">Titre *</label>
+          <input type="text" id="new-doc-title" placeholder="Titre du document" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:.9em">
+        </div>
+        <div style="display:flex;gap:10px">
+          <div style="flex:1">
+            <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">Type *</label>
+            <select id="new-doc-type" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:.88em">
+              <option value="article">Article</option>
+              <option value="livre">Livre</option>
+              <option value="revue">Revue ARCA</option>
+              <option value="lus-pour-vous">Lus pour vous</option>
+            </select>
+          </div>
+          <div style="flex:1">
+            <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">Catégorie *</label>
+            <input type="text" id="new-doc-category" placeholder="ex: Alchimie" list="cat-suggestions" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:.88em">
+            <datalist id="cat-suggestions"></datalist>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <div style="flex:1">
+            <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">Auteur affiché</label>
+            <input type="text" id="new-doc-author" placeholder="ex: S. Feye" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:.88em">
+          </div>
+          <div style="flex:1">
+            <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">Sujet</label>
+            <input type="text" id="new-doc-subject" placeholder="ex: hermetisme" list="subj-suggestions" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:.88em">
+            <datalist id="subj-suggestions"></datalist>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <div style="flex:1">
+            <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">Publication</label>
+            <input type="text" id="new-doc-pub" placeholder="ex: ARCA 7" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:.88em">
+          </div>
+          <div style="flex:1">
+            <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">Année</label>
+            <input type="text" id="new-doc-year" placeholder="ex: 2024" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:.88em">
+          </div>
+        </div>
+        <div>
+          <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">URL Dropbox (si fichier déjà uploadé)</label>
+          <input type="url" id="new-doc-url" placeholder="https://dl.dropboxusercontent.com/…" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:.88em">
+        </div>
+        <div>
+          <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">— OU — Fichier PDF (max ~5 MB)</label>
+          <input type="file" id="new-doc-file" accept=".pdf" style="font-size:.88em">
+          <div id="upload-progress" style="margin-top:6px;font:.75em/1 Arial;color:var(--muted);display:none">Upload en cours…</div>
+        </div>
+      </div>
+
+      <div class="confirm-btns">
+        <button class="confirm-cancel" id="add-doc-cancel">Annuler</button>
+        <button class="confirm-ok" id="add-doc-ok" style="background:var(--navy)">Ajouter</button>
+      </div>
+    </div>
   </div>
 
   <!-- ── CONFIGURATION ── -->
@@ -364,11 +478,13 @@ $('btn-logout').addEventListener('click', function() { sessionStorage.removeItem
 function loadData() {
   var base = 'https://podcast-arca.netlify.app';
   Promise.all([
-    fetch(base + '/episodes.json?' + Date.now()).then(function(r) { return r.json(); }),
-    fetch(base + '/config.json?'   + Date.now()).then(function(r) { return r.json(); })
+    fetch(base + '/episodes.json?'  + Date.now()).then(function(r) { return r.json(); }),
+    fetch(base + '/config.json?'    + Date.now()).then(function(r) { return r.json(); }),
+    fetch(base + '/documents.json?' + Date.now()).then(function(r) { return r.json(); }),
   ]).then(function(res) {
     S.episodes = res[0];
     S.config   = res[1];
+    D.docs     = res[2];
     initAdmin();
   }).catch(function(e) {
     var err = $('login-err');
@@ -381,7 +497,9 @@ function initAdmin() {
   $('login-wrap').style.display = 'none';
   $('admin').style.display      = 'block';
   populateSelects();
+  populateDocSelects();
   renderEpisodes();
+  renderDocs();
   renderConfig();
 }
 
@@ -728,6 +846,262 @@ $('btn-save-config').addEventListener('click', function() {
     if (err) toast('Erreur : ' + err, 'err');
     else toast('Configuration sauvegardée !');
   });
+});
+
+/* ═══════════════════ DOCUMENTATION ═══════════════════ */
+var D = { docs: [], dirty: new Set() };
+
+function loadDocs() {
+  fetch('https://podcast-arca.netlify.app/documents.json?' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(docs){
+      D.docs = docs;
+      populateDocSelects();
+      renderDocs();
+    });
+}
+
+function populateDocSelects() {
+  var cats = {}, seen = {};
+  D.docs.forEach(function(d){ if (d.category && !seen[d.category]) { seen[d.category]=true; cats[d.category]=0; } if(d.category) cats[d.category]++; });
+
+  ['dq-category','dbulk-cat','ddel-cat-sel'].forEach(function(id){
+    var sel = $(id); while(sel.options.length>1) sel.remove(1);
+    Object.keys(cats).sort().forEach(function(cat){
+      var o=document.createElement('option'); o.value=cat; o.textContent=cat+' ('+cats[cat]+')'; sel.appendChild(o);
+    });
+  });
+
+  // Auteurs pour bulk
+  var bulkA = $('dbulk-author'); while(bulkA.options.length>1) bulkA.remove(1);
+  Object.keys(S.config.authors||{}).forEach(function(k){
+    var o=document.createElement('option'); o.value=k; o.textContent=S.config.authors[k]; bulkA.appendChild(o);
+  });
+
+  // Sujets pour bulk
+  var bulkS = $('dbulk-subject'); while(bulkS.options.length>1) bulkS.remove(1);
+  Object.keys(S.config.subjects||{}).forEach(function(k){
+    var o=document.createElement('option'); o.value=k; o.textContent=S.config.subjects[k]; bulkS.appendChild(o);
+  });
+
+  // Datalists pour "Ajouter un document"
+  var catList = $('cat-suggestions'); catList.innerHTML='';
+  Object.keys(cats).sort().forEach(function(c){ var o=document.createElement('option'); o.value=c; catList.appendChild(o); });
+  var subjList = $('subj-suggestions'); subjList.innerHTML='';
+  Object.keys(S.config.subjects||{}).sort().forEach(function(k){ var o=document.createElement('option'); o.value=k; catList.appendChild(o); });
+}
+
+/* ── Filtre docs ── */
+var DF = { search:'', type:'', category:'' };
+$('dq-search').addEventListener('input',  function(){ DF.search=this.value.toLowerCase(); renderDocs(); });
+$('dq-type').addEventListener('change',    function(){ DF.type=this.value; renderDocs(); });
+$('dq-category').addEventListener('change',function(){ DF.category=this.value; renderDocs(); });
+
+function getVisibleDocs() {
+  return D.docs.filter(function(d){
+    if (DF.search   && (d.title||'').toLowerCase().indexOf(DF.search)===-1) return false;
+    if (DF.type     && d.type     !== DF.type)     return false;
+    if (DF.category && d.category !== DF.category) return false;
+    return true;
+  });
+}
+
+function renderDocs() {
+  var docs = getVisibleDocs();
+  var list = $('doc-list');
+  if (!docs.length) { list.innerHTML='<div class="empty">Aucun document trouvé.</div>'; return; }
+  list.innerHTML='';
+  docs.forEach(function(doc){ list.appendChild(buildDocCard(doc)); });
+  updateDocStatus();
+}
+
+function buildDocCard(doc) {
+  var idx = D.docs.indexOf(doc);
+  var div = document.createElement('div');
+  div.className = 'ep-card' + (D.dirty.has(idx)?' dirty':'');
+  div.dataset.didx = idx;
+
+  var typeLabel = {article:'Article',livre:'Livre',revue:'Revue ARCA','lus-pour-vous':'Lus pour vous'}[doc.type]||doc.type;
+  var subjOpts = '<option value="">— Aucun —</option>';
+  Object.keys(S.config.subjects||{}).forEach(function(k){
+    subjOpts+='<option value="'+k+'"'+(doc.subject===k?' selected':'')+'>'+esc(S.config.subjects[k])+'</option>';
+  });
+
+  div.innerHTML =
+    '<div class="ep-inner">'+
+    '<div class="ep-body">'+
+      '<div class="ep-head">'+
+        '<div style="display:flex;gap:6px;align-items:center;flex:1;min-width:0">'+
+          '<span style="background:var(--gold);color:var(--navy-dk);font:.6em/1 Arial;padding:2px 7px;border-radius:3px;white-space:nowrap;flex-shrink:0">'+esc(typeLabel)+'</span>'+
+          '<span style="background:var(--bg);border:1px solid var(--border);font:.6em/1 Arial;padding:2px 7px;border-radius:3px;white-space:nowrap;flex-shrink:0">'+esc(doc.category||'')+'</span>'+
+          '<div class="ep-title" title="'+esc(doc.title)+'">'+esc(doc.title)+'</div>'+
+        '</div>'+
+        '<button class="btn-del-ep doc-del" title="Supprimer ce document">🗑</button>'+
+      '</div>'+
+      '<div class="ep-sub">'+esc(doc.author_display||'')+(doc.publication?' · '+esc(doc.publication):'')+(doc.year?' · '+esc(doc.year):'')+'</div>'+
+      '<div class="ep-fields">'+
+        '<div class="ep-field"><label>Auteur affiché</label>'+
+          '<input type="text" class="doc-author-input t-input" value="'+esc(doc.author_display||'')+'" placeholder="Nom affiché" style="max-width:200px">'+
+        '</div>'+
+        '<div class="ep-field"><label>Sujet</label>'+
+          '<select class="subject-sel doc-subject-sel">'+subjOpts+'</select>'+
+        '</div>'+
+        '<div class="ep-field"><label>URL Dropbox</label>'+
+          '<input type="url" class="doc-url-input t-input" value="'+esc(doc.dropbox_url||'')+'" placeholder="https://dl.dropbox…" style="max-width:300px">'+
+        '</div>'+
+      '</div>'+
+    '</div></div>';
+
+  // Auteur
+  div.querySelector('.doc-author-input').addEventListener('input', function(){
+    D.docs[idx].author_display = this.value;
+    markDocDirty(idx); div.classList.add('dirty'); updateDocStatus();
+  });
+
+  // Sujet
+  div.querySelector('.doc-subject-sel').addEventListener('change', function(){
+    D.docs[idx].subject = this.value;
+    markDocDirty(idx); div.classList.add('dirty'); updateDocStatus();
+  });
+
+  // URL
+  div.querySelector('.doc-url-input').addEventListener('input', function(){
+    D.docs[idx].dropbox_url = this.value.trim();
+    markDocDirty(idx); div.classList.add('dirty'); updateDocStatus();
+  });
+
+  // Supprimer
+  div.querySelector('.doc-del').addEventListener('click', function(e){
+    e.stopPropagation();
+    dialog('Supprimer ce document ?', doc.title, function(){
+      D.docs.splice(idx,1); renderDocs(); updateDocStatus();
+      toast('Document supprimé — Sauvegarder pour confirmer');
+    }, {label:'Supprimer', color:'var(--red)'});
+  });
+
+  return div;
+}
+
+function markDocDirty(idx){ D.dirty.add(idx); }
+function updateDocStatus(){ $('doc-save-status').textContent = D.dirty.size?D.dirty.size+' modif. non sauvegardée(s)':''; }
+
+/* ── Save docs ── */
+$('btn-save-docs').addEventListener('click', function(){
+  var btn=this; btn.textContent='Sauvegarde…'; btn.classList.add('saving');
+  saveFile('documents.json', D.docs, function(err){
+    btn.classList.remove('saving');
+    if (err) { toast('Erreur : '+err,'err'); return; }
+    D.dirty.clear();
+    document.querySelectorAll('#doc-list .ep-card.dirty').forEach(function(c){c.classList.remove('dirty');});
+    updateDocStatus();
+    btn.textContent='✓ Sauvegardé'; btn.classList.add('saved');
+    toast('Documentation sauvegardée ! Netlify redéploie dans ~30s.');
+    setTimeout(function(){btn.textContent='💾 Sauvegarder';btn.classList.remove('saved');},3000);
+  });
+});
+
+/* ── Bulk assign docs ── */
+$('btn-dbulk').addEventListener('click', function(){
+  var kw   = $('dbulk-kw').value.trim().toLowerCase();
+  var cat  = $('dbulk-cat').value;
+  var auth = $('dbulk-author').value;
+  var subj = $('dbulk-subject').value;
+  if (!auth && !subj) { toast('Choisis un auteur ou un sujet','err'); return; }
+  if (!kw && !cat)    { toast('Précise un mot-clé ou une catégorie','err'); return; }
+  var docs = D.docs.filter(function(d){
+    return (!cat||(d.category===cat)) && (!kw||(d.title||'').toLowerCase().indexOf(kw)!==-1);
+  });
+  if (!docs.length) { toast('Aucun document ne correspond','err'); return; }
+  var authName = auth?((S.config.authors||{})[auth]||auth):'';
+  var subjName = subj?((S.config.subjects||{})[subj]||subj):'';
+  dialog('Assigner les métadonnées ?',
+    docs.length+' document(s)'+(kw?' contenant "'+kw+'"':'')+(cat?' dans '+cat:'')+(authName?' → '+authName:'')+(subjName?' → '+subjName:''),
+    function(){
+      docs.forEach(function(d){
+        var i=D.docs.indexOf(d);
+        if (auth) { d.author_display=authName; }
+        if (subj) { d.subject=subj; }
+        markDocDirty(i);
+      });
+      renderDocs(); updateDocStatus();
+      toast(docs.length+' document(s) mis à jour — Sauvegarder pour confirmer');
+    }, {label:'Appliquer', color:'var(--navy)'});
+});
+
+/* ── Supprimer une catégorie ── */
+$('btn-ddel-cat').addEventListener('click', function(){
+  var sel=document.getElementById('ddel-cat-sel'); var cat=sel.value;
+  if (!cat) { toast('Choisis une catégorie','err'); return; }
+  var count=D.docs.filter(function(d){return d.category===cat;}).length;
+  dialog('Supprimer la catégorie ?','« '+cat+' » — '+count+' document(s). Irréversible après sauvegarde.',
+    function(){
+      D.docs=D.docs.filter(function(d){return d.category!==cat;});
+      populateDocSelects(); renderDocs(); updateDocStatus();
+      toast(count+' document(s) supprimé(s) — Sauvegarder pour confirmer');
+    },{label:'Supprimer',color:'var(--red)'});
+});
+
+/* ── Modale : Ajouter un document ── */
+$('btn-add-doc').addEventListener('click', function(){ $('add-doc-mask').style.display='flex'; });
+$('add-doc-cancel').addEventListener('click', function(){ $('add-doc-mask').style.display='none'; });
+
+$('add-doc-ok').addEventListener('click', function(){
+  var title   = $('new-doc-title').value.trim();
+  var type    = $('new-doc-type').value;
+  var category= $('new-doc-category').value.trim();
+  var author  = $('new-doc-author').value.trim();
+  var subject = $('new-doc-subject').value.trim();
+  var pub     = $('new-doc-pub').value.trim();
+  var year    = $('new-doc-year').value.trim();
+  var url     = $('new-doc-url').value.trim();
+  var file    = $('new-doc-file').files[0];
+
+  if (!title||!type||!category) { toast('Titre, type et catégorie sont requis','err'); return; }
+
+  function finalize(dropbox_url) {
+    var id = title.toLowerCase().replace(/[^a-z0-9]+/g,'-').substring(0,60)+'-'+Date.now();
+    var doc = {
+      id:id, title:title, type:type, category:category,
+      author_display:author, authors:author?[author.toLowerCase().replace(/[^a-z0-9]+/g,'-')]:[],
+      subject:subject||'', publication:pub, year:year,
+      dropbox_url:dropbox_url||''
+    };
+    D.docs.push(doc);
+    populateDocSelects(); renderDocs(); updateDocStatus();
+    toast('Document ajouté — Sauvegarder pour confirmer');
+    $('add-doc-mask').style.display='none';
+    ['new-doc-title','new-doc-category','new-doc-author','new-doc-subject','new-doc-pub','new-doc-year','new-doc-url'].forEach(function(id){$(id).value='';});
+    $('new-doc-file').value='';
+  }
+
+  if (url) { finalize(url); return; }
+
+  if (file) {
+    var prog=$('upload-progress'); prog.style.display='block'; prog.textContent='Lecture du fichier…';
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var b64=e.target.result.split(',')[1];
+      var remotePath='/Documentation ARCA/'+
+        {article:'Articles',livre:'Livres',revue:'Revue ARCA','lus-pour-vous':'Lus pour vous'}[type]+
+        (type==='article'||type==='lus-pour-vous'?'/'+category:'')+'/'+
+        title.toLowerCase().replace(/[^a-z0-9]+/g,'-').substring(0,60)+'.pdf';
+
+      prog.textContent='Upload sur Dropbox…';
+      fetch('/.netlify/functions/upload-doc',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({password:S.pwd,filename:file.name,content:b64,remotePath:remotePath})
+      }).then(function(r){return r.json();}).then(function(res){
+        prog.style.display='none';
+        if (res.success) { finalize(res.dropbox_url); }
+        else { toast('Erreur upload : '+res.error,'err'); }
+      }).catch(function(err){ prog.style.display='none'; toast('Erreur réseau : '+err.message,'err'); });
+    };
+    reader.readAsDataURL(file);
+    return;
+  }
+
+  finalize('');
 });
 
 /* ═══════════════════ INIT ═══════════════════ */

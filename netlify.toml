@@ -39,3 +39,9 @@
   for = "/docs.html"
   [headers.values]
     Content-Security-Policy = "frame-ancestors 'self' https://arca-revue.com"
+
+# docs-embed.html intégrable depuis arca-revue.com
+[[headers]]
+  for = "/docs-embed.html"
+  [headers.values]
+    Content-Security-Policy = "frame-ancestors 'self' https://arca-revue.com"
