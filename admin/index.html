@@ -419,12 +419,19 @@
   }
 
   /* ── Confirm dialog ── */
-  function confirm(title, msg, onOk) {
+  function confirm(title, msg, onOk, opts) {
+    opts = opts || {};
+    var okLabel = opts.okLabel || "Confirmer";
+    var okColor = opts.okColor || "var(--navy)";
+
     var overlay = document.getElementById("confirm-overlay");
     document.getElementById("confirm-title").textContent = title;
     document.getElementById("confirm-msg").textContent   = msg;
+    var okBtn = document.getElementById("confirm-ok");
+    okBtn.textContent = okLabel;
+    okBtn.style.background = okColor;
     overlay.style.display = "flex";
-    document.getElementById("confirm-ok").onclick = function () {
+    okBtn.onclick = function () {
       overlay.style.display = "none";
       onOk();
     };
@@ -598,7 +605,8 @@
           renderEpisodes();
           updateSaveStatus();
           toast("Épisode supprimé — clique Sauvegarder pour confirmer");
-        }
+        },
+        { okLabel: "Supprimer", okColor: "var(--red)" }
       );
     });
 
@@ -806,7 +814,8 @@
         renderEpisodes();
         updateSaveStatus();
         toast(eps.length + " épisode(s) mis à jour — clique Sauvegarder pour confirmer");
-      }
+      },
+      { okLabel: "Appliquer", okColor: "var(--navy)" }
     );
   });
 
@@ -828,7 +837,8 @@
         sel.value = "";
         renderEpisodes();
         toast(count + " épisode(s) supprimé(s) — clique Sauvegarder pour confirmer");
-      }
+      },
+      { okLabel: "Supprimer", okColor: "var(--red)" }
     );
   });
 
