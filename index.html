@@ -275,14 +275,18 @@
       transform: translateY(-5px);
       box-shadow: 0 10px 28px rgba(45,52,97,.18);
     }
+    .pa-featured-card { border-width: 3px; }
     .pa-featured-thumbs {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      height: 130px;
+      height: 140px;
       gap: 2px;
+      overflow: hidden;
     }
     .pa-featured-thumbs img {
-      width: 100%; height: 100%; object-fit: cover; display: block;
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: center;
+      display: block; min-height: 0;
     }
     .pa-featured-ph { background: var(--navy); }
     .pa-featured-body { padding: 14px 18px 16px; }

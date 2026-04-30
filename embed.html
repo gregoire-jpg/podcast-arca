@@ -137,10 +137,10 @@
     .pa-pl-count { color: var(--gold); font-weight: bold; }
 
     /* Bannière Nouveautés */
-    .pa-featured-card { grid-column:1/-1; background:var(--white); border-radius:10px; overflow:hidden; cursor:pointer; border:2px solid var(--gold); box-shadow:0 2px 8px rgba(45,52,97,.08); transition:transform .2s,box-shadow .2s; }
+    .pa-featured-card { grid-column:1/-1; background:var(--white); border-radius:10px; overflow:hidden; cursor:pointer; border:3px solid var(--gold); box-shadow:0 2px 8px rgba(45,52,97,.08); transition:transform .2s,box-shadow .2s; }
     .pa-featured-card:hover { transform:translateY(-4px); box-shadow:0 8px 24px rgba(45,52,97,.16); }
-    .pa-featured-thumbs { display:grid; grid-template-columns:repeat(5,1fr); height:110px; gap:2px; }
-    .pa-featured-thumbs img { width:100%; height:100%; object-fit:cover; display:block; }
+    .pa-featured-thumbs { display:grid; grid-template-columns:repeat(5,1fr); height:120px; gap:2px; overflow:hidden; }
+    .pa-featured-thumbs img { width:100%; height:100%; object-fit:cover; object-position:center; display:block; min-height:0; }
     .pa-featured-ph { background:var(--navy); }
     .pa-featured-body { padding:12px 14px 14px; }
     .pa-featured-badge { display:inline-block; background:var(--gold); color:var(--navy-dk); font:bold .6em/1 Arial,sans-serif; letter-spacing:1.5px; text-transform:uppercase; padding:3px 8px; border-radius:4px; margin-bottom:6px; }
