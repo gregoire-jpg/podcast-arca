@@ -516,7 +516,9 @@
     "audio_url": "https://dl.dropboxusercontent.com/scl/fi/rxzkgvak1yvxo5ja3mz4h/I_m5Qzrww3o.mp3?rlkey=7d6p0dij5qdx2zyi7tq9k21sl&dl=0",
     "file_size": 1902213,
     "image_url": "https://i.ytimg.com/vi/I_m5Qzrww3o/maxresdefault.jpg",
-    "authors": [],
+    "authors": [
+      "stephane-feye"
+    ],
     "subject": ""
   },
   {
@@ -532,7 +534,9 @@
     "audio_url": "https://dl.dropboxusercontent.com/scl/fi/jwqnv62odzhtrwe2gzair/rfmS1pRCzzI.mp3?rlkey=f84xnwhoi1gh7zq3m6lr13po6&dl=0",
     "file_size": 20952117,
     "image_url": "https://i.ytimg.com/vi/rfmS1pRCzzI/maxresdefault.jpg",
-    "authors": [],
+    "authors": [
+      "odile-dapsens"
+    ],
     "subject": ""
   },
   {
@@ -548,7 +552,9 @@
     "audio_url": "https://dl.dropboxusercontent.com/scl/fi/9whople4ckhbymegcyb5y/ylZR6E5UF1Q.mp3?rlkey=zei5qx7abriu1o831833xuk62&dl=0",
     "file_size": 36434877,
     "image_url": "https://i.ytimg.com/vi/ylZR6E5UF1Q/maxresdefault.jpg",
-    "authors": [],
+    "authors": [
+      "remy-dechambre"
+    ],
     "subject": ""
   },
   {
