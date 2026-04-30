@@ -498,7 +498,9 @@
     "audio_url": "https://dl.dropboxusercontent.com/scl/fi/95idqrtafy920r3whin2i/0GTKIs3Y3Lw.mp3?rlkey=za03asx8lvyezg9r1kq7nbzfq&dl=0",
     "file_size": 4961517,
     "image_url": "https://i.ytimg.com/vi/0GTKIs3Y3Lw/maxresdefault.jpg",
-    "authors": [],
+    "authors": [
+      "stephane-feye"
+    ],
     "subject": ""
   },
   {
