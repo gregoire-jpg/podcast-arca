@@ -222,8 +222,11 @@ def main():
     dbx  = make_dbx() if not NO_UPLOAD else None
     docs = load_json(DOCS_FILE, [])
 
-    # Index des URLs déjà traitées
-    seen_urls = {d.get("source_url", "") for d in docs}
+    # Index des URLs déjà uploadées sur Dropbox (ignore les échecs précédents)
+    seen_urls = {d.get("source_url", "") for d in docs if d.get("dropbox_url")}
+    # Supprimer les entrées sans dropbox_url pour les réessayer
+    docs = [d for d in docs if d.get("dropbox_url")]
+    print(f"📋 {len(docs)} document(s) déjà sur Dropbox, réessai des autres…")
     added = 0
 
     import tempfile
