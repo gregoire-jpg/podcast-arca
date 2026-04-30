@@ -1,0 +1,27 @@
+name: Nettoyer les titres de documents
+
+on:
+  workflow_dispatch:
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Nettoyer les titres
+        run: python scripts/clean-doc-titles.py
+
+      - name: Commit si modifié
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add documents.json
+          git diff --staged --quiet || git commit -m "fix: supprimer prefixe pdf et suffixe .pdf des titres"
+          git push

@@ -160,8 +160,14 @@ def _extract_file_links(soup, seen):
             if full not in seen:
                 seen.add(full)
                 slug  = href.split("?")[0].rstrip("/").split("/")[-1]
-                title = text or slug.replace("-", " ").title()
-                links.append({"url": full, "title": title})
+                raw   = text or slug.replace("-", " ").title()
+                # Nettoyer le préfixe "pdf" et le suffixe ".pdf"
+                t = raw.strip()
+                if t.lower().startswith("pdf"):
+                    t = t[3:].strip()
+                if t.lower().endswith(".pdf"):
+                    t = t[:-4].strip()
+                links.append({"url": full, "title": t or raw})
 
         elif href.lower().endswith(".pdf"):
             full = href if href.startswith("http") else BASE_URL + href
