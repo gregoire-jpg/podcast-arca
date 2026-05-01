@@ -250,17 +250,19 @@
     });
   }
 
+  /* Renvois : délégation sur document.body via pointerdown (fiable iOS/Android/Desktop) */
+  document.body.addEventListener('pointerdown', function(e) {
+    var a = e.target.closest('.voir-link');
+    if (!a) return;
+    e.preventDefault();
+    goToTerm(a.dataset.term, parseInt(a.dataset.num, 10) || 0);
+  });
+
   function attachVoirLinks(container) {
+    /* Les liens utilisent data-term/data-num, l'événement est capturé par le body */
     container.querySelectorAll('.voir-link').forEach(function(a) {
-      a.addEventListener('click',     handler);
-      a.addEventListener('touchstart', function(e){ e.stopPropagation(); }); // évite le délai iOS
-      a.addEventListener('touchend',  handler);
+      a.style.touchAction = 'manipulation'; // supprime délai 300ms iOS
     });
-    function handler(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      goToTerm(this.dataset.term, parseInt(this.dataset.num, 10) || 0);
-    }
   }
 
   function render() {
