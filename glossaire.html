@@ -54,7 +54,7 @@
     .term-source { font: italic .78em/1 Arial; color: var(--gold); margin-bottom: 6px; }
     .term-text { font: .93em/1.65 Georgia; color: #2a2a2a; }
     .term-voir { margin-top: 10px; font: .78em/1 Arial; color: var(--muted); }
-    .term-voir a { color: var(--navy); text-decoration: none; border-bottom: 1px dotted var(--border); transition: border-color .15s; }
+    .term-voir a { color: var(--navy); text-decoration: none; border-bottom: 1px dotted var(--border); transition: border-color .15s; cursor: pointer; -webkit-tap-highlight-color: rgba(200,160,96,.3); }
     .term-voir a:hover { border-bottom-color: var(--navy); }
     .term-num { font: bold .78em/1 Arial; color: var(--muted); margin-right: 6px; }
 
@@ -250,6 +250,19 @@
     });
   }
 
+  function attachVoirLinks(container) {
+    container.querySelectorAll('.voir-link').forEach(function(a) {
+      a.addEventListener('click',     handler);
+      a.addEventListener('touchstart', function(e){ e.stopPropagation(); }); // évite le délai iOS
+      a.addEventListener('touchend',  handler);
+    });
+    function handler(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      goToTerm(this.dataset.term, parseInt(this.dataset.num, 10) || 0);
+    }
+  }
+
   function render() {
     var terms = G.filtered;
     var list = document.getElementById('pa-list');
@@ -276,6 +289,7 @@
       html += '</div>';
     });
     list.innerHTML = html;
+    attachVoirLinks(list);
   }
 
   function termCard(t) {
@@ -312,7 +326,7 @@
         var m = v.trim().match(/^(.+?)\s+(\d+)$/);
         var termRef = esc(m ? m[1].trim() : v.trim());
         var numRef  = m ? m[2] : '0';
-        return '<a href="#" class="voir-link" data-term="' + termRef + '" data-num="' + numRef + '">' + vDisplay + '</a>';
+        return '<a href="javascript:void(0)" class="voir-link" data-term="' + termRef + '" data-num="' + numRef + '">' + vDisplay + '</a>';
       }).join(', ');
       html += '</div>';
     }
@@ -378,21 +392,6 @@
     }, 200);
   };
 
-  /* Délégation : capture les clics sur .voir-link dans tout le document */
-  document.addEventListener('click', function(e) {
-    var a = e.target.closest('.voir-link');
-    if (!a) return;
-    e.preventDefault();
-    goToTerm(a.dataset.term, parseInt(a.dataset.num, 10) || 0);
-  });
-
-  /* Compatibilité iOS : les éléments non-interactifs ont besoin de cursor:pointer */
-  document.addEventListener('touchend', function(e) {
-    var a = e.target.closest('.voir-link');
-    if (!a) return;
-    e.preventDefault();
-    goToTerm(a.dataset.term, parseInt(a.dataset.num, 10) || 0);
-  });
 
   function notifyHeight() {
     window.parent.postMessage({ type: 'pa-gloss-resize', height: document.body.scrollHeight }, 'https://arca-revue.com');
