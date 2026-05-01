@@ -32,6 +32,12 @@
     .section-card{background:var(--white);border-radius:10px;overflow:hidden;cursor:pointer;border:2px solid transparent;box-shadow:0 2px 8px rgba(45,52,97,.08);transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column;}
     .section-card:hover{transform:translateY(-4px);box-shadow:0 8px 22px rgba(45,52,97,.16);}
     .sc-icon{background:var(--navy);padding:22px;text-align:center;font-size:2em;}
+    .sc-img{height:140px;overflow:hidden;background:var(--navy);}
+    .sc-img img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;transition:transform .4s;}
+    .section-card:hover .sc-img img{transform:scale(1.06);}
+    .cat-img{height:90px;margin:-14px -14px 10px;overflow:hidden;border-radius:8px 8px 0 0;background:var(--navy);}
+    .cat-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;}
+    .cat-card:hover .cat-img img{transform:scale(1.07);}
     .sc-body{padding:14px;flex:1;}
     .sc-title{font:normal .95em/1.3 Georgia;color:var(--navy);margin-bottom:5px;}
     .sc-count{font:.7em/1 Arial;color:var(--gold);font-weight:bold;}
@@ -86,6 +92,26 @@
   var $=function(id){return document.getElementById(id);};
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function notifyHeight(){window.parent.postMessage({type:'pa-docs-resize',height:document.body.scrollHeight},'https://arca-revue.com');}
+
+  var IMGS={
+    'revue':         'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/HermesTrismegistusCaucHighRes.jpg/600px-HermesTrismegistusCaucHighRes.jpg',
+    'articles':      'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Cistercian_monks_at_work_-_UL_Cambridge_Ms_Mm.5.31.jpg/600px-Cistercian_monks_at_work_-_UL_Cambridge_Ms_Mm.5.31.jpg',
+    'livres':        'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/KellsFol034rChiRhoMonogram.jpg/600px-KellsFol034rChiRhoMonogram.jpg',
+    'lus-pour-vous': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Folio_26r_-_The_Annunciation.jpg/600px-Folio_26r_-_The_Annunciation.jpg',
+    'Alchimie':      'https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/A_crowned_alchemical_flask_containing_a_young_king%2C_dressed_Wellcome_V0025640.jpg/400px-A_crowned_alchemical_flask_containing_a_young_king%2C_dressed_Wellcome_V0025640.jpg',
+    'Hermétisme':    'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Emerald_Tablet_British_Library_Arundel_MS_164_fol_155r.jpg/400px-Emerald_Tablet_British_Library_Arundel_MS_164_fol_155r.jpg',
+    'Christianisme': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Folio_26r_-_The_Annunciation.jpg/400px-Folio_26r_-_The_Annunciation.jpg',
+    'Classiques':    'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg/400px-Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg',
+    'Louis Cattiaux & Message Retrouvé':'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/A_peacock_in_a_crowned_alchemical_flask%3B_representing_the_st_Wellcome_V0025638.jpg/400px-A_peacock_in_a_crowned_alchemical_flask%3B_representing_the_st_Wellcome_V0025638.jpg',
+    'Judaïsme':      'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Medieval_amulet_to_protect_mother_and_child._Wellcome_M0008070.jpg/400px-Medieval_amulet_to_protect_mother_and_child._Wellcome_M0008070.jpg',
+    'Islam':         'https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Illuminated_frontispiece_from_the_Ilkhanid_Qur%27an_manuscript.jpg/400px-Illuminated_frontispiece_from_the_Ilkhanid_Qur%27an_manuscript.jpg',
+    'Divers':        'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Voynich_Manuscript_%2832%29.jpg/400px-Voynich_Manuscript_%2832%29.jpg',
+    'Néophytes':     'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Cistercian_monks_at_work_-_UL_Cambridge_Ms_Mm.5.31.jpg/400px-Cistercian_monks_at_work_-_UL_Cambridge_Ms_Mm.5.31.jpg',
+    'Néerlandais':   'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/KellsFol034rChiRhoMonogram.jpg/400px-KellsFol034rChiRhoMonogram.jpg',
+    'Égypte':        'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg/400px-Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg',
+  };
+
+  function cardImg(key,fb){var s=IMGS[key]||'';if(!s)return'<div class="sc-icon">'+fb+'</div>';return'<div class="sc-img"><img src="'+s+'" alt="" loading="lazy" onerror="this.parentElement.innerHTML=\''+fb+'\'"></div>';}
 
   var SECTIONS=[
     {id:'revue',        label:'Revue ARCA',   icon:'📰',desc:'Les numéros complets de la revue'},
@@ -156,7 +182,7 @@
     var h='<div class="section-grid">';
     SECTIONS.forEach(function(s){
       h+='<div class="section-card" data-section="'+s.id+'">'+
-        '<div class="sc-icon">'+s.icon+'</div>'+
+        cardImg(s.id,s.icon)+
         '<div class="sc-body"><div class="sc-title">'+esc(s.label)+'</div>'+
         '<div class="sc-count">'+(counts[s.id]||0)+' document(s)</div>'+
         '<div class="sc-desc">'+esc(s.desc)+'</div></div></div>';
@@ -178,7 +204,8 @@
     var sl=(SECTIONS.find(function(s){return s.id===D.section;})||{}).label||D.section;
     var h=bc([{label:'Accueil',target:'home'},{label:sl}])+'<div class="cat-grid">';
     order.forEach(function(cat){
-      h+='<div class="cat-card" data-cat="'+esc(cat)+'">'+
+      var ci=IMGS[cat]?'<div class="cat-img"><img src="'+IMGS[cat]+'" alt="" loading="lazy" onerror="this.parentElement.remove()"></div>':'';
+      h+='<div class="cat-card" data-cat="'+esc(cat)+'">'+ci+
         '<div class="cat-card-title">'+esc(cat)+'</div>'+
         '<div class="cat-card-count">'+cats[cat]+' document(s)</div></div>';
     });
