@@ -61,6 +61,83 @@
     /* Empty */
     .pa-state { text-align: center; padding: 80px 24px; font: italic 1em/1.6 Georgia; color: var(--muted); }
 
+    /* ── Panneau latéral (renvoi) ── */
+    .ref-backdrop {
+      display: none;
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,.18);
+    }
+    .ref-backdrop.on { display: block; }
+
+    .ref-panel {
+      position: fixed; z-index: 201;
+      top: 0; right: 0; bottom: 0;
+      width: min(440px, 95vw);
+      background: var(--bg);
+      box-shadow: -6px 0 40px rgba(0,0,0,.18);
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+    }
+    .ref-panel.on { transform: translateX(0); }
+
+    .ref-header {
+      background: var(--navy);
+      padding: 20px 20px 16px;
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+      flex-shrink: 0;
+    }
+    .ref-header-text { flex: 1; }
+    .ref-eyebrow { font: .62em/1 Arial; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 8px; }
+    .ref-title { font: normal 1.4em/1.2 Georgia; color: var(--white); letter-spacing: 1px; text-transform: uppercase; }
+    .ref-close {
+      background: none; border: none; color: rgba(255,255,255,.5);
+      font-size: 1.5em; line-height: 1; padding: 0; flex-shrink: 0;
+      transition: color .2s; cursor: pointer; margin-top: -2px;
+    }
+    .ref-close:hover { color: var(--white); }
+
+    .ref-body { flex: 1; overflow-y: auto; padding: 20px; }
+
+    .ref-entry {
+      margin-bottom: 18px; padding: 14px 14px 14px 16px;
+      border-left: 2px solid var(--border);
+      border-radius: 0 6px 6px 0;
+      transition: background .3s, border-left-color .3s;
+    }
+    .ref-entry.highlight {
+      background: rgba(200,160,96,.12);
+      border-left-color: var(--gold);
+    }
+    .ref-entry-num { font: bold .75em/1 Arial; color: var(--muted); display: block; margin-bottom: 4px; }
+    .ref-entry-src { font: italic .75em/1 Arial; color: var(--gold); display: block; margin-bottom: 6px; }
+    .ref-entry-txt { font: .9em/1.65 Georgia; color: #2a2a2a; }
+
+    .ref-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .ref-goto {
+      font: .78em/1 Arial; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--navy); text-decoration: none; cursor: pointer;
+      border: none; background: none;
+      transition: color .2s;
+    }
+    .ref-goto:hover { color: var(--gold); }
+
+    /* Mobile : panneau vient du bas */
+    @media (max-width: 600px) {
+      .ref-panel {
+        top: auto; right: 0; bottom: 0; left: 0;
+        width: 100%; height: 75vh;
+        border-radius: 16px 16px 0 0;
+        transform: translateY(100%);
+      }
+      .ref-panel.on { transform: translateY(0); }
+    }
+
     /* Footer */
     .pa-footer { background: var(--navy-dk); border-top: 1px solid rgba(255,255,255,.07); text-align: center; padding: 22px; font: .68em/1 Arial; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,.25); }
 
@@ -124,6 +201,22 @@
 </div>
 
 <div class="pa-footer">&copy; Académie de Thélème — Tous droits réservés</div>
+
+<!-- Panneau latéral pour les renvois -->
+<div class="ref-backdrop" id="ref-backdrop"></div>
+<div class="ref-panel" id="ref-panel">
+  <div class="ref-header">
+    <div class="ref-header-text">
+      <span class="ref-eyebrow">Voir aussi</span>
+      <div class="ref-title" id="ref-title">—</div>
+    </div>
+    <button class="ref-close" id="ref-close" aria-label="Fermer">×</button>
+  </div>
+  <div class="ref-body" id="ref-body"></div>
+  <div class="ref-footer">
+    <button class="ref-goto" id="ref-goto">Voir dans le glossaire complet →</button>
+  </div>
+</div>
 
 <script>
 (function() {
@@ -250,12 +343,12 @@
     });
   }
 
-  /* Renvois : délégation sur document.body via pointerdown (fiable iOS/Android/Desktop) */
+  /* Renvois : panneau latéral */
   document.body.addEventListener('pointerdown', function(e) {
     var a = e.target.closest('.voir-link');
     if (!a) return;
     e.preventDefault();
-    goToTerm(a.dataset.term, parseInt(a.dataset.num, 10) || 0);
+    showRefPanel(a.dataset.term, parseInt(a.dataset.num, 10) || 0);
   });
 
   function attachVoirLinks(container) {
@@ -337,7 +430,75 @@
     return html;
   }
 
-  /* Navigation par renvoi — via délégation d'événements (compatible iOS) */
+  /* ── Panneau latéral ── */
+  var _refPanel    = document.getElementById('ref-panel');
+  var _refBackdrop = document.getElementById('ref-backdrop');
+  var _refGoto     = document.getElementById('ref-goto');
+  var _refTarget   = null; // terme cible pour "Voir dans le glossaire"
+
+  function openRefPanel()  { _refPanel.classList.add('on'); _refBackdrop.classList.add('on'); }
+  function closeRefPanel() { _refPanel.classList.remove('on'); _refBackdrop.classList.remove('on'); }
+
+  document.getElementById('ref-close').addEventListener('click', closeRefPanel);
+  _refBackdrop.addEventListener('click', closeRefPanel);
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeRefPanel(); });
+
+  _refGoto.addEventListener('click', function(){
+    closeRefPanel();
+    if(_refTarget) goToTerm(_refTarget.terme, 0);
+  });
+
+  function showRefPanel(termeName, entryNum) {
+    var tLow = termeName.toLowerCase().trim();
+    var target = null;
+    for(var i=0;i<G.terms.length;i++){
+      if(G.terms[i].terme.toLowerCase()===tLow){target=G.terms[i];break;}
+    }
+    if(!target){
+      for(var j=0;j<G.terms.length;j++){
+        if(G.terms[j].terme.toLowerCase().indexOf(tLow)===0){target=G.terms[j];break;}
+      }
+    }
+    if(!target){
+      // Terme non trouvé → navigation classique
+      goToTerm(termeName, entryNum);
+      return;
+    }
+    _refTarget = target;
+
+    // Remplir le panneau
+    document.getElementById('ref-title').textContent = target.terme;
+
+    var body = document.getElementById('ref-body');
+    if(!target.entrees || target.entrees.length===0){
+      body.innerHTML = '<div style="padding:20px;font:italic .9em/1.6 Georgia;color:var(--muted);">(aucune définition)</div>';
+    } else {
+      var html = '';
+      target.entrees.forEach(function(e, i){
+        var isHL = (entryNum > 0) ? (i+1 === entryNum) : (i === 0);
+        html += '<div class="ref-entry'+(isHL?' highlight':'')+'">';
+        if(target.entrees.length > 1){
+          html += '<span class="ref-entry-num">'+(i+1)+'</span>';
+        }
+        if(e.source){ html += '<span class="ref-entry-src">['+esc(e.source)+']</span>'; }
+        html += '<div class="ref-entry-txt">'+esc(e.texte)+'</div>';
+        html += '</div>';
+      });
+      body.innerHTML = html;
+
+      // Scroller jusqu'à la définition ciblée
+      if(entryNum > 0){
+        setTimeout(function(){
+          var entries = body.querySelectorAll('.ref-entry');
+          if(entries[entryNum-1]) entries[entryNum-1].scrollIntoView({block:'nearest'});
+        }, 320);
+      }
+    }
+
+    openRefPanel();
+  }
+
+  /* Navigation classique (depuis "Voir dans le glossaire") */
   function goToTerm(termeName, entryNum) {
     var target = null;
     var tLow = termeName.toLowerCase().trim();
