@@ -343,18 +343,24 @@
     });
   }
 
-  /* Renvois : panneau latéral */
-  document.body.addEventListener('pointerdown', function(e) {
-    var a = e.target.closest('.voir-link');
-    if (!a) return;
-    e.preventDefault();
-    showRefPanel(a.dataset.term, parseInt(a.dataset.num, 10) || 0);
-  });
+  /* Renvois : panneau latéral — géré par attachVoirLinks */
 
   function attachVoirLinks(container) {
-    /* Les liens utilisent data-term/data-num, l'événement est capturé par le body */
     container.querySelectorAll('.voir-link').forEach(function(a) {
-      a.style.touchAction = 'manipulation'; // supprime délai 300ms iOS
+      a.style.touchAction = 'manipulation';
+
+      function handleVoir(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        /* Empêcher le scroll lié au href AVANT l'ouverture du panneau */
+        var scrollY = window.scrollY;
+        showRefPanel(a.dataset.term, parseInt(a.dataset.num, 10) || 0);
+        /* Restaurer la position de scroll si le navigateur l'a modifiée */
+        requestAnimationFrame(function() { window.scrollTo(0, scrollY); });
+      }
+
+      a.addEventListener('click',    handleVoir);
+      a.addEventListener('touchend', handleVoir, { passive: false });
     });
   }
 
@@ -421,7 +427,7 @@
         var m = v.trim().match(/^(.+?)\s+(\d+)$/);
         var termRef = esc(m ? m[1].trim() : v.trim());
         var numRef  = m ? m[2] : '0';
-        return '<a href="javascript:void(0)" class="voir-link" data-term="' + termRef + '" data-num="' + numRef + '">' + vDisplay + '</a>';
+        return '<a href="#!" class="voir-link" data-term="' + termRef + '" data-num="' + numRef + '">' + vDisplay + '</a>';
       }).join(', ');
       html += '</div>';
     }
