@@ -309,12 +309,10 @@
       html += '<div class="term-voir">Voir aussi : ';
       html += t.voir.map(function(v){
         var vDisplay = q ? highlight(v, q) : esc(v);
-        // Extraire nom + numéro optionnel : "Noé 5" → {nom:"Noé", num:5}
         var m = v.trim().match(/^(.+?)\s+(\d+)$/);
         var termRef = esc(m ? m[1].trim() : v.trim());
-        var numRef  = m ? m[2] : '';
-        var onclick = 'glossGoTo(\'' + termRef.replace(/'/g,"\\'") + '\',' + (numRef||'0') + ')';
-        return '<a href="#" onclick="' + onclick + ';return false;">' + vDisplay + '</a>';
+        var numRef  = m ? m[2] : '0';
+        return '<a href="#" class="voir-link" data-term="' + termRef + '" data-num="' + numRef + '">' + vDisplay + '</a>';
       }).join(', ');
       html += '</div>';
     }
@@ -323,8 +321,8 @@
     return html;
   }
 
-  /* Navigation par renvoi — accessible globalement via onclick */
-  window.glossGoTo = function(termeName, entryNum) {
+  /* Navigation par renvoi — via délégation d'événements (compatible iOS) */
+  function goToTerm(termeName, entryNum) {
     var target = null;
     var tLow = termeName.toLowerCase().trim();
     for (var i = 0; i < G.terms.length; i++) {
@@ -379,6 +377,22 @@
       }
     }, 200);
   };
+
+  /* Délégation : capture les clics sur .voir-link dans tout le document */
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('.voir-link');
+    if (!a) return;
+    e.preventDefault();
+    goToTerm(a.dataset.term, parseInt(a.dataset.num, 10) || 0);
+  });
+
+  /* Compatibilité iOS : les éléments non-interactifs ont besoin de cursor:pointer */
+  document.addEventListener('touchend', function(e) {
+    var a = e.target.closest('.voir-link');
+    if (!a) return;
+    e.preventDefault();
+    goToTerm(a.dataset.term, parseInt(a.dataset.num, 10) || 0);
+  });
 
   function notifyHeight() {
     window.parent.postMessage({ type: 'pa-gloss-resize', height: document.body.scrollHeight }, 'https://arca-revue.com');
