@@ -1,21 +1,21 @@
 {
   "sections": {
-    "revue":        "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/HermesTrismegistusCaucHighRes.jpg/600px-HermesTrismegistusCaucHighRes.jpg",
-    "articles":     "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Cistercian_monks_at_work_-_UL_Cambridge_Ms_Mm.5.31.jpg/600px-Cistercian_monks_at_work_-_UL_Cambridge_Ms_Mm.5.31.jpg",
-    "livres":       "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/KellsFol034rChiRhoMonogram.jpg/600px-KellsFol034rChiRhoMonogram.jpg",
-    "lus-pour-vous":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Folio_26r_-_The_Annunciation.jpg/600px-Folio_26r_-_The_Annunciation.jpg"
+    "revue":        "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/A_crowned_alchemical_flask_containing_a_young_king%2C_dressed_Wellcome_V0025640.jpg/500px-A_crowned_alchemical_flask_containing_a_young_king%2C_dressed_Wellcome_V0025640.jpg",
+    "articles":     "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Cistercian_monks_at_work_-_UL_Cambridge_Ms_Mm.5.31.jpg/500px-Cistercian_monks_at_work_-_UL_Cambridge_Ms_Mm.5.31.jpg",
+    "livres":       "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/KellsFol034rChiRhoMonogram.jpg/500px-KellsFol034rChiRhoMonogram.jpg",
+    "lus-pour-vous":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Folio_26r_-_The_Annunciation.jpg/500px-Folio_26r_-_The_Annunciation.jpg"
   },
   "categories": {
-    "Alchimie":      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/A_crowned_alchemical_flask_containing_a_young_king%2C_dressed_Wellcome_V0025640.jpg/400px-A_crowned_alchemical_flask_containing_a_young_king%2C_dressed_Wellcome_V0025640.jpg",
-    "Hermétisme":    "https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Emerald_Tablet_British_Library_Arundel_MS_164_fol_155r.jpg/400px-Emerald_Tablet_British_Library_Arundel_MS_164_fol_155r.jpg",
-    "Christianisme": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Folio_26r_-_The_Annunciation.jpg/400px-Folio_26r_-_The_Annunciation.jpg",
-    "Classiques":    "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg/400px-Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg",
-    "Louis Cattiaux & Message Retrouvé": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/A_peacock_in_a_crowned_alchemical_flask%3B_representing_the_st_Wellcome_V0025638.jpg/400px-A_peacock_in_a_crowned_alchemical_flask%3B_representing_the_st_Wellcome_V0025638.jpg",
-    "Judaïsme":      "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Medieval_amulet_to_protect_mother_and_child._Wellcome_M0008070.jpg/400px-Medieval_amulet_to_protect_mother_and_child._Wellcome_M0008070.jpg",
-    "Islam":         "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Illuminated_frontispiece_from_the_Ilkhanid_Qur%27an_manuscript.jpg/400px-Illuminated_frontispiece_from_the_Ilkhanid_Qur%27an_manuscript.jpg",
-    "Divers":        "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Voynich_Manuscript_%2832%29.jpg/400px-Voynich_Manuscript_%2832%29.jpg",
-    "Néophytes":     "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Cistercian_monks_at_work_-_UL_Cambridge_Ms_Mm.5.31.jpg/400px-Cistercian_monks_at_work_-_UL_Cambridge_Ms_Mm.5.31.jpg",
-    "Néerlandais":   "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/KellsFol034rChiRhoMonogram.jpg/400px-KellsFol034rChiRhoMonogram.jpg",
-    "Égypte":        "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg/400px-Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg"
+    "Alchimie":      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/A_crowned_alchemical_flask_containing_a_young_king%2C_dressed_Wellcome_V0025640.jpg/330px-A_crowned_alchemical_flask_containing_a_young_king%2C_dressed_Wellcome_V0025640.jpg",
+    "Hermétisme":    "https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Emerald_Tablet_British_Library_Arundel_MS_164_fol_155r.jpg/330px-Emerald_Tablet_British_Library_Arundel_MS_164_fol_155r.jpg",
+    "Christianisme": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Folio_26r_-_The_Annunciation.jpg/330px-Folio_26r_-_The_Annunciation.jpg",
+    "Classiques":    "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg/330px-Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg",
+    "Louis Cattiaux & Message Retrouvé": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/A_peacock_in_a_crowned_alchemical_flask%3B_representing_the_st_Wellcome_V0025638.jpg/330px-A_peacock_in_a_crowned_alchemical_flask%3B_representing_the_st_Wellcome_V0025638.jpg",
+    "Judaïsme":      "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Medieval_amulet_to_protect_mother_and_child._Wellcome_M0008070.jpg/330px-Medieval_amulet_to_protect_mother_and_child._Wellcome_M0008070.jpg",
+    "Islam":         "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Illuminated_frontispiece_from_the_Ilkhanid_Qur%27an_manuscript.jpg/330px-Illuminated_frontispiece_from_the_Ilkhanid_Qur%27an_manuscript.jpg",
+    "Divers":        "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Voynich_Manuscript_%2832%29.jpg/330px-Voynich_Manuscript_%2832%29.jpg",
+    "Néophytes":     "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Cistercian_monks_at_work_-_UL_Cambridge_Ms_Mm.5.31.jpg/330px-Cistercian_monks_at_work_-_UL_Cambridge_Ms_Mm.5.31.jpg",
+    "Néerlandais":   "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/KellsFol034rChiRhoMonogram.jpg/330px-KellsFol034rChiRhoMonogram.jpg",
+    "Égypte":        "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg/330px-Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg"
   }
 }
