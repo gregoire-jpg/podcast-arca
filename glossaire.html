@@ -22,9 +22,16 @@
 
     /* Filter bar */
     .pa-filter-bar { background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 90; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
-    .pa-search-row { display: flex; align-items: center; gap: 12px; padding: 12px 24px; max-width: 880px; margin: 0 auto; }
-    .pa-search { flex: 1; padding: 9px 16px; border: 1px solid var(--border); border-radius: 8px; font: 1em/1 Georgia; outline: none; }
+    .pa-search-row { display: flex; align-items: center; gap: 12px; padding: 12px 24px; max-width: 880px; margin: 0 auto; flex-wrap: wrap; }
+    .pa-search { flex: 1; min-width: 200px; padding: 9px 16px; border: 1px solid var(--border); border-radius: 8px; font: 1em/1 Georgia; outline: none; }
     .pa-search:focus { border-color: var(--navy); }
+    .pa-mode { display: flex; gap: 6px; flex-shrink: 0; }
+    .pa-mode-btn { padding: 7px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); font: .78em/1 Arial; color: var(--muted); transition: all .2s; }
+    .pa-mode-btn.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+    .pa-results-info { font: .75em/1 Arial; color: var(--muted); padding: 0 24px 8px; max-width: 880px; margin: 0 auto; display: none; }
+
+    /* Highlight */
+    mark { background: rgba(200,160,96,.35); color: inherit; border-radius: 2px; padding: 0 1px; font-style: normal; }
 
     /* Alphabet nav */
     .pa-alpha { background: #f3f0ea; border-bottom: 1px solid var(--border); padding: 10px 24px; text-align: center; }
@@ -74,13 +81,45 @@
 
 <div class="pa-filter-bar">
   <div class="pa-search-row">
-    <input class="pa-search" type="text" id="pa-search" placeholder="Rechercher un terme…" autocomplete="off">
+    <input class="pa-search" type="text" id="pa-search" placeholder="Rechercher…" autocomplete="off">
+    <div class="pa-mode">
+      <button class="pa-mode-btn active" data-mode="all" id="mode-all">Tout le glossaire</button>
+      <button class="pa-mode-btn" data-mode="entries" id="mode-entries">Dans les définitions</button>
+    </div>
   </div>
+  <div class="pa-results-info" id="pa-results-info"></div>
 </div>
 
 <div class="pa-alpha" id="pa-alpha"></div>
 
-<div class="pa-container" id="pa-list">
+<!-- Page d'accueil / introduction -->
+<div id="pa-intro" style="display:none">
+  <div style="max-width:880px;margin:0 auto;padding:48px 24px;">
+    <div style="background:var(--white);border-radius:12px;padding:40px 48px;box-shadow:0 2px 12px rgba(45,52,97,.08);border-left:4px solid var(--gold);">
+      <p style="font:.93em/1.75 Georgia;color:#2a2a2a;margin-bottom:24px;">
+        Les chercheurs savent combien il est difficile de se frayer un chemin dans le labyrinthe des termes hermétiques. Ce glossaire est né des recommandations de Louis Cattiaux (<em>Florilège</em>, lettres 176 et 311) :
+      </p>
+      <blockquote style="border-left:2px solid var(--gold);padding-left:24px;margin:0 0 20px;">
+        <p style="font:italic .92em/1.75 Georgia;color:#3a3a3a;margin-bottom:16px;">
+          À propos de votre quête, je me permets amicalement de vous conseiller de prendre des notes dans toutes vos lectures et de les confronter afin que la lumière se fasse en vous du dedans et non pas du dehors comme vous me le demandez. Si vous avez soif de la Sagesse et si vous avez foi dans le Seigneur qui en est le maître, le chemin sera aplani sous vos pieds au fur et à mesure de votre avance. Son parfum est inoubliable et les fiançailles sont exquises.
+        </p>
+        <p style="font:italic .92em/1.75 Georgia;color:#3a3a3a;">
+          C'est en confrontant les textes hermétiques que la décantation se fera peu à peu, ce que vous y voyez est bien et vous devez continuer en prenant des notes comparatives qui feront jaillir la lumière de plus en plus jusqu'à ce que vous vous trouviez dans une obscurité sans nom d'où il vous faudra sortir tout seul par simple décantation.
+        </p>
+      </blockquote>
+      <p style="font:.93em/1.75 Georgia;color:#2a2a2a;">
+        Emmanuel d'Hooghvorst disait aussi que notre quête, sans notes, est comme manipuler des grains de sable d'or qui s'échappent de nos mains…
+      </p>
+      <div style="margin-top:32px;text-align:center;">
+        <button id="btn-enter-glossaire" style="padding:12px 32px;background:var(--navy);color:var(--white);border:none;border-radius:8px;font:1em/1 Georgia;cursor:pointer;letter-spacing:.5px;transition:background .2s;">
+          Consulter le glossaire →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pa-container" id="pa-list" style="display:none">
   <div class="pa-state">Chargement…</div>
 </div>
 
@@ -88,12 +127,64 @@
 
 <script>
 (function() {
-  var G = { terms: [], filtered: [], activeLetter: '' };
+  var G = { terms: [], filtered: [], activeLetter: '', query: '', mode: 'all' };
   var BASE = 'https://podcast-arca.netlify.app';
 
   function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+  /* Surligner les occurrences du terme recherché */
+  function highlight(text, q) {
+    if (!q) return esc(text);
+    var escaped = esc(text);
+    var qEsc = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return escaped.replace(new RegExp('(' + qEsc + ')', 'gi'), '<mark>$1</mark>');
+  }
+
+  function applySearch() {
+    var q = G.query;
+    if (!q) { G.filtered = G.terms; return; }
+    G.activeLetter = '';
+    if (G.mode === 'all') {
+      /* Tout le glossaire : terme + définitions + sources */
+      G.filtered = G.terms.filter(function(t){
+        return t.terme.toLowerCase().indexOf(q) !== -1 ||
+          t.entrees.some(function(e){
+            return (e.texte||'').toLowerCase().indexOf(q) !== -1 ||
+                   (e.source||'').toLowerCase().indexOf(q) !== -1;
+          }) ||
+          (t.voir||[]).some(function(v){ return v.toLowerCase().indexOf(q) !== -1; });
+      });
+    } else {
+      /* Mode "définitions" : uniquement dans le texte des entrées */
+      G.filtered = G.terms.filter(function(t){
+        return t.entrees.some(function(e){ return (e.texte||'').toLowerCase().indexOf(q) !== -1; });
+      });
+    }
+  }
+
+  function updateResultsInfo() {
+    var info = document.getElementById('pa-results-info');
+    if (G.query) {
+      var mode = G.mode === 'all' ? 'dans tout le glossaire' : 'dans les définitions';
+      info.textContent = G.filtered.length + ' terme(s) trouvé(s) pour « ' + G.query + ' » — ' + mode;
+      info.style.display = 'block';
+    } else {
+      info.style.display = 'none';
+    }
+  }
+
   function init() {
+    /* Afficher l'intro d'abord */
+    document.getElementById('pa-intro').style.display = 'block';
+    document.getElementById('pa-alpha').style.display = 'none';
+
+    document.getElementById('btn-enter-glossaire').addEventListener('click', function(){
+      document.getElementById('pa-intro').style.display = 'none';
+      document.getElementById('pa-alpha').style.display = 'block';
+      document.getElementById('pa-list').style.display = 'block';
+      notifyHeight();
+    });
+
     fetch(BASE + '/glossaire.json?' + Date.now())
       .then(function(r){ return r.json(); })
       .then(function(data){
@@ -103,20 +194,27 @@
         render();
       }).catch(function(){
         document.getElementById('pa-list').innerHTML = '<div class="pa-state">Impossible de charger le glossaire.</div>';
+        document.getElementById('pa-list').style.display = 'block';
       });
 
+    /* Recherche */
     document.getElementById('pa-search').addEventListener('input', function() {
-      var q = this.value.toLowerCase().trim();
-      if (q) {
-        G.filtered = G.terms.filter(function(t){
-          return t.terme.toLowerCase().indexOf(q) !== -1 ||
-            t.entrees.some(function(e){ return e.texte.toLowerCase().indexOf(q) !== -1; });
-        });
-        G.activeLetter = '';
-      } else {
-        G.filtered = G.terms;
-      }
+      G.query = this.value.toLowerCase().trim();
+      G.activeLetter = '';
+      applySearch();
+      updateAlphaActive();
+      updateResultsInfo();
       render();
+    });
+
+    /* Boutons de mode */
+    document.querySelectorAll('.pa-mode-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        G.mode = this.dataset.mode;
+        document.querySelectorAll('.pa-mode-btn').forEach(function(b){ b.classList.remove('active'); });
+        this.classList.add('active');
+        if (G.query) { applySearch(); updateResultsInfo(); render(); }
+      });
     });
   }
 
@@ -155,7 +253,13 @@
   function render() {
     var terms = G.filtered;
     var list = document.getElementById('pa-list');
-    if (!terms.length) { list.innerHTML = '<div class="pa-state">Aucun terme trouvé.</div>'; return; }
+    /* Si on cherche, afficher la liste même si l'intro est visible */
+    if (G.query) {
+      document.getElementById('pa-intro').style.display = 'none';
+      document.getElementById('pa-alpha').style.display = 'block';
+      list.style.display = 'block';
+    }
+    if (!terms.length) { list.innerHTML = '<div class="pa-state">Aucun terme trouvé pour « ' + esc(G.query) + ' ».</div>'; return; }
 
     // Grouper par lettre
     var byLetter = {}, letterOrder = [];
@@ -175,21 +279,30 @@
   }
 
   function termCard(t) {
+    var q = G.query;
     var html = '<div class="term-card" id="term-' + esc(t.id) + '">';
-    html += '<div class="term-name">' + esc(t.terme) + '</div>';
+
+    /* Nom du terme — surligné si mode "all" */
+    var termDisplay = (G.mode === 'all' && q) ? highlight(t.terme, q) : esc(t.terme);
+    html += '<div class="term-name">' + termDisplay + '</div>';
 
     if (t.entrees.length === 0) {
       html += '<div class="term-entry"><div class="term-text"><em>(définition à venir)</em></div></div>';
     } else {
       t.entrees.forEach(function(e, i){
+        /* En mode "définitions", n'afficher que les entrées qui contiennent le terme */
+        if (q && G.mode === 'entries' && (e.texte||'').toLowerCase().indexOf(q) === -1) return;
+
         html += '<div class="term-entry">';
         if (t.entrees.length > 1) {
-          html += '<div class="term-num">' + (i+1) + '</div>';
+          html += '<span class="term-num">' + (i+1) + ' — </span>';
         }
         if (e.source) {
-          html += '<div class="term-source">[' + esc(e.source) + ']</div>';
+          var srcDisplay = q ? highlight(e.source, q) : esc(e.source);
+          html += '<div class="term-source">[' + srcDisplay + ']</div>';
         }
-        html += '<div class="term-text">' + esc(e.texte) + '</div>';
+        var txtDisplay = q ? highlight(e.texte, q) : esc(e.texte);
+        html += '<div class="term-text">' + txtDisplay + '</div>';
         html += '</div>';
       });
     }
@@ -198,7 +311,8 @@
       html += '<div class="term-voir">Voir aussi : ';
       html += t.voir.map(function(v){
         var slug = v.toLowerCase().split(' ')[0].replace(/[^a-z]/g,'');
-        return '<a href="#term-' + slug + '">' + esc(v) + '</a>';
+        var vDisplay = (G.mode === 'all' && q) ? highlight(v, q) : esc(v);
+        return '<a href="#term-' + slug + '">' + vDisplay + '</a>';
       }).join(', ');
       html += '</div>';
     }
