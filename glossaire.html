@@ -290,9 +290,8 @@
       html += '<div class="term-entry"><div class="term-text"><em>(définition à venir)</em></div></div>';
     } else {
       t.entrees.forEach(function(e, i){
-        /* En mode "titres", toutes les entrées sont affichées (le filtre est sur le titre) */
-
-        html += '<div class="term-entry">';
+        /* Chaque entrée reçoit un ID unique : term-{id}-{n} */
+        html += '<div class="term-entry" id="entry-' + esc(t.id) + '-' + (i+1) + '">';
         if (t.entrees.length > 1) {
           html += '<span class="term-num">' + (i+1) + ' — </span>';
         }
@@ -310,8 +309,12 @@
       html += '<div class="term-voir">Voir aussi : ';
       html += t.voir.map(function(v){
         var vDisplay = q ? highlight(v, q) : esc(v);
-        var termRef = esc(v.replace(/\s+\d+$/, '').trim()); // nom sans le numéro
-        return '<a href="#" onclick="glossGoTo(\'' + termRef.replace(/'/g,"\\'") + '\');return false;">' + vDisplay + '</a>';
+        // Extraire nom + numéro optionnel : "Noé 5" → {nom:"Noé", num:5}
+        var m = v.trim().match(/^(.+?)\s+(\d+)$/);
+        var termRef = esc(m ? m[1].trim() : v.trim());
+        var numRef  = m ? m[2] : '';
+        var onclick = 'glossGoTo(\'' + termRef.replace(/'/g,"\\'") + '\',' + (numRef||'0') + ')';
+        return '<a href="#" onclick="' + onclick + ';return false;">' + vDisplay + '</a>';
       }).join(', ');
       html += '</div>';
     }
@@ -321,7 +324,7 @@
   }
 
   /* Navigation par renvoi — accessible globalement via onclick */
-  window.glossGoTo = function(termeName) {
+  window.glossGoTo = function(termeName, entryNum) {
     var target = null;
     var tLow = termeName.toLowerCase().trim();
     for (var i = 0; i < G.terms.length; i++) {
@@ -347,14 +350,32 @@
     updateAlphaActive();
     render();
 
-    // Scroller jusqu'au terme cible et le mettre en évidence
+    // Scroller jusqu'à l'entrée ciblée (ou le terme entier si pas de numéro)
     setTimeout(function() {
-      var el = document.getElementById('term-' + target.id);
+      var n = parseInt(entryNum, 10) || 0;
+      // Cibler l'entrée spécifique si un numéro est précisé
+      var el = (n > 0) ? document.getElementById('entry-' + target.id + '-' + n) : null;
+      var termEl = document.getElementById('term-' + target.id);
+
+      // Scroll : vers l'entrée si elle existe, sinon vers le terme
+      var scrollTarget = el || termEl;
+      if (scrollTarget) {
+        scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      // Flash doré uniquement sur l'entrée ciblée (ou la carte entière)
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        el.style.transition = 'background .4s';
-        el.style.background = 'rgba(200,160,96,.2)';
-        setTimeout(function(){ el.style.background = ''; }, 2500);
+        el.style.transition = 'background .4s, border-left-color .4s';
+        el.style.background = 'rgba(200,160,96,.25)';
+        el.style.borderLeftColor = 'var(--gold)';
+        setTimeout(function(){
+          el.style.background = '';
+          el.style.borderLeftColor = '';
+        }, 2500);
+      } else if (termEl) {
+        termEl.style.transition = 'background .4s';
+        termEl.style.background = 'rgba(200,160,96,.15)';
+        setTimeout(function(){ termEl.style.background = ''; }, 2500);
       }
     }, 200);
   };
