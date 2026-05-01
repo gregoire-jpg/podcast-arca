@@ -207,6 +207,13 @@
     return html;
   }
 
+  function notifyHeight() {
+    window.parent.postMessage({ type: 'pa-gloss-resize', height: document.body.scrollHeight }, 'https://arca-revue.com');
+  }
+
+  var _origRender = render;
+  render = function() { _origRender(); setTimeout(notifyHeight, 200); };
+
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
 })();
 </script>
