@@ -45,3 +45,16 @@
   for = "/docs-embed.html"
   [headers.values]
     Content-Security-Policy = "frame-ancestors 'self' https://arca-revue.com"
+
+# glossaire.json public
+[[headers]]
+  for = "/glossaire.json"
+  [headers.values]
+    Cache-Control = "public, max-age=300"
+    Access-Control-Allow-Origin = "*"
+
+# glossaire.html intégrable
+[[headers]]
+  for = "/glossaire.html"
+  [headers.values]
+    Content-Security-Policy = "frame-ancestors 'self' https://arca-revue.com"

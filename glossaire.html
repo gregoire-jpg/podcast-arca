@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glossaire Hermétique — Revue ARCA</title>
+  <style>
+    :root {
+      --navy:#2d3461; --navy-dk:#1e2245; --gold:#c8a060;
+      --white:#ffffff; --bg:#faf8f5; --border:#e2ddd8; --muted:#777;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Georgia, serif; background: var(--bg); color: var(--navy); }
+    button { cursor: pointer; }
+
+    /* Header */
+    .pa-header { background: var(--navy); padding: 60px 24px 50px; text-align: center; }
+    .pa-eyebrow { display: block; font: .65em/1 Arial; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
+    .pa-header h1 { font: normal 2.8em/1 Georgia; letter-spacing: 6px; text-transform: uppercase; color: var(--white); margin-bottom: 18px; }
+    .pa-rule { width: 44px; height: 2px; background: var(--gold); margin: 0 auto 18px; }
+    .pa-header p { font: italic 1em/1 Georgia; color: rgba(255,255,255,.55); }
+
+    /* Filter bar */
+    .pa-filter-bar { background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 90; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+    .pa-search-row { display: flex; align-items: center; gap: 12px; padding: 12px 24px; max-width: 880px; margin: 0 auto; }
+    .pa-search { flex: 1; padding: 9px 16px; border: 1px solid var(--border); border-radius: 8px; font: 1em/1 Georgia; outline: none; }
+    .pa-search:focus { border-color: var(--navy); }
+
+    /* Alphabet nav */
+    .pa-alpha { background: #f3f0ea; border-bottom: 1px solid var(--border); padding: 10px 24px; text-align: center; }
+    .pa-alpha a { display: inline-block; margin: 2px 1px; padding: 4px 8px; font: bold .78em/1 Arial; color: var(--navy); text-decoration: none; border-radius: 4px; transition: background .15s, color .15s; }
+    .pa-alpha a:hover, .pa-alpha a.active { background: var(--navy); color: var(--white); }
+    .pa-alpha a.disabled { color: var(--border); pointer-events: none; }
+
+    /* Content */
+    .pa-container { max-width: 880px; margin: 0 auto; padding: 24px 24px 80px; }
+
+    /* Letter section */
+    .letter-section { margin-bottom: 48px; }
+    .letter-header { font: normal 3em/1 Georgia; color: var(--gold); opacity: .4; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+
+    /* Term card */
+    .term-card { margin-bottom: 28px; padding: 0 0 28px; border-bottom: 1px solid var(--border); }
+    .term-card:last-child { border-bottom: none; }
+    .term-name { font: bold 1.15em/1 Arial; color: var(--navy); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+    .term-entry { margin-bottom: 14px; padding-left: 16px; border-left: 2px solid var(--border); }
+    .term-source { font: italic .78em/1 Arial; color: var(--gold); margin-bottom: 6px; }
+    .term-text { font: .93em/1.65 Georgia; color: #2a2a2a; }
+    .term-voir { margin-top: 10px; font: .78em/1 Arial; color: var(--muted); }
+    .term-voir a { color: var(--navy); text-decoration: none; border-bottom: 1px dotted var(--border); transition: border-color .15s; }
+    .term-voir a:hover { border-bottom-color: var(--navy); }
+    .term-num { font: bold .78em/1 Arial; color: var(--muted); margin-right: 6px; }
+
+    /* Empty */
+    .pa-state { text-align: center; padding: 80px 24px; font: italic 1em/1.6 Georgia; color: var(--muted); }
+
+    /* Footer */
+    .pa-footer { background: var(--navy-dk); border-top: 1px solid rgba(255,255,255,.07); text-align: center; padding: 22px; font: .68em/1 Arial; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,.25); }
+
+    @media (max-width: 600px) {
+      .pa-header h1 { font-size: 2em; }
+      .pa-container { padding: 16px 14px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="pa-header">
+  <span class="pa-eyebrow">Revue ARCA</span>
+  <h1>Glossaire Hermétique</h1>
+  <div class="pa-rule"></div>
+  <p>995 termes · Alchimie · Cabale · Hermétisme · Philosophie antique</p>
+</div>
+
+<div class="pa-filter-bar">
+  <div class="pa-search-row">
+    <input class="pa-search" type="text" id="pa-search" placeholder="Rechercher un terme…" autocomplete="off">
+  </div>
+</div>
+
+<div class="pa-alpha" id="pa-alpha"></div>
+
+<div class="pa-container" id="pa-list">
+  <div class="pa-state">Chargement…</div>
+</div>
+
+<div class="pa-footer">&copy; Académie de Thélème — Tous droits réservés</div>
+
+<script>
+(function() {
+  var G = { terms: [], filtered: [], activeLetter: '' };
+  var BASE = 'https://podcast-arca.netlify.app';
+
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function init() {
+    fetch(BASE + '/glossaire.json?' + Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        G.terms = data;
+        G.filtered = data;
+        buildAlpha();
+        render();
+      }).catch(function(){
+        document.getElementById('pa-list').innerHTML = '<div class="pa-state">Impossible de charger le glossaire.</div>';
+      });
+
+    document.getElementById('pa-search').addEventListener('input', function() {
+      var q = this.value.toLowerCase().trim();
+      if (q) {
+        G.filtered = G.terms.filter(function(t){
+          return t.terme.toLowerCase().indexOf(q) !== -1 ||
+            t.entrees.some(function(e){ return e.texte.toLowerCase().indexOf(q) !== -1; });
+        });
+        G.activeLetter = '';
+      } else {
+        G.filtered = G.terms;
+      }
+      render();
+    });
+  }
+
+  function buildAlpha() {
+    var letters = {};
+    G.terms.forEach(function(t){ letters[t.lettre] = true; });
+    var alpha = document.getElementById('pa-alpha');
+    var html = '';
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(l){
+      if (letters[l]) {
+        html += '<a href="#letter-' + l + '" data-letter="' + l + '">' + l + '</a>';
+      } else {
+        html += '<a class="disabled">' + l + '</a>';
+      }
+    });
+    alpha.innerHTML = html;
+    alpha.querySelectorAll('a[data-letter]').forEach(function(a){
+      a.addEventListener('click', function(e){
+        e.preventDefault();
+        G.activeLetter = this.dataset.letter;
+        G.filtered = G.terms.filter(function(t){ return t.lettre === G.activeLetter; });
+        document.getElementById('pa-search').value = '';
+        updateAlphaActive();
+        render();
+        window.scrollTo(0, document.getElementById('pa-filter-bar') ? 0 : 0);
+      });
+    });
+  }
+
+  function updateAlphaActive() {
+    document.querySelectorAll('.pa-alpha a').forEach(function(a){
+      a.classList.toggle('active', a.dataset.letter === G.activeLetter);
+    });
+  }
+
+  function render() {
+    var terms = G.filtered;
+    var list = document.getElementById('pa-list');
+    if (!terms.length) { list.innerHTML = '<div class="pa-state">Aucun terme trouvé.</div>'; return; }
+
+    // Grouper par lettre
+    var byLetter = {}, letterOrder = [];
+    terms.forEach(function(t){
+      if (!byLetter[t.lettre]) { byLetter[t.lettre] = []; letterOrder.push(t.lettre); }
+      byLetter[t.lettre].push(t);
+    });
+
+    var html = '';
+    letterOrder.forEach(function(letter){
+      html += '<div class="letter-section" id="letter-' + letter + '">';
+      html += '<div class="letter-header">' + letter + '</div>';
+      byLetter[letter].forEach(function(t){ html += termCard(t); });
+      html += '</div>';
+    });
+    list.innerHTML = html;
+  }
+
+  function termCard(t) {
+    var html = '<div class="term-card" id="term-' + esc(t.id) + '">';
+    html += '<div class="term-name">' + esc(t.terme) + '</div>';
+
+    if (t.entrees.length === 0) {
+      html += '<div class="term-entry"><div class="term-text"><em>(définition à venir)</em></div></div>';
+    } else {
+      t.entrees.forEach(function(e, i){
+        html += '<div class="term-entry">';
+        if (t.entrees.length > 1) {
+          html += '<div class="term-num">' + (i+1) + '</div>';
+        }
+        if (e.source) {
+          html += '<div class="term-source">[' + esc(e.source) + ']</div>';
+        }
+        html += '<div class="term-text">' + esc(e.texte) + '</div>';
+        html += '</div>';
+      });
+    }
+
+    if (t.voir && t.voir.length > 0) {
+      html += '<div class="term-voir">Voir aussi : ';
+      html += t.voir.map(function(v){
+        var slug = v.toLowerCase().split(' ')[0].replace(/[^a-z]/g,'');
+        return '<a href="#term-' + slug + '">' + esc(v) + '</a>';
+      }).join(', ');
+      html += '</div>';
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
+})();
+</script>
+</body>
+</html>

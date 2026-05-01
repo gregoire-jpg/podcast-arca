@@ -236,6 +236,7 @@
       <nav class="admin-nav">
         <button class="nav-btn on" data-panel="podcasts">Podcasts</button>
         <button class="nav-btn"    data-panel="docs">Documentation</button>
+        <button class="nav-btn"    data-panel="glossaire">Glossaire</button>
       </nav>
     </div>
     <button class="btn-logout" id="btn-logout">Déconnexion</button>
@@ -440,6 +441,49 @@
     </div>
   </div>
 
+  <!-- ══ GLOSSAIRE ══ -->
+  <div class="panel" id="panel-glossaire">
+    <div class="docs-nav">
+      <div class="docs-bc">
+        <span class="docs-bc-cur">Glossaire hermétique</span>
+        <span style="font:.75em/1 Arial;color:var(--muted);margin-left:12px" id="gloss-count"></span>
+      </div>
+      <div class="docs-nav-actions">
+        <input type="text" id="gloss-search" placeholder="Rechercher un terme…" class="t-input" style="min-width:200px">
+        <button class="btn btn-navy" id="btn-add-term">+ Nouveau terme</button>
+        <span class="save-status" id="gloss-save-status"></span>
+        <button class="btn btn-navy btn-save" id="btn-save-gloss">💾 Sauvegarder</button>
+      </div>
+    </div>
+    <div id="gloss-list"><div class="empty">Chargement…</div></div>
+  </div>
+
+  <!-- Modale : Ajouter / éditer un terme -->
+  <div class="confirm-mask" id="term-mask" style="display:none">
+    <div class="confirm-box" style="max-width:600px;text-align:left;max-height:85vh;overflow-y:auto;">
+      <h3 style="margin-bottom:18px;color:var(--navy)" id="term-mask-title">Nouveau terme</h3>
+      <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:20px">
+        <div>
+          <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px">Terme *</label>
+          <input type="text" id="term-name" placeholder="ex: ALCHIMIE" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:.9em">
+        </div>
+        <div>
+          <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px">Définitions</label>
+          <div id="term-entries-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px"></div>
+          <button class="btn" id="btn-add-entry" style="background:var(--bg);border:1px dashed var(--border);color:var(--muted);width:100%;padding:8px;">+ Ajouter une définition</button>
+        </div>
+        <div>
+          <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px">Renvois (Voir aussi)</label>
+          <input type="text" id="term-voir" placeholder="ex: Mercure 2, Soufre 1, Pierre 3" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:.88em">
+          <div style="font:.72em/1 Arial;color:var(--muted);margin-top:4px">Séparer par des virgules</div>
+        </div>
+      </div>
+      <div class="confirm-btns">
+        <button class="confirm-cancel" id="term-cancel">Annuler</button>
+        <button class="confirm-ok" id="term-ok" style="background:var(--navy)">Enregistrer</button>
+      </div>
+    </div>
+  </div>
 
 </div><!-- /admin -->
 
@@ -556,7 +600,8 @@ function initAdmin() {
   populateSelects();
   renderEpisodes();
   renderConfig();
-  loadDocsImages(); // charge les images puis rend le panel docs
+  loadDocsImages();
+  loadGlossaire();
 }
 
 /* ═══════════════════ SELECTS ═══════════════════ */
@@ -1057,6 +1102,156 @@ $('add-doc-ok').addEventListener('click', function(){
   }
 
   finalize('');
+});
+
+/* ═══════════════════ GLOSSAIRE ═══════════════════ */
+var GL = { terms: [], dirty: false, editIdx: -1, search: '' };
+
+function loadGlossaire() {
+  fetch('https://podcast-arca.netlify.app/glossaire.json?' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      GL.terms = data;
+      renderGlossaire();
+    }).catch(function(e){ toast('Erreur chargement glossaire: ' + e.message, 'err'); });
+}
+
+function renderGlossaire() {
+  var terms = GL.search
+    ? GL.terms.filter(function(t){ return t.terme.toLowerCase().indexOf(GL.search) !== -1; })
+    : GL.terms;
+  $('gloss-count').textContent = terms.length + ' / ' + GL.terms.length + ' termes';
+  if (!terms.length) { $('gloss-list').innerHTML = '<div class="empty">Aucun terme trouvé.</div>'; return; }
+  var h = '<div class="doc-list">';
+  terms.forEach(function(t, vi) {
+    var idx = GL.terms.indexOf(t);
+    var defs = t.entrees.length ? (t.entrees[0].texte||'').substring(0,100)+'…' : '<em>aucune définition</em>';
+    h += '<div class="doc-row" style="cursor:pointer" data-idx="'+idx+'">' +
+      '<div class="doc-body">' +
+        '<div class="doc-title" style="text-transform:uppercase;font-weight:bold">'+esc(t.terme)+'</div>' +
+        '<div class="doc-meta">'+t.entrees.length+' définition(s)' + (t.voir.length ? ' · Voir : '+esc(t.voir.slice(0,3).join(', ')) : '') + '</div>' +
+      '</div>' +
+      '<button class="btn-del-ep" data-idx="'+idx+'" title="Supprimer">🗑</button>' +
+    '</div>';
+  });
+  h += '</div>';
+  $('gloss-list').innerHTML = h;
+
+  $('gloss-list').querySelectorAll('.doc-row').forEach(function(row){
+    row.addEventListener('click', function(e){
+      if(e.target.closest('.btn-del-ep')) return;
+      openTermEdit(parseInt(this.dataset.idx,10));
+    });
+  });
+  $('gloss-list').querySelectorAll('.btn-del-ep').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var idx = parseInt(this.dataset.idx,10);
+      dialog('Supprimer ce terme ?', GL.terms[idx].terme, function(){
+        GL.terms.splice(idx,1); GL.dirty=true; renderGlossaire(); updateGlossStatus();
+        toast('Terme supprimé — Sauvegarder pour confirmer');
+      }, {label:'Supprimer', color:'var(--red)'});
+    });
+  });
+}
+
+function updateGlossStatus() {
+  $('gloss-save-status').textContent = GL.dirty ? 'Modifications non sauvegardées' : '';
+}
+
+/* ── Édition d'un terme ── */
+function openTermEdit(idx) {
+  GL.editIdx = idx;
+  var t = idx >= 0 ? GL.terms[idx] : {terme:'', entrees:[], voir:[]};
+  $('term-mask-title').textContent = idx >= 0 ? 'Modifier le terme' : 'Nouveau terme';
+  $('term-name').value = t.terme;
+  $('term-voir').value = (t.voir||[]).join(', ');
+  renderEntryList(t.entrees);
+  $('term-mask').style.display='flex';
+}
+
+function renderEntryList(entries) {
+  var list = $('term-entries-list');
+  list.innerHTML = '';
+  (entries||[]).forEach(function(e, i){
+    var div = document.createElement('div');
+    div.style.cssText = 'background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;position:relative';
+    div.innerHTML =
+      '<div style="font:.65em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Source</div>'+
+      '<input type="text" value="'+esc(e.source||'')+'" placeholder="[Auteur, Ouvrage, Ed., p. X]" style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:4px;font-size:.85em;margin-bottom:6px" class="entry-source">'+
+      '<div style="font:.65em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Définition</div>'+
+      '<textarea rows="3" placeholder="Texte de la définition…" style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:4px;font-size:.85em;resize:vertical;font-family:Georgia,serif" class="entry-texte">'+esc(e.texte||'')+'</textarea>'+
+      '<button style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1em" class="entry-del">×</button>';
+    div.querySelector('.entry-del').addEventListener('click', function(){ div.remove(); });
+    list.appendChild(div);
+  });
+}
+
+$('btn-add-entry').addEventListener('click', function(){
+  var list = $('term-entries-list');
+  var div = document.createElement('div');
+  div.style.cssText = 'background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;position:relative';
+  div.innerHTML =
+    '<div style="font:.65em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Source</div>'+
+    '<input type="text" placeholder="[Auteur, Ouvrage, Ed., p. X]" style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:4px;font-size:.85em;margin-bottom:6px" class="entry-source">'+
+    '<div style="font:.65em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Définition</div>'+
+    '<textarea rows="3" placeholder="Texte de la définition…" style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:4px;font-size:.85em;resize:vertical;font-family:Georgia,serif" class="entry-texte"></textarea>'+
+    '<button style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1em" class="entry-del">×</button>';
+  div.querySelector('.entry-del').addEventListener('click', function(){ div.remove(); });
+  list.appendChild(div);
+});
+
+$('btn-add-term').addEventListener('click', function(){ openTermEdit(-1); });
+$('term-cancel').addEventListener('click', function(){ $('term-mask').style.display='none'; });
+
+$('term-ok').addEventListener('click', function(){
+  var name = $('term-name').value.trim().toUpperCase();
+  if (!name) { toast('Le terme est requis', 'err'); return; }
+
+  var entries = [];
+  $('term-entries-list').querySelectorAll('div[style]').forEach(function(div){
+    var src = div.querySelector('.entry-source').value.trim();
+    var txt = div.querySelector('.entry-texte').value.trim();
+    if (txt) entries.push({source: src, texte: txt});
+  });
+
+  var voir = $('term-voir').value.split(',').map(function(v){ return v.trim(); }).filter(Boolean);
+  var id = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+
+  var obj = {id: id, terme: name, lettre: name[0], entrees: entries, voir: voir};
+
+  if (GL.editIdx >= 0) {
+    GL.terms[GL.editIdx] = obj;
+    toast('Terme modifié — Sauvegarder pour confirmer');
+  } else {
+    // Insérer dans l'ordre alphabétique
+    var insertAt = GL.terms.findIndex(function(t){ return t.terme > name; });
+    if (insertAt === -1) GL.terms.push(obj); else GL.terms.splice(insertAt, 0, obj);
+    toast('Terme ajouté — Sauvegarder pour confirmer');
+  }
+  GL.dirty = true;
+  $('term-mask').style.display='none';
+  renderGlossaire();
+  updateGlossStatus();
+});
+
+/* ── Recherche ── */
+$('gloss-search').addEventListener('input', function(){
+  GL.search = this.value.toLowerCase().trim();
+  renderGlossaire();
+});
+
+/* ── Sauvegarder ── */
+$('btn-save-gloss').addEventListener('click', function(){
+  var btn=this; btn.textContent='Sauvegarde…'; btn.classList.add('saving');
+  saveFile('glossaire.json', GL.terms, function(err){
+    btn.classList.remove('saving');
+    if(err){toast('Erreur : '+err,'err');return;}
+    GL.dirty=false; updateGlossStatus();
+    btn.textContent='✓ Sauvegardé'; btn.classList.add('saved');
+    toast('Glossaire sauvegardé ! Netlify redéploie dans ~30s.');
+    setTimeout(function(){btn.textContent='💾 Sauvegarder';btn.classList.remove('saved');},3000);
+  });
 });
 
 /* ═══════════════════ DOCUMENTATION NAVIGATION ═══════════════════ */
