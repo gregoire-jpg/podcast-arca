@@ -56,9 +56,9 @@ CATEGORIES = {
         "Néophytes":                       "/documentation/articles-1/neophytes/",
     },
     "livres": {
-        "Livres":                     "/documentation/livres/",
-        "Bibliographies et Dictionnaires": "/documentation/livres/bibliographies-et-dictionnaires/",
-        "Cabale hébraïque":           "/documentation/livres/cabale-hebraique/",
+        "Livres":                              "/documentation/livres/",
+        "Bibliographies et Dictionnaires":     "/documentation/livres/bibliographies/",
+        "Cabale hébraïque — Dicos & Grammaires": "/documentation/livres/cabale-hebraique-dicos-grammaires/",
     },
     "revue": {
         # La page principale liste des sous-pages → crawl 2 niveaux

@@ -42,6 +42,9 @@
 
     /* ── Section cards (niveau 1 : Revue / Articles / Livres / Lus) ── */
     .section-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; }
+    @media (min-width: 768px) {
+      .section-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; }
+    }
 
     .section-card {
       background: var(--white); border-radius: 12px; overflow: hidden;
@@ -64,6 +67,9 @@
 
     /* ── Category cards (niveau 2) ── */
     .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+    @media (min-width: 768px) {
+      .cat-grid { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 20px; }
+    }
 
     .cat-card {
       background: var(--white); border-radius: 10px; overflow: hidden;
