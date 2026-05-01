@@ -83,8 +83,8 @@
   <div class="pa-search-row">
     <input class="pa-search" type="text" id="pa-search" placeholder="Rechercher…" autocomplete="off">
     <div class="pa-mode">
-      <button class="pa-mode-btn active" data-mode="all" id="mode-all">Tout le glossaire</button>
-      <button class="pa-mode-btn" data-mode="entries" id="mode-entries">Dans les définitions</button>
+      <button class="pa-mode-btn active" data-mode="titles" id="mode-titles">Titres uniquement</button>
+      <button class="pa-mode-btn" data-mode="all" id="mode-all">Tout le glossaire</button>
     </div>
   </div>
   <div class="pa-results-info" id="pa-results-info"></div>
@@ -127,7 +127,7 @@
 
 <script>
 (function() {
-  var G = { terms: [], filtered: [], activeLetter: '', query: '', mode: 'all' };
+  var G = { terms: [], filtered: [], activeLetter: '', query: '', mode: 'titles' };
   var BASE = 'https://podcast-arca.netlify.app';
 
   function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -144,8 +144,13 @@
     var q = G.query;
     if (!q) { G.filtered = G.terms; return; }
     G.activeLetter = '';
-    if (G.mode === 'all') {
-      /* Tout le glossaire : terme + définitions + sources */
+    if (G.mode === 'titles') {
+      /* Mode 1 : titres uniquement (ABANDON, ABEILLES…) */
+      G.filtered = G.terms.filter(function(t){
+        return t.terme.toLowerCase().indexOf(q) !== -1;
+      });
+    } else {
+      /* Mode 2 : tout le glossaire (titres + définitions + sources + renvois) */
       G.filtered = G.terms.filter(function(t){
         return t.terme.toLowerCase().indexOf(q) !== -1 ||
           t.entrees.some(function(e){
@@ -154,18 +159,13 @@
           }) ||
           (t.voir||[]).some(function(v){ return v.toLowerCase().indexOf(q) !== -1; });
       });
-    } else {
-      /* Mode "définitions" : uniquement dans le texte des entrées */
-      G.filtered = G.terms.filter(function(t){
-        return t.entrees.some(function(e){ return (e.texte||'').toLowerCase().indexOf(q) !== -1; });
-      });
     }
   }
 
   function updateResultsInfo() {
     var info = document.getElementById('pa-results-info');
     if (G.query) {
-      var mode = G.mode === 'all' ? 'dans tout le glossaire' : 'dans les définitions';
+      var mode = G.mode === 'titles' ? 'dans les titres' : 'dans tout le glossaire';
       info.textContent = G.filtered.length + ' terme(s) trouvé(s) pour « ' + G.query + ' » — ' + mode;
       info.style.display = 'block';
     } else {
@@ -282,16 +282,15 @@
     var q = G.query;
     var html = '<div class="term-card" id="term-' + esc(t.id) + '">';
 
-    /* Nom du terme — surligné si mode "all" */
-    var termDisplay = (G.mode === 'all' && q) ? highlight(t.terme, q) : esc(t.terme);
+    /* Nom du terme — toujours surligné si recherche active */
+    var termDisplay = q ? highlight(t.terme, q) : esc(t.terme);
     html += '<div class="term-name">' + termDisplay + '</div>';
 
     if (t.entrees.length === 0) {
       html += '<div class="term-entry"><div class="term-text"><em>(définition à venir)</em></div></div>';
     } else {
       t.entrees.forEach(function(e, i){
-        /* En mode "définitions", n'afficher que les entrées qui contiennent le terme */
-        if (q && G.mode === 'entries' && (e.texte||'').toLowerCase().indexOf(q) === -1) return;
+        /* En mode "titres", toutes les entrées sont affichées (le filtre est sur le titre) */
 
         html += '<div class="term-entry">';
         if (t.entrees.length > 1) {
