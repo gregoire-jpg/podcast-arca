@@ -155,7 +155,7 @@
   var $ = function(id){ return document.getElementById(id); };
   function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  /* ── Images médiévales domaine public (Wikimedia Commons) ── */
+  /* ── Images — chargées depuis docs-images.json (modifiable via l'admin) ── */
   var IMGS = {
     /* Sections principales */
     'revue':         'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/HermesTrismegistusCaucHighRes.jpg/600px-HermesTrismegistusCaucHighRes.jpg',
@@ -197,9 +197,14 @@
   /* ── Init ── */
   function init() {
     Promise.all([
-      fetch('https://podcast-arca.netlify.app/documents.json?' + Date.now()).then(function(r){ return r.json(); }),
+      fetch('https://podcast-arca.netlify.app/documents.json?'   + Date.now()).then(function(r){ return r.json(); }),
+      fetch('https://podcast-arca.netlify.app/docs-images.json?' + Date.now()).then(function(r){ return r.json(); }).catch(function(){ return {}; }),
     ]).then(function(res) {
       D.docs = res[0];
+      // Fusionner les images du JSON avec les valeurs par défaut
+      var imgData = res[1];
+      if (imgData.sections)   { Object.assign(IMGS, imgData.sections);   }
+      if (imgData.categories) { Object.assign(IMGS, imgData.categories); }
       buildSubFilters();
       render();
     }).catch(function(e) {

@@ -121,9 +121,14 @@
   ];
 
   function init(){
-    fetch('https://podcast-arca.netlify.app/documents.json?'+Date.now()).then(function(r){return r.json();})
-    .then(function(docs){D.docs=docs;buildSubFilters();render();setTimeout(notifyHeight,300);})
-    .catch(function(){$('pa-main').innerHTML='<div class="pa-state">Impossible de charger la documentation.</div>';});
+    Promise.all([
+      fetch('https://podcast-arca.netlify.app/documents.json?'+Date.now()).then(function(r){return r.json();}),
+      fetch('https://podcast-arca.netlify.app/docs-images.json?'+Date.now()).then(function(r){return r.json();}).catch(function(){return{};})
+    ]).then(function(all){var r=all[0],img=all[1];
+      if(img.sections) Object.assign(IMGS,img.sections);
+      if(img.categories) Object.assign(IMGS,img.categories);
+      D.docs=r; buildSubFilters(); render(); setTimeout(notifyHeight,300);
+    }).catch(function(){$('pa-main').innerHTML='<div class="pa-state">Impossible de charger la documentation.</div>';});
 
     document.querySelectorAll('.pa-tab').forEach(function(tab){
       tab.addEventListener('click',function(){

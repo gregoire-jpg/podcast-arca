@@ -51,6 +51,36 @@
     .panel { display: none; padding: 28px; max-width: 1080px; margin: 0 auto; }
     .panel.on { display: block; }
 
+    /* ── Docs navigation ── */
+    .docs-nav { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; padding-bottom: 14px; border-bottom: 2px solid var(--border); }
+    .docs-bc { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .docs-bc-btn { background: none; border: none; font: .82em/1 Arial; color: var(--muted); padding: 0; transition: color .2s; }
+    .docs-bc-btn:hover { color: var(--navy); }
+    .docs-bc-sep { color: var(--border); font-size: .8em; }
+    .docs-bc-cur { font: bold .82em/1 Arial; color: var(--navy); }
+    .docs-nav-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* Folder cards */
+    .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+    .folder-card { background: var(--white); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 6px rgba(45,52,97,.08); border: 2px solid transparent; transition: box-shadow .2s; cursor: pointer; }
+    .folder-card:hover { box-shadow: 0 4px 16px rgba(45,52,97,.15); border-color: rgba(200,160,96,.4); }
+    .folder-img { height: 120px; background: var(--navy); position: relative; overflow: hidden; }
+    .folder-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s; }
+    .folder-card:hover .folder-img img { transform: scale(1.05); }
+    .folder-img-btn { position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,.55); border: none; color: #fff; font: .7em/1 Arial; padding: 4px 8px; border-radius: 4px; cursor: pointer; opacity: 0; transition: opacity .2s; }
+    .folder-card:hover .folder-img-btn { opacity: 1; }
+    .folder-body { padding: 12px 14px; }
+    .folder-name  { font: normal .92em/1.3 Georgia; color: var(--navy); margin-bottom: 4px; }
+    .folder-count { font: .7em/1 Arial; color: var(--gold); font-weight: bold; }
+    .folder-del   { background: none; border: none; color: var(--muted); font-size: .9em; float: right; margin-top: -2px; padding: 2px 4px; transition: color .15s; }
+    .folder-del:hover { color: var(--red); }
+    .folder-card-add { border: 2px dashed var(--border); background: none; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; height: 170px; cursor: pointer; transition: border-color .2s, background .2s; color: var(--muted); font: .85em/1 Arial; }
+    .folder-card-add:hover { border-color: var(--gold); background: rgba(200,160,96,.05); color: var(--navy); }
+
+    /* Docs save bar */
+    .docs-save-bar { margin-top: 20px; padding: 12px 16px; background: rgba(200,160,96,.1); border: 1px solid var(--gold); border-radius: 8px; display: flex; align-items: center; gap: 12px; }
+    .docs-save-bar span { font: .82em/1 Arial; color: #8a7030; flex: 1; }
+
     /* ── Toolbar — 3 sections distinctes ── */
     .toolbar { border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 22px; overflow: hidden; }
 
@@ -280,57 +310,35 @@
 
   <!-- ── DOCUMENTATION ── -->
   <div class="panel" id="panel-docs">
-    <div class="toolbar">
 
-      <!-- Filtrer -->
-      <div class="t-row t-filter">
-        <span class="t-label">Filtrer</span>
-        <input class="t-input" type="text" id="dq-search" placeholder="Rechercher dans les titres…" style="flex:1;min-width:180px">
-        <select class="t-select" id="dq-type">
-          <option value="">Tous les types</option>
-          <option value="article">Articles</option>
-          <option value="livre">Livres</option>
-          <option value="revue">Revue ARCA</option>
-          <option value="lus-pour-vous">Lus pour vous</option>
-        </select>
-        <select class="t-select" id="dq-category"><option value="">Toutes les catégories</option></select>
-        <span class="t-spacer"></span>
+    <!-- Navigation / fil d'Ariane -->
+    <div class="docs-nav">
+      <div class="docs-bc" id="docs-bc">
+        <span class="docs-bc-cur">Documentation</span>
+      </div>
+      <div class="docs-nav-actions" id="docs-nav-actions">
+        <button class="btn btn-navy" id="btn-add-folder" style="display:none">📁 Nouveau dossier</button>
+        <button class="btn btn-gold" id="btn-add-doc-nav" style="display:none;padding:8px 16px;">+ Ajouter un document</button>
         <span class="save-status" id="doc-save-status"></span>
-        <button class="btn btn-navy btn-save" id="btn-save-docs">💾 Sauvegarder</button>
+        <button class="btn btn-navy btn-save" id="btn-save-docs" style="display:none">💾 Sauvegarder</button>
       </div>
-
-      <!-- Assigner en masse -->
-      <div class="t-row t-bulk">
-        <span class="t-label">Assigner</span>
-        <input class="t-input" type="text" id="dbulk-kw" placeholder="Mot-clé…" style="max-width:140px">
-        <select class="t-select" id="dbulk-cat"><option value="">Toutes catégories</option></select>
-        <select class="t-select" id="dbulk-author"><option value="">+ Auteur</option></select>
-        <select class="t-select" id="dbulk-subject"><option value="">+ Sujet</option></select>
-        <button class="btn btn-navy" id="btn-dbulk">Appliquer aux résultats</button>
-      </div>
-
-      <!-- Supprimer une catégorie -->
-      <div class="t-row t-delete">
-        <span class="t-label">Supprimer</span>
-        <select class="t-select" id="ddel-cat-sel" style="flex:1"><option value="">Choisir une catégorie à supprimer…</option></select>
-        <button class="btn btn-danger" id="btn-ddel-cat">🗑 Supprimer cette catégorie</button>
-      </div>
-
     </div>
 
-    <div style="margin-bottom:16px;display:flex;gap:10px;align-items:center">
-      <button class="btn btn-gold" id="btn-add-doc" style="padding:10px 20px;">+ Ajouter un document</button>
-      <span style="font:.78em/1 Arial;color:var(--muted);">Ficher PDF max ~5 MB. Au-delà, colle l'URL Dropbox directement.</span>
+    <!-- Zone de contenu dynamique -->
+    <div id="docs-content"><div class="empty">Chargement…</div></div>
+
+    <!-- Barre de sauvegarde images -->
+    <div class="docs-save-bar" id="docs-img-bar" style="display:none">
+      <span>Images modifiées — non encore sauvegardées</span>
+      <button class="btn btn-navy" id="btn-save-imgs">💾 Sauvegarder les images</button>
     </div>
 
-    <div id="doc-list"><div class="empty">Chargement…</div></div>
-  </div>
+  </div><!-- /panel-docs -->
 
   <!-- Modale : Ajouter un document -->
   <div class="confirm-mask" id="add-doc-mask" style="display:none">
     <div class="confirm-box" style="max-width:520px;text-align:left;">
       <h3 style="margin-bottom:18px;color:var(--navy)">Ajouter un document</h3>
-
       <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
         <div>
           <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">Titre *</label>
@@ -340,8 +348,8 @@
           <div style="flex:1">
             <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">Type *</label>
             <select id="new-doc-type" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:.88em">
-              <option value="article">Article</option>
-              <option value="livre">Livre</option>
+              <option value="articles">Article</option>
+              <option value="livres">Livre</option>
               <option value="revue">Revue ARCA</option>
               <option value="lus-pour-vous">Lus pour vous</option>
             </select>
@@ -359,8 +367,7 @@
           </div>
           <div style="flex:1">
             <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">Sujet</label>
-            <input type="text" id="new-doc-subject" placeholder="ex: hermetisme" list="subj-suggestions" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:.88em">
-            <datalist id="subj-suggestions"></datalist>
+            <input type="text" id="new-doc-subject" placeholder="ex: hermetisme" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:.88em">
           </div>
         </div>
         <div style="display:flex;gap:10px">
@@ -383,13 +390,56 @@
           <div id="upload-progress" style="margin-top:6px;font:.75em/1 Arial;color:var(--muted);display:none">Upload en cours…</div>
         </div>
       </div>
-
       <div class="confirm-btns">
         <button class="confirm-cancel" id="add-doc-cancel">Annuler</button>
         <button class="confirm-ok" id="add-doc-ok" style="background:var(--navy)">Ajouter</button>
       </div>
     </div>
   </div>
+
+  <!-- Modale : Modifier l'image d'un dossier -->
+  <div class="confirm-mask" id="img-edit-mask" style="display:none">
+    <div class="confirm-box" style="max-width:460px;text-align:left;">
+      <h3 style="margin-bottom:14px;color:var(--navy)">Modifier l'image du dossier</h3>
+      <div id="img-preview" style="height:150px;background:var(--navy);border-radius:8px;overflow:hidden;margin-bottom:14px;">
+        <img id="img-preview-img" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
+      </div>
+      <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px">URL de l'image (domaine public recommandé)</label>
+      <input type="url" id="img-url-input" placeholder="https://upload.wikimedia.org/…" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:.88em;margin-bottom:6px">
+      <p style="font:.72em/1.4 Arial;color:var(--muted);margin-bottom:18px">
+        Source recommandée : <a href="https://commons.wikimedia.org/w/index.php?search=medieval+manuscript&ns0=1" target="_blank" style="color:var(--gold)">Wikimedia Commons</a> — manuscrits médiévaux, antiquité.
+      </p>
+      <div class="confirm-btns">
+        <button class="confirm-cancel" id="img-cancel">Annuler</button>
+        <button class="confirm-ok" id="img-ok" style="background:var(--navy)">Appliquer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale : Ajouter un dossier -->
+  <div class="confirm-mask" id="folder-add-mask" style="display:none">
+    <div class="confirm-box" style="max-width:400px;text-align:left;">
+      <h3 style="margin-bottom:18px;color:var(--navy)">Nouveau dossier</h3>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
+        <div>
+          <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px">Nom du dossier *</label>
+          <input type="text" id="new-folder-name" placeholder="ex: Néoplatonisme" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:.9em">
+        </div>
+        <div id="new-folder-type-wrap">
+          <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px">Dans la section *</label>
+          <select id="new-folder-type" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:.88em">
+            <option value="articles">Articles</option>
+            <option value="lus-pour-vous">Lus pour vous</option>
+          </select>
+        </div>
+      </div>
+      <div class="confirm-btns">
+        <button class="confirm-cancel" id="folder-cancel">Annuler</button>
+        <button class="confirm-ok" id="folder-ok" style="background:var(--navy)">Créer</button>
+      </div>
+    </div>
+  </div>
+
 
 </div><!-- /admin -->
 
@@ -504,10 +554,9 @@ function initAdmin() {
   $('login-wrap').style.display = 'none';
   $('admin').style.display      = 'block';
   populateSelects();
-  populateDocSelects();
   renderEpisodes();
-  renderDocs();
   renderConfig();
+  loadDocsImages(); // charge les images puis rend le panel docs
 }
 
 /* ═══════════════════ SELECTS ═══════════════════ */
@@ -1112,6 +1161,244 @@ $('add-doc-ok').addEventListener('click', function(){
   }
 
   finalize('');
+});
+
+/* ═══════════════════ DOCUMENTATION NAVIGATION ═══════════════════ */
+var DN = { level:'home', section:'', sectionLabel:'', category:'', images:{sections:{},categories:{}}, imgKey:'', imgKeyType:'' };
+
+var SECTION_LABELS = { revue:'Revue ARCA', articles:'Articles', livres:'Livres', 'lus-pour-vous':'Lus pour vous' };
+var SECTION_ICONS  = { revue:'📰', articles:'📄', livres:'📖', 'lus-pour-vous':'👁' };
+var SECTION_HAS_CATS = ['articles','lus-pour-vous'];
+
+function loadDocsImages() {
+  fetch('https://podcast-arca.netlify.app/docs-images.json?'+Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      DN.images = d;
+      renderDocsPanel();
+    }).catch(function(){ renderDocsPanel(); });
+}
+
+function imgFor(key) { return (DN.images.sections||{})[key] || (DN.images.categories||{})[key] || ''; }
+
+function renderDocsPanel() {
+  renderDocsBreadcrumb();
+  renderDocsActions();
+  if (DN.level==='home')     renderDocsHome();
+  else if (DN.level==='section')  renderDocsSection();
+  else if (DN.level==='category') renderDocsCategoryList();
+}
+
+function renderDocsBreadcrumb() {
+  var bc = $('docs-bc'); bc.innerHTML = '';
+  if (DN.level==='home') {
+    bc.innerHTML = '<span class="docs-bc-cur">Documentation</span>';
+    return;
+  }
+  var home = document.createElement('button'); home.className='docs-bc-btn'; home.textContent='Documentation';
+  home.onclick=function(){DN.level='home';DN.section='';DN.category='';renderDocsPanel();};
+  bc.appendChild(home);
+  bc.insertAdjacentHTML('beforeend','<span class="docs-bc-sep">›</span>');
+  if (DN.level==='section') {
+    bc.insertAdjacentHTML('beforeend','<span class="docs-bc-cur">'+esc(DN.sectionLabel)+'</span>');
+  } else {
+    var sec = document.createElement('button'); sec.className='docs-bc-btn'; sec.textContent=DN.sectionLabel;
+    sec.onclick=function(){DN.level='section';DN.category='';renderDocsPanel();};
+    bc.appendChild(sec);
+    bc.insertAdjacentHTML('beforeend','<span class="docs-bc-sep">›</span><span class="docs-bc-cur">'+esc(DN.category)+'</span>');
+  }
+}
+
+function renderDocsActions() {
+  var a=$('docs-nav-actions');
+  $('btn-add-folder').style.display   = DN.level==='home'?'':'none';
+  $('btn-add-doc-nav').style.display  = DN.level==='category'?'':'none';
+  $('btn-save-docs').style.display    = DN.level==='category'?'':'none';
+  $('doc-save-status').style.display  = DN.level==='category'?'':'none';
+}
+
+/* ── Niveau 0 : 4 grandes sections ── */
+function renderDocsHome() {
+  var counts={};
+  D.docs.forEach(function(d){ counts[d.type]=(counts[d.type]||0)+1; });
+  var h='<div class="folder-grid">';
+  ['revue','articles','livres','lus-pour-vous'].forEach(function(sid){
+    var img=imgFor(sid);
+    var imgHtml=img?'<img src="'+esc(img)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':'';
+    h+='<div class="folder-card" data-section="'+sid+'">'+
+      '<div class="folder-img">'+imgHtml+
+        '<button class="folder-img-btn" data-imgkey="'+sid+'" data-imgtype="section">✏ Image</button>'+
+      '</div>'+
+      '<div class="folder-body">'+
+        '<div class="folder-name">'+esc(SECTION_LABELS[sid]||sid)+'</div>'+
+        '<div class="folder-count">'+(counts[sid]||0)+' document(s)</div>'+
+      '</div></div>';
+  });
+  h+='<button class="folder-card-add" id="btn-add-folder-home"><span style="font-size:1.8em">📁</span>Nouveau dossier</button>';
+  h+='</div>';
+  $('docs-content').innerHTML=h;
+  $('docs-content').querySelectorAll('.folder-card').forEach(function(card){
+    card.addEventListener('click',function(e){
+      if(e.target.closest('.folder-img-btn'))return;
+      var sid=this.dataset.section;
+      DN.section=sid; DN.sectionLabel=SECTION_LABELS[sid]||sid;
+      DN.level=SECTION_HAS_CATS.includes(sid)?'section':'category';
+      DN.category=!SECTION_HAS_CATS.includes(sid)?DN.sectionLabel:'';
+      renderDocsPanel();
+    });
+  });
+  $('docs-content').querySelectorAll('.folder-img-btn').forEach(function(btn){
+    btn.addEventListener('click',function(e){e.stopPropagation();openImgEdit(this.dataset.imgkey,this.dataset.imgtype);});
+  });
+  document.getElementById('btn-add-folder-home').addEventListener('click',function(){openFolderAdd();});
+}
+
+/* ── Niveau 1 : Catégories d'une section ── */
+function renderDocsSection() {
+  var cats={},order=[];
+  D.docs.filter(function(d){return d.type===DN.section;}).forEach(function(d){
+    if(!cats[d.category]){cats[d.category]=0;order.push(d.category);}
+    cats[d.category]++;
+  });
+  var h='<div class="folder-grid">';
+  order.forEach(function(cat){
+    var img=imgFor(cat);
+    var imgHtml=img?'<img src="'+esc(img)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':'';
+    h+='<div class="folder-card" data-cat="'+esc(cat)+'">'+
+      '<div class="folder-img">'+imgHtml+
+        '<button class="folder-img-btn" data-imgkey="'+esc(cat)+'" data-imgtype="category">✏ Image</button>'+
+      '</div>'+
+      '<div class="folder-body">'+
+        '<div class="folder-name">'+esc(cat)+'</div>'+
+        '<div class="folder-count">'+cats[cat]+' document(s)</div>'+
+        '<button class="folder-del" data-cat="'+esc(cat)+'">🗑</button>'+
+      '</div></div>';
+  });
+  h+='<button class="folder-card-add" id="btn-add-subcat"><span style="font-size:1.8em">📁</span>Nouveau sous-dossier</button>';
+  h+='</div>';
+  $('docs-content').innerHTML=h;
+  $('docs-content').querySelectorAll('.folder-card').forEach(function(card){
+    card.addEventListener('click',function(e){
+      if(e.target.closest('.folder-img-btn')||e.target.closest('.folder-del'))return;
+      DN.category=this.dataset.cat; DN.level='category'; renderDocsPanel();
+    });
+  });
+  $('docs-content').querySelectorAll('.folder-img-btn').forEach(function(btn){
+    btn.addEventListener('click',function(e){e.stopPropagation();openImgEdit(this.dataset.imgkey,this.dataset.imgtype);});
+  });
+  $('docs-content').querySelectorAll('.folder-del').forEach(function(btn){
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var cat=this.dataset.cat;
+      var cnt=D.docs.filter(function(d){return d.category===cat;}).length;
+      dialog('Supprimer le dossier ?','«'+cat+'» — '+cnt+' document(s). Irréversible après sauvegarde.',
+        function(){D.docs=D.docs.filter(function(d){return d.category!==cat;});renderDocsSection();updateDocStatus();toast('Dossier supprimé — Sauvegarder docs');},
+        {label:'Supprimer',color:'var(--red)'});
+    });
+  });
+  document.getElementById('btn-add-subcat').addEventListener('click',function(){openFolderAdd(DN.section);});
+}
+
+/* ── Niveau 2 : Documents d'une catégorie ── */
+function renderDocsCategoryList() {
+  var docs=D.docs.filter(function(d){
+    return (d.type===DN.section||d.type===DN.section.replace(/s$/,'')) && d.category===DN.category;
+  });
+  $('btn-save-docs').style.display = '';
+  var h=docs.length?'<div class="doc-list">':'<div class="doc-list"><div class="empty">Aucun document — cliquer + Ajouter</div>';
+  docs.forEach(function(doc){h+=buildDocCard(doc).outerHTML;});
+  h+='</div>';
+  $('docs-content').innerHTML=h;
+  $('docs-content').querySelectorAll('.doc-del').forEach(function(btn){
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var idx=parseInt(this.closest('.ep-card').dataset.didx,10);
+      var doc=D.docs[idx];
+      dialog('Supprimer ce document ?',doc.title,function(){D.docs.splice(idx,1);renderDocsCategoryList();updateDocStatus();toast('Supprimé — Sauvegarder docs');},{label:'Supprimer',color:'var(--red)'});
+    });
+  });
+  $('docs-content').querySelectorAll('.doc-author-input').forEach(function(inp){
+    inp.addEventListener('input',function(){D.docs[parseInt(this.closest('.ep-card').dataset.didx,10)].author_display=this.value;markDocDirty(parseInt(this.closest('.ep-card').dataset.didx,10));updateDocStatus();});
+  });
+  $('docs-content').querySelectorAll('.doc-subject-sel').forEach(function(sel){
+    sel.addEventListener('change',function(){D.docs[parseInt(this.closest('.ep-card').dataset.didx,10)].subject=this.value;markDocDirty(parseInt(this.closest('.ep-card').dataset.didx,10));updateDocStatus();});
+  });
+  $('docs-content').querySelectorAll('.doc-url-input').forEach(function(inp){
+    inp.addEventListener('input',function(){D.docs[parseInt(this.closest('.ep-card').dataset.didx,10)].dropbox_url=this.value.trim();markDocDirty(parseInt(this.closest('.ep-card').dataset.didx,10));updateDocStatus();});
+  });
+  updateDocStatus();
+}
+
+/* ── Modifier image ── */
+function openImgEdit(key, type) {
+  DN.imgKey=key; DN.imgKeyType=type;
+  var cur = type==='section'?(DN.images.sections||{})[key]:(DN.images.categories||{})[key]||'';
+  $('img-url-input').value=cur;
+  $('img-preview-img').src=cur;
+  $('img-edit-mask').style.display='flex';
+}
+$('img-url-input').addEventListener('input',function(){ $('img-preview-img').src=this.value; });
+$('img-cancel').addEventListener('click',function(){ $('img-edit-mask').style.display='none'; });
+$('img-ok').addEventListener('click',function(){
+  var url=$('img-url-input').value.trim();
+  if(DN.imgKeyType==='section'){ if(!DN.images.sections)DN.images.sections={}; DN.images.sections[DN.imgKey]=url; }
+  else { if(!DN.images.categories)DN.images.categories={}; DN.images.categories[DN.imgKey]=url; }
+  $('img-edit-mask').style.display='none';
+  $('docs-img-bar').style.display='flex';
+  renderDocsPanel();
+});
+
+/* ── Sauvegarder images ── */
+$('btn-save-imgs').addEventListener('click',function(){
+  var btn=this; btn.textContent='Sauvegarde…';
+  saveFile('docs-images.json',DN.images,function(err){
+    btn.textContent='💾 Sauvegarder les images';
+    if(err){toast('Erreur : '+err,'err');}
+    else{$('docs-img-bar').style.display='none';toast('Images sauvegardées !');}
+  });
+});
+
+/* ── Ajouter un dossier ── */
+function openFolderAdd(defaultSection) {
+  $('new-folder-name').value='';
+  if(defaultSection){$('new-folder-type').value=defaultSection;$('new-folder-type-wrap').style.display=defaultSection?'none':'';}
+  else{$('new-folder-type-wrap').style.display='';}
+  $('folder-add-mask').style.display='flex';
+}
+$('folder-cancel').addEventListener('click',function(){$('folder-add-mask').style.display='none';});
+$('folder-ok').addEventListener('click',function(){
+  var name=$('new-folder-name').value.trim();
+  var type=$('new-folder-type').value;
+  if(!name){toast('Nom du dossier requis','err');return;}
+  // Le dossier existe s'il y a au moins un doc avec cette catégorie/type
+  var exists=D.docs.some(function(d){return d.type===type&&d.category===name;});
+  if(exists){toast('Ce dossier existe déjà','err');return;}
+  // Créer un doc placeholder vide pour matérialiser le dossier
+  D.docs.push({id:'placeholder-'+Date.now(),title:'(dossier vide)',type:type,category:name,author_display:'',authors:[],subject:'',publication:'',year:'',dropbox_url:'',placeholder:true});
+  $('folder-add-mask').style.display='none';
+  toast('Dossier «'+name+'» créé — ajoute des documents et sauvegarde');
+  DN.section=type; DN.sectionLabel=SECTION_LABELS[type]||type;
+  DN.level=SECTION_HAS_CATS.includes(type)?'section':'category'; DN.category=name;
+  renderDocsPanel();
+});
+
+/* ── Boutons de navigation docs ── */
+$('btn-add-folder').addEventListener('click',function(){openFolderAdd();});
+$('btn-add-doc-nav').addEventListener('click',function(){
+  $('new-doc-type').value=DN.section;
+  $('new-doc-category').value=DN.category;
+  $('add-doc-mask').style.display='flex';
+});
+$('btn-save-docs').addEventListener('click',function(){
+  var btn=this; btn.textContent='Sauvegarde…'; btn.classList.add('saving');
+  saveFile('documents.json',D.docs,function(err){
+    btn.classList.remove('saving');
+    if(err){toast('Erreur : '+err,'err');return;}
+    D.dirty.clear(); updateDocStatus();
+    btn.textContent='✓ Sauvegardé'; btn.classList.add('saved');
+    toast('Documentation sauvegardée ! Netlify redéploie dans ~30s.');
+    setTimeout(function(){btn.textContent='💾 Sauvegarder';btn.classList.remove('saved');},3000);
+  });
 });
 
 /* ═══════════════════ INIT ═══════════════════ */

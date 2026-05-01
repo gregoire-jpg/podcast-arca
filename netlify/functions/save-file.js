@@ -22,7 +22,7 @@ exports.handler = async function (event) {
   }
 
   // Seuls ces fichiers sont autorisés
-  const allowed = ["episodes.json", "config.json"];
+  const allowed = ["episodes.json", "config.json", "documents.json", "docs-images.json"];
   if (!allowed.includes(filename)) {
     return { statusCode: 403, body: JSON.stringify({ error: "Fichier non autorisé" }) };
   }
