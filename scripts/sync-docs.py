@@ -56,11 +56,17 @@ CATEGORIES = {
         "Néophytes":                       "/documentation/articles-1/neophytes/",
     },
     "livres": {
-        "Livres": "/documentation/livres/",
+        "Livres":                     "/documentation/livres/",
+        "Bibliographies et Dictionnaires": "/documentation/livres/bibliographies-et-dictionnaires/",
+        "Cabale hébraïque":           "/documentation/livres/cabale-hebraique/",
     },
     "revue": {
         # La page principale liste des sous-pages → crawl 2 niveaux
-        "Revue ARCA": "/documentation/telechargements/",
+        "Revue ARCA":        "/documentation/telechargements/",
+        # Suppléments (3 sous-dossiers, chacun avec 1 document)
+        "Revue ARCA Suppléments — Contes":   "/documentation/telechargements/arca-revue-supplements/arca-volume-de-contes/",
+        "Revue ARCA Suppléments — Jeux":     "/documentation/telechargements/arca-revue-supplements/arca-volume-de-jeux/",
+        "Revue ARCA Suppléments — Prières":  "/documentation/telechargements/arca-revue-supplements/arca-volumes-de-prieres/",
     },
     "lus-pour-vous": {
         "Alchimie":     "/documentation/lus-pour-vous/alchimie-1/",
