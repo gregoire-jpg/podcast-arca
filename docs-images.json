@@ -16,6 +16,23 @@
     "Divers":        "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Voynich_Manuscript_%2832%29.jpg/330px-Voynich_Manuscript_%2832%29.jpg",
     "Néophytes":     "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Cistercian_monks_at_work_-_UL_Cambridge_Ms_Mm.5.31.jpg/330px-Cistercian_monks_at_work_-_UL_Cambridge_Ms_Mm.5.31.jpg",
     "Néerlandais":   "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/KellsFol034rChiRhoMonogram.jpg/330px-KellsFol034rChiRhoMonogram.jpg",
-    "Égypte":        "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg/330px-Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg"
+    "Égypte":        "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg/330px-Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg",
+
+    "Bibliographies et Dictionnaires": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Cistercian_monks_at_work_-_UL_Cambridge_Ms_Mm.5.31.jpg/330px-Cistercian_monks_at_work_-_UL_Cambridge_Ms_Mm.5.31.jpg",
+    "Cabale hébraïque":                "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Medieval_amulet_to_protect_mother_and_child._Wellcome_M0008070.jpg/330px-Medieval_amulet_to_protect_mother_and_child._Wellcome_M0008070.jpg",
+
+    "Revue ARCA":                          "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/A_crowned_alchemical_flask_containing_a_young_king%2C_dressed_Wellcome_V0025640.jpg/330px-A_crowned_alchemical_flask_containing_a_young_king%2C_dressed_Wellcome_V0025640.jpg",
+    "Livres":                              "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/KellsFol034rChiRhoMonogram.jpg/330px-KellsFol034rChiRhoMonogram.jpg",
+    "Revue ARCA Suppléments — Contes":     "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Voynich_Manuscript_%2832%29.jpg/330px-Voynich_Manuscript_%2832%29.jpg",
+    "Revue ARCA Suppléments — Jeux":       "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg/330px-Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg",
+    "Revue ARCA Suppléments — Prières":    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Folio_26r_-_The_Annunciation.jpg/330px-Folio_26r_-_The_Annunciation.jpg",
+
+    "Alchimie (Lus pour vous)":     "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/A_crowned_alchemical_flask_containing_a_young_king%2C_dressed_Wellcome_V0025640.jpg/330px-A_crowned_alchemical_flask_containing_a_young_king%2C_dressed_Wellcome_V0025640.jpg",
+    "Christianisme (Lus pour vous)":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Folio_26r_-_The_Annunciation.jpg/330px-Folio_26r_-_The_Annunciation.jpg",
+    "Classiques (Lus pour vous)":   "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg/330px-Sinuhe-Papyrus_%28Papyrus_Berlin_3022%29.jpg",
+    "Divers (Lus pour vous)":       "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Voynich_Manuscript_%2832%29.jpg/330px-Voynich_Manuscript_%2832%29.jpg",
+    "Hermétisme (Lus pour vous)":   "https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Emerald_Tablet_British_Library_Arundel_MS_164_fol_155r.jpg/330px-Emerald_Tablet_British_Library_Arundel_MS_164_fol_155r.jpg",
+    "Islam (Lus pour vous)":        "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Illuminated_frontispiece_from_the_Ilkhanid_Qur%27an_manuscript.jpg/330px-Illuminated_frontispiece_from_the_Ilkhanid_Qur%27an_manuscript.jpg",
+    "Judaïsme (Lus pour vous)":     "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Medieval_amulet_to_protect_mother_and_child._Wellcome_M0008070.jpg/330px-Medieval_amulet_to_protect_mother_and_child._Wellcome_M0008070.jpg"
   }
 }
