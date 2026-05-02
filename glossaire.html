@@ -74,13 +74,15 @@
       from { opacity: 0; transform: translateY(-4px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    .ve-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
+    .ve-header { display: flex; justify-content: flex-end; margin-bottom: 4px; }
+    .ve-entry-hdr { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
     .ve-title { font: bold .82em/1 Arial; color: var(--navy); letter-spacing: 1.5px; text-transform: uppercase; flex: 1; }
     .ve-goto  { font: .7em/1 Arial; color: var(--muted); text-decoration: none; cursor: pointer; background: none; border: none; white-space: nowrap; transition: color .2s; }
     .ve-goto:hover { color: var(--navy); }
-    .ve-close { background: none; border: none; color: var(--muted); font-size: 1.1em; cursor: pointer; padding: 0 0 0 6px; transition: color .2s; flex-shrink: 0; }
+    .ve-close { background: none; border: none; color: var(--muted); font-size: 1.1em; cursor: pointer; padding: 0; transition: color .2s; }
     .ve-close:hover { color: var(--navy); }
-    .ve-entry { margin-bottom: 10px; padding: 8px 10px 8px 12px; border-left: 2px solid var(--border); border-radius: 0 4px 4px 0; }
+    .ve-entry { margin-bottom: 8px; padding: 8px 10px 8px 12px; border-left: 2px solid var(--border); border-radius: 0 4px 4px 0; }
+    .ve-entry:last-child { margin-bottom: 0; }
     .ve-entry.ve-hl { border-left-color: var(--gold); background: rgba(200,160,96,.12); }
     .ve-num { font: bold .7em/1 Arial; color: var(--muted); display: block; margin-bottom: 3px; }
     .ve-src { font: italic .7em/1 Arial; color: var(--gold); display: block; margin-bottom: 5px; }
@@ -280,18 +282,33 @@
   /* Renvois : expansion inline */
 
   /* ── Expansion inline des renvois ── */
-  var _veLink = null;
-  var _veEl   = null;
+  var _veLinks  = new Map();  // link → son div d'entrée dans l'expansion
+  var _veEl     = null;
+  var _veAnchor = null;
 
   function closeVE() {
-    if (_veEl)   { _veEl.remove();   _veEl = null; }
-    if (_veLink) { _veLink.classList.remove('ve-active'); _veLink = null; }
+    if (_veEl) { _veEl.remove(); _veEl = null; }
+    _veLinks.forEach(function(_, l) { l.classList.remove('ve-active'); });
+    _veLinks.clear();
+    _veAnchor = null;
   }
 
   function openVE(link, termeName, entryNum) {
-    if (_veLink === link) { closeVE(); return; }   // toggle
-    closeVE();
+    var anchor = link.closest('.term-voir') || link.closest('.term-card');
 
+    // Si on clique depuis un contexte différent, fermer l'expansion actuelle
+    if (_veEl && anchor !== _veAnchor) { closeVE(); }
+
+    // Toggle : retirer l'entrée si elle est déjà affichée
+    if (_veLinks.has(link)) {
+      _veLinks.get(link).remove();
+      _veLinks.delete(link);
+      link.classList.remove('ve-active');
+      if (_veLinks.size === 0) { closeVE(); }
+      return;
+    }
+
+    // Chercher le terme
     var tLow = termeName.toLowerCase().trim();
     var target = null;
     for (var i = 0; i < G.terms.length; i++) {
@@ -304,53 +321,54 @@
     }
     if (!target) return;
 
-    var div = document.createElement('div');
-    div.className = 'voir-expansion';
+    // Créer le conteneur expansion si besoin
+    if (!_veEl) {
+      _veEl = document.createElement('div');
+      _veEl.className = 'voir-expansion';
+      var hdr = document.createElement('div'); hdr.className = 've-header';
+      var cl  = document.createElement('button'); cl.className = 've-close'; cl.textContent = '×';
+      cl.addEventListener('click', function(e){ e.stopPropagation(); closeVE(); });
+      hdr.appendChild(cl);
+      _veEl.appendChild(hdr);
+      _veAnchor = anchor;
+      if (anchor) { anchor.parentNode.insertBefore(_veEl, anchor.nextSibling); }
+    }
 
-    // En-tête
-    var hdr = document.createElement('div'); hdr.className = 've-header';
-    var ttl = document.createElement('div'); ttl.className = 've-title'; ttl.textContent = target.terme;
-    var gt  = document.createElement('button'); gt.className = 've-goto'; gt.textContent = 'Voir dans le glossaire →';
-    gt.addEventListener('click', function(e){ e.stopPropagation(); closeVE(); goToTerm(target.terme, 0); });
-    var cl  = document.createElement('button'); cl.className = 've-close'; cl.textContent = '×';
-    cl.addEventListener('click', function(e){ e.stopPropagation(); closeVE(); });
-    hdr.appendChild(ttl); hdr.appendChild(gt); hdr.appendChild(cl);
-    div.appendChild(hdr);
+    // Trouver l'entrée précise demandée (entryNum est 1-based)
+    var entryIdx = (entryNum > 0 && target.entrees && entryNum <= target.entrees.length)
+      ? entryNum - 1 : 0;
+    var entry = target.entrees && target.entrees.length ? target.entrees[entryIdx] : null;
 
-    // Définitions
-    if (!target.entrees || !target.entrees.length) {
+    // Construire le bloc pour cette entrée
+    var ed = document.createElement('div'); ed.className = 've-entry ve-hl';
+
+    var ehdr = document.createElement('div'); ehdr.className = 've-entry-hdr';
+    var ttl  = document.createElement('span'); ttl.className = 've-title';
+    var dispNum = (target.entrees && target.entrees.length > 1) ? ' — ' + entryNum : '';
+    ttl.textContent = target.terme + dispNum;
+    var gt = document.createElement('button'); gt.className = 've-goto'; gt.textContent = 'Voir dans le glossaire →';
+    (function(t, n){ gt.addEventListener('click', function(e){ e.stopPropagation(); closeVE(); goToTerm(t, n); }); })(target.terme, entryIdx);
+    ehdr.appendChild(ttl); ehdr.appendChild(gt);
+    ed.appendChild(ehdr);
+
+    if (entry) {
+      if (entry.source) {
+        var sr = document.createElement('div'); sr.className = 've-src'; sr.textContent = '[' + entry.source + ']'; ed.appendChild(sr);
+      }
+      var tx = document.createElement('div'); tx.className = 've-txt'; tx.textContent = entry.texte; ed.appendChild(tx);
+    } else {
       var empty = document.createElement('div');
       empty.style.cssText = 'font:italic .85em Georgia;color:var(--muted);padding:4px 0';
       empty.textContent = '(aucune définition)';
-      div.appendChild(empty);
-    } else {
-      target.entrees.forEach(function(e, i) {
-        var isHL = entryNum > 0 ? (i + 1 === entryNum) : true;
-        var ed = document.createElement('div'); ed.className = 've-entry' + (isHL ? ' ve-hl' : '');
-        if (target.entrees.length > 1) {
-          var nm = document.createElement('span'); nm.className = 've-num'; nm.textContent = (i+1) + ' —'; ed.appendChild(nm);
-        }
-        if (e.source) {
-          var sr = document.createElement('div'); sr.className = 've-src'; sr.textContent = '[' + e.source + ']'; ed.appendChild(sr);
-        }
-        var tx = document.createElement('div'); tx.className = 've-txt'; tx.textContent = e.texte; ed.appendChild(tx);
-        div.appendChild(ed);
-      });
+      ed.appendChild(empty);
     }
 
-    // Insérer juste après le .term-voir parent
-    var anchor = link.closest('.term-voir') || link.closest('.term-card');
-    if (anchor) {
-      anchor.parentNode.insertBefore(div, anchor.nextSibling);
-    }
-
-    _veEl   = div;
-    _veLink = link;
+    _veEl.appendChild(ed);
+    _veLinks.set(link, ed);
     link.classList.add('ve-active');
 
-    // Scroller uniquement pour rendre visible (block:nearest = pas de remontée)
     requestAnimationFrame(function() {
-      div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      _veEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
   }
 
