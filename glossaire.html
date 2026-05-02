@@ -63,6 +63,7 @@
     .note-call { font-size: .7em; vertical-align: super; color: var(--gold); font-weight: bold; }
     .term-note { font: italic .76em/1.55 Georgia; color: var(--muted); margin-top: 7px; padding-top: 6px; border-top: 1px solid var(--border); }
     .term-note sup { font-style: normal; font-weight: bold; color: var(--gold); margin-right: 2px; }
+    .term-note-item { display: block; margin-bottom: 3px; }
     .ve-note { font: italic .75em/1.5 Georgia; color: var(--muted); margin-top: 6px; padding-top: 5px; border-top: 1px solid rgba(200,160,96,.25); }
     .ve-note sup { font-style: normal; font-weight: bold; color: var(--gold); margin-right: 2px; }
 
@@ -371,17 +372,18 @@
       }
       var tx = document.createElement('div'); tx.className = 've-txt';
       if (entry.note) {
-        var rawTx = entry.texte || '';
-        var hasMk = rawTx.indexOf('[note]') >= 0;
-        if (hasMk) {
-          var pts = rawTx.split('[note]');
-          tx.innerHTML = esc(pts[0]) + '<sup class="note-call">&#185;</sup>' + esc(pts.slice(1).join(''));
-        } else {
-          tx.innerHTML = esc(rawTx) + '<sup class="note-call">&#185;</sup>';
-        }
+        var nr2 = renderNoteText(entry.texte || '', entry.note || '', '');
+        tx.innerHTML = nr2.txt;
         ed.appendChild(tx);
         var nt = document.createElement('div'); nt.className = 've-note';
-        nt.innerHTML = '<sup>&#185;</sup> ' + esc(entry.note);
+        var nls = (entry.note || '').split('\n').filter(function(l){ return l.trim(); });
+        if (nls.length <= 1) {
+          nt.innerHTML = '<sup>' + (NOTE_SUPS[0]||'1') + '</sup>&nbsp;' + esc(entry.note);
+        } else {
+          nt.innerHTML = nls.map(function(l, j){
+            return '<span style="display:block"><sup>' + (NOTE_SUPS[j]||(j+1)) + '</sup>&nbsp;' + esc(l) + '</span>';
+          }).join('');
+        }
         ed.appendChild(nt);
       } else {
         tx.textContent = entry.texte;
@@ -447,6 +449,43 @@
     attachVoirLinks(list);
   }
 
+  /* ── Rendu des notes (supporte 1 ou N notes séparées par \n) ── */
+  var NOTE_SUPS = ['¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹'];
+
+  function noteCallHtml(idx) {
+    return '<sup class="note-call">' + (NOTE_SUPS[idx] || (idx+1)) + '</sup>';
+  }
+
+  function renderNoteText(rawTxt, noteStr, q) {
+    /* Retourne le HTML du texte avec appels de notes numérotés. */
+    if (!noteStr) {
+      return { txt: q ? highlight(rawTxt, q) : esc(rawTxt), notesHtml: '' };
+    }
+    var noteLines = noteStr.split('\n').filter(function(l){ return l.trim(); });
+    var parts = rawTxt.split('[note]');
+    var txtHtml = '';
+    for (var i = 0; i < parts.length; i++) {
+      txtHtml += (q ? highlight(parts[i], q) : esc(parts[i]));
+      if (i < parts.length - 1) txtHtml += noteCallHtml(i);
+    }
+    /* Si pas de marqueur dans le texte mais note présente : appel en fin */
+    if (parts.length === 1 && noteLines.length > 0) {
+      txtHtml += noteCallHtml(0);
+    }
+    /* HTML des notes */
+    var notesHtml = '';
+    if (noteLines.length === 1) {
+      notesHtml = '<div class="term-note"><sup>' + (NOTE_SUPS[0]||'1') + '</sup> ' + esc(noteLines[0]) + '</div>';
+    } else {
+      notesHtml = '<div class="term-note">';
+      for (var j = 0; j < noteLines.length; j++) {
+        notesHtml += '<span class="term-note-item"><sup>' + (NOTE_SUPS[j]||(j+1)) + '</sup> ' + esc(noteLines[j]) + '</span>';
+      }
+      notesHtml += '</div>';
+    }
+    return { txt: txtHtml, notesHtml: notesHtml };
+  }
+
   function termCard(t) {
     var q = G.query;
     var html = '<div class="term-card" id="term-' + esc(t.id) + '">';
@@ -471,24 +510,10 @@
           var srcDisplay = q ? highlight(e.source, q) : esc(e.source);
           html += '<div class="term-source">[' + srcDisplay + ']</div>';
         }
-        /* Texte : remplacer [note] par l'appel de note exposant si une note existe */
-        var rawTxt = e.texte || '';
-        var hasMarker = rawTxt.indexOf('[note]') >= 0;
-        var txtDisplay;
-        if (e.note && hasMarker) {
-          var parts = rawTxt.split('[note]');
-          var before = q ? highlight(parts[0], q) : esc(parts[0]);
-          var after  = q ? highlight(parts.slice(1).join(''), q) : esc(parts.slice(1).join(''));
-          txtDisplay = before + '<sup class="note-call">&#185;</sup>' + after;
-        } else if (e.note) {
-          txtDisplay = (q ? highlight(rawTxt, q) : esc(rawTxt)) + '<sup class="note-call">&#185;</sup>';
-        } else {
-          txtDisplay = q ? highlight(rawTxt, q) : esc(rawTxt);
-        }
-        html += '<div class="term-text">' + txtDisplay + '</div>';
-        if (e.note) {
-          html += '<div class="term-note"><sup>&#185;</sup> ' + esc(e.note) + '</div>';
-        }
+        /* Texte avec appels de notes numérotés */
+        var noteRender = renderNoteText(e.texte || '', e.note || '', q);
+        html += '<div class="term-text">' + noteRender.txt + '</div>';
+        html += noteRender.notesHtml;
         html += '</div>';
       });
     }
@@ -538,15 +563,19 @@
       if (term.entrees.length > 1) body += '<span class="num">' + (i+1) + ' —</span>';
       if (e.source) body += '<div class="src">[' + esc(e.source) + ']</div>';
       var rawT = e.texte || '';
+      var rawT = e.texte || '';
       if (e.note) {
-        var hasMkP = rawT.indexOf('[note]') >= 0;
-        if (hasMkP) {
-          var ptsP = rawT.split('[note]');
-          body += '<div class="txt">' + esc(ptsP[0]) + '<sup class="note-call">&#185;</sup>' + esc(ptsP.slice(1).join('')) + '</div>';
+        var nrP = renderNoteText(rawT, e.note, '');
+        body += '<div class="txt">' + nrP.txt + '</div>';
+        var nlsP = e.note.split('\n').filter(function(l){ return l.trim(); });
+        if (nlsP.length <= 1) {
+          body += '<div class="note"><sup>\u00b9</sup>&nbsp;' + esc(e.note) + '</div>';
         } else {
-          body += '<div class="txt">' + esc(rawT) + '<sup class="note-call">&#185;</sup></div>';
+          body += '<div class="note">' + nlsP.map(function(l, j){
+            var sups = ['\u00b9','\u00b2','\u00b3','\u2074','\u2075'];
+            return '<div><sup>' + (sups[j]||(j+1)) + '</sup>&nbsp;' + esc(l) + '</div>';
+          }).join('') + '</div>';
         }
-        body += '<div class="note"><sup>&#185;</sup> ' + esc(e.note) + '</div>';
       } else {
         body += '<div class="txt">' + esc(rawT) + '</div>';
       }
