@@ -185,16 +185,18 @@ def _extract_file_links(soup, seen):
 
 
 def _get_doc_subpages(soup, base_url):
-    """Retourne les URLs des sous-pages de documentation (1 niveau)."""
+    """Retourne les URLs des sous-pages de documentation (1 niveau, enfants seulement)."""
+    base = base_url.rstrip("/") + "/"
     subpages = []
     for a in soup.find_all("a", href=True):
         href = a["href"]
         full = href if href.startswith("http") else BASE_URL + href
-        # Sous-page de documentation non terminée par un mot-clé de nav
+        # Sous-page : doit être un enfant direct de base_url (pas un parent, pas un frère)
         if (
-            "/documentation/" in full
+            full.rstrip("/").startswith(base.rstrip("/"))
             and full.rstrip("/") != base_url.rstrip("/")
             and "?layout=file" not in full
+            and "?" not in full
             and not any(k in full for k in ["/connexion", "/sinscrire", "/oublie", "/lp-profile"])
         ):
             subpages.append(full)
@@ -231,17 +233,26 @@ def get_pdf_links(sess, url):
     seen  = set()
     links = _extract_file_links(soup, seen)
 
-    # Pagination : récupérer toutes les pages suivantes
-    page_urls = _get_pagination_urls(soup, url)
-    if page_urls:
-        print(f"  → {len(page_urls)} page(s) supplémentaire(s) détectée(s)…")
-    for page_url in page_urls:
+    # Pagination : récupérer toutes les pages suivantes (BFS sur tous les liens offset=)
+    fetched_pages = {url}
+    page_queue = _get_pagination_urls(soup, url)
+    if page_queue:
+        print(f"  → {len(page_queue)} page(s) supplémentaire(s) détectée(s)…")
+    while page_queue:
+        page_url = page_queue.pop(0)
+        if page_url in fetched_pages:
+            continue
+        fetched_pages.add(page_url)
         try:
             pr   = sess.get(page_url, timeout=30)
             pr.raise_for_status()
             psoup = BeautifulSoup(pr.text, "html.parser")
             pl    = _extract_file_links(psoup, seen)
             links.extend(pl)
+            # Chercher de nouvelles pages de pagination sur cette page aussi
+            for new_url in _get_pagination_urls(psoup, url):
+                if new_url not in fetched_pages and new_url not in page_queue:
+                    page_queue.append(new_url)
             time.sleep(0.3)
         except Exception as e:
             print(f"    ⚠  {page_url} : {e}")
