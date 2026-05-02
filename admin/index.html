@@ -1170,35 +1170,40 @@ function openTermEdit(idx) {
   $('term-mask').style.display='flex';
 }
 
-function renderEntryList(entries) {
-  var list = $('term-entries-list');
-  list.innerHTML = '';
-  (entries||[]).forEach(function(e, i){
-    var div = document.createElement('div');
-    div.style.cssText = 'background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;position:relative';
-    div.innerHTML =
-      '<div style="font:.65em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Source</div>'+
-      '<input type="text" value="'+esc(e.source||'')+'" placeholder="[Auteur, Ouvrage, Ed., p. X]" style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:4px;font-size:.85em;margin-bottom:6px" class="entry-source">'+
-      '<div style="font:.65em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Définition</div>'+
-      '<textarea rows="3" placeholder="Texte de la définition…" style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:4px;font-size:.85em;resize:vertical;font-family:Georgia,serif" class="entry-texte">'+esc(e.texte||'')+'</textarea>'+
-      '<button style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1em" class="entry-del">×</button>';
-    div.querySelector('.entry-del').addEventListener('click', function(){ div.remove(); });
-    list.appendChild(div);
-  });
-}
-
-$('btn-add-entry').addEventListener('click', function(){
-  var list = $('term-entries-list');
+function createEntryDiv(e) {
+  e = e || {};
+  var S = 'width:100%;box-sizing:border-box;padding:6px 10px;border:1px solid var(--border);border-radius:4px;font-size:.85em;';
+  var LBL = 'font:.65em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px';
   var div = document.createElement('div');
   div.style.cssText = 'background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;position:relative';
   div.innerHTML =
-    '<div style="font:.65em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Source</div>'+
-    '<input type="text" placeholder="[Auteur, Ouvrage, Ed., p. X]" style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:4px;font-size:.85em;margin-bottom:6px" class="entry-source">'+
-    '<div style="font:.65em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Définition</div>'+
-    '<textarea rows="3" placeholder="Texte de la définition…" style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:4px;font-size:.85em;resize:vertical;font-family:Georgia,serif" class="entry-texte"></textarea>'+
-    '<button style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1em" class="entry-del">×</button>';
+    '<div style="'+LBL+'">Source</div>'+
+    '<input type="text" value="'+esc(e.source||'')+'" placeholder="[Auteur, Ouvrage, Ed., p. X]" style="'+S+'margin-bottom:8px" class="entry-source">'+
+    '<div style="'+LBL+'">Définition <span style="font-variant:normal;text-transform:none;letter-spacing:0;opacity:.55;font-style:italic">— écrire [note] à l\'endroit de l\'appel</span></div>'+
+    '<textarea rows="3" placeholder="Texte de la définition…" style="'+S+'resize:vertical;font-family:Georgia,serif;margin-bottom:2px" class="entry-texte">'+esc(e.texte||'')+'</textarea>'+
+    '<button type="button" style="font:.68em/1 Arial;background:none;border:1px solid var(--border);border-radius:3px;color:var(--muted);cursor:pointer;padding:2px 7px;margin-bottom:8px" class="entry-insert-note" title="Insère [note] à la position du curseur dans le champ Définition">↳ insérer ¹</button>'+
+    '<div style="'+LBL+'">Note <span style="font-variant:normal;text-transform:none;letter-spacing:0;opacity:.55;font-style:italic">(optionnelle)</span></div>'+
+    '<textarea rows="2" placeholder="Texte de la note…" style="'+S+'resize:vertical;font-family:Georgia,serif;background:rgba(200,160,96,.06)" class="entry-note">'+esc(e.note||'')+'</textarea>'+
+    '<button type="button" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1em" class="entry-del">×</button>';
   div.querySelector('.entry-del').addEventListener('click', function(){ div.remove(); });
-  list.appendChild(div);
+  div.querySelector('.entry-insert-note').addEventListener('click', function(){
+    var ta = div.querySelector('.entry-texte');
+    var s = ta.selectionStart, end = ta.selectionEnd;
+    ta.value = ta.value.substring(0, s) + '[note]' + ta.value.substring(end);
+    ta.selectionStart = ta.selectionEnd = s + 6;
+    ta.focus();
+  });
+  return div;
+}
+
+function renderEntryList(entries) {
+  var list = $('term-entries-list');
+  list.innerHTML = '';
+  (entries||[]).forEach(function(e){ list.appendChild(createEntryDiv(e)); });
+}
+
+$('btn-add-entry').addEventListener('click', function(){
+  $('term-entries-list').appendChild(createEntryDiv({}));
 });
 
 $('btn-add-term').addEventListener('click', function(){ openTermEdit(-1); });
@@ -1210,9 +1215,13 @@ $('term-ok').addEventListener('click', function(){
 
   var entries = [];
   $('term-entries-list').querySelectorAll('div[style]').forEach(function(div){
-    var src = div.querySelector('.entry-source').value.trim();
-    var txt = div.querySelector('.entry-texte').value.trim();
-    if (txt) entries.push({source: src, texte: txt});
+    var src  = div.querySelector('.entry-source').value.trim();
+    var txt  = div.querySelector('.entry-texte').value.trim();
+    var note = div.querySelector('.entry-note').value.trim();
+    if (!txt) return;
+    var entry = {source: src, texte: txt};
+    if (note) entry.note = note;
+    entries.push(entry);
   });
 
   var voir = $('term-voir').value.split(',').map(function(v){ return v.trim(); }).filter(Boolean);

@@ -60,6 +60,11 @@
     .term-voir a { color: var(--navy); text-decoration: none; border-bottom: 1px dotted var(--border); transition: border-color .15s; cursor: pointer; -webkit-tap-highlight-color: rgba(200,160,96,.3); }
     .term-voir a:hover { border-bottom-color: var(--navy); }
     .term-num { font: bold .78em/1 Arial; color: var(--muted); margin-right: 6px; }
+    .note-call { font-size: .7em; vertical-align: super; color: var(--gold); font-weight: bold; }
+    .term-note { font: italic .76em/1.55 Georgia; color: var(--muted); margin-top: 7px; padding-top: 6px; border-top: 1px solid var(--border); }
+    .term-note sup { font-style: normal; font-weight: bold; color: var(--gold); margin-right: 2px; }
+    .ve-note { font: italic .75em/1.5 Georgia; color: var(--muted); margin-top: 6px; padding-top: 5px; border-top: 1px solid rgba(200,160,96,.25); }
+    .ve-note sup { font-style: normal; font-weight: bold; color: var(--gold); margin-right: 2px; }
 
     /* Empty */
     .pa-state { text-align: center; padding: 80px 24px; font: italic 1em/1.6 Georgia; color: var(--muted); }
@@ -364,7 +369,24 @@
       if (entry.source) {
         var sr = document.createElement('div'); sr.className = 've-src'; sr.textContent = '[' + entry.source + ']'; ed.appendChild(sr);
       }
-      var tx = document.createElement('div'); tx.className = 've-txt'; tx.textContent = entry.texte; ed.appendChild(tx);
+      var tx = document.createElement('div'); tx.className = 've-txt';
+      if (entry.note) {
+        var rawTx = entry.texte || '';
+        var hasMk = rawTx.indexOf('[note]') >= 0;
+        if (hasMk) {
+          var pts = rawTx.split('[note]');
+          tx.innerHTML = esc(pts[0]) + '<sup class="note-call">&#185;</sup>' + esc(pts.slice(1).join(''));
+        } else {
+          tx.innerHTML = esc(rawTx) + '<sup class="note-call">&#185;</sup>';
+        }
+        ed.appendChild(tx);
+        var nt = document.createElement('div'); nt.className = 've-note';
+        nt.innerHTML = '<sup>&#185;</sup> ' + esc(entry.note);
+        ed.appendChild(nt);
+      } else {
+        tx.textContent = entry.texte;
+        ed.appendChild(tx);
+      }
     } else {
       var empty = document.createElement('div');
       empty.style.cssText = 'font:italic .85em Georgia;color:var(--muted);padding:4px 0';
@@ -449,8 +471,24 @@
           var srcDisplay = q ? highlight(e.source, q) : esc(e.source);
           html += '<div class="term-source">[' + srcDisplay + ']</div>';
         }
-        var txtDisplay = q ? highlight(e.texte, q) : esc(e.texte);
+        /* Texte : remplacer [note] par l'appel de note exposant si une note existe */
+        var rawTxt = e.texte || '';
+        var hasMarker = rawTxt.indexOf('[note]') >= 0;
+        var txtDisplay;
+        if (e.note && hasMarker) {
+          var parts = rawTxt.split('[note]');
+          var before = q ? highlight(parts[0], q) : esc(parts[0]);
+          var after  = q ? highlight(parts.slice(1).join(''), q) : esc(parts.slice(1).join(''));
+          txtDisplay = before + '<sup class="note-call">&#185;</sup>' + after;
+        } else if (e.note) {
+          txtDisplay = (q ? highlight(rawTxt, q) : esc(rawTxt)) + '<sup class="note-call">&#185;</sup>';
+        } else {
+          txtDisplay = q ? highlight(rawTxt, q) : esc(rawTxt);
+        }
         html += '<div class="term-text">' + txtDisplay + '</div>';
+        if (e.note) {
+          html += '<div class="term-note"><sup>&#185;</sup> ' + esc(e.note) + '</div>';
+        }
         html += '</div>';
       });
     }
@@ -480,6 +518,9 @@
       '.num{font:bold .72em/1 Arial;color:#999;margin-right:4px}',
       '.src{font:italic .72em/1.5 Georgia;color:#c8a060;margin-bottom:4px}',
       '.txt{font:.9em/1.65 Georgia}',
+      '.note-call{font-size:.7em;vertical-align:super;color:#c8a060;font-weight:bold}',
+      '.note{font:italic .74em/1.5 Georgia;color:#888;margin-top:6px;padding-top:5px;border-top:1px solid #eee}',
+      '.note sup{font-style:normal;font-weight:bold;color:#c8a060;margin-right:2px}',
       '.voir{margin-top:14px;font:.78em/1.5 Arial;color:#777}',
       'hr{border:none;border-top:1px solid #ddd;margin:22px 0}',
       '.exp-head{font:.68em/1 Arial;letter-spacing:1px;text-transform:uppercase;color:#aaa;margin-bottom:12px}',
@@ -496,7 +537,19 @@
       body += '<div class="entry">';
       if (term.entrees.length > 1) body += '<span class="num">' + (i+1) + ' —</span>';
       if (e.source) body += '<div class="src">[' + esc(e.source) + ']</div>';
-      body += '<div class="txt">' + esc(e.texte) + '</div>';
+      var rawT = e.texte || '';
+      if (e.note) {
+        var hasMkP = rawT.indexOf('[note]') >= 0;
+        if (hasMkP) {
+          var ptsP = rawT.split('[note]');
+          body += '<div class="txt">' + esc(ptsP[0]) + '<sup class="note-call">&#185;</sup>' + esc(ptsP.slice(1).join('')) + '</div>';
+        } else {
+          body += '<div class="txt">' + esc(rawT) + '<sup class="note-call">&#185;</sup></div>';
+        }
+        body += '<div class="note"><sup>&#185;</sup> ' + esc(e.note) + '</div>';
+      } else {
+        body += '<div class="txt">' + esc(rawT) + '</div>';
+      }
       body += '</div>';
     });
     if (term.voir && term.voir.length) {
