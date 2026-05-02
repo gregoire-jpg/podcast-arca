@@ -51,8 +51,8 @@
     .term-card:last-child { border-bottom: none; }
     .term-name-row { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
     .term-name { font: bold 1.15em/1 Arial; color: var(--navy); letter-spacing: 1px; text-transform: uppercase; flex: 1; }
-    .term-print { background: none; border: none; cursor: pointer; color: var(--muted); font-size: .88em; padding: 1px 0; opacity: .35; transition: opacity .15s, color .15s; flex-shrink: 0; line-height: 1; }
-    .term-print:hover { opacity: 1; color: var(--gold); }
+    .term-print { background: none; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; color: var(--muted); font-size: .8em; padding: 2px 6px; transition: background .15s, color .15s, border-color .15s; flex-shrink: 0; line-height: 1.4; white-space: nowrap; }
+    .term-print:hover { background: var(--gold); color: #fff; border-color: var(--gold); }
     .term-entry { margin-bottom: 14px; padding-left: 16px; border-left: 2px solid var(--border); }
     .term-source { font: italic .78em/1 Arial; color: var(--gold); margin-bottom: 6px; }
     .term-text { font: .93em/1.65 Georgia; color: #2a2a2a; }
@@ -433,7 +433,7 @@
     var termDisplay = q ? highlight(t.terme, q) : esc(t.terme);
     html += '<div class="term-name-row">';
     html += '<div class="term-name">' + termDisplay + '</div>';
-    html += '<button class="term-print" data-id="' + esc(t.id) + '" title="Exporter en PDF">⎙</button>';
+    html += '<button class="term-print" data-id="' + esc(t.id) + '" title="Exporter en PDF">⎙ PDF</button>';
     html += '</div>';
 
     if (t.entrees.length === 0) {
