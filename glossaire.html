@@ -49,7 +49,10 @@
     /* Term card */
     .term-card { margin-bottom: 28px; padding: 0 0 28px; border-bottom: 1px solid var(--border); }
     .term-card:last-child { border-bottom: none; }
-    .term-name { font: bold 1.15em/1 Arial; color: var(--navy); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+    .term-name-row { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
+    .term-name { font: bold 1.15em/1 Arial; color: var(--navy); letter-spacing: 1px; text-transform: uppercase; flex: 1; }
+    .term-print { background: none; border: none; cursor: pointer; color: var(--muted); font-size: .88em; padding: 1px 0; opacity: .35; transition: opacity .15s, color .15s; flex-shrink: 0; line-height: 1; }
+    .term-print:hover { opacity: 1; color: var(--gold); }
     .term-entry { margin-bottom: 14px; padding-left: 16px; border-left: 2px solid var(--border); }
     .term-source { font: italic .78em/1 Arial; color: var(--gold); margin-bottom: 6px; }
     .term-text { font: .93em/1.65 Georgia; color: #2a2a2a; }
@@ -225,6 +228,12 @@
         document.getElementById('pa-list').innerHTML = '<div class="pa-state">Impossible de charger le glossaire.</div>';
         document.getElementById('pa-list').style.display = 'block';
       });
+
+    /* Délégation pour les boutons d'export PDF */
+    document.getElementById('pa-list').addEventListener('click', function(e) {
+      var btn = e.target.closest('.term-print');
+      if (btn) { e.stopPropagation(); printTerm(btn.dataset.id); }
+    });
 
     /* Recherche */
     document.getElementById('pa-search').addEventListener('input', function() {
@@ -422,7 +431,10 @@
 
     /* Nom du terme — toujours surligné si recherche active */
     var termDisplay = q ? highlight(t.terme, q) : esc(t.terme);
+    html += '<div class="term-name-row">';
     html += '<div class="term-name">' + termDisplay + '</div>';
+    html += '<button class="term-print" data-id="' + esc(t.id) + '" title="Exporter en PDF">⎙</button>';
+    html += '</div>';
 
     if (t.entrees.length === 0) {
       html += '<div class="term-entry"><div class="term-text"><em>(définition à venir)</em></div></div>';
@@ -457,6 +469,85 @@
 
     html += '</div>';
     return html;
+  }
+
+  /* ── Export PDF d'une définition ── */
+  function buildPrintHTML(term, openEntries) {
+    var css = [
+      'body{font-family:Georgia,serif;max-width:580px;margin:48px auto;padding:0 24px;color:#222}',
+      'h1{font:bold 1.15em/1 Arial;color:#1a2744;letter-spacing:2px;text-transform:uppercase;border-bottom:2px solid #c8a060;padding-bottom:8px;margin-bottom:18px}',
+      '.entry{margin-bottom:14px;padding-left:14px;border-left:2px solid #ddd}',
+      '.num{font:bold .72em/1 Arial;color:#999;margin-right:4px}',
+      '.src{font:italic .72em/1.5 Georgia;color:#c8a060;margin-bottom:4px}',
+      '.txt{font:.9em/1.65 Georgia}',
+      '.voir{margin-top:14px;font:.78em/1.5 Arial;color:#777}',
+      'hr{border:none;border-top:1px solid #ddd;margin:22px 0}',
+      '.exp-head{font:.68em/1 Arial;letter-spacing:1px;text-transform:uppercase;color:#aaa;margin-bottom:12px}',
+      '.exp{margin-bottom:12px;padding:8px 12px;border-left:3px solid #c8a060;background:rgba(200,160,96,.07)}',
+      '.exp-title{font:bold .78em/1 Arial;color:#1a2744;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}',
+      '.exp-src{font:italic .72em/1.5 Georgia;color:#c8a060;margin-bottom:4px}',
+      '.exp-txt{font:.85em/1.6 Georgia}',
+      '.footer{margin-top:32px;font:.65em/1 Arial;color:#bbb;text-align:center;border-top:1px solid #eee;padding-top:12px}',
+      '@media print{body{margin:20px}}'
+    ].join('');
+
+    var body = '<h1>' + esc(term.terme) + '</h1>';
+    term.entrees.forEach(function(e, i) {
+      body += '<div class="entry">';
+      if (term.entrees.length > 1) body += '<span class="num">' + (i+1) + ' —</span>';
+      if (e.source) body += '<div class="src">[' + esc(e.source) + ']</div>';
+      body += '<div class="txt">' + esc(e.texte) + '</div>';
+      body += '</div>';
+    });
+    if (term.voir && term.voir.length) {
+      body += '<div class="voir">Voir aussi : ' + term.voir.map(function(v){ return esc(v); }).join(', ') + '</div>';
+    }
+    if (openEntries.length) {
+      body += '<hr><div class="exp-head">Renvois développés</div>';
+      openEntries.forEach(function(exp) {
+        body += '<div class="exp">';
+        body += '<div class="exp-title">' + esc(exp.title) + '</div>';
+        if (exp.source) body += '<div class="exp-src">' + esc(exp.source) + '</div>';
+        if (exp.text)   body += '<div class="exp-txt">'  + esc(exp.text)   + '</div>';
+        body += '</div>';
+      });
+    }
+    body += '<div class="footer">ARCA — Glossaire hermétique</div>';
+    return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>ARCA — ' + esc(term.terme) + '</title><style>' + css + '</style></head><body>' + body + '</body></html>';
+  }
+
+  function printTerm(termId) {
+    var term = null;
+    for (var i = 0; i < G.terms.length; i++) {
+      if (G.terms[i].id === termId) { term = G.terms[i]; break; }
+    }
+    if (!term) return;
+
+    // Collecter les entrées ouvertes appartenant à cette carte
+    var openEntries = [];
+    if (_veAnchor) {
+      var cardEl = document.getElementById('term-' + termId);
+      if (cardEl && cardEl.contains(_veAnchor)) {
+        _veLinks.forEach(function(entryDiv) {
+          var titleEl = entryDiv.querySelector('.ve-title');
+          var srcEl   = entryDiv.querySelector('.ve-src');
+          var txtEl   = entryDiv.querySelector('.ve-txt');
+          openEntries.push({
+            title:  titleEl ? titleEl.textContent : '',
+            source: srcEl   ? srcEl.textContent   : '',
+            text:   txtEl   ? txtEl.textContent   : ''
+          });
+        });
+      }
+    }
+
+    var html = buildPrintHTML(term, openEntries);
+    var win = window.open('', '_blank', 'width=740,height=900');
+    if (!win) return;
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    win.print();
   }
 
   /* Fermer l'expansion si on appuie sur Échap */
