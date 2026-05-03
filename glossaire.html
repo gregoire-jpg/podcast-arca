@@ -59,12 +59,12 @@
     .term-entry { margin-bottom: 18px; }
     /* Bouton flottant retour en haut */
     #btn-top { position: fixed; bottom: 28px; right: 24px; z-index: 200;
-      width: 42px; height: 42px; border-radius: 50%; border: none; cursor: pointer;
-      background: var(--gold); color: #fff; font-size: 1.2em; line-height: 42px;
-      text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,.25);
-      opacity: 0; transform: translateY(10px);
-      transition: opacity .25s, transform .25s; pointer-events: none; }
-    #btn-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+      width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer;
+      background: var(--gold); color: #fff; font-size: 1.3em; line-height: 44px;
+      text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+      opacity: 0.25; transform: scale(0.85);
+      transition: opacity .2s, transform .2s; }
+    #btn-top:hover, #btn-top.visible { opacity: 1; transform: scale(1); }
     .term-voir { margin-top: 10px; font: .78em/1 Arial; color: var(--muted); }
     .term-voir a { color: var(--navy); text-decoration: none; border-bottom: 1px dotted var(--border); transition: border-color .15s; cursor: pointer; -webkit-tap-highlight-color: rgba(200,160,96,.3); }
     .term-voir a:hover { border-bottom-color: var(--navy); }
@@ -716,10 +716,13 @@
 <script>
 (function(){
   var btn = document.getElementById('btn-top');
-  var THRESHOLD = 300;
-  window.addEventListener('scroll', function(){
-    btn.classList.toggle('visible', window.scrollY > THRESHOLD);
-  }, { passive: true });
+  var THRESHOLD = 150;
+  function onScroll() {
+    var y = window.scrollY || document.documentElement.scrollTop || 0;
+    btn.classList.toggle('visible', y > THRESHOLD);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  document.addEventListener('scroll', onScroll, { passive: true });
   btn.addEventListener('click', function(){
     var search = document.getElementById('pa-search');
     if (search) {
