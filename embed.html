@@ -517,7 +517,8 @@
     var thumb = ep.image_url
       ? '<img class="pa-row-thumb" src="' + esc(ep.image_url) + '" alt="" loading="lazy">'
       : '<div class="pa-row-thumb" style="background:#e2ddd8;border-radius:4px;"></div>';
-    var plays = S.counts && S.counts.plays && ep.id ? (S.counts.plays[ep.id] || 0) : 0;
+    var epKey = ep.youtube_id || ep.id || '';
+    var plays = S.counts && S.counts.plays && epKey ? (S.counts.plays[epKey] || 0) : 0;
     var playsHtml = plays > 0 ? '<span class="pa-row-count">▶ ' + plays + '</span>' : '';
     return '<div class="pa-ep-row' + (isPlaying ? ' playing' : '') + '" data-idx="' + idx + '">' +
       '<div class="pa-row-play-icon">' + (isPlaying ? '▶' : '') + '</div>' +
@@ -544,10 +545,23 @@
     audio.src = ep.audio_url;
     audio.playbackRate = parseFloat($("pa-speed").value);
     audio.play();
-    if (ep.id) {
+    var epKey = ep.youtube_id || ep.id || '';
+    if (epKey) {
       fetch('/.netlify/functions/track-count', {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({type:'play', id: ep.id})
+        body: JSON.stringify({type:'play', id: epKey})
+      }).then(function(r){ return r.json(); }).then(function(d){
+        if (!S.counts) S.counts = {downloads:{},plays:{},totals:{downloads:0,plays:0}};
+        S.counts.plays[epKey] = d.count || 0;
+        S.counts.totals.plays = d.total || 0;
+        // Mettre à jour le badge du bandeau
+        var statEl = document.getElementById('pod-stat');
+        var cntEl  = document.getElementById('pod-count');
+        if (cntEl && d.total > 0) {
+          cntEl.textContent = d.total.toLocaleString('fr-FR');
+          if (statEl) statEl.style.display = 'inline-flex';
+        }
+        render(); // Rafraîchir le compteur dans la ligne de l'épisode
       }).catch(function(){});
     }
     $("pa-ep-title").textContent  = ep.title || "—";

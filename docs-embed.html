@@ -341,6 +341,18 @@ function trackDl(id){
   fetch('/.netlify/functions/track-count',{
     method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({type:'download',id:id})
+  }).then(function(r){return r.json();}).then(function(d){
+    if(!D.counts) D.counts={downloads:{},plays:{},totals:{downloads:0,plays:0}};
+    D.counts.downloads[id]=d.count||0;
+    D.counts.totals.downloads=d.total||0;
+    // Mettre à jour le badge du bandeau immédiatement
+    var statEl=document.getElementById('docs-stat');
+    var cntEl=document.getElementById('docs-count');
+    if(cntEl&&d.total>0){
+      cntEl.textContent=d.total.toLocaleString('fr-FR');
+      if(statEl) statEl.style.display='inline-flex';
+    }
+    render(); // Rafraîchir le compteur du document dans la liste
   }).catch(function(){});
 }
 </script>
