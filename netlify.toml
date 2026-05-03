@@ -6,6 +6,19 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# Fichiers HTML : jamais mis en cache (toujours la version la plus recente)
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
+
+# Page racine
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
 # RSS
 [[headers]]
   for = "/rss.xml"
