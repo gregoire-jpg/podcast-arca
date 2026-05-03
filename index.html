@@ -362,7 +362,7 @@
   <div class="eyebrow">Revue ARCA</div>
   <h1>Podcasts</h1>
   <div class="pa-header-rule"></div>
-  <p>Explorations philosophiques &amp; ésotériques</p>
+  <p><span id="pod-count">—</span> épisodes · Philosophie · Hermétisme · Alchimie</p>
 </div>
 
 <!-- ── Filter bar ── -->
@@ -476,6 +476,8 @@
     ]).then(function (res) {
       S.episodes = res[0];
       S.config   = res[1];
+      var podEl = document.getElementById('pod-count');
+      if (podEl) podEl.textContent = S.episodes.length;
       buildSubFilters();
       render();
     }).catch(function () {
@@ -720,6 +722,18 @@
     audio.src = ep.audio_url;
     audio.playbackRate = parseFloat($("pa-speed").value);
     audio.play();
+    // Tracker l'écoute
+    if (ep.id) {
+      fetch('/.netlify/functions/track-count', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({type:'play', id: ep.id})
+      }).then(function(r){ return r.json(); }).then(function(d){
+        if (d.total !== undefined) {
+          var el = document.getElementById('pod-count');
+          if (el && el.dataset.mode==='plays') el.textContent = d.total + ' écoutes';
+        }
+      }).catch(function(){});
+    }
 
     /* Update player UI */
     $("pa-ep-title").textContent  = ep.title || "—";
@@ -786,6 +800,15 @@
     init();
   }
 })();
+
+// Charger le total d'écoutes
+fetch('/counts.json?' + Date.now()).then(function(r){ return r.json(); }).then(function(d){
+  var el = document.getElementById('pod-count');
+  if (el && d.totals && d.totals.plays > 0) {
+    el.textContent = d.totals.plays;
+    el.dataset.mode = 'plays';
+  }
+}).catch(function(){});
 </script>
 </body>
 </html>

@@ -134,7 +134,7 @@
   <span class="pa-eyebrow">Revue ARCA</span>
   <h1>Documentation</h1>
   <div class="pa-rule"></div>
-  <p>Articles · Livres · Revues · Lectures</p>
+  <p><span id="docs-count">—</span> documents · Articles · Livres · Revues · Lectures</p>
 </div>
 
 <div class="pa-filter-bar">
@@ -207,6 +207,8 @@
       fetch('https://podcast-arca.netlify.app/docs-images.json?' + Date.now()).then(function(r){ return r.json(); }).catch(function(){ return {}; }),
     ]).then(function(res) {
       D.docs = res[0];
+      var cntEl = document.getElementById('docs-count');
+      if (cntEl) cntEl.textContent = D.docs.length;
       // Fusionner les images du JSON avec les valeurs par défaut
       var imgData = res[1];
       if (imgData.sections)   { Object.assign(IMGS, imgData.sections);   }
@@ -397,7 +399,7 @@
   function docRow(doc) {
     var meta = [doc.author_display, doc.publication, doc.year].filter(Boolean).join(' · ');
     var dl = doc.dropbox_url
-      ? '<a class="doc-dl" href="'+esc(doc.dropbox_url)+'" target="_blank" onclick="event.stopPropagation()">⬇ Télécharger</a>'
+      ? '<a class="doc-dl" href="'+esc(doc.dropbox_url)+'" target="_blank" onclick="event.stopPropagation();trackDownload('+JSON.stringify(doc.id)+')">⬇ Télécharger</a>'
       : '<span class="doc-dl-soon">bientôt</span>';
     return '<div class="doc-row">' +
       '<div class="doc-icon">📄</div>' +
@@ -409,6 +411,28 @@
 
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
 })();
+
+function trackDownload(docId) {
+  fetch('/.netlify/functions/track-count', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({type:'download', id: docId})
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if (d.total !== undefined) {
+      var el = document.getElementById('docs-count');
+      if (el && el.dataset.mode === 'dl') el.textContent = d.total + ' téléchargements';
+    }
+  }).catch(function(){});
+}
+
+// Charger le total de téléchargements
+fetch('/counts.json?' + Date.now()).then(function(r){ return r.json(); }).then(function(d){
+  var el = document.getElementById('docs-count');
+  if (el && d.totals && d.totals.downloads > 0) {
+    el.textContent = d.totals.downloads;
+    el.dataset.mode = 'dl';
+  }
+}).catch(function(){});
 </script>
 </body>
 </html>
