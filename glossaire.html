@@ -58,13 +58,14 @@
     .term-text { font: .93em/1.65 Georgia; color: #2a2a2a; text-align: justify; }
     .term-entry { margin-bottom: 18px; }
     /* Bouton flottant retour en haut */
-    #btn-top { position: fixed; bottom: 28px; right: 24px; z-index: 200;
+    /* Bouton retour en haut — position absolute pour compatibilite iframe */
+    #btn-top { position: absolute; right: 24px; top: 200px; z-index: 200;
       width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer;
       background: var(--gold); color: #fff; font-size: 1.3em; line-height: 44px;
       text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,.3);
-      opacity: 0.25; transform: scale(0.85);
-      transition: opacity .2s, transform .2s; }
-    #btn-top:hover, #btn-top.visible { opacity: 1; transform: scale(1); }
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s; }
+    #btn-top.visible { opacity: 1; pointer-events: auto; }
     .term-voir { margin-top: 10px; font: .78em/1 Arial; color: var(--muted); }
     .term-voir a { color: var(--navy); text-decoration: none; border-bottom: 1px dotted var(--border); transition: border-color .15s; cursor: pointer; -webkit-tap-highlight-color: rgba(200,160,96,.3); }
     .term-voir a:hover { border-bottom-color: var(--navy); }
@@ -718,20 +719,48 @@
 <script>
 (function(){
   var btn = document.getElementById('btn-top');
-  var THRESHOLD = 150;
-  function onScroll() {
-    var y = window.scrollY || document.documentElement.scrollTop || 0;
-    btn.classList.toggle('visible', y > THRESHOLD);
+  var THRESHOLD = 300;
+  var inIframe = window.top !== window;
+
+  function showBtn(scrolled) {
+    btn.classList.toggle('visible', scrolled);
   }
-  window.addEventListener('scroll', onScroll, { passive: true });
-  document.addEventListener('scroll', onScroll, { passive: true });
+
+  if (!inIframe) {
+    // Acces direct : scroll normal
+    function onScroll() {
+      var y = window.scrollY || document.documentElement.scrollTop || 0;
+      showBtn(y > THRESHOLD);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  } else {
+    // Dans un iframe : ecouter les messages du parent
+    window.addEventListener('message', function(e) {
+      if (!e.data) return;
+      if (e.data.type === 'pa-parent-scroll') {
+        var relY = e.data.scrollY - e.data.iframeTop;
+        showBtn(relY > THRESHOLD);
+        // Repositionner le bouton dans la zone visible
+        var viewH = e.data.viewportH || 600;
+        var top = Math.max(200, relY + viewH - 70);
+        btn.style.top = top + 'px';
+      }
+    });
+  }
+
   btn.addEventListener('click', function(){
-    var search = document.getElementById('pa-search');
-    if (search) {
-      search.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(function(){ search.focus(); }, 400);
+    if (inIframe) {
+      // Demander au parent de scroller au debut de l'iframe
+      window.parent.postMessage({ type: 'pa-scroll-top' }, '*');
     } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      var search = document.getElementById('pa-search');
+      if (search) {
+        search.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(function(){ search.focus(); }, 400);
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
   });
 })();
