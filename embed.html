@@ -209,6 +209,11 @@
     .pa-header h1 { font: normal 2.4em/1 Georgia; letter-spacing: 5px; text-transform: uppercase; color: #fff; margin-bottom: 16px; }
     .pa-rule { width: 44px; height: 2px; background: var(--gold); margin: 0 auto 16px; }
     .pa-header p { font: italic 1em/1 Georgia; color: rgba(255,255,255,.55); }
+    .pa-stat{margin-top:12px;display:inline-flex;align-items:center;gap:8px;
+      padding:5px 16px;border:1px solid rgba(200,160,96,.4);border-radius:20px;
+      font:.68em/1 Arial;letter-spacing:2px;text-transform:uppercase;
+      color:var(--gold);opacity:.9;}
+    .pa-stat-num{font-weight:bold;font-size:1.15em;letter-spacing:1px;}
 
     /* Bouton retour en haut */
     #btn-top { position: fixed; bottom: 24px; right: 20px; z-index: 200;
@@ -231,7 +236,10 @@
   <span class="pa-eyebrow">Revue ARCA</span>
   <h1>Podcasts</h1>
   <div class="pa-rule"></div>
-  <p><span id="pod-count">—</span> épisodes · Philosophie · Hermétisme · Alchimie</p>
+  <p id="pod-eps">— épisodes · Philosophie · Hermétisme · Alchimie</p>
+  <div class="pa-stat" id="pod-stat" style="display:none">
+    <span class="pa-stat-num" id="pod-count">0</span> écoutes
+  </div>
 </div>
 
 <!-- ── Filter bar ── -->
@@ -324,15 +332,20 @@
     ]).then(function (res) {
       S.episodes = res[0];
       S.config   = res[1];
-      var podEl = document.getElementById('pod-count');
-      if (podEl) podEl.textContent = S.episodes.length;
+      var epsEl = document.getElementById('pod-eps');
+      if (epsEl) epsEl.textContent = S.episodes.length + ' épisodes · Philosophie · Hermétisme · Alchimie';
       // Charger les compteurs d'écoutes
       fetch('https://podcast-arca.netlify.app/counts.json?' + Date.now())
         .then(function(r){ return r.json(); })
         .then(function(c){
           S.counts = c;
           var tot = c.totals && c.totals.plays > 0 ? c.totals.plays : 0;
-          if (tot > 0 && podEl) podEl.textContent = tot + ' écoutes';
+          var statEl = document.getElementById('pod-stat');
+          var cntEl  = document.getElementById('pod-count');
+          if (tot > 0 && statEl && cntEl) {
+            cntEl.textContent = tot.toLocaleString('fr-FR');
+            statEl.style.display = 'inline-flex';
+          }
           render(); // Re-render avec compteurs
         }).catch(function(){});
       buildSubFilters();

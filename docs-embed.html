@@ -79,6 +79,11 @@
     .pa-header h1{font:normal 2.4em/1 Georgia;letter-spacing:5px;text-transform:uppercase;color:#fff;margin-bottom:16px;}
     .pa-rule{width:44px;height:2px;background:var(--gold);margin:0 auto 16px;}
     .pa-header p{font:italic 1em/1 Georgia;color:rgba(255,255,255,.55);}
+    .pa-stat{margin-top:12px;display:inline-flex;align-items:center;gap:8px;
+      padding:5px 16px;border:1px solid rgba(200,160,96,.4);border-radius:20px;
+      font:.68em/1 Arial;letter-spacing:2px;text-transform:uppercase;
+      color:var(--gold);opacity:.9;}
+    .pa-stat-num{font-weight:bold;font-size:1.15em;letter-spacing:1px;}
 
     /* Bouton retour en haut */
     #btn-top{position:fixed;bottom:24px;right:20px;z-index:200;width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;background:var(--gold);color:#fff;font-size:1.2em;line-height:42px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.25);opacity:.25;transform:scale(.85);transition:opacity .2s,transform .2s;}
@@ -94,7 +99,10 @@
   <span class="pa-eyebrow">Revue ARCA</span>
   <h1>Documentation</h1>
   <div class="pa-rule"></div>
-  <p><span id="docs-count">—</span> documents · Articles · Livres · Revues · Lectures</p>
+  <p>Articles · Livres · Revues · Lectures</p>
+  <div class="pa-stat" id="docs-stat" style="display:none">
+    <span class="pa-stat-num" id="docs-count">0</span> téléchargements
+  </div>
 </div>
 
 <div class="pa-filter-bar">
@@ -152,14 +160,18 @@
       if(img.sections) Object.assign(IMGS,img.sections);
       if(img.categories) Object.assign(IMGS,img.categories);
       D.docs=r;
-      var cEl=document.getElementById('docs-count'); if(cEl) cEl.textContent=r.length;
       // Charger les compteurs de téléchargements
       fetch('https://podcast-arca.netlify.app/counts.json?'+Date.now())
         .then(function(res){return res.json();})
         .then(function(c){
           D.counts=c;
           var tot=c.totals&&c.totals.downloads>0?c.totals.downloads:0;
-          if(tot>0&&cEl) cEl.textContent=tot+' téléchargements';
+          var statEl=document.getElementById('docs-stat');
+          var cntEl=document.getElementById('docs-count');
+          if(tot>0&&statEl&&cntEl){
+            cntEl.textContent=tot.toLocaleString('fr-FR');
+            statEl.style.display='inline-flex';
+          }
           render();
         }).catch(function(){});
       buildSubFilters(); render(); setTimeout(notifyHeight,300);
