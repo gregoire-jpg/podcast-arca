@@ -67,6 +67,7 @@
     .doc-dl{display:inline-flex;align-items:center;gap:4px;font:.7em/1 Arial;color:var(--gold);text-decoration:none;flex-shrink:0;white-space:nowrap;padding:3px 9px;border:1px solid var(--gold);border-radius:4px;transition:background .15s,color .15s;}
     .doc-dl:hover{background:var(--gold);color:var(--navy);}
     .doc-dl-soon{opacity:.3;font:.68em/1 Arial;color:var(--muted);flex-shrink:0;}
+    .doc-dl-count{font:.65em/1 Arial;color:var(--muted);white-space:nowrap;flex-shrink:0;margin-left:4px;}
 
     .pa-state{text-align:center;padding:60px 20px;font:italic 1em/1.6 Georgia;color:var(--muted);}
 
@@ -152,6 +153,15 @@
       if(img.categories) Object.assign(IMGS,img.categories);
       D.docs=r;
       var cEl=document.getElementById('docs-count'); if(cEl) cEl.textContent=r.length;
+      // Charger les compteurs de téléchargements
+      fetch('https://podcast-arca.netlify.app/counts.json?'+Date.now())
+        .then(function(res){return res.json();})
+        .then(function(c){
+          D.counts=c;
+          var tot=c.totals&&c.totals.downloads>0?c.totals.downloads:0;
+          if(tot>0&&cEl) cEl.textContent=tot+' téléchargements';
+          render();
+        }).catch(function(){});
       buildSubFilters(); render(); setTimeout(notifyHeight,300);
     }).catch(function(){$('pa-main').innerHTML='<div class="pa-state">Impossible de charger la documentation.</div>';});
 
@@ -290,13 +300,15 @@
 
   function docRow(doc){
     var meta=[doc.author_display,doc.publication,doc.year].filter(Boolean).join(' · ');
+    var dlCount=D.counts&&D.counts.downloads&&doc.id?(D.counts.downloads[doc.id]||0):0;
+    var dlCountHtml=dlCount>0?'<span class="doc-dl-count">⬇ '+dlCount+'</span>':'';
     var dl=doc.dropbox_url
       ?'<a class="doc-dl" href="'+esc(doc.dropbox_url)+'" target="_blank" onclick="event.stopPropagation();trackDl('+JSON.stringify(doc.id)+')">⬇ Télécharger</a>'
       :'<span class="doc-dl-soon">bientôt</span>';
     return'<div class="doc-row"><div class="doc-icon">📄</div>'+
       '<div class="doc-body"><div class="doc-title">'+esc(doc.title)+'</div>'+
       (meta?'<div class="doc-meta">'+esc(meta)+'</div>':'')+
-      '</div>'+dl+'</div>';
+      '</div>'+dlCountHtml+dl+'</div>';
   }
 
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
