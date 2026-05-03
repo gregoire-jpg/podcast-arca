@@ -71,9 +71,30 @@
     .pa-state{text-align:center;padding:60px 20px;font:italic 1em/1.6 Georgia;color:var(--muted);}
 
     @media(max-width:540px){.pa-tab{padding:12px 14px;font-size:.62em;}.pa-container{padding:14px 12px 50px;}}
+
+    /* Bandeau */
+    .pa-header{background:var(--navy);padding:48px 24px 40px;text-align:center;}
+    .pa-eyebrow{display:block;font:.65em/1 Arial;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+    .pa-header h1{font:normal 2.4em/1 Georgia;letter-spacing:5px;text-transform:uppercase;color:#fff;margin-bottom:16px;}
+    .pa-rule{width:44px;height:2px;background:var(--gold);margin:0 auto 16px;}
+    .pa-header p{font:italic 1em/1 Georgia;color:rgba(255,255,255,.55);}
+
+    /* Bouton retour en haut */
+    #btn-top{position:fixed;bottom:24px;right:20px;z-index:200;width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;background:var(--gold);color:#fff;font-size:1.2em;line-height:42px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.25);opacity:.25;transform:scale(.85);transition:opacity .2s,transform .2s;}
+    #btn-top:hover,#btn-top.visible{opacity:1;transform:scale(1);}
+
+    @media(max-width:540px){.pa-header h1{font-size:1.8em;}}
   </style>
 </head>
 <body>
+
+<!-- Bandeau -->
+<div class="pa-header">
+  <span class="pa-eyebrow">Revue ARCA</span>
+  <h1>Documentation</h1>
+  <div class="pa-rule"></div>
+  <p><span id="docs-count">—</span> documents · Articles · Livres · Revues · Lectures</p>
+</div>
 
 <div class="pa-filter-bar">
   <div class="pa-filter-tabs">
@@ -129,7 +150,9 @@
     ]).then(function(all){var r=all[0],img=all[1];
       if(img.sections) Object.assign(IMGS,img.sections);
       if(img.categories) Object.assign(IMGS,img.categories);
-      D.docs=r; buildSubFilters(); render(); setTimeout(notifyHeight,300);
+      D.docs=r;
+      var cEl=document.getElementById('docs-count'); if(cEl) cEl.textContent=r.length;
+      buildSubFilters(); render(); setTimeout(notifyHeight,300);
     }).catch(function(){$('pa-main').innerHTML='<div class="pa-state">Impossible de charger la documentation.</div>';});
 
     document.querySelectorAll('.pa-tab').forEach(function(tab){
@@ -268,7 +291,7 @@
   function docRow(doc){
     var meta=[doc.author_display,doc.publication,doc.year].filter(Boolean).join(' · ');
     var dl=doc.dropbox_url
-      ?'<a class="doc-dl" href="'+esc(doc.dropbox_url)+'" target="_blank" onclick="event.stopPropagation()">⬇ Télécharger</a>'
+      ?'<a class="doc-dl" href="'+esc(doc.dropbox_url)+'" target="_blank" onclick="event.stopPropagation();trackDl('+JSON.stringify(doc.id)+')">⬇ Télécharger</a>'
       :'<span class="doc-dl-soon">bientôt</span>';
     return'<div class="doc-row"><div class="doc-icon">📄</div>'+
       '<div class="doc-body"><div class="doc-title">'+esc(doc.title)+'</div>'+
@@ -278,6 +301,24 @@
 
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}
 })();
+</script>
+
+<button id="btn-top" title="Retour en haut" aria-label="Retour en haut">↑</button>
+<script>
+(function(){
+  var btn=document.getElementById('btn-top');
+  function onScroll(){btn.classList.toggle('visible',(window.scrollY||document.documentElement.scrollTop||0)>150);}
+  window.addEventListener('scroll',onScroll,{passive:true});
+  document.addEventListener('scroll',onScroll,{passive:true});
+  btn.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+
+function trackDl(id){
+  fetch('/.netlify/functions/track-count',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({type:'download',id:id})
+  }).catch(function(){});
+}
 </script>
 </body>
 </html>

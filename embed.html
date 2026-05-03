@@ -198,9 +198,37 @@
       .pa-tab { padding: 13px 14px; font-size: .62em; }
       .pa-player { padding: 16px 14px 14px; }
     }
+
+    /* Bandeau */
+    .pa-header { background: var(--navy); padding: 48px 24px 40px; text-align: center; }
+    .pa-eyebrow { display: block; font: .65em/1 Arial; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+    .pa-header h1 { font: normal 2.4em/1 Georgia; letter-spacing: 5px; text-transform: uppercase; color: #fff; margin-bottom: 16px; }
+    .pa-rule { width: 44px; height: 2px; background: var(--gold); margin: 0 auto 16px; }
+    .pa-header p { font: italic 1em/1 Georgia; color: rgba(255,255,255,.55); }
+
+    /* Bouton retour en haut */
+    #btn-top { position: fixed; bottom: 24px; right: 20px; z-index: 200;
+      width: 42px; height: 42px; border-radius: 50%; border: none; cursor: pointer;
+      background: var(--gold); color: #fff; font-size: 1.2em; line-height: 42px;
+      text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,.25);
+      opacity: 0.25; transform: scale(0.85);
+      transition: opacity .2s, transform .2s; }
+    #btn-top:hover, #btn-top.visible { opacity: 1; transform: scale(1); }
+
+    @media (max-width: 600px) {
+      .pa-header h1 { font-size: 1.8em; }
+    }
   </style>
 </head>
 <body>
+
+<!-- Bandeau -->
+<div class="pa-header">
+  <span class="pa-eyebrow">Revue ARCA</span>
+  <h1>Podcasts</h1>
+  <div class="pa-rule"></div>
+  <p><span id="pod-count">—</span> épisodes · Philosophie · Hermétisme · Alchimie</p>
+</div>
 
 <!-- ── Filter bar ── -->
 <div class="pa-filter-bar">
@@ -292,6 +320,8 @@
     ]).then(function (res) {
       S.episodes = res[0];
       S.config   = res[1];
+      var podEl = document.getElementById('pod-count');
+      if (podEl) podEl.textContent = S.episodes.length;
       buildSubFilters();
       render();
       setTimeout(notifyHeight, 300);
@@ -485,6 +515,12 @@
     audio.src = ep.audio_url;
     audio.playbackRate = parseFloat($("pa-speed").value);
     audio.play();
+    if (ep.id) {
+      fetch('/.netlify/functions/track-count', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({type:'play', id: ep.id})
+      }).catch(function(){});
+    }
     $("pa-ep-title").textContent  = ep.title || "—";
     $("pa-ep-author").textContent = (ep.authors || []).map(function (a) { return (S.config.authors || {})[a] || a; }).join(" · ");
     $("pa-ep-pl").textContent     = ep.playlist_title || "";
@@ -527,6 +563,17 @@
   function esc(s) { return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
   if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); } else { init(); }
+})();
+</script>
+
+<button id="btn-top" title="Retour en haut" aria-label="Retour en haut">↑</button>
+<script>
+(function(){
+  var btn = document.getElementById('btn-top');
+  function onScroll() { btn.classList.toggle('visible', (window.scrollY||document.documentElement.scrollTop||0) > 150); }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  document.addEventListener('scroll', onScroll, {passive:true});
+  btn.addEventListener('click', function(){ window.scrollTo({top:0,behavior:'smooth'}); });
 })();
 </script>
 </body>
