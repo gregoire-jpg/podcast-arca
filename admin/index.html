@@ -1077,13 +1077,27 @@ $('add-doc-ok').addEventListener('click', function(){
   if (url) { finalize(url); return; }
 
   if (file) {
+    // Vérification taille côté client (max 7 MB avant base64)
+    if (file.size > 7 * 1024 * 1024) {
+      toast('Fichier trop volumineux (' + Math.round(file.size/1024/1024) + ' MB, max 7 MB).\nUploadez-le directement sur Dropbox puis collez l\'URL ci-dessus.', 'err');
+      return;
+    }
+
     var prog=$('upload-progress'); prog.style.display='block'; prog.textContent='Lecture du fichier…';
     var reader=new FileReader();
     reader.onload=function(e){
       var b64=e.target.result.split(',')[1];
-      var remotePath='/Documentation ARCA/'+
-        {article:'Articles',livre:'Livres',revue:'Revue ARCA','lus-pour-vous':'Lus pour vous'}[type]+
-        (type==='article'||type==='lus-pour-vous'?'/'+category:'')+'/'+
+      // Mapping corrigé (articles/livres au pluriel)
+      var folderMap = {
+        articles:'Articles', article:'Articles',
+        livres:'Livres', livre:'Livres',
+        revue:'Revue ARCA',
+        'lus-pour-vous':'Lus pour vous'
+      };
+      var folder = folderMap[type] || type;
+      var needsCat = (type==='articles'||type==='article'||type==='lus-pour-vous');
+      var remotePath='/Documentation ARCA/'+folder+
+        (needsCat?'/'+category:'')+'/'+
         title.toLowerCase().replace(/[^a-z0-9]+/g,'-').substring(0,60)+'.pdf';
 
       prog.textContent='Upload sur Dropbox…';
@@ -1091,11 +1105,16 @@ $('add-doc-ok').addEventListener('click', function(){
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({password:S.pwd,filename:file.name,content:b64,remotePath:remotePath})
-      }).then(function(r){return r.json();}).then(function(res){
+      }).then(function(r){
+        if (!r.ok && r.status !== 200) {
+          return r.text().then(function(t){ throw new Error('HTTP '+r.status+' — '+(t||'réponse vide')); });
+        }
+        return r.json();
+      }).then(function(res){
         prog.style.display='none';
         if (res.success) { finalize(res.dropbox_url); }
-        else { toast('Erreur upload : '+res.error,'err'); }
-      }).catch(function(err){ prog.style.display='none'; toast('Erreur réseau : '+err.message,'err'); });
+        else { toast('Erreur upload : '+(res.error||'inconnue'),'err'); }
+      }).catch(function(err){ prog.style.display='none'; toast('Erreur upload : '+err.message,'err'); });
     };
     reader.readAsDataURL(file);
     return;
