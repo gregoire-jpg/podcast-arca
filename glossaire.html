@@ -183,8 +183,8 @@
 
   function formatParas(escaped) {
     var paras = escaped.split('\n\n');
-    if (paras.length <= 1) return escaped.replace(/\n/g, '<br>');
-    return paras.map(function(p){ return '<p class="tp">' + p.replace(/\n/g, '<br>') + '</p>'; }).join('');
+    if (paras.length <= 1) return escaped;
+    return paras.map(function(p){ return '<p class="tp">' + p + '</p>'; }).join('');
   }
 
   /* Surligner les occurrences du terme recherché */
