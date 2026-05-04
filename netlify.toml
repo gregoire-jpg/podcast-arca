@@ -72,4 +72,4 @@
   [headers.values]
     Content-Security-Policy = "frame-ancestors 'self' https://arca-revue.com"
 
-# Force redeploy 2026-05-03T20:51:23Z
+# Force redeploy 2026-05-04T09:45:00Z
