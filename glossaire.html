@@ -56,6 +56,8 @@
     .term-entry { margin-bottom: 14px; padding-left: 16px; border-left: 2px solid var(--border); }
     .term-source { font: italic .78em/1 Arial; color: var(--gold); margin-bottom: 6px; }
     .term-text { font: .93em/1.65 Georgia; color: #2a2a2a; text-align: justify; }
+    .term-text .tp, .ve-txt .tp { margin: 0 0 .75em; }
+    .term-text .tp:last-child, .ve-txt .tp:last-child { margin-bottom: 0; }
     .term-entry { margin-bottom: 18px; }
     /* Bouton flottant retour en haut */
     /* Bouton retour en haut — position absolute pour compatibilite iframe */
@@ -178,6 +180,12 @@
   var BASE = 'https://podcast-arca.netlify.app';
 
   function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function formatParas(escaped) {
+    var paras = escaped.split('\n\n');
+    if (paras.length <= 1) return escaped.replace(/\n/g, '<br>');
+    return paras.map(function(p){ return '<p class="tp">' + p.replace(/\n/g, '<br>') + '</p>'; }).join('');
+  }
 
   /* Surligner les occurrences du terme recherché */
   function highlight(text, q) {
@@ -397,7 +405,7 @@
         }
         ed.appendChild(nt);
       } else {
-        tx.textContent = entry.texte;
+        tx.innerHTML = formatParas(esc(entry.texte || ''));
         ed.appendChild(tx);
       }
     } else {
@@ -470,13 +478,13 @@
   function renderNoteText(rawTxt, noteStr, q) {
     /* Retourne le HTML du texte avec appels de notes numérotés. */
     if (!noteStr) {
-      return { txt: q ? highlight(rawTxt, q) : esc(rawTxt), notesHtml: '' };
+      return { txt: formatParas(q ? highlight(rawTxt, q) : esc(rawTxt)), notesHtml: '' };
     }
     var noteLines = noteStr.split('\n').filter(function(l){ return l.trim(); });
     var parts = rawTxt.split('[note]');
     var txtHtml = '';
     for (var i = 0; i < parts.length; i++) {
-      txtHtml += (q ? highlight(parts[i], q) : esc(parts[i]));
+      txtHtml += formatParas(q ? highlight(parts[i], q) : esc(parts[i]));
       if (i < parts.length - 1) txtHtml += noteCallHtml(i);
     }
     /* Si pas de marqueur dans le texte mais note présente : appel en fin */
