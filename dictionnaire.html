@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dictionnaire Étymologique — Revue ARCA</title>
+  <style>
+    :root {
+      --navy:#2d3461; --navy-dk:#1e2245; --gold:#c8a060;
+      --white:#ffffff; --bg:#faf8f5; --border:#e2ddd8; --muted:#777;
+      --text:#2a2a2a;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Georgia, serif; background: var(--bg); color: var(--navy); }
+    button { cursor: pointer; }
+
+    /* ── Header ── */
+    .pa-header { background: var(--navy); padding: 60px 24px 50px; text-align: center; }
+    .pa-eyebrow { display: block; font: .65em/1 Arial; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
+    .pa-header h1 { font: normal 2.8em/1 Georgia; letter-spacing: 6px; text-transform: uppercase; color: var(--white); margin-bottom: 18px; }
+    .pa-rule { width: 44px; height: 2px; background: var(--gold); margin: 0 auto 18px; }
+    .pa-header p { font: italic 1em/1 Georgia; color: rgba(255,255,255,.55); }
+
+    /* ── Filter bar ── */
+    .pa-filter-bar { background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 90; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+    .pa-search-row { display: flex; align-items: center; gap: 10px; padding: 12px 24px; max-width: 1100px; margin: 0 auto; flex-wrap: wrap; }
+    .pa-search { flex: 1; min-width: 200px; padding: 9px 16px; border: 1px solid var(--border); border-radius: 8px; font: 1em/1 Georgia; outline: none; }
+    .pa-search:focus { border-color: var(--navy); }
+    .pa-results-info { font: .75em/1 Arial; color: var(--muted); padding: 0 24px 8px; max-width: 1100px; margin: 0 auto; }
+    mark { background: rgba(200,160,96,.35); color: inherit; border-radius: 2px; padding: 0 1px; font-style: normal; }
+
+    /* ── Alphabet nav ── */
+    .pa-alpha { background: #f3f0ea; border-bottom: 1px solid var(--border); padding: 10px 24px; text-align: center; }
+    .pa-alpha a { display: inline-block; margin: 2px 1px; padding: 4px 8px; font: bold .78em/1 Arial; color: var(--navy); text-decoration: none; border-radius: 4px; transition: background .15s, color .15s; }
+    .pa-alpha a:hover, .pa-alpha a.active { background: var(--navy); color: var(--white); }
+    .pa-alpha a.disabled { color: var(--border); pointer-events: none; }
+
+    /* ── Container ── */
+    .pa-container { max-width: 1100px; margin: 0 auto; padding: 24px 24px 80px; }
+
+    /* ── Letter section ── */
+    .letter-section { margin-bottom: 40px; }
+    .letter-header { font: normal 3em/1 Georgia; color: var(--gold); opacity: .4; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+
+    /* ── Table ── */
+    .dico-table { width: 100%; border-collapse: collapse; font-size: .9em; }
+    .dico-table thead th {
+      background: var(--navy); color: var(--white);
+      font: bold .72em/1 Arial; letter-spacing: 1px; text-transform: uppercase;
+      padding: 10px 12px; text-align: left; position: sticky; top: 53px; z-index: 10;
+    }
+    .dico-table thead th:first-child { border-radius: 4px 0 0 4px; width: 14%; }
+    .dico-table thead th:last-child  { border-radius: 0 4px 4px 0; }
+    .dico-table tbody tr { border-bottom: 1px solid var(--border); transition: background .12s; }
+    .dico-table tbody tr:hover { background: rgba(200,160,96,.07); }
+    .dico-table tbody tr:last-child { border-bottom: none; }
+    .dico-table td { padding: 10px 12px; vertical-align: top; line-height: 1.55; color: var(--text); }
+    .td-motfr { font: bold .95em/1.3 Arial; color: var(--navy); white-space: nowrap; width: 14%; }
+    .td-autre  { font: .85em/1.55 Georgia; width: 16%; color: #444; }
+    .td-orig   { font: .85em/1.55 Georgia; width: 22%; color: #444; font-style: italic; }
+    .td-expl   { font: .9em/1.6 Georgia; }
+
+    /* ── État vide / chargement ── */
+    .pa-state { text-align: center; padding: 60px 24px; font: italic 1.05em/1 Georgia; color: var(--muted); }
+
+    /* ── Btn top ── */
+    #btn-top { position: absolute; right: 24px; top: 200px; z-index: 200;
+      width: 44px; height: 44px; border-radius: 50%; border: none;
+      background: var(--gold); color: #fff; font-size: 1.3em; line-height: 44px;
+      text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+      opacity: 0; pointer-events: none; transition: opacity .2s; }
+    #btn-top.visible { opacity: 1; pointer-events: auto; }
+
+    /* ── Mobile : cartes ── */
+    @media (max-width: 680px) {
+      .dico-table, .dico-table thead, .dico-table tbody, .dico-table tr, .dico-table td { display: block; }
+      .dico-table thead { display: none; }
+      .dico-table tbody tr { padding: 12px 0; }
+      .dico-table td { padding: 3px 0; width: 100% !important; white-space: normal; }
+      .td-motfr { font-size: 1em; border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 4px; }
+      .td-autre::before  { content: 'Latin / Grec / Hébreu : '; font: bold .68em/1 Arial; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 2px; }
+      .td-orig::before   { content: 'Origine : '; font: bold .68em/1 Arial; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 2px; }
+      .td-expl::before   { content: 'Explication : '; font: bold .68em/1 Arial; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 2px; }
+      .td-autre:empty, .td-orig:empty { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="pa-header">
+  <span class="pa-eyebrow">Revue ARCA</span>
+  <h1>Dictionnaire Étymologique</h1>
+  <div class="pa-rule"></div>
+  <p>Étymologie des termes hermétiques, bibliques et philosophiques</p>
+</header>
+
+<div class="pa-filter-bar">
+  <div class="pa-search-row">
+    <input type="search" class="pa-search" id="pa-search" placeholder="Rechercher un mot, une explication…" autocomplete="off">
+    <span id="pa-count" style="font:.78em/1 Arial;color:var(--muted);white-space:nowrap">— entrées</span>
+  </div>
+</div>
+
+<nav class="pa-alpha" id="pa-alpha"></nav>
+
+<div class="pa-results-info" id="pa-results-info" style="display:none"></div>
+
+<div class="pa-container">
+  <div id="pa-list"><div class="pa-state">Chargement…</div></div>
+</div>
+
+<button id="btn-top" title="Retour en haut">↑</button>
+
+<script>
+'use strict';
+
+var D = { entries: [], filtered: [], query: '', activeLetter: '' };
+var LETTERS = ['A','B','C','D','E','F','G','H','I/J','K/L','M','N','O','P','Q','R','S','T','U','V','W/X/Y/Z'];
+var LETTER_MAP = { 'I/J':'IJ', 'K/L':'KL', 'W/X/Y/Z':'WXYZ' };
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function highlight(text, q) {
+  if (!q) return esc(text);
+  var escaped = esc(text);
+  var qEsc = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return escaped.replace(new RegExp('(' + qEsc + ')', 'gi'), '<mark>$1</mark>');
+}
+
+function nl2br(s) {
+  return esc(s).replace(/\n/g, '<br>');
+}
+function nlhi(s, q) {
+  if (!q) return nl2br(s);
+  return esc(s).replace(/\n/g,'<br>').replace(
+    new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi'),
+    '<mark>$1</mark>'
+  );
+}
+
+/* ── Alphabet nav ── */
+function buildAlpha(usedLetters) {
+  var nav = document.getElementById('pa-alpha');
+  nav.innerHTML = LETTERS.map(function(l) {
+    var key = LETTER_MAP[l] || l;
+    var active = usedLetters.has(key);
+    return '<a href="#sec-' + key + '" class="' + (active ? '' : 'disabled') + '">' + l + '</a>';
+  }).join('');
+}
+
+/* ── Rendu principal ── */
+function render() {
+  var q = D.query.toLowerCase().trim();
+  var letter = D.activeLetter;
+
+  D.filtered = D.entries.filter(function(e) {
+    if (letter && e.lettre !== letter) return false;
+    if (!q) return true;
+    return (e.mot_fr||'').toLowerCase().indexOf(q) !== -1
+        || (e.mot_autre||'').toLowerCase().indexOf(q) !== -1
+        || (e.origine||'').toLowerCase().indexOf(q) !== -1
+        || (e.explication||'').toLowerCase().indexOf(q) !== -1;
+  });
+
+  var info = document.getElementById('pa-results-info');
+  if (q || letter) {
+    info.style.display = 'block';
+    info.textContent = D.filtered.length + ' résultat(s) sur ' + D.entries.length + ' entrées';
+  } else {
+    info.style.display = 'none';
+  }
+  document.getElementById('pa-count').textContent = D.entries.length + ' entrées';
+
+  if (!D.filtered.length) {
+    document.getElementById('pa-list').innerHTML = '<div class="pa-state">Aucune entrée trouvée pour « ' + esc(D.query) + ' ».</div>';
+    return;
+  }
+
+  /* Grouper par lettre */
+  var groups = {};
+  var order = [];
+  D.filtered.forEach(function(e) {
+    if (!groups[e.lettre]) { groups[e.lettre] = []; order.push(e.lettre); }
+    groups[e.lettre].push(e);
+  });
+
+  var html = '';
+  order.forEach(function(lettre) {
+    var label = Object.keys(LETTER_MAP).find(function(k){ return LETTER_MAP[k]===lettre; }) || lettre;
+    html += '<div class="letter-section" id="sec-' + esc(lettre) + '">';
+    html += '<div class="letter-header">' + esc(label) + '</div>';
+    html += '<table class="dico-table">';
+    html += '<thead><tr>'
+          + '<th>Mot en français</th>'
+          + '<th>Latin · Grec · Hébreu…</th>'
+          + '<th>Origine étymologique</th>'
+          + '<th>Explication</th>'
+          + '</tr></thead><tbody>';
+
+    groups[lettre].forEach(function(e) {
+      html += '<tr>'
+            + '<td class="td-motfr">' + highlight(e.mot_fr, q) + '</td>'
+            + '<td class="td-autre">' + nlhi(e.mot_autre||'', q) + '</td>'
+            + '<td class="td-orig">'  + nlhi(e.origine||'', q)   + '</td>'
+            + '<td class="td-expl">'  + nlhi(e.explication||'', q) + '</td>'
+            + '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+  });
+
+  document.getElementById('pa-list').innerHTML = html;
+}
+
+/* ── Chargement ── */
+fetch('https://podcast-arca.netlify.app/dictionnaire.json?' + Date.now())
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    D.entries = data;
+    var used = new Set(data.map(function(e){ return e.lettre; }));
+    buildAlpha(used);
+    render();
+  })
+  .catch(function(e){
+    document.getElementById('pa-list').innerHTML = '<div class="pa-state">Impossible de charger le dictionnaire.</div>';
+  });
+
+/* ── Recherche ── */
+document.getElementById('pa-search').addEventListener('input', function(){
+  D.query = this.value;
+  D.activeLetter = '';
+  document.querySelectorAll('.pa-alpha a').forEach(function(a){ a.classList.remove('active'); });
+  render();
+});
+
+/* ── Navigation alphabet ── */
+document.getElementById('pa-alpha').addEventListener('click', function(e){
+  var a = e.target.closest('a');
+  if (!a || a.classList.contains('disabled')) return;
+  e.preventDefault();
+  var key = a.getAttribute('href').replace('#sec-','');
+  if (D.activeLetter === key) {
+    D.activeLetter = '';
+    a.classList.remove('active');
+  } else {
+    D.activeLetter = key;
+    document.querySelectorAll('.pa-alpha a').forEach(function(b){ b.classList.remove('active'); });
+    a.classList.add('active');
+  }
+  D.query = '';
+  document.getElementById('pa-search').value = '';
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+/* ── Btn top ── */
+var btn = document.getElementById('btn-top');
+var THRESHOLD = 300;
+var inIframe = window.self !== window.top;
+
+function showBtn(v) { btn.classList.toggle('visible', v); }
+
+if (inIframe) {
+  window.addEventListener('message', function(e) {
+    if (e.data && e.data.type === 'pa-parent-scroll') {
+      var relY = e.data.scrollY - e.data.iframeTop;
+      showBtn(relY > THRESHOLD);
+      btn.style.top = Math.max(200, relY + e.data.viewportH - 70) + 'px';
+    }
+  });
+} else {
+  window.addEventListener('scroll', function(){ showBtn(window.scrollY > THRESHOLD); });
+}
+btn.addEventListener('click', function(){
+  if (inIframe) window.parent.postMessage({ type: 'pa-scroll-top' }, '*');
+  else window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>
