@@ -72,4 +72,11 @@
   [headers.values]
     Content-Security-Policy = "frame-ancestors 'self' https://arca-revue.com"
 
-# Force redeploy 2026-05-04T09:45:00Z
+# dictionnaire.json public
+[[headers]]
+  for = "/dictionnaire.json"
+  [headers.values]
+    Cache-Control = "public, max-age=300"
+    Access-Control-Allow-Origin = "*"
+
+# Force redeploy 2026-05-04T10:30:00Z

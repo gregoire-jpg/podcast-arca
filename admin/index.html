@@ -132,6 +132,11 @@
     .btn-save.saving { background: var(--muted) !important; cursor: wait; }
     .btn-save.saved  { background: var(--green) !important; }
     .save-status { font-size: .8em; color: var(--muted); }
+    .dico-lbl { font:.65em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px }
+    .dico-row { display:grid;grid-template-columns:160px 1fr auto;gap:8px;align-items:start;padding:8px 10px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s }
+    .dico-row:hover { background:var(--bg) }
+    .dico-motfr { font:bold .88em/1 Arial;color:var(--navy);text-transform:uppercase;padding-top:2px }
+    .dico-expl { font:.82em/1.45 Georgia;color:var(--text);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical }
 
     /* ── Episode cards ── */
     .ep-card { background: var(--white); border-radius: 10px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.07); transition: box-shadow .2s; }
@@ -237,6 +242,7 @@
         <button class="nav-btn on" data-panel="podcasts">Podcasts</button>
         <button class="nav-btn"    data-panel="docs">Documentation</button>
         <button class="nav-btn"    data-panel="glossaire">Glossaire</button>
+        <button class="nav-btn"    data-panel="dictionnaire">Dictionnaire</button>
       </nav>
     </div>
     <button class="btn-logout" id="btn-logout">Déconnexion</button>
@@ -481,6 +487,74 @@
       <div class="confirm-btns">
         <button class="confirm-cancel" id="term-cancel">Annuler</button>
         <button class="confirm-ok" id="term-ok" style="background:var(--navy)">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DICTIONNAIRE ══ -->
+  <div class="panel" id="panel-dictionnaire">
+    <div class="docs-nav">
+      <div class="docs-bc">
+        <span class="docs-bc-cur">Dictionnaire étymologique</span>
+        <span style="font:.75em/1 Arial;color:var(--muted);margin-left:12px" id="dico-count"></span>
+      </div>
+      <div class="docs-nav-actions">
+        <input type="text" id="dico-search" placeholder="Rechercher un mot…" class="t-input" style="min-width:180px">
+        <select id="dico-lettre" class="t-input" style="min-width:90px">
+          <option value="">Toutes lettres</option>
+          <option>A</option><option>B</option><option>C</option><option>D</option>
+          <option>E</option><option>F</option><option>G</option><option>H</option>
+          <option>IJ</option><option>KL</option><option>M</option><option>N</option>
+          <option>O</option><option>P</option><option>Q</option><option>R</option>
+          <option>S</option><option>T</option><option>U</option><option>V</option>
+          <option>WXYZ</option>
+        </select>
+        <button class="btn btn-navy" id="btn-add-dico">+ Nouvelle entrée</button>
+        <span class="save-status" id="dico-save-status"></span>
+        <button class="btn btn-navy btn-save" id="btn-save-dico">💾 Sauvegarder</button>
+      </div>
+    </div>
+    <div id="dico-list"><div class="empty">Chargement…</div></div>
+  </div>
+
+  <!-- Modale dictionnaire -->
+  <div class="confirm-mask" id="dico-mask" style="display:none">
+    <div class="confirm-box" style="max-width:640px;text-align:left;max-height:88vh;overflow-y:auto;">
+      <h3 style="margin-bottom:16px;color:var(--navy)" id="dico-mask-title">Nouvelle entrée</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div>
+          <label class="dico-lbl">Mot en français *</label>
+          <input type="text" id="dico-mot-fr" placeholder="ex: ABANDON" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box;text-transform:uppercase">
+        </div>
+        <div>
+          <label class="dico-lbl">Lettre</label>
+          <select id="dico-lettre-edit" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
+            <option>A</option><option>B</option><option>C</option><option>D</option>
+            <option>E</option><option>F</option><option>G</option><option>H</option>
+            <option>IJ</option><option>KL</option><option>M</option><option>N</option>
+            <option>O</option><option>P</option><option>Q</option><option>R</option>
+            <option>S</option><option>T</option><option>U</option><option>V</option>
+            <option>WXYZ</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div>
+          <label class="dico-lbl">Mot en latin / grec / hébreu…</label>
+          <textarea id="dico-mot-autre" rows="3" placeholder="ex: apis&#10;Αβελ&#10;הבל" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.88em/1.5 Georgia;box-sizing:border-box;resize:vertical"></textarea>
+        </div>
+        <div>
+          <label class="dico-lbl">Origine étymologique</label>
+          <textarea id="dico-origine" rows="3" placeholder="ex: &lt; ban (germ.)&#10;arabe : Abel" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.88em/1.5 Georgia;box-sizing:border-box;resize:vertical"></textarea>
+        </div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label class="dico-lbl">Explication</label>
+        <textarea id="dico-explication" rows="4" placeholder="Définition, sens, références…" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.88em/1.6 Georgia;box-sizing:border-box;resize:vertical"></textarea>
+      </div>
+      <div class="confirm-btns">
+        <button class="confirm-cancel" id="dico-cancel">Annuler</button>
+        <button class="confirm-ok" id="dico-ok" style="background:var(--navy)">Enregistrer</button>
       </div>
     </div>
   </div>
@@ -895,6 +969,7 @@ document.querySelectorAll('.nav-btn').forEach(function(btn) {
     document.querySelectorAll('.panel').forEach(function(p)   { p.classList.remove('on'); });
     this.classList.add('on');
     $('panel-' + this.dataset.panel).classList.add('on');
+    if (this.dataset.panel === 'dictionnaire' && !DC.entries.length) loadDictionnaire();
   });
 });
 
@@ -1517,6 +1592,122 @@ $('btn-save-docs').addEventListener('click',function(){
     btn.textContent='✓ Sauvegardé'; btn.classList.add('saved');
     toast('Documentation sauvegardée ! Netlify redéploie dans ~30s.');
     setTimeout(function(){btn.textContent='💾 Sauvegarder';btn.classList.remove('saved');},3000);
+  });
+});
+
+/* ═══════════════════ DICTIONNAIRE ═══════════════════ */
+var DC = { entries: [], dirty: false, editIdx: -1, search: '', lettre: '' };
+
+function loadDictionnaire() {
+  fetch('https://podcast-arca.netlify.app/dictionnaire.json?' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      DC.entries = data;
+      renderDictionnaire();
+    }).catch(function(e){ toast('Erreur chargement dictionnaire: ' + e.message, 'err'); });
+}
+
+function renderDictionnaire() {
+  var list = DC.entries.filter(function(e){
+    if (DC.lettre && e.lettre !== DC.lettre) return false;
+    if (DC.search) {
+      var q = DC.search.toLowerCase();
+      return (e.mot_fr||'').toLowerCase().indexOf(q) !== -1
+          || (e.explication||'').toLowerCase().indexOf(q) !== -1;
+    }
+    return true;
+  });
+  $('dico-count').textContent = list.length + ' / ' + DC.entries.length + ' entrées';
+  if (!list.length) { $('dico-list').innerHTML = '<div class="empty">Aucune entrée trouvée.</div>'; return; }
+
+  var h = '<div class="doc-list">';
+  list.forEach(function(e) {
+    var idx = DC.entries.indexOf(e);
+    h += '<div class="dico-row" data-idx="'+idx+'">'
+       + '<div class="dico-motfr">'+esc(e.mot_fr)+'<div style="font:.7em/1 Arial;font-weight:normal;color:var(--muted);margin-top:3px">'+esc(e.lettre)+'</div></div>'
+       + '<div class="dico-expl">'+esc((e.explication||'').replace(/\n/g,' '))+'</div>'
+       + '<button class="btn-del-ep" data-idx="'+idx+'" title="Supprimer" style="flex-shrink:0">🗑</button>'
+       + '</div>';
+  });
+  h += '</div>';
+  $('dico-list').innerHTML = h;
+
+  $('dico-list').querySelectorAll('.dico-row').forEach(function(row){
+    row.addEventListener('click', function(e){
+      if (e.target.closest('.btn-del-ep')) return;
+      openDicoEdit(parseInt(this.dataset.idx, 10));
+    });
+  });
+  $('dico-list').querySelectorAll('.btn-del-ep').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var idx = parseInt(this.dataset.idx, 10);
+      dialog('Supprimer cette entrée ?', DC.entries[idx].mot_fr, function(){
+        DC.entries.splice(idx, 1); DC.dirty = true; renderDictionnaire(); updateDicoStatus();
+        toast('Entrée supprimée — Sauvegarder pour confirmer');
+      }, {label:'Supprimer', color:'var(--red)'});
+    });
+  });
+}
+
+function updateDicoStatus() {
+  $('dico-save-status').textContent = DC.dirty ? 'Modifications non sauvegardées' : '';
+}
+
+function openDicoEdit(idx) {
+  DC.editIdx = idx;
+  var e = idx >= 0 ? DC.entries[idx] : {mot_fr:'', mot_autre:'', origine:'', explication:'', lettre:'A'};
+  $('dico-mask-title').textContent = idx >= 0 ? 'Modifier l\'entrée' : 'Nouvelle entrée';
+  $('dico-mot-fr').value = e.mot_fr || '';
+  $('dico-mot-autre').value = e.mot_autre || '';
+  $('dico-origine').value = e.origine || '';
+  $('dico-explication').value = e.explication || '';
+  $('dico-lettre-edit').value = e.lettre || 'A';
+  $('dico-mask').style.display = 'flex';
+}
+
+$('btn-add-dico').addEventListener('click', function(){ openDicoEdit(-1); });
+$('dico-cancel').addEventListener('click', function(){ $('dico-mask').style.display='none'; });
+
+$('dico-ok').addEventListener('click', function(){
+  var motFr = $('dico-mot-fr').value.trim().toUpperCase();
+  if (!motFr) { toast('Le mot en français est requis', 'err'); return; }
+  var lettre = $('dico-lettre-edit').value;
+  var id = motFr.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  var obj = {
+    id: id,
+    lettre: lettre,
+    mot_fr: motFr,
+    mot_autre: $('dico-mot-autre').value.trim(),
+    origine: $('dico-origine').value.trim(),
+    explication: $('dico-explication').value.trim()
+  };
+  if (DC.editIdx >= 0) {
+    DC.entries[DC.editIdx] = obj;
+    toast('Entrée modifiée — Sauvegarder pour confirmer');
+  } else {
+    var insertAt = DC.entries.findIndex(function(e){ return e.lettre > lettre || (e.lettre===lettre && e.mot_fr > motFr); });
+    if (insertAt === -1) DC.entries.push(obj); else DC.entries.splice(insertAt, 0, obj);
+    toast('Entrée ajoutée — Sauvegarder pour confirmer');
+  }
+  DC.dirty = true;
+  $('dico-mask').style.display = 'none';
+  renderDictionnaire();
+  updateDicoStatus();
+});
+
+$('dico-search').addEventListener('input', function(){ DC.search = this.value.toLowerCase().trim(); renderDictionnaire(); });
+$('dico-lettre').addEventListener('change', function(){ DC.lettre = this.value; renderDictionnaire(); });
+
+$('btn-save-dico').addEventListener('click', function(){
+  var btn = this; btn.textContent='Sauvegarde…'; btn.classList.add('saving');
+  saveFile('dictionnaire.json', DC.entries, function(err){
+    btn.classList.remove('saving');
+    if (err) { toast('Erreur : '+err, 'err'); return; }
+    DC.dirty = false; updateDicoStatus();
+    btn.textContent = '✓ Sauvegardé'; btn.classList.add('saved');
+    toast('Dictionnaire sauvegardé ! Netlify redéploie dans ~30s.');
+    setTimeout(function(){ btn.textContent='💾 Sauvegarder'; btn.classList.remove('saved'); }, 3000);
   });
 });
 
