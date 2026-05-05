@@ -211,6 +211,13 @@ function render() {
   });
 
   document.getElementById('pa-list').innerHTML = html;
+  // Notifier le parent de la hauteur réelle (pour auto-resize de l'iframe)
+  setTimeout(function(){
+    var h = document.body.scrollHeight;
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'pa-resize', height: h }, '*');
+    }
+  }, 50);
 }
 
 /* ── Chargement ── */

@@ -3873,14 +3873,6 @@
   },
   {
     "lettre": "E",
-    "mot_fr": "Mot en\nfrançais",
-    "mot_autre": "Mot en latin,\ngrec,\nhébreu,…",
-    "origine": "Origine\nétymologique",
-    "explication": "explication",
-    "id": "mot-en-fran-ais"
-  },
-  {
-    "lettre": "E",
     "mot_fr": "EAU",
     "mot_autre": "aqua\nÛdwr",
     "origine": "< aequa summa\n< a qua juvamur\nυƒός ; ásai\nἀπουσία\nsunous…a",
@@ -5993,14 +5985,6 @@
   },
   {
     "lettre": "H",
-    "mot_fr": "Mot en\nfrançais",
-    "mot_autre": "Mot en latin,\ngrec,\nhébreu,…",
-    "origine": "Origine\nétymologique",
-    "explication": "explication",
-    "id": "mot-en-fran-ais"
-  },
-  {
-    "lettre": "H",
     "mot_fr": "HABILE",
     "mot_autre": "habilis",
     "origine": "< habere",
@@ -7833,14 +7817,6 @@
   },
   {
     "lettre": "M",
-    "mot_fr": "Mot en\nfrançais",
-    "mot_autre": "Mot en latin,\ngrec,\nhébreu,…",
-    "origine": "Origine\nétymologique",
-    "explication": "explication",
-    "id": "mot-en-fran-ais"
-  },
-  {
-    "lettre": "M",
     "mot_fr": "MACHINE",
     "mot_autre": "",
     "origine": "< machinor\n< μαχανά\nmhcan»",
@@ -9353,14 +9329,6 @@
   },
   {
     "lettre": "O",
-    "mot_fr": "ORIGINE",
-    "mot_autre": "origo",
-    "origine": "< oriri",
-    "explication": "naître, commencer, provenir, apparaître, car\nl’origine se lève comme le soleil à l’orient",
-    "id": "origine"
-  },
-  {
-    "lettre": "O",
     "mot_fr": "ORION",
     "mot_autre": "",
     "origine": "< urina",
@@ -9502,14 +9470,6 @@
     "origine": "< oblatio",
     "explication": "offrande (Isidore)",
     "id": "ovis-brebis"
-  },
-  {
-    "lettre": "P",
-    "mot_fr": "Mot en\nfrançais",
-    "mot_autre": "Mot en latin,\ngrec,\nhébreu,…",
-    "origine": "Origine\nétymologique",
-    "explication": "explication",
-    "id": "mot-en-fran-ais"
   },
   {
     "lettre": "P",
@@ -11558,14 +11518,6 @@
     "origine": "rugitus",
     "explication": "rugissement",
     "id": "rut"
-  },
-  {
-    "lettre": "S",
-    "mot_fr": "Mot en\nfrançais",
-    "mot_autre": "Mot en latin,\ngrec,\nhébreu,…",
-    "origine": "Origine\nétymologique",
-    "explication": "explication",
-    "id": "mot-en-fran-ais"
   },
   {
     "lettre": "S",
