@@ -52,9 +52,10 @@
     }
     .dico-table thead th:first-child { border-radius: 4px 0 0 4px; }
     .dico-table thead th:last-child  { border-radius: 0 4px 4px 0; }
-    .dico-table tbody tr { border-bottom: 1px solid var(--border); transition: background .12s; }
-    .dico-table tbody tr:hover { background: rgba(200,160,96,.07); }
-    .dico-table tbody tr:last-child { border-bottom: none; }
+    .dico-table tbody tr.erow-first { border-top: 1px solid var(--border); }
+    .dico-table tbody tr.erow-cont  { border-top: none; }
+    .dico-table tbody tr:hover td   { background: rgba(200,160,96,.07); }
+    .dico-table tbody tr:last-child { border-bottom: 1px solid var(--border); }
     .dico-table td { padding: 10px 12px; vertical-align: top; line-height: 1.55; color: var(--text); overflow-wrap: break-word; word-break: break-word; }
     .td-motfr { font: bold .95em/1.3 Arial; color: var(--navy); width: 13%; min-width: 90px; }
     .td-autre  { font: .85em/1.55 Georgia; width: 17%; color: #444; }
@@ -199,12 +200,33 @@ function render() {
           + '</tr></thead><tbody>';
 
     groups[lettre].forEach(function(e) {
-      html += '<tr>'
-            + '<td class="td-motfr">' + highlight(e.mot_fr, q) + '</td>'
-            + '<td class="td-autre" dir="auto">' + nlhi(e.mot_autre||'', q) + '</td>'
-            + '<td class="td-orig"  dir="auto">' + nlhi(e.origine||'', q)   + '</td>'
-            + '<td class="td-expl">'             + nlhi(e.explication||'', q) + '</td>'
-            + '</tr>';
+      var origLines = (e.origine||'').split('\n');
+      // Fusionner les lignes d'explication qui sont des continuations de wrapping
+      // (commence par minuscule ou '(' = continuation de la ligne précédente)
+      var rawExpl = (e.explication||'').split('\n');
+      var explLines = [];
+      for (var k = 0; k < rawExpl.length; k++) {
+        var ln = rawExpl[k].trim(); if (!ln) continue;
+        var fc = ln.charCodeAt(0);
+        var isCont = explLines.length > 0 && (
+          (fc >= 97 && fc <= 122) ||  // minuscule a-z
+          (fc >= 224 && fc <= 254) || // minuscule accentuée
+          ln[0] === '(' || ln[0] === ')' || ln[0] === ','
+        );
+        if (isCont) explLines[explLines.length-1] += ' ' + ln;
+        else explLines.push(ln);
+      }
+      var rows = Math.max(origLines.length, explLines.length, 1);
+      for (var r = 0; r < rows; r++) {
+        html += '<tr class="' + (r===0 ? 'erow-first' : 'erow-cont') + '">';
+        if (r === 0) {
+          html += '<td class="td-motfr" rowspan="'+rows+'">' + highlight(e.mot_fr,q) + '</td>';
+          html += '<td class="td-autre" dir="auto" rowspan="'+rows+'">' + nlhi(e.mot_autre||'',q) + '</td>';
+        }
+        html += '<td class="td-orig" dir="auto">' + nlhi(origLines[r]||'',q) + '</td>';
+        html += '<td class="td-expl">'            + nlhi(explLines[r]||'',q) + '</td>';
+        html += '</tr>';
+      }
     });
 
     html += '</tbody></table></div></div>';
