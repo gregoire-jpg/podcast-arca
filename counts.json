@@ -383,9 +383,11 @@
     "jouon-paul-grammaire-de-lhebreu-biblique-institut-biblique-pontifical-1947": 252,
     "sander-trenel-dictionnaire-hebreu-francais-bureau-des-archives-israelites-1859": 290
   },
-  "plays": {},
+  "plays": {
+    "TyQEy5yNplo": 1
+  },
   "totals": {
     "downloads": 113982,
-    "plays": 0
+    "plays": 1
   }
 }
