@@ -1771,7 +1771,7 @@
     "lettre": "C",
     "mot_fr": "CALVAIRE",
     "mot_autre": "calvaria",
-    "origine": "< calvus\nkaloà Þ ἀρείας",
+    "origine": "< calvus\nκαλοῦ ἀρείας",
     "explication": "chauve\ncf. Golgotha\nmontagne souvent arrosée par une pluie de\nbonbons et les confiseurs de ce pays en\nfaisaient quelquefois des statues parlantes (La\nVérité II, p. 256)",
     "id": "calvaire"
   },
@@ -2339,7 +2339,7 @@
     "lettre": "C",
     "mot_fr": "CHRIST",
     "mot_autre": "Χριστός\n‏תסערכ",
-    "origine": "χρίω\nχριστώς ƒστός\n(mât oint)\n< ‏ערכ\n< kristobal\nK = C + H",
+    "origine": "χρίω\nχριστός\n(mât oint)\n< ‏ערכ\n< kristobal\nK = C + H",
     "explication": "toucher légèrement, oindre, frotter d’huile,\nfrotter, grainer\nquand nous partons pour les voyages\nprolifères sous les auspices de notre divin\nJésus, il faut que le mât de notre navire soit\nmis, par son onction salutaire, dans un état\n(érection) que nos pères ont nommé état de\ngrâce (La Vérité II, p. 55)\nécriture de Cattiaux « par goût particulier »\nacte\nacte fixé en Dieu\n11e lettre = 3 + 8 ; unité dédoublée et ajoutée\nà elle-même",
     "id": "christ"
   },
@@ -6050,8 +6050,8 @@
   {
     "lettre": "H",
     "mot_fr": "HÉCATOMBE",
-    "mot_autre": "˜κατόμβη",
-    "origine": "˜κατόν - βοῦς",
+    "mot_autre": "Ἑκατόμβη",
+    "origine": "Ἑκατόν - βοῦς",
     "explication": "sacrifice de 100 bœufs",
     "id": "h-catombe"
   },
