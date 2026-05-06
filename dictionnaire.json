@@ -1195,7 +1195,7 @@
     "lettre": "B",
     "mot_fr": "BABEL",
     "mot_autre": "‏בבל",
-    "origine": "‏בלל <\nassocié à\nβάβιον\nβέβηλος\nla – bb\narabe : bab – baba –\nal\nbab-ilou\nbâb ‏לטכ baliya",
+    "origine": "‏בלל <\nassocié à\nβάβιον\nβέβηλος\n‏בב – la\narabe : bab – baba –\nal\nbab-ilou\nbâb ‏לטכ baliya",
     "explication": "mêler, brouiller, agiter\nbabillage, balbutier\npetit enfant\nlieu où on ne peut marcher, donc profane,\nimpur, vulgaire\nporte de Dieu\nmain de l'édifice ou du père (La Vérité I, p.\n377)\nporte du soleil\nporte de toute calamité",
     "id": "babel"
   },
@@ -1371,7 +1371,7 @@
     "lettre": "B",
     "mot_fr": "BÉNIR",
     "mot_autre": "benedictio",
-    "origine": "< bene dicere\n!rb",
+    "origine": "< bene dicere\n‏ברך",
     "explication": "bien dire (contraire de maudire, mal dire)\nfaire descendre ; l’acte sacerdotal de faire\ndescendre le dieu d’en haut dans ses saintes\nespèces (FP p. 286)",
     "id": "b-nir"
   },
@@ -1435,7 +1435,7 @@
     "lettre": "B",
     "mot_fr": "BEYA",
     "mot_autre": "",
-    "origine": "hy - b",
+    "origine": "‏b - יה",
     "explication": "par Iah, en Iah, avec Iah",
     "id": "beya"
   },
@@ -1707,7 +1707,7 @@
     "lettre": "C",
     "mot_fr": "CADMUS",
     "mot_autre": "",
-    "origine": ",dvq",
+    "origine": "‏קדם",
     "explication": "l'Ancien",
     "id": "cadmus"
   },
@@ -1915,7 +1915,7 @@
     "lettre": "C",
     "mot_fr": "CATARACTE",
     "mot_autre": "καταρράκτης",
-    "origine": "kata-#rhgnumi",
+    "origine": "κατα-ῥηγνυμι",
     "explication": "briser de bas en haut (de là breken, ndls)",
     "id": "cataracte"
   },
@@ -2211,7 +2211,7 @@
     "lettre": "C",
     "mot_fr": "CHEMIN",
     "mot_autre": "caminus\niter\nὸδός",
-    "origine": "< κάμινος\n< ka#\n< ire, itus\no - δόσις",
+    "origine": "< κάμινος\n< κα#\n< ire, itus\no - δόσις",
     "explication": "fourneau, fournaise, forge, cheminée, foyer,\nfeu\nbrûler\npiste par où on cheminait\ndon et 70, globalisation du principe de vie ;\ndon de conglober la vie ; La Vérité II, p. 56 (sur\nJésus, « je suis le chemin »)",
     "id": "chemin"
   },
@@ -2291,7 +2291,7 @@
     "lettre": "C",
     "mot_fr": "CHIMIE",
     "mot_autre": "χυμεία\nchemia",
-    "origine": "< χυμός\n‏(égypt.) טמכ\nhy ,w",
+    "origine": "< χυμός\n‏(égypt.) טמכ\n‏,w יה",
     "explication": "mélange de plusieurs sucs, mixtion\nliquide en fusion, mollesse, malléabilité, suc\nnaturel\nnoir, l’Égypte\nnom de Dieu (puisque la chimie a pour but de\nfusionner le hy et le vh)",
     "id": "chimie"
   },
@@ -2443,7 +2443,7 @@
     "lettre": "C",
     "mot_fr": "CLEF",
     "mot_autre": "clavis",
-    "origine": "< κλαίς, κλείς\nracine kle#",
+    "origine": "< κλαίς, κλείς\nracine κλε#",
     "explication": "tout ce qui sert à fermer",
     "id": "clef"
   },
@@ -3371,7 +3371,7 @@
     "lettre": "D",
     "mot_fr": "DÉJÀ",
     "mot_autre": "iam",
-    "origine": "‘de hy (iah)’\n,vy",
+    "origine": "‏(iah)’ יה ‘de\n,vy",
     "explication": "de la partie volatile du nom de Dieu\njour, aujourd’hui",
     "id": "d-j"
   },
@@ -3427,7 +3427,7 @@
     "lettre": "D",
     "mot_fr": "DÉMON",
     "mot_autre": "δαίμων\nΔαίμων",
-    "origine": "< racine di#\n< δαίω\n< δάω\n< δαήμων",
+    "origine": "< racine δι#\n< δαίω\n< δάω\n< δαήμων",
     "explication": "dieu, déesse, âme d’un mort\nbriller\npartager car le démon distribue à chacun son\nlot, diviser\napprendre pour soi, savoir\nsavant, habile (Chantraine)\nexpert et savant en choses (Isidore)\nLe Bon Démon représente le monde\nchargé de fruits, ou la raison qui y est\npréposée, en ce sens que, comme un\nbon distributeur (diairšthj), elle\npartage (date‹tai) et divise (διαμερίζει)\nla part assignée à chacun (Homère,\nBeya, p. 57)",
     "id": "d-mon"
   },
@@ -4187,7 +4187,7 @@
     "lettre": "E",
     "mot_fr": "ENFANT",
     "mot_autre": "infans\nνήπιος\npuer - pueri",
-    "origine": "< in – fari\nfari  loqui\n< φημί\nnh - επος",
+    "origine": "< in – fari\nfari  loqui\n< φημί\n‏επος - הנ",
     "explication": "qui ne parle pas, incapable de parler\némettre des sons de la voix, mais pas encore\ndes mots posés à leur lieu propre (Stephanus)\n(Isidore)\nrendre visible, manifester sa pensée par la\nparole, penser\nqui n’a pas la parole\ncf. au mot « puer »",
     "id": "enfant"
   },
@@ -5451,7 +5451,7 @@
     "lettre": "F",
     "mot_fr": "FROID",
     "mot_autre": "frigus",
-    "origine": "< #ρῖγος\n< φρίττω",
+    "origine": "< ῥῖγος\n< φρίττω",
     "explication": "froid, gel, froid glacé\nfrissonner, se hérisser",
     "id": "froid"
   },
@@ -6003,7 +6003,7 @@
     "lettre": "H",
     "mot_fr": "HACHMAL",
     "mot_autre": "‏חשמל",
-    "origine": "lm >a yx\nlm ‏נחש\n‏>xn משל\n‏נחש\n‏מלל et h>x\nἡλεκτρον (Septante)",
+    "origine": "‏חי >a מל\n‏‏נחש מל\n‏>xn משל\n‏נחש\n‏מלל et h>x\nἡλεκτρον (Septante)",
     "explication": "être de feu qui parle\nairain poli (FP p. 163)\nairain circoncis, coupé, poli\nserpent\nse taire, être inactif, ET parler\nambre jaune, alliage d’or (4/5) et d’argent\n(1/5) cf. EH, cours hébreu II, p. 117",
     "id": "hachmal"
   },
@@ -6363,7 +6363,7 @@
     "lettre": "H",
     "mot_fr": "HORUS",
     "mot_autre": "‘Ωρος",
-    "origine": "éra ός\nérv ός et ερει ός\nérou ώττος\nwr ός ; arabe aur",
+    "origine": "éra ός\nérv ός et ερει ός\nérou ώττος\n‏aur arabe ; ός רו",
     "explication": "un être, la beauté lui-même, qui est l'heure\ndes vivants\nl'être qui avait tout prévu et qui prend soin de\ntout\nl’œil de l'année : quelqu'un ignore-t-il que\nsans la lumière universellement répandue par\nl'astre du jour, le monde entier ne serait que\nténèbres ?\nl'or : celui qui est le véritable or\n(La Vérité, I, p. 144)\nle lointain (Miroir 23, p. 87)",
     "id": "horus"
   },
@@ -6947,7 +6947,7 @@
     "lettre": "IJ",
     "mot_fr": "JEAN",
     "mot_autre": "‏ישחנם\nἸωάννης",
-    "origine": "< ]x\nιιαν νάσε\nιια ”Annv ᾳσε\nιωάς ἄναξ νήσων",
+    "origine": "‏חם <\nιιαν νάσε\nιια ”Annv ᾳσε\nιωάς ἄναξ νήσων",
     "explication": "la grâce\ncelui qui crie : conglobez\nil crie à notre Anne : chantez, délectez et faites\nvotre mission\nle roi du souffle et de la parole qui doit aller et\nvenir (La Vérité, II, p. 73 et 204)",
     "id": "jean"
   },
@@ -7987,7 +7987,7 @@
     "lettre": "M",
     "mot_fr": "MARIE",
     "mot_autre": "Maria\n,yrm\nMaria\nΜαρία",
-    "origine": "amara\n‏מרה\nryam\nravm\n,y – rvam\n,y - rm\nμάρη ύα\nμαρτύρων ύα\nμαρσύπων ύα",
+    "origine": "amara\n‏מרה\nryam\nravm\n,y – rvam\n‏מר - ,y\nμάρη ύα\nμαρτύρων ύα\nμαρσύπων ύα",
     "explication": "amertume, car Marie est pleine d’amertume à\ncause de son état déchu (EH)\nmaîtresse\ncelle qui éclaire\ncelle qui est éclairée\nétoile de la mer (car la mer est la réunion de\ntoutes les eaux comme Marie l’est des grâces)\nmer amère\n(racines hébraïques d’Albert le Grand)\nles mers (les mers des philosophes sont les\ncieux et les airs)\nla seule main (qui verse sur nous les grâces\ncontinuelles de Dieu)\nla voix et la force de ces petits témoins\nla voix et la force des bourses\n(La Vérité, II, p. 31-32)",
     "id": "marie"
   },
@@ -8043,7 +8043,7 @@
     "lettre": "M",
     "mot_fr": "MATIÈRE",
     "mot_autre": "materia",
-    "origine": "< mater hy ?\n< mater",
+    "origine": "‏? יה mater <\n< mater",
     "explication": "la mère Iah\ncomme une mère (Isidore)",
     "id": "mati-re"
   },
@@ -8211,7 +8211,7 @@
     "lettre": "M",
     "mot_fr": "MER",
     "mot_autre": "mare",
-    "origine": "< amarus\n< rm",
+    "origine": "< amarus\n‏מר <",
     "explication": "mer, bassin, récipient, car ses eaux sont\namères (Isidore)\namer",
     "id": "mer"
   },
@@ -8291,7 +8291,7 @@
     "lettre": "M",
     "mot_fr": "MESSIE",
     "mot_autre": "‏משיח\nΜεσσίας",
-    "origine": "comme χριστός\nμέσος σιώς ύασις\nmissa ύα\nmissa hy",
+    "origine": "comme χριστός\nμέσος σιώς ύασις\nmissa ύα\n‏יה missa",
     "explication": "l'oint, le Christ\nen hébreu, même valeur numérique que ,\n>xn\nserpent (358) (Homère, Beya, p. 803)\nDieu au milieu des êtres, qui opère leur salut\nactuel en le vivifiant\nessence vive et vivifiante du feu solaire\nenvoyé par radiation aux substances ; unique\ncar ce principe de vie envoyé sur la terre par le\nTrès-Haut est l'animateur universel de tous les\ndifférents êtres créés\nvoix envoyée, Verbe, donc verbe divin dans la\npersonne de Dieu le Fils\némanation divine (La Vérité, II, p. 10)",
     "id": "messie"
   },
@@ -8515,7 +8515,7 @@
     "lettre": "M",
     "mot_fr": "MOÏSE",
     "mot_autre": "‏משה\nΜωυσάς, Μωσεύς\nΜωσάς\nMoyse",
-    "origine": "< ‏משה\n= ‏מששי\n‏שה - ym\nμῶ, ῦσει, άσα εΰσω\nμε çsί άσε\nΜοῦσα",
+    "origine": "< ‏משה\n= ‏מששי\n‏מי - ‏שה\nμῶ, ῦσει, άσα εΰσω\nμε çsί άσε\nΜοῦσα",
     "explication": "tirer de, faire sortir, car il a été sauvé des eaux\nnom donné par la fille du pharaon, d'origine\négyptienne ; même signification\nqui est l'agneau, le chevreau, le mouton ?\nje suis Cupidon qui ai envoyé et qui dois\nenflammer celui qui pleuvra\nmusicien qui a délecté les oreilles du petit\nCupidon (La Vérité, II, p. 131 et 172)\nMuse",
     "id": "mo-se"
   },
@@ -8627,7 +8627,7 @@
     "lettre": "M",
     "mot_fr": "MORT",
     "mot_autre": "mors\nνεκρός",
-    "origine": "< amarus\n< morsus\nnh - κάρ\n? μαρμαίρω\nracine mar",
+    "origine": "< amarus\n< morsus\n‏κάρ - הנ\n? μαρμαίρω\nracine mar",
     "explication": "car la mort est amère (Isidore)\ncar on a mordu un fruit prohibé (Isidore)\nsans cœur, sans esprit, sans destin\nbriller, rayonner, car on dit en français « feu\nuntel »\nconsumer",
     "id": "mort"
   },
@@ -8938,8 +8938,8 @@
   {
     "lettre": "N",
     "mot_fr": "NOÉ",
-    "mot_autre": "xn\nΝῶε",
-    "origine": "inverse de ]x\narabe : nouh\nνῷ ἕων",
+    "mot_autre": "‏נח\nΝῶε",
+    "origine": "‏חם de inverse\narabe : nouh\nνῷ ἕων",
     "explication": "anagramme de « grâce »\nesprit du nouveau\nl'être qui envoie à l'arbre de la science du bien\net du mal (La Vérité, I, p. 298)",
     "id": "no"
   },
@@ -9595,7 +9595,7 @@
     "lettre": "P",
     "mot_fr": "PÂQUES",
     "mot_autre": "‏פצח\nΠάσχα",
-    "origine": "xc yp\nπατέρος σχάσεις\nπάσχω",
+    "origine": "‏פי צח\nπατέρος σχάσεις\nπάσχω",
     "explication": "le passage\nla bouche qui parle\nles fragments du père, qui doivent lui\nconstituer un fils (La Vérité, II, p. 219)\nsouffrir",
     "id": "p-ques"
   },
@@ -10059,7 +10059,7 @@
     "lettre": "P",
     "mot_fr": "PHOQUE",
     "mot_autre": "",
-    "origine": "!vp",
+    "origine": "‏פשך",
     "explication": "tituber, vaciller, être instable ; ces animaux\nont en effet une démarche peu gracieuse (FP\np. 34)",
     "id": "phoque"
   },
@@ -10939,7 +10939,7 @@
     "lettre": "Q",
     "mot_fr": "QUILLE",
     "mot_autre": "τρόπις",
-    "origine": "kegil (vieux ht all.)\nquiller\n< τρέπω",
+    "origine": "‏all.) טה (vieux kegil\nquiller\n< τρέπω",
     "explication": "pilier, poteau\nremettre debout\nquille ou carène d’un navire (carène : partie\nimmergée)\ntourner",
     "id": "quille"
   },
@@ -10955,7 +10955,7 @@
     "lettre": "R",
     "mot_fr": "RABBIN",
     "mot_autre": "",
-    "origine": "br",
+    "origine": "‏רב",
     "explication": "multiplier ; les rabbins sont ceux en qui s’est\nmultipliée la torah (FP, p. 255)",
     "id": "rabbin"
   },
@@ -11587,7 +11587,7 @@
     "lettre": "S",
     "mot_fr": "SACRIFIER",
     "mot_autre": "ῥέζω",
-    "origine": "? ῥέ - zw",
+    "origine": "‏וז - ῥέ ?",
     "explication": "? faire couler la vie",
     "id": "sacrifier"
   },
@@ -12635,7 +12635,7 @@
     "lettre": "T",
     "mot_fr": "TARDEMAH",
     "mot_autre": "‏טרדמה\nεκστασις",
-    "origine": ",dr\n‏הרד tm\n‏dr מטה\n‏td מרה\n‏מדט rh",
+    "origine": ",dr\n‏מט ‏הרד\n‏dr מטה\n‏td מרה\n‏הר ‏מדט",
     "explication": "dormir profondément\nvaleur numérique : 649 (donc 19)\nanagrammes possibles :\n« il fit descendre la mort »\n« descends vers la mort »\n« jugement (religion) de l'amer »\n« la mesure de la montagne ».\nsortir hors de ; extase",
     "id": "tardemah"
   },
@@ -13291,7 +13291,7 @@
     "lettre": "U",
     "mot_fr": "URINE",
     "mot_autre": "urina\noâron",
-    "origine": "aurina <aurum\n< urere\n< ex renibus\negeritur\nsanskrit : vâri\nουρέω\nlié à ουρά\net ώρρος\n< ὁρρωδέω\n#ορσέω\napparenté à : ἕρση\nουρανός",
+    "origine": "aurina <aurum\n< urere\n< ex renibus\negeritur\nsanskrit : vâri\nουρέω\nlié à ουρά\net ώρρος\n< ὁρρωδέω\nὁρσέω\napparenté à : ἕρση\nουρανός",
     "explication": "qui a la couleur de l'or (Robert)\nelle brûle (Isidore)\nelle sort des reins (Isidore)\neau\nuriner\nqueue, sexe\nsacrum, croupion\nfrémir, avoir horreur (le sacrum est le lieu de\nla crainte)\npleuvoir (Chantraine)\nrosée, goutte de rosée, jeune agneau frais à la\nrosée\nle ciel",
     "id": "urine"
   },
@@ -13547,7 +13547,7 @@
     "lettre": "V",
     "mot_fr": "VERTU",
     "mot_autre": "ἀρετή",
-    "origine": "‏רעש\n‏סעש (lié à vervex,\nberbex)\n#arj\nἄρσην",
+    "origine": "‏רעש\n‏סעש (lié à vervex,\nberbex)\nἁρς\nἄρσην",
     "explication": "lié à l’homme, à la force mâle\nbrebis, lié aussi au mâle\nverser\nle mâle",
     "id": "vertu"
   },
@@ -13619,7 +13619,7 @@
     "lettre": "V",
     "mot_fr": "VIERGE",
     "mot_autre": "virgo",
-    "origine": "< #ηριγόνη\n< ἠριγένεια\n< ᾳρ/εαρ -\nγίγνομαι\n< εγείρω\n< viridior aetas\n< virago\n< virum agit",
+    "origine": "< ἡριγόνη\n< ἠριγένεια\n< ᾳρ/εαρ -\nγίγνομαι\n< εγείρω\n< viridior aetas\n< virago\n< virum agit",
     "explication": "fille du matin, simplicité toute droite, semence\nqui se lève\nfille de la force qui se dresse, celle qui naît tôt\nmatin, force qui se dresse, printemps, sève,\nsuc, sang ; + naître, devenir\ns’éveiller, éveiller\nâge plus vert (Isidore)\nnon corrompue car elle ignore la passion\nféminine (Isidore)\nqui joue le rôle de l’homme (Isidore)\ncf. saint, séparé",
     "id": "vierge"
   },
@@ -13779,7 +13779,7 @@
     "lettre": "V",
     "mot_fr": "VOLUPTÉ",
     "mot_autre": "voluptas",
-    "origine": "< velle\n< #ελπίς",
+    "origine": "< velle\n< ἑλπίς",
     "explication": "vouloir\nespoir",
     "id": "volupt"
   },
@@ -13803,7 +13803,7 @@
     "lettre": "V",
     "mot_fr": "VULCAIN",
     "mot_autre": "Vulcanus\nsurnom : Mulciber",
-    "origine": "vi – volentia\nfulget\n< fulgor\n< fulmen (foudre)\n< volans candor\nquasi volicanus\narabe : w\nww\nalkhan\n< mulcere",
+    "origine": "vi – volentia\nfulget\n< fulgor\n< fulmen (foudre)\n< volans candor\nquasi volicanus\narabe : w\n‏וו\nalkhan\n< mulcere",
     "explication": "il agit avec force et volonté (Varron)\nle feu par son éclat, lance des éclairs (Varron,\nV, 70)\ncandeur, feu volant, chaleur volante (Isidore)\nil vole à travers l'air (Servius)\n(« Achille ressuscité »)\npur feu\nfeu du pur feu\nsouverain, monarque ; donc le feu du pur feu\nqui nous anime est notre monarque universel ;\nles Arabes et les Égyptiens ont donné ce nom\nau Dieu incréé, et les Phéaciens l'ont repris. Le\npremier temple du royaume d’Égypte était\ndédié à Vulcain\n(La Vérité, I, p. 63)\nadoucir, apaiser\ncf. Héphaïstos",
     "id": "vulcain"
   },
