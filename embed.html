@@ -16,7 +16,7 @@
       --muted:   #777;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; }
+    html, body { height: auto; }
     body { font-family: Georgia, serif; background: var(--bg); color: var(--navy); }
     button { cursor: pointer; }
 
@@ -321,8 +321,10 @@
 
   /* Auto-resize : notifie la hauteur au parent (site ARCA) */
   function notifyHeight() {
-    var h = document.body.scrollHeight;
-    window.parent.postMessage({ type: "pa-resize", height: h }, "https://arca-revue.com");
+    // Mesurer le contenu réel (pas scrollHeight qui ne rétrécit pas)
+    var h = document.body.getBoundingClientRect().height ||
+            document.documentElement.offsetHeight;
+    window.parent.postMessage({ type: "pa-resize", height: Math.ceil(h) + 20 }, "https://arca-revue.com");
   }
 
   function init() {
