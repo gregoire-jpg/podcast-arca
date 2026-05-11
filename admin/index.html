@@ -219,6 +219,9 @@
     }
 
     /* ── Citations du Jour ── */
+    .cit-tab { padding: 8px 14px; background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); font: .78em/1 Arial; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; transition: color .2s, border-color .2s; }
+    .cit-tab:hover { color: var(--navy); }
+    .cit-tab.on { color: var(--navy); border-bottom-color: var(--gold); font-weight: bold; }
     .cit-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin-bottom: 10px; transition: box-shadow .15s; }
     .cit-card:hover { box-shadow: 0 2px 12px rgba(45,52,97,.08); }
     .cit-card.featured { border-left: 3px solid var(--gold); }
@@ -613,10 +616,10 @@
       <span style="font:.75em/1 Arial;color:var(--muted);margin-left:12px" id="cit-counter"></span>
     </div>
     <div class="docs-nav-actions">
-      <button class="nav-btn cit-tab on" data-cit="citations" style="padding:8px 14px;font-size:.78em;border-bottom:2px solid var(--gold)">Citations</button>
-      <button class="nav-btn cit-tab" data-cit="auteurs" style="padding:8px 14px;font-size:.78em">Auteurs</button>
-      <button class="nav-btn cit-tab" data-cit="inscrits" style="padding:8px 14px;font-size:.78em">Inscrits</button>
-      <button class="nav-btn cit-tab" data-cit="stats" style="padding:8px 14px;font-size:.78em">Statistiques</button>
+      <button class="cit-tab on" data-cit="citations">Citations</button>
+      <button class="cit-tab" data-cit="auteurs">Auteurs</button>
+      <button class="cit-tab" data-cit="inscrits">Inscrits</button>
+      <button class="cit-tab" data-cit="stats">Statistiques</button>
     </div>
   </div>
 
@@ -1945,13 +1948,9 @@ function citPopulateAuteursSelect() {
 /* ── Sous-onglets ── */
 document.querySelectorAll('.cit-tab').forEach(function(b) {
   b.addEventListener('click', function() {
-    document.querySelectorAll('.cit-tab').forEach(function(x) {
-      x.classList.remove('on');
-      x.style.borderBottom = '2px solid transparent';
-    });
+    document.querySelectorAll('.cit-tab').forEach(function(x) { x.classList.remove('on'); });
     document.querySelectorAll('.cit-subpanel').forEach(function(x) { x.style.display = 'none'; });
     this.classList.add('on');
-    this.style.borderBottom = '2px solid var(--gold)';
     var sub = this.dataset.cit;
     $('cit-sub-' + sub).style.display = 'block';
     if (sub === 'inscrits') citLoadInscrits();
