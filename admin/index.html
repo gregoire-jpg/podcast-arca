@@ -217,6 +217,30 @@
       .ep-inner { flex-direction: column; }
       .ep-thumb { width: 100%; height: 140px; }
     }
+
+    /* ── Citations du Jour ── */
+    .cit-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin-bottom: 10px; transition: box-shadow .15s; }
+    .cit-card:hover { box-shadow: 0 2px 12px rgba(45,52,97,.08); }
+    .cit-card.featured { border-left: 3px solid var(--gold); }
+    .cit-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
+    .cit-text { font: italic .98em/1.55 Georgia; color: var(--navy); margin-bottom: 4px; }
+    .cit-text.complement { color: var(--muted); font-size: .92em; padding-top: 6px; margin-top: 6px; border-top: 1px dashed var(--border); }
+    .cit-meta { display: flex; gap: 12px; font: .78em/1 Arial; color: var(--muted); align-items: center; flex-wrap: wrap; margin-top: 8px; }
+    .cit-meta .cit-auteur { color: var(--navy); font-weight: bold; letter-spacing: .5px; }
+    .cit-meta .cit-ref { font-style: italic; color: var(--gold); }
+    .cit-actions { display: flex; gap: 4px; align-items: center; }
+    .cit-icon-btn { background: none; border: none; color: var(--muted); padding: 4px 8px; cursor: pointer; font-size: 1.1em; transition: color .15s; }
+    .cit-icon-btn:hover { color: var(--navy); }
+    .cit-icon-btn.del:hover { color: var(--red); }
+    .cit-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: .7em; letter-spacing: 1px; text-transform: uppercase; font-weight: bold; }
+    .cit-badge.gold { background: rgba(200,160,96,.15); color: #8a6d2f; }
+    .cit-badge.green { background: rgba(39,174,96,.15); color: var(--green); }
+    .cit-badge.gray { background: var(--bg); color: var(--muted); }
+    .cit-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
+    .cit-stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 22px; text-align: center; }
+    .cit-stat-value { font: bold 2.2em/1 Georgia; color: var(--navy); }
+    .cit-stat-label { font: .75em/1 Arial; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+    .cit-stats-section { font: .8em/1 Arial; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
   </style>
 </head>
 <body>
@@ -243,6 +267,7 @@
         <button class="nav-btn"    data-panel="docs">Documentation</button>
         <button class="nav-btn"    data-panel="glossaire">Glossaire</button>
         <button class="nav-btn"    data-panel="dictionnaire">Dictionnaire</button>
+        <button class="nav-btn"    data-panel="citations">Citations du Jour</button>
       </nav>
     </div>
     <button class="btn-logout" id="btn-logout">Déconnexion</button>
@@ -576,6 +601,146 @@
     <div class="confirm-btns">
       <button class="confirm-cancel" id="confirm-cancel">Annuler</button>
       <button class="confirm-ok"     id="confirm-ok">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CITATIONS DU JOUR ══ -->
+<div class="panel" id="panel-citations">
+  <div class="docs-nav">
+    <div class="docs-bc">
+      <span class="docs-bc-cur">Citations du Jour</span>
+      <span style="font:.75em/1 Arial;color:var(--muted);margin-left:12px" id="cit-counter"></span>
+    </div>
+    <div class="docs-nav-actions">
+      <button class="nav-btn cit-tab on" data-cit="citations" style="padding:8px 14px;font-size:.78em;border-bottom:2px solid var(--gold)">Citations</button>
+      <button class="nav-btn cit-tab" data-cit="auteurs" style="padding:8px 14px;font-size:.78em">Auteurs</button>
+      <button class="nav-btn cit-tab" data-cit="inscrits" style="padding:8px 14px;font-size:.78em">Inscrits</button>
+      <button class="nav-btn cit-tab" data-cit="stats" style="padding:8px 14px;font-size:.78em">Statistiques</button>
+    </div>
+  </div>
+
+  <!-- Sous-panel Citations -->
+  <div class="cit-subpanel on" id="cit-sub-citations">
+    <div class="toolbar" style="margin-bottom:18px">
+      <div class="t-row t-filter">
+        <span class="t-label">Filtrer</span>
+        <input class="t-input" type="text" id="cit-search" placeholder="Rechercher dans les citations…" style="flex:1;min-width:180px">
+        <select class="t-select" id="cit-filter-auteur"><option value="">Tous les auteurs</option></select>
+        <select class="t-select" id="cit-filter-avant">
+          <option value="">Toutes</option>
+          <option value="true">En avant</option>
+          <option value="false">Standard</option>
+        </select>
+        <span class="t-spacer"></span>
+        <button class="btn btn-gold" id="cit-add">+ Ajouter une citation</button>
+      </div>
+    </div>
+    <div id="cit-list"><div class="empty">Chargement…</div></div>
+  </div>
+
+  <!-- Sous-panel Auteurs -->
+  <div class="cit-subpanel" id="cit-sub-auteurs" style="display:none">
+    <div class="toolbar" style="margin-bottom:18px">
+      <div class="t-row t-filter">
+        <span class="t-label">Auteurs</span>
+        <span class="t-spacer"></span>
+        <button class="btn btn-gold" id="cit-add-auteur">+ Ajouter un auteur</button>
+      </div>
+    </div>
+    <div id="cit-auteurs-list"><div class="empty">Chargement…</div></div>
+  </div>
+
+  <!-- Sous-panel Inscrits -->
+  <div class="cit-subpanel" id="cit-sub-inscrits" style="display:none">
+    <div class="toolbar" style="margin-bottom:18px">
+      <div class="t-row t-filter">
+        <span class="t-label">Inscrits e-mail</span>
+        <span class="t-spacer"></span>
+        <button class="btn btn-navy" id="cit-export-csv">📥 Exporter CSV</button>
+      </div>
+    </div>
+    <div id="cit-inscrits-list"><div class="empty">Chargement…</div></div>
+  </div>
+
+  <!-- Sous-panel Stats -->
+  <div class="cit-subpanel" id="cit-sub-stats" style="display:none">
+    <div id="cit-stats-content"><div class="empty">Chargement…</div></div>
+  </div>
+</div>
+
+<!-- Modale citation -->
+<div class="confirm-mask" id="cit-mask" style="display:none">
+  <div class="confirm-box" style="max-width:640px;text-align:left;max-height:88vh;overflow-y:auto">
+    <h3 style="margin-bottom:16px;color:var(--navy)" id="cit-mask-title">Nouvelle citation</h3>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">
+      <div>
+        <label class="dico-lbl">Texte (colonne gauche) *</label>
+        <textarea id="cit-f-texte" rows="3" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.95em/1.5 Georgia;box-sizing:border-box;resize:vertical;font-style:italic"></textarea>
+      </div>
+      <div>
+        <label class="dico-lbl">Texte complément (colonne droite, optionnel)</label>
+        <textarea id="cit-f-complement" rows="3" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.95em/1.5 Georgia;box-sizing:border-box;resize:vertical;font-style:italic"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label class="dico-lbl">Auteur *</label>
+          <select id="cit-f-auteur" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box"></select>
+        </div>
+        <div>
+          <label class="dico-lbl">Référence</label>
+          <input type="text" id="cit-f-reference" placeholder="ex: Livre I, verset 2" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
+        </div>
+      </div>
+      <div>
+        <label class="dico-lbl">Source (livre, recueil…)</label>
+        <input type="text" id="cit-f-source" placeholder="ex: Le Message Retrouvé" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
+      </div>
+      <div style="display:grid;grid-template-columns:120px 1fr 1fr;gap:12px;align-items:end">
+        <div>
+          <label class="dico-lbl">Poids admin</label>
+          <input type="number" min="0" id="cit-f-poids" value="1" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding-bottom:8px">
+          <input type="checkbox" id="cit-f-avant" style="width:18px;height:18px;accent-color:var(--gold)">
+          <span style="font:.85em/1 Arial">Mettre en avant</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding-bottom:8px">
+          <input type="checkbox" id="cit-f-active" checked style="width:18px;height:18px;accent-color:var(--green)">
+          <span style="font:.85em/1 Arial">Active</span>
+        </label>
+      </div>
+    </div>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" id="cit-mask-cancel">Annuler</button>
+      <button class="confirm-ok" id="cit-mask-save" style="background:var(--gold)">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modale auteur -->
+<div class="confirm-mask" id="cit-auteur-mask" style="display:none">
+  <div class="confirm-box" style="max-width:480px;text-align:left">
+    <h3 style="margin-bottom:16px;color:var(--navy)" id="cit-auteur-title">Nouvel auteur</h3>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">
+      <div>
+        <label class="dico-lbl">Nom *</label>
+        <input type="text" id="cit-af-nom" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.95em/1 Arial;box-sizing:border-box">
+      </div>
+      <div style="display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:end">
+        <div>
+          <label class="dico-lbl">Poids</label>
+          <input type="number" min="0" id="cit-af-poids" value="1" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding-bottom:8px">
+          <input type="checkbox" id="cit-af-avant" style="width:18px;height:18px;accent-color:var(--gold)">
+          <span style="font:.85em/1 Arial">Mettre en avant</span>
+        </label>
+      </div>
+    </div>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" id="cit-auteur-cancel">Annuler</button>
+      <button class="confirm-ok" id="cit-auteur-save" style="background:var(--gold)">Enregistrer</button>
     </div>
   </div>
 </div>
@@ -1709,6 +1874,363 @@ $('btn-save-dico').addEventListener('click', function(){
     toast('Dictionnaire sauvegardé ! Netlify redéploie dans ~30s.');
     setTimeout(function(){ btn.textContent='💾 Sauvegarder'; btn.classList.remove('saved'); }, 3000);
   });
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   CITATIONS DU JOUR — module isolé
+   Backend : projet Supabase erp-editionsbeya (schéma "citations")
+   Toutes les variables sous le namespace CIT pour ne rien casser dans Arca.
+═══════════════════════════════════════════════════════════════════ */
+var CIT = {
+  url: 'https://fsbyoxotsmmzejefiaqg.supabase.co',
+  anon: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYnlveG90c21temVqZWZpYXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNjM2NTMsImV4cCI6MjA5MjkzOTY1M30.WeggZAYy3N6hZp6vLQyQWoi_55KHPdhhFcA9P-MO3UA',
+  service: null,
+  loaded: false,
+  citations: [], auteurs: [], inscrits: [],
+  curEditId: null, curEditAuteurId: null,
+};
+
+function citHeaders(write) {
+  var key = (write && CIT.service) ? CIT.service : CIT.anon;
+  return {
+    'apikey': key, 'Authorization': 'Bearer ' + key,
+    'Content-Type': 'application/json',
+    'Accept-Profile': 'citations', 'Content-Profile': 'citations',
+  };
+}
+function citApi(path, opts) {
+  opts = opts || {};
+  var write = opts.write !== false;
+  return fetch(CIT.url + '/rest/v1' + path, {
+    method: opts.method || 'GET',
+    headers: Object.assign(citHeaders(write), opts.headers || {}),
+    body: opts.body,
+  }).then(function(r) {
+    if (!r.ok) return r.text().then(function(t) { throw new Error(r.status + ' ' + t); });
+    return r.text().then(function(t) { return t ? JSON.parse(t) : null; });
+  });
+}
+function citEnsureService() {
+  if (CIT.service) return true;
+  CIT.service = localStorage.getItem('cit_service_key');
+  if (CIT.service) return true;
+  var k = prompt('Première utilisation de l\'admin Citations.\nColle ici la service_role key Supabase du projet erp-editionsbeya (mémorisée localement) :');
+  if (!k) return false;
+  CIT.service = k.trim();
+  localStorage.setItem('cit_service_key', CIT.service);
+  return true;
+}
+
+/* ── Chargement initial des données ── */
+function citLoad() {
+  if (CIT.loaded) return Promise.resolve();
+  return Promise.all([
+    citApi('/auteurs?select=*&order=nom.asc', { write: false }),
+    citApi('/citations?select=*,auteurs(nom)&order=id.desc', { write: false }),
+  ]).then(function(res) {
+    CIT.auteurs = res[0]; CIT.citations = res[1];
+    CIT.loaded = true;
+    citPopulateAuteursSelect();
+    citRender();
+    citRenderAuteurs();
+  }).catch(function(e) { toast('Erreur chargement Citations: ' + e.message, 'err'); });
+}
+
+function citPopulateAuteursSelect() {
+  var sel = $('cit-filter-auteur');
+  sel.innerHTML = '<option value="">Tous les auteurs</option>' +
+    CIT.auteurs.map(function(a) { return '<option value="' + a.id + '">' + esc(a.nom) + '</option>'; }).join('');
+}
+
+/* ── Sous-onglets ── */
+document.querySelectorAll('.cit-tab').forEach(function(b) {
+  b.addEventListener('click', function() {
+    document.querySelectorAll('.cit-tab').forEach(function(x) {
+      x.classList.remove('on');
+      x.style.borderBottom = '2px solid transparent';
+    });
+    document.querySelectorAll('.cit-subpanel').forEach(function(x) { x.style.display = 'none'; });
+    this.classList.add('on');
+    this.style.borderBottom = '2px solid var(--gold)';
+    var sub = this.dataset.cit;
+    $('cit-sub-' + sub).style.display = 'block';
+    if (sub === 'inscrits') citLoadInscrits();
+    if (sub === 'stats') citLoadStats();
+  });
+});
+
+/* ── Render Citations ── */
+function citRender() {
+  var box = $('cit-list');
+  var search = ($('cit-search').value || '').toLowerCase();
+  var fa = $('cit-filter-auteur').value;
+  var fav = $('cit-filter-avant').value;
+  var list = CIT.citations.filter(function(c) {
+    if (search && c.texte.toLowerCase().indexOf(search) === -1 && (c.texte_complement || '').toLowerCase().indexOf(search) === -1) return false;
+    if (fa && c.auteur_id !== parseInt(fa)) return false;
+    if (fav === 'true' && !c.mise_en_avant) return false;
+    if (fav === 'false' && c.mise_en_avant) return false;
+    return true;
+  });
+  $('cit-counter').textContent = list.length + ' citation' + (list.length > 1 ? 's' : '');
+  if (list.length === 0) { box.innerHTML = '<div class="empty">Aucune citation</div>'; return; }
+  box.innerHTML = list.map(function(c) {
+    return '<div class="cit-card' + (c.mise_en_avant ? ' featured' : '') + '">' +
+      '<div class="cit-row">' +
+        '<div style="flex:1">' +
+          '<div class="cit-text">' + esc(c.texte) + '</div>' +
+          (c.texte_complement ? '<div class="cit-text complement">' + esc(c.texte_complement) + '</div>' : '') +
+          '<div class="cit-meta">' +
+            '<span class="cit-auteur">' + esc((c.auteurs && c.auteurs.nom) || '—') + '</span>' +
+            (c.reference ? '<span class="cit-ref">' + esc(c.reference) + '</span>' : '') +
+            (c.source ? '<span>' + esc(c.source) + '</span>' : '') +
+            (c.mise_en_avant ? '<span class="cit-badge gold">★ En avant</span>' : '') +
+            (!c.active ? '<span class="cit-badge gray">Inactive</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="cit-actions">' +
+          '<button class="cit-icon-btn" data-cit-edit="' + c.id + '" title="Modifier">✎</button>' +
+          '<button class="cit-icon-btn del" data-cit-del="' + c.id + '" title="Supprimer">✕</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  box.querySelectorAll('[data-cit-edit]').forEach(function(b) {
+    b.addEventListener('click', function() { citOpen(parseInt(this.dataset.citEdit)); });
+  });
+  box.querySelectorAll('[data-cit-del]').forEach(function(b) {
+    b.addEventListener('click', function() { citDelete(parseInt(this.dataset.citDel)); });
+  });
+}
+['cit-search', 'cit-filter-auteur', 'cit-filter-avant'].forEach(function(id) {
+  $(id).addEventListener('input', citRender);
+  $(id).addEventListener('change', citRender);
+});
+
+/* ── Modale citation ── */
+function citOpen(id) {
+  if (!citEnsureService()) return;
+  CIT.curEditId = id;
+  var c = id ? CIT.citations.find(function(x) { return x.id === id; }) : { texte:'', texte_complement:'', reference:'', source:'', auteur_id:null, mise_en_avant:false, poids_admin:1, active:true };
+  $('cit-mask-title').textContent = id ? 'Modifier la citation' : 'Nouvelle citation';
+  var sel = $('cit-f-auteur');
+  sel.innerHTML = '<option value="">— Choisir un auteur —</option>' +
+    CIT.auteurs.map(function(a) { return '<option value="' + a.id + '"' + (c.auteur_id === a.id ? ' selected' : '') + '>' + esc(a.nom) + '</option>'; }).join('');
+  $('cit-f-texte').value = c.texte || '';
+  $('cit-f-complement').value = c.texte_complement || '';
+  $('cit-f-reference').value = c.reference || '';
+  $('cit-f-source').value = c.source || '';
+  $('cit-f-poids').value = c.poids_admin != null ? c.poids_admin : 1;
+  $('cit-f-avant').checked = !!c.mise_en_avant;
+  $('cit-f-active').checked = c.active !== false;
+  $('cit-mask').style.display = 'flex';
+}
+$('cit-mask-cancel').addEventListener('click', function() { $('cit-mask').style.display = 'none'; });
+$('cit-mask-save').addEventListener('click', function() {
+  var body = {
+    texte: $('cit-f-texte').value.trim(),
+    texte_complement: $('cit-f-complement').value.trim() || null,
+    reference: $('cit-f-reference').value.trim() || null,
+    source: $('cit-f-source').value.trim() || null,
+    auteur_id: parseInt($('cit-f-auteur').value) || null,
+    poids_admin: parseInt($('cit-f-poids').value) || 1,
+    mise_en_avant: $('cit-f-avant').checked,
+    active: $('cit-f-active').checked,
+  };
+  if (!body.texte) { toast('Texte obligatoire', 'err'); return; }
+  if (!body.auteur_id) { toast('Auteur obligatoire', 'err'); return; }
+  var p = CIT.curEditId
+    ? citApi('/citations?id=eq.' + CIT.curEditId, { method: 'PATCH', body: JSON.stringify(body) })
+    : citApi('/citations', { method: 'POST', body: JSON.stringify(body) });
+  p.then(function() {
+    return citApi('/citations?select=*,auteurs(nom)&order=id.desc', { write: false });
+  }).then(function(rows) {
+    CIT.citations = rows; citRender();
+    $('cit-mask').style.display = 'none';
+    toast('Citation enregistrée');
+  }).catch(function(e) { toast('Erreur: ' + e.message, 'err'); });
+});
+function citDelete(id) {
+  if (!citEnsureService()) return;
+  dialog('Supprimer cette citation ?', 'Cette action est irréversible.', function() {
+    citApi('/citations?id=eq.' + id, { method: 'DELETE' }).then(function() {
+      CIT.citations = CIT.citations.filter(function(c) { return c.id !== id; });
+      citRender();
+      toast('Citation supprimée');
+    }).catch(function(e) { toast('Erreur: ' + e.message, 'err'); });
+  }, { label: 'Supprimer', color: 'var(--red)' });
+}
+$('cit-add').addEventListener('click', function() { citOpen(null); });
+
+/* ── Auteurs ── */
+function citRenderAuteurs() {
+  var box = $('cit-auteurs-list');
+  if (CIT.auteurs.length === 0) { box.innerHTML = '<div class="empty">Aucun auteur</div>'; return; }
+  box.innerHTML = CIT.auteurs.map(function(a) {
+    var nbCit = CIT.citations.filter(function(c) { return c.auteur_id === a.id; }).length;
+    return '<div class="cit-card' + (a.mise_en_avant ? ' featured' : '') + '">' +
+      '<div class="cit-row">' +
+        '<div style="flex:1">' +
+          '<div style="font:1.1em/1.2 Georgia;color:var(--navy);font-weight:bold">' + esc(a.nom) + '</div>' +
+          '<div class="cit-meta">' +
+            '<span>' + nbCit + ' citation' + (nbCit > 1 ? 's' : '') + '</span>' +
+            '<span>Poids ' + a.poids_admin + '</span>' +
+            (a.mise_en_avant ? '<span class="cit-badge gold">★ En avant</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="cit-actions">' +
+          '<button class="cit-icon-btn" data-aut-edit="' + a.id + '" title="Modifier">✎</button>' +
+          '<button class="cit-icon-btn del" data-aut-del="' + a.id + '" title="Supprimer">✕</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  box.querySelectorAll('[data-aut-edit]').forEach(function(b) {
+    b.addEventListener('click', function() { citAuteurOpen(parseInt(this.dataset.autEdit)); });
+  });
+  box.querySelectorAll('[data-aut-del]').forEach(function(b) {
+    b.addEventListener('click', function() { citAuteurDelete(parseInt(this.dataset.autDel)); });
+  });
+}
+function citAuteurOpen(id) {
+  if (!citEnsureService()) return;
+  CIT.curEditAuteurId = id;
+  var a = id ? CIT.auteurs.find(function(x) { return x.id === id; }) : { nom:'', mise_en_avant:false, poids_admin:1 };
+  $('cit-auteur-title').textContent = id ? 'Modifier l\'auteur' : 'Nouvel auteur';
+  $('cit-af-nom').value = a.nom || '';
+  $('cit-af-poids').value = a.poids_admin != null ? a.poids_admin : 1;
+  $('cit-af-avant').checked = !!a.mise_en_avant;
+  $('cit-auteur-mask').style.display = 'flex';
+}
+$('cit-auteur-cancel').addEventListener('click', function() { $('cit-auteur-mask').style.display = 'none'; });
+$('cit-auteur-save').addEventListener('click', function() {
+  var body = {
+    nom: $('cit-af-nom').value.trim(),
+    poids_admin: parseInt($('cit-af-poids').value) || 1,
+    mise_en_avant: $('cit-af-avant').checked,
+  };
+  if (!body.nom) { toast('Nom obligatoire', 'err'); return; }
+  var p = CIT.curEditAuteurId
+    ? citApi('/auteurs?id=eq.' + CIT.curEditAuteurId, { method: 'PATCH', body: JSON.stringify(body) })
+    : citApi('/auteurs', { method: 'POST', body: JSON.stringify(body) });
+  p.then(function() {
+    return citApi('/auteurs?select=*&order=nom.asc', { write: false });
+  }).then(function(rows) {
+    CIT.auteurs = rows; citRenderAuteurs(); citPopulateAuteursSelect();
+    $('cit-auteur-mask').style.display = 'none';
+    toast('Auteur enregistré');
+  }).catch(function(e) { toast('Erreur: ' + e.message, 'err'); });
+});
+function citAuteurDelete(id) {
+  if (!citEnsureService()) return;
+  dialog('Supprimer cet auteur ?', 'Toutes les citations de cet auteur seront aussi supprimées.', function() {
+    citApi('/auteurs?id=eq.' + id, { method: 'DELETE' }).then(function() {
+      CIT.auteurs = CIT.auteurs.filter(function(a) { return a.id !== id; });
+      CIT.citations = CIT.citations.filter(function(c) { return c.auteur_id !== id; });
+      citRenderAuteurs(); citRender(); citPopulateAuteursSelect();
+      toast('Auteur supprimé');
+    }).catch(function(e) { toast('Erreur: ' + e.message, 'err'); });
+  }, { label: 'Supprimer', color: 'var(--red)' });
+}
+$('cit-add-auteur').addEventListener('click', function() { citAuteurOpen(null); });
+
+/* ── Inscrits ── */
+function citLoadInscrits() {
+  citApi('/inscrits_email?select=*&order=consentement_at.desc', { write: false }).then(function(rows) {
+    CIT.inscrits = rows;
+    var box = $('cit-inscrits-list');
+    if (rows.length === 0) { box.innerHTML = '<div class="empty">Aucun inscrit pour le moment</div>'; return; }
+    box.innerHTML = rows.map(function(i) {
+      var d = new Date(i.consentement_at).toLocaleDateString('fr-FR');
+      return '<div class="cit-card">' +
+        '<div class="cit-row">' +
+          '<div style="flex:1">' +
+            '<div style="font:1em/1 Arial;color:var(--navy)">' + esc(i.email) + '</div>' +
+            '<div class="cit-meta">' +
+              '<span>Inscrit le ' + d + '</span>' +
+              (i.confirme ? '<span class="cit-badge green">Confirmé</span>' : '<span class="cit-badge gold">En attente</span>') +
+              (i.desinscrit_at ? '<span class="cit-badge gray">Désinscrit</span>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="cit-actions">' +
+            '<button class="cit-icon-btn del" data-ins-del="' + i.id + '" title="Supprimer">✕</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    box.querySelectorAll('[data-ins-del]').forEach(function(b) {
+      b.addEventListener('click', function() {
+        var id = parseInt(this.dataset.insDel);
+        if (!citEnsureService()) return;
+        dialog('Supprimer cet inscrit ?', '', function() {
+          citApi('/inscrits_email?id=eq.' + id, { method: 'DELETE' }).then(function() {
+            CIT.inscrits = CIT.inscrits.filter(function(x) { return x.id !== id; });
+            citLoadInscrits();
+            toast('Inscrit supprimé');
+          }).catch(function(e) { toast('Erreur: ' + e.message, 'err'); });
+        }, { label: 'Supprimer', color: 'var(--red)' });
+      });
+    });
+  }).catch(function(e) { toast('Erreur inscrits: ' + e.message, 'err'); });
+}
+$('cit-export-csv').addEventListener('click', function() {
+  if (!CIT.inscrits.length) { toast('Aucun inscrit à exporter', 'err'); return; }
+  var csv = 'email,confirme,inscrit_le\n' + CIT.inscrits.map(function(i) {
+    return '"' + i.email + '",' + i.confirme + ',' + i.consentement_at;
+  }).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'inscrits_citations.csv'; a.click();
+});
+
+/* ── Stats ── */
+function citLoadStats() {
+  Promise.all([
+    citApi('/citations?select=id', { write: false, headers: { Prefer: 'count=exact' } }),
+    citApi('/auteurs?select=id', { write: false, headers: { Prefer: 'count=exact' } }),
+    citApi('/votes?select=id', { write: false, headers: { Prefer: 'count=exact' } }),
+    citApi('/inscrits_email?select=id&confirme=eq.true', { write: false, headers: { Prefer: 'count=exact' } }),
+    citApi('/v_stats_citations?select=*&order=nb_aime.desc&limit=5', { write: false }),
+    citApi('/v_stats_auteurs?select=*&order=total_aime.desc&limit=5', { write: false }),
+  ]).then(function(r) {
+    var nbCit = r[0].length, nbAut = r[1].length, nbVot = r[2].length, nbIns = r[3].length;
+    var topCit = r[4], topAut = r[5];
+    $('cit-stats-content').innerHTML =
+      '<div class="cit-stats-grid">' +
+        '<div class="cit-stat-card"><div class="cit-stat-value">' + nbCit + '</div><div class="cit-stat-label">Citations</div></div>' +
+        '<div class="cit-stat-card"><div class="cit-stat-value">' + nbAut + '</div><div class="cit-stat-label">Auteurs</div></div>' +
+        '<div class="cit-stat-card"><div class="cit-stat-value">' + nbVot + '</div><div class="cit-stat-label">Votes</div></div>' +
+        '<div class="cit-stat-card"><div class="cit-stat-value">' + nbIns + '</div><div class="cit-stat-label">Inscrits e-mail</div></div>' +
+      '</div>' +
+      '<div class="cit-stats-section">Top citations aimées</div>' +
+      (topCit.length === 0 ? '<div class="empty">Pas encore de votes</div>' : topCit.map(function(c) {
+        return '<div class="cit-card">' +
+          '<div class="cit-text">' + esc(c.texte.slice(0, 200)) + (c.texte.length > 200 ? '…' : '') + '</div>' +
+          '<div class="cit-meta">' +
+            '<span class="cit-auteur">' + esc(c.auteur) + '</span>' +
+            '<span>♡ ' + c.nb_aime + '   ✗ ' + c.nb_pas_aime + '   👁 ' + c.nb_vues + '</span>' +
+          '</div>' +
+        '</div>';
+      }).join('')) +
+      '<div class="cit-stats-section">Top auteurs aimés</div>' +
+      (topAut.length === 0 ? '<div class="empty">Pas encore de votes</div>' : topAut.map(function(a) {
+        return '<div class="cit-card">' +
+          '<div style="font:1.1em/1.2 Georgia;color:var(--navy);font-weight:bold">' + esc(a.nom) + '</div>' +
+          '<div class="cit-meta">' +
+            '<span>' + a.nb_citations + ' citation' + (a.nb_citations > 1 ? 's' : '') + '</span>' +
+            '<span>♡ ' + a.total_aime + '   ✗ ' + a.total_pas_aime + '</span>' +
+          '</div>' +
+        '</div>';
+      }).join(''));
+  }).catch(function(e) { toast('Erreur stats: ' + e.message, 'err'); });
+}
+
+/* ── Hook dans la nav principale Arca pour lazy load ── */
+document.querySelectorAll('.nav-btn').forEach(function(btn) {
+  if (btn.dataset.panel === 'citations') {
+    btn.addEventListener('click', function() { citLoad(); });
+  }
 });
 
 /* ═══════════════════ INIT ═══════════════════ */
