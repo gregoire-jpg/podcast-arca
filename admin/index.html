@@ -270,7 +270,7 @@
         <button class="nav-btn"    data-panel="docs">Documentation</button>
         <button class="nav-btn"    data-panel="glossaire">Glossaire</button>
         <button class="nav-btn"    data-panel="dictionnaire">Dictionnaire</button>
-        <button class="nav-btn"    data-panel="citations">Citations du Jour</button>
+        <button class="nav-btn"    data-panel="citations">Pensées Traditionnelles</button>
       </nav>
     </div>
     <button class="btn-logout" id="btn-logout">Déconnexion</button>
@@ -612,11 +612,11 @@
 <div class="panel" id="panel-citations">
   <div class="docs-nav">
     <div class="docs-bc">
-      <span class="docs-bc-cur">Citations du Jour</span>
+      <span class="docs-bc-cur">Pensées Traditionnelles</span>
       <span style="font:.75em/1 Arial;color:var(--muted);margin-left:12px" id="cit-counter"></span>
     </div>
     <div class="docs-nav-actions">
-      <button class="cit-tab on" data-cit="citations">Citations</button>
+      <button class="cit-tab on" data-cit="citations">Pensées</button>
       <button class="cit-tab" data-cit="auteurs">Auteurs</button>
       <button class="cit-tab" data-cit="annonces">Annonces</button>
       <button class="cit-tab" data-cit="inscrits">Inscrits</button>
@@ -630,7 +630,7 @@
     <div class="toolbar" style="margin-bottom:18px">
       <div class="t-row t-filter">
         <span class="t-label">Filtrer</span>
-        <input class="t-input" type="text" id="cit-search" placeholder="Rechercher dans les citations…" style="flex:1;min-width:180px">
+        <input class="t-input" type="text" id="cit-search" placeholder="Rechercher dans les pensées…" style="flex:1;min-width:180px">
         <select class="t-select" id="cit-filter-auteur"><option value="">Tous les auteurs</option></select>
         <select class="t-select" id="cit-filter-avant">
           <option value="">Toutes</option>
@@ -638,7 +638,7 @@
           <option value="false">Standard</option>
         </select>
         <span class="t-spacer"></span>
-        <button class="btn btn-gold" id="cit-add">+ Ajouter une citation</button>
+        <button class="btn btn-gold" id="cit-add">+ Ajouter une pensée</button>
       </div>
     </div>
     <div id="cit-list"><div class="empty">Chargement…</div></div>
@@ -687,7 +687,7 @@
   <!-- Sous-panel Aperçu mobile -->
   <div class="cit-subpanel" id="cit-sub-preview" style="display:none">
     <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
-      <input type="text" id="prev-url" placeholder="URL de l'app Citations du Jour (http://localhost:8080 par défaut)" style="flex:1;min-width:240px;padding:9px 12px;border:1px solid var(--border);border-radius:6px;background:white;font:.85em/1 Arial">
+      <input type="text" id="prev-url" placeholder="URL de l'app Pensées Traditionnelles (http://localhost:8080 par défaut)" style="flex:1;min-width:240px;padding:9px 12px;border:1px solid var(--border);border-radius:6px;background:white;font:.85em/1 Arial">
       <button class="btn btn-navy" id="prev-load" style="padding:9px 18px">Charger</button>
       <select id="prev-device" style="padding:9px 10px;border:1px solid var(--border);border-radius:6px;background:white;font:.85em/1 Arial">
         <option value="iphone">iPhone (393×852)</option>
@@ -713,10 +713,10 @@
   </div>
 </div>
 
-<!-- Modale citation -->
+<!-- Modale pensée -->
 <div class="confirm-mask" id="cit-mask" style="display:none">
   <div class="confirm-box" style="max-width:640px;text-align:left;max-height:88vh;overflow-y:auto">
-    <h3 style="margin-bottom:16px;color:var(--navy)" id="cit-mask-title">Nouvelle citation</h3>
+    <h3 style="margin-bottom:16px;color:var(--navy)" id="cit-mask-title">Nouvelle pensée</h3>
     <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">
       <div>
         <label class="dico-lbl">Texte (colonne gauche) *</label>
@@ -2171,8 +2171,8 @@ function citRender() {
     if (fav === 'false' && c.mise_en_avant) return false;
     return true;
   });
-  $('cit-counter').textContent = list.length + ' citation' + (list.length > 1 ? 's' : '');
-  if (list.length === 0) { box.innerHTML = '<div class="empty">Aucune citation</div>'; return; }
+  $('cit-counter').textContent = list.length + ' pensée' + (list.length > 1 ? 's' : '');
+  if (list.length === 0) { box.innerHTML = '<div class="empty">Aucune pensée</div>'; return; }
   box.innerHTML = list.map(function(c) {
     return '<div class="cit-card' + (c.mise_en_avant ? ' featured' : '') + '">' +
       '<div class="cit-row">' +
@@ -2211,7 +2211,7 @@ function citOpen(id) {
   if (!citEnsureService()) return;
   CIT.curEditId = id;
   var c = id ? CIT.citations.find(function(x) { return x.id === id; }) : { texte:'', texte_complement:'', reference:'', source:'', auteur_id:null, mise_en_avant:false, poids_admin:1, active:true };
-  $('cit-mask-title').textContent = id ? 'Modifier la citation' : 'Nouvelle citation';
+  $('cit-mask-title').textContent = id ? 'Modifier la pensée' : 'Nouvelle pensée';
   var sel = $('cit-f-auteur');
   sel.innerHTML = '<option value="">— Choisir un auteur —</option>' +
     CIT.auteurs.map(function(a) { return '<option value="' + a.id + '"' + (c.auteur_id === a.id ? ' selected' : '') + '>' + esc(a.nom) + '</option>'; }).join('');
@@ -2246,16 +2246,16 @@ $('cit-mask-save').addEventListener('click', function() {
   }).then(function(rows) {
     CIT.citations = rows; citRender();
     $('cit-mask').style.display = 'none';
-    toast('Citation enregistrée');
+    toast('Pensée enregistrée');
   }).catch(function(e) { toast('Erreur: ' + e.message, 'err'); });
 });
 function citDelete(id) {
   if (!citEnsureService()) return;
-  dialog('Supprimer cette citation ?', 'Cette action est irréversible.', function() {
+  dialog('Supprimer cette pensée ?', 'Cette action est irréversible.', function() {
     citApi('/citations?id=eq.' + id, { method: 'DELETE' }).then(function() {
       CIT.citations = CIT.citations.filter(function(c) { return c.id !== id; });
       citRender();
-      toast('Citation supprimée');
+      toast('Pensée supprimée');
     }).catch(function(e) { toast('Erreur: ' + e.message, 'err'); });
   }, { label: 'Supprimer', color: 'var(--red)' });
 }
@@ -2272,7 +2272,7 @@ function citRenderAuteurs() {
         '<div style="flex:1">' +
           '<div style="font:1.1em/1.2 Georgia;color:var(--navy);font-weight:bold">' + esc(a.nom) + '</div>' +
           '<div class="cit-meta">' +
-            '<span>' + nbCit + ' citation' + (nbCit > 1 ? 's' : '') + '</span>' +
+            '<span>' + nbCit + ' pensée' + (nbCit > 1 ? 's' : '') + '</span>' +
             '<span>Poids ' + a.poids_admin + '</span>' +
             (a.mise_en_avant ? '<span class="cit-badge gold">★ En avant</span>' : '') +
           '</div>' +
@@ -2332,7 +2332,7 @@ $('cit-auteur-save').addEventListener('click', function() {
 });
 function citAuteurDelete(id) {
   if (!citEnsureService()) return;
-  dialog('Supprimer cet auteur ?', 'Toutes les citations de cet auteur seront aussi supprimées.', function() {
+  dialog('Supprimer cet auteur ?', 'Toutes les pensées de cet auteur seront aussi supprimées.', function() {
     citApi('/auteurs?id=eq.' + id, { method: 'DELETE' }).then(function() {
       CIT.auteurs = CIT.auteurs.filter(function(a) { return a.id !== id; });
       CIT.citations = CIT.citations.filter(function(c) { return c.auteur_id !== id; });
@@ -2390,7 +2390,7 @@ $('cit-export-csv').addEventListener('click', function() {
   var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
-  a.href = url; a.download = 'inscrits_citations.csv'; a.click();
+  a.href = url; a.download = 'inscrits_pensees.csv'; a.click();
 });
 
 /* ── Stats ── */
@@ -2409,13 +2409,13 @@ function citLoadStats() {
     var topCit = r[4], topAut = r[5], topEnr = r[6], nbEnr = r[7].length;
     $('cit-stats-content').innerHTML =
       '<div class="cit-stats-grid">' +
-        '<div class="cit-stat-card"><div class="cit-stat-value">' + nbCit + '</div><div class="cit-stat-label">Citations</div></div>' +
+        '<div class="cit-stat-card"><div class="cit-stat-value">' + nbCit + '</div><div class="cit-stat-label">Pensées</div></div>' +
         '<div class="cit-stat-card"><div class="cit-stat-value">' + nbAut + '</div><div class="cit-stat-label">Auteurs</div></div>' +
         '<div class="cit-stat-card"><div class="cit-stat-value">' + nbVot + '</div><div class="cit-stat-label">Votes</div></div>' +
         '<div class="cit-stat-card"><div class="cit-stat-value">' + nbEnr + '</div><div class="cit-stat-label">Enregistrements</div></div>' +
         '<div class="cit-stat-card"><div class="cit-stat-value">' + nbIns + '</div><div class="cit-stat-label">Inscrits e-mail</div></div>' +
       '</div>' +
-      '<div class="cit-stats-section">Top citations enregistrées</div>' +
+      '<div class="cit-stats-section">Top pensées enregistrées</div>' +
       (topEnr.length === 0 || topEnr[0].nb_enregistrements === 0 ? '<div class="empty">Pas encore d\'enregistrements</div>' : topEnr.filter(function(c) { return c.nb_enregistrements > 0; }).map(function(c) {
         return '<div class="cit-card">' +
           '<div class="cit-text">' + esc(c.texte.slice(0, 200)) + (c.texte.length > 200 ? '…' : '') + '</div>' +
@@ -2425,7 +2425,7 @@ function citLoadStats() {
           '</div>' +
         '</div>';
       }).join('')) +
-      '<div class="cit-stats-section">Top citations aimées</div>' +
+      '<div class="cit-stats-section">Top pensées aimées</div>' +
       (topCit.length === 0 ? '<div class="empty">Pas encore de votes</div>' : topCit.map(function(c) {
         return '<div class="cit-card">' +
           '<div class="cit-text">' + esc(c.texte.slice(0, 200)) + (c.texte.length > 200 ? '…' : '') + '</div>' +
@@ -2440,7 +2440,7 @@ function citLoadStats() {
         return '<div class="cit-card">' +
           '<div style="font:1.1em/1.2 Georgia;color:var(--navy);font-weight:bold">' + esc(a.nom) + '</div>' +
           '<div class="cit-meta">' +
-            '<span>' + a.nb_citations + ' citation' + (a.nb_citations > 1 ? 's' : '') + '</span>' +
+            '<span>' + a.nb_citations + ' pensée' + (a.nb_citations > 1 ? 's' : '') + '</span>' +
             '<span>♡ ' + a.total_aime + '   ✗ ' + a.total_pas_aime + '   🔖 ' + (a.total_enregistrements || 0) + '</span>' +
           '</div>' +
         '</div>';
