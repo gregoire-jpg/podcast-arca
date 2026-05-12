@@ -1916,7 +1916,8 @@ $('btn-save-dico').addEventListener('click', function(){
 var CIT = {
   url: 'https://fsbyoxotsmmzejefiaqg.supabase.co',
   anon: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYnlveG90c21temVqZWZpYXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNjM2NTMsImV4cCI6MjA5MjkzOTY1M30.WeggZAYy3N6hZp6vLQyQWoi_55KHPdhhFcA9P-MO3UA',
-  service: null,
+  // Service role key — accès admin via le password Arca uniquement (pas de prompt supplémentaire)
+  service: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYnlveG90c21temVqZWZpYXFnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzM2MzY1MywiZXhwIjoyMDkyOTM5NjUzfQ.Z22_YLAT_jILvYzW82wEQOxp1_ttiAjLI7LTGDN5KOY',
   loaded: false,
   citations: [], auteurs: [], inscrits: [],
   curEditId: null, curEditAuteurId: null,
@@ -1942,16 +1943,7 @@ function citApi(path, opts) {
     return r.text().then(function(t) { return t ? JSON.parse(t) : null; });
   });
 }
-function citEnsureService() {
-  if (CIT.service) return true;
-  CIT.service = localStorage.getItem('cit_service_key');
-  if (CIT.service) return true;
-  var k = prompt('Première utilisation de l\'admin Citations.\nColle ici la service_role key Supabase du projet erp-editionsbeya (mémorisée localement) :');
-  if (!k) return false;
-  CIT.service = k.trim();
-  localStorage.setItem('cit_service_key', CIT.service);
-  return true;
-}
+function citEnsureService() { return true; }
 
 /* ── Chargement initial des données ── */
 function citLoad() {
