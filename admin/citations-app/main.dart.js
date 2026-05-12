@@ -28901,7 +28901,7 @@ m=j?B.hV:l.tf(m.giJ()).a
 b=new A.iw(j?i:i.C(0,A.aV(0,m.a,0)),i,l,m)
 if(i.wG(k))b=A.aC1(i.C(0,B.OI),l)
 s=4
-return A.j($.aAb().Nm(100,"Citation du jour",n,b,B.Mb,B.KS,B.O9,B.afx),$async$qp)
+return A.j($.aAb().Nm(100,"Pens\xe9e du jour",n,b,B.Mb,B.KS,B.O9,B.afx),$async$qp)
 case 4:return A.p(null,r)}})
 return A.q($async$qp,r)},
 On(){var s=0,r=A.r(t.H)
@@ -45663,7 +45663,7 @@ r=A.hm(2)
 q=A.hm(2)
 p=A.bc().$2$color$fontSize(B.C,16)
 l=A.w9(m,o,new A.ph(B.ax,B.a6,B.aM,o,o,o,o,o,o,B.a8,B.a6,o,o,o,o,o,o,o,o,o,o,o,o,o,o,B.Nm,B.m,o,o,B.aM,B.a6,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,o,B.m,B.n),new A.uf(n),A.aGn(new A.eK(4,s,B.pM),o,o,new A.eK(4,r,B.pM),B.N7,!0,new A.eK(4,q,B.Li),A.bc().$2$color$fontSize(B.dK,16),p),B.aM,l,!0)
-return new A.Bn(this.c?B.n_:B.qD,"Citations du Jour",l,!1,o)}}
+return new A.Bn(this.c?B.n_:B.qD,"Pens\xe9es Traditionnelles",l,!1,o)}}
 A.Kc.prototype={}
 A.iW.prototype={}
 A.pk.prototype={
@@ -45752,7 +45752,7 @@ A.dR(p,!1).mm(null)
 return A.p(null,r)}})
 return A.q($async$Hx,r)},
 K(a){return A.CW(null,B.aM,A.kt(!0,this.w?this.a9l():this.a9a(),!0),null)},
-a9a(){var s,r,q,p,o=this,n=null,m=8e5,l=A.fd(n,A.aB("Passer",n,n,n,A.bc().$3$color$fontSize$letterSpacing(B.C,14,1),n,n,n),B.ag,!1,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,o.gajx(),n,n,n,n,n,n),k=A.ds(A.dn(A.aB("Restez inspir\xe9",n,n,n,A.hj().$3$color$fontSize$height(B.a6,36,1.2),n,n,n)),n,A.aV(m,0,0)),j=A.fb(n,n,B.H,B.a8,n,n,n,1,n,n,n,n,40),i=A.dn(A.aB("Recevez chaque matin une citation choisie avec soin, ainsi que les annonces des \xc9ditions Beya et de la Revue Arca.",n,n,n,A.bc().$4$color$fontSize$fontStyle$height(B.C,17,B.aH,1.6),n,n,n)),h=A.aV(m,0,0)
+a9a(){var s,r,q,p,o=this,n=null,m=8e5,l=A.fd(n,A.aB("Passer",n,n,n,A.bc().$3$color$fontSize$letterSpacing(B.C,14,1),n,n,n),B.ag,!1,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,o.gajx(),n,n,n,n,n,n),k=A.ds(A.dn(A.aB("Restez inspir\xe9",n,n,n,A.hj().$3$color$fontSize$height(B.a6,36,1.2),n,n,n)),n,A.aV(m,0,0)),j=A.fb(n,n,B.H,B.a8,n,n,n,1,n,n,n,n,40),i=A.dn(A.aB("Recevez chaque matin une pens\xe9e choisie avec soin, ainsi que les annonces des \xc9ditions Beya et de la Revue Arca.",n,n,n,A.bc().$4$color$fontSize$fontStyle$height(B.C,17,B.aH,1.6),n,n,n)),h=A.aV(m,0,0)
 h=A.ds(i,A.aV(2e5,0,0),h)
 i=A.dn(A.aIk(!1,o.e,B.QA,!1,n,n,B.JP,1,n,n,n,n,n,A.bc().$2$color$fontSize(B.a6,16),B.b2,n,new A.aq8()))
 s=A.aV(m,0,0)
@@ -45770,14 +45770,14 @@ if(l!=null)B.b.N(q,A.b([B.e9,A.aB(l,n,n,n,A.bc().$3$color$fontSize$fontStyle(B.i
 q.push(B.oF)
 q.push(o.a9e())
 return A.Dw(A.aG1(n,A.cF(q,B.az,B.B,B.R,0,B.V),o.d),B.qZ,n,B.aL)},
-a98(){var s=null,r=A.dn(A.dy(A.b([new A.yY(this.f,new A.aq6(this),B.a6,new A.cI(A.hm(2),B.v),new A.aF(B.dK,1,B.t,-1),s),B.a8h,A.dD(A.fd(s,A.aB("J'accepte de recevoir par e-mail la citation du jour ainsi que les annonces des \xc9ditions Beya et de la Revue Arca (nouvelles parutions, \xe9v\xe9nements). Je peux me d\xe9sabonner \xe0 tout moment.",s,s,s,A.bc().$3$color$fontSize$height(B.C,14,1.5),s,s,s),B.ag,!1,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,new A.aq7(this),s,s,s,s,s,s),1,s)],t.p),B.az,B.B,B.R,0,s)),q=A.aV(8e5,0,0)
+a98(){var s=null,r=A.dn(A.dy(A.b([new A.yY(this.f,new A.aq6(this),B.a6,new A.cI(A.hm(2),B.v),new A.aF(B.dK,1,B.t,-1),s),B.a8h,A.dD(A.fd(s,A.aB("J'accepte de recevoir par e-mail la pens\xe9e du jour ainsi que les annonces des \xc9ditions Beya et de la Revue Arca (nouvelles parutions, \xe9v\xe9nements). Je peux me d\xe9sabonner \xe0 tout moment.",s,s,s,A.bc().$3$color$fontSize$height(B.C,14,1.5),s,s,s),B.ag,!1,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,new A.aq7(this),s,s,s,s,s,s),1,s)],t.p),B.az,B.B,B.R,0,s)),q=A.aV(8e5,0,0)
 return A.ds(r,A.aV(5e5,0,0),q)},
 a9e(){var s,r=null,q=A.bc().$3$color$fontSize$height(B.C.dw(0.6),12,1.6),p=A.rn(r,-1,r)
 p.T=new A.aqa(this)
 p=A.cW(r,r,r,r,r,p,r,r,r,B.oT,"politique de confidentialit\xe9")
 s=A.rn(r,-1,r)
 s.T=new A.aqb()
-return A.aC3(A.cW(A.b([B.a9z,p,B.a9A,A.cW(r,r,r,r,r,s,r,r,r,B.oT,"contact@citationsdujour.be")],t.VO),r,r,r,r,r,r,r,r,q,r),r,r)},
+return A.aC3(A.cW(A.b([B.a9z,p,B.a9A,A.cW(r,r,r,r,r,s,r,r,r,B.oT,"penseestraditionnelles@etik.com")],t.VO),r,r,r,r,r,r,r,r,q,r),r,r)},
 a9l(){var s,r,q,p,o,n=null,m=6e5,l=A.ds(A.dn(A.j6(B.PX,B.a8,n,56)),n,A.aV(m,0,0))
 l=l.IO(new A.Q4(n,!0,n,n,n,B.a3N,B.a3n))
 s=this.y?"D\xe9j\xe0 inscrit":"Merci"
@@ -45785,11 +45785,11 @@ s=A.dn(A.aB(s,n,n,n,A.hj().$2$color$fontSize(B.a6,48),n,n,n))
 r=A.aV(m,0,0)
 r=A.ds(s,A.aV(3e5,0,0),r)
 s=A.fb(n,n,B.H,B.a8,n,n,n,1,n,n,n,n,40)
-q=this.y?"Cette adresse est d\xe9j\xe0 inscrite.\nUne citation vous attend chaque jour.":"Votre inscription est confirm\xe9e.\nUne nouvelle citation vous attend chaque jour."
+q=this.y?"Cette adresse est d\xe9j\xe0 inscrite.\nUne pens\xe9e vous attend chaque jour.":"Votre inscription est confirm\xe9e.\nUne nouvelle pens\xe9e vous attend chaque jour."
 q=A.dn(A.aB(q,n,n,n,A.bc().$4$color$fontSize$fontStyle$height(B.C,18,B.aH,1.7),B.bt,n,n))
 p=A.aV(m,0,0)
 p=A.ds(q,A.aV(5e5,0,0),p)
-q=A.dn(A.a5Z(B.adN,new A.aqc(this),n))
+q=A.dn(A.a5Z(B.adM,new A.aqc(this),n))
 o=A.aV(m,0,0)
 return new A.b_(B.qY,A.cF(A.b([l,B.kU,r,B.e9,s,B.hN,p,B.a8l,A.ds(q,A.aV(7e5,0,0),o)],t.p),B.W,B.e1,B.R,0,B.V),n)}}
 A.aqd.prototype={
@@ -45840,7 +45840,7 @@ A.aq9.prototype={
 $1(a){return B.o3},
 $S:99}
 A.aqb.prototype={
-$0(){return A.Jz(A.ca("mailto:contact@citationsdujour.be",0,null),B.rT)},
+$0(){return A.Jz(A.ca("mailto:penseestraditionnelles@etik.com",0,null),B.rT)},
 $S:0}
 A.aqc.prototype={
 $0(){var s=this.a.c
@@ -46051,7 +46051,7 @@ return A.q($async$vo,r)},
 K(a){var s,r,q,p,o,n,m,l,k=this,j=null,i=8e5,h=k.a9b()
 if(k.f)s=A.ho(A.aF_(B.a8,1),j,j)
 else{s=k.d
-if(s==null)s=A.ho(new A.b_(B.Pm,A.cF(A.b([A.aB("Aucune citation disponible",j,j,j,A.hj().$2$color$fontSize(B.C,22),j,j,j),B.e9,A.oc(A.aB("R\xe9essayer",j,j,j,A.bc().$2$color$letterSpacing(B.a8,2),j,j,j),k.ga9F(),j)],t.p),B.W,B.B,B.bq,0,B.V),j),j,j)
+if(s==null)s=A.ho(new A.b_(B.Pm,A.cF(A.b([A.aB("Aucune pens\xe9e disponible",j,j,j,A.hj().$2$color$fontSize(B.C,22),j,j,j),B.e9,A.oc(A.aB("R\xe9essayer",j,j,j,A.bc().$2$color$letterSpacing(B.a8,2),j,j,j),k.ga9F(),j)],t.p),B.W,B.B,B.bq,0,B.V),j),j,j)
 else{r=s.c
 q=r!=null&&r.length!==0
 p=t.p
@@ -46067,7 +46067,7 @@ s=A.Dw(A.cF(o,B.W,B.B,B.R,0,B.V),B.Pk,j,B.aL)}}s=A.b([h,A.dD(s,1,j)],t.p)
 if(k.d!=null)s.push(k.a97())
 h=k.e
 if(h!=null&&k.r)s.push(new A.yt(h,j))
-h=A.dn(A.aB("UNE CITATION PAR JOUR",j,j,j,A.bc().$3$color$fontSize$letterSpacing(B.C.dw(0.5),11,3),j,j,j))
+h=A.dn(A.aB("UNE PENS\xc9E PAR JOUR",j,j,j,A.bc().$3$color$fontSize$letterSpacing(B.C.dw(0.5),11,3),j,j,j))
 r=A.aV(i,0,0)
 s.push(new A.b_(B.P1,A.ds(h,A.aV(17e5,0,0),r),j))
 return A.CW(j,B.aM,A.kt(!0,A.cF(s,B.W,B.B,B.R,0,B.V),!0),j)},
@@ -102380,8 +102380,8 @@ B.adL=new A.ix("Suppression incompl\xe8te c\xf4t\xe9 serveur. Donn\xe9es locales
 B.a8B=new A.iu(B.adL,null,null,null,null,null,null,null,null,null,null,null,null,B.d8,!1,null,null,null,B.a0,null)
 B.adP=new A.ix("D\xe9sinscription effectu\xe9e.",null,null,null,null,null,null,null,null,null)
 B.a8C=new A.iu(B.adP,null,null,null,null,null,null,null,null,null,null,null,null,B.d8,!1,null,null,null,B.a0,null)
-B.adM=new A.ix("Copi\xe9.",null,null,null,null,null,null,null,null,null)
-B.a8D=new A.iu(B.adM,null,null,null,null,null,null,null,null,null,null,null,null,B.ez,!1,null,null,null,B.a0,null)
+B.adN=new A.ix("Copi\xe9.",null,null,null,null,null,null,null,null,null)
+B.a8D=new A.iu(B.adN,null,null,null,null,null,null,null,null,null,null,null,null,B.ez,!1,null,null,null,B.a0,null)
 B.Jv=new A.DF(0,"permissive")
 B.a8E=new A.DF(1,"normal")
 B.a8F=new A.DF(2,"forced")
@@ -102482,7 +102482,7 @@ B.a9w=new A.bs(0,0)
 B.a9x=new A.Ei(null,null,null)
 B.a9y=new A.Ej(B.f,null)
 B.JQ=new A.fG(0,0,B.j,!1,0,0)
-B.a9z=new A.dz("Votre adresse est utilis\xe9e par les \xc9ditions Beya pour vous envoyer la citation du jour et les annonces de nos publications (\xc9ditions Beya, Revue Arca). Elle n'est jamais partag\xe9e avec d'autres tiers. D\xe9sinscription \xe0 tout moment depuis \xab Mes donn\xe9es \xbb. D\xe9tails dans la ",null,null,B.ay,null,null,null,null,null,null,null)
+B.a9z=new A.dz("Votre adresse est utilis\xe9e par les \xc9ditions Beya pour vous envoyer la pens\xe9e du jour et les annonces de nos publications (\xc9ditions Beya, Revue Arca). Elle n'est jamais partag\xe9e avec d'autres tiers. D\xe9sinscription \xe0 tout moment depuis \xab Mes donn\xe9es \xbb. D\xe9tails dans la ",null,null,B.ay,null,null,null,null,null,null,null)
 B.a9A=new A.dz(". Contact : ",null,null,B.ay,null,null,null,null,null,null,null)
 B.oS=new A.u(!0,null,null,null,null,null,null,B.db,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 B.h=new A.m8(0)
@@ -102754,7 +102754,7 @@ B.acj=new A.u(!0,B.a5,null,".AppleSystemUIFont",null,null,null,null,null,null,nu
 B.acE=new A.u(!0,B.n,null,".AppleSystemUIFont",null,null,null,null,null,null,null,null,null,null,null,null,null,B.h,null,null,null,"blackRedwoodCity labelMedium",null,null,null,null)
 B.a9P=new A.u(!0,B.n,null,".AppleSystemUIFont",null,null,null,null,null,null,null,null,null,null,null,null,null,B.h,null,null,null,"blackRedwoodCity labelSmall",null,null,null,null)
 B.adJ=new A.dW(B.abz,B.aaw,B.abA,B.ac0,B.aad,B.aal,B.aaP,B.abW,B.ab0,B.acm,B.a9I,B.aa_,B.acj,B.acE,B.a9P)
-B.adN=new A.ix("RETOUR \xc0 LA CITATION",null,null,null,null,null,null,null,null,null)
+B.adM=new A.ix("RETOUR \xc0 LA PENS\xc9E",null,null,null,null,null,null,null,null,null)
 B.ahS=new A.alQ(0,"system")
 B.a3z=new A.i(0.056,0.024)
 B.a3P=new A.i(0.108,0.3085)
