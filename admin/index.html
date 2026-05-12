@@ -764,14 +764,38 @@
 
 <!-- Modale auteur -->
 <div class="confirm-mask" id="cit-auteur-mask" style="display:none">
-  <div class="confirm-box" style="max-width:480px;text-align:left">
+  <div class="confirm-box" style="max-width:580px;text-align:left;max-height:90vh;overflow-y:auto">
     <h3 style="margin-bottom:16px;color:var(--navy)" id="cit-auteur-title">Nouvel auteur</h3>
     <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">
-      <div>
-        <label class="dico-lbl">Nom *</label>
-        <input type="text" id="cit-af-nom" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.95em/1 Arial;box-sizing:border-box">
+      <div style="display:grid;grid-template-columns:1fr 140px;gap:12px">
+        <div>
+          <label class="dico-lbl">Nom *</label>
+          <input type="text" id="cit-af-nom" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.95em/1 Arial;box-sizing:border-box">
+        </div>
+        <div>
+          <label class="dico-lbl">Dates</label>
+          <input type="text" id="cit-af-dates" placeholder="ex: 1604–1668" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
+        </div>
       </div>
-      <div style="display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:end">
+      <div>
+        <label class="dico-lbl">Bio courte (3–5 lignes)</label>
+        <textarea id="cit-af-bio" rows="4" placeholder="Quelques phrases pour situer l'auteur, son courant, son apport." style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.95em/1.4 Arial;box-sizing:border-box;resize:vertical;font-style:italic"></textarea>
+      </div>
+      <div>
+        <label class="dico-lbl">Œuvres principales</label>
+        <input type="text" id="cit-af-oeuvres" placeholder='ex: "Le Discours de la méthode" (1637), "Les Méditations" (1641)' style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label class="dico-lbl">URL photo (optionnel)</label>
+          <input type="text" id="cit-af-photo" placeholder="https://…" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.85em/1 Arial;box-sizing:border-box">
+        </div>
+        <div>
+          <label class="dico-lbl">Lien « En savoir plus »</label>
+          <input type="text" id="cit-af-lien" placeholder="https://… (Wikipédia, page éditeur…)" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.85em/1 Arial;box-sizing:border-box">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:end;border-top:1px dashed var(--border);padding-top:12px">
         <div>
           <label class="dico-lbl">Poids</label>
           <input type="number" min="0" id="cit-af-poids" value="1" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
@@ -2273,6 +2297,11 @@ function citAuteurOpen(id) {
   var a = id ? CIT.auteurs.find(function(x) { return x.id === id; }) : { nom:'', mise_en_avant:false, poids_admin:1 };
   $('cit-auteur-title').textContent = id ? 'Modifier l\'auteur' : 'Nouvel auteur';
   $('cit-af-nom').value = a.nom || '';
+  $('cit-af-dates').value = a.dates || '';
+  $('cit-af-bio').value = a.bio || '';
+  $('cit-af-oeuvres').value = a.oeuvres || '';
+  $('cit-af-photo').value = a.photo_url || '';
+  $('cit-af-lien').value = a.lien_url || '';
   $('cit-af-poids').value = a.poids_admin != null ? a.poids_admin : 1;
   $('cit-af-avant').checked = !!a.mise_en_avant;
   $('cit-auteur-mask').style.display = 'flex';
@@ -2281,6 +2310,11 @@ $('cit-auteur-cancel').addEventListener('click', function() { $('cit-auteur-mask
 $('cit-auteur-save').addEventListener('click', function() {
   var body = {
     nom: $('cit-af-nom').value.trim(),
+    dates: $('cit-af-dates').value.trim() || null,
+    bio: $('cit-af-bio').value.trim() || null,
+    oeuvres: $('cit-af-oeuvres').value.trim() || null,
+    photo_url: $('cit-af-photo').value.trim() || null,
+    lien_url: $('cit-af-lien').value.trim() || null,
     poids_admin: parseInt($('cit-af-poids').value) || 1,
     mise_en_avant: $('cit-af-avant').checked,
   };
