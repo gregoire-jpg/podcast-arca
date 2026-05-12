@@ -45228,7 +45228,7 @@ o.push(k.a7u(s))
 s=A.aij(A.f2(o,B.ar,B.a4,B.aB),B.NT)}}s=A.c([h,A.mF(s,1,j)],t.p)
 if(k.d!=null)s.push(k.a7v())
 h=k.e
-if(h!=null)s.push(new A.xN(h,j))
+if(h!=null&&k.r)s.push(new A.xN(h,j))
 h=A.dg(A.bc("UNE CITATION PAR JOUR",j,j,j,A.bx().$3$color$fontSize$letterSpacing(B.N.fg(0.5),11,3),j,j))
 r=A.aR(i,0,0)
 s.push(new A.bH(B.NC,A.dk(h,A.aR(17e5,0,0),r),j))
