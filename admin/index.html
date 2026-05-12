@@ -686,8 +686,8 @@
     </div>
 
     <div style="font:.82em/1.5 Arial;color:var(--muted);margin-bottom:14px">
-      Pour prévisualiser, démarre l'app Flutter sur port fixe :
-      <code style="background:rgba(0,0,0,.06);padding:1px 6px;border-radius:2px;font:.95em/1 'Courier New',monospace">flutter run -d chrome --web-port=8080</code>
+      Par défaut : version prod déployée à <code style="background:rgba(0,0,0,.06);padding:1px 6px;border-radius:2px;font:.95em/1 'Courier New',monospace">./citations-app/</code>.
+      Pour tester un build local (dev) : <code style="background:rgba(0,0,0,.06);padding:1px 6px;border-radius:2px;font:.95em/1 'Courier New',monospace">flutter run -d chrome --web-port=8080</code>
     </div>
 
     <div id="prev-warning" style="display:none;padding:10px 14px;background:#fff4e0;border:1px solid #e0a060;border-radius:6px;color:#7a4f10;font:.85em/1.4 Arial;margin-bottom:14px"></div>
@@ -2000,7 +2000,7 @@ function initPreview() {
 
   if (previewInit) return;
 
-  var saved = localStorage.getItem('arca_preview_url') || 'http://localhost:8080';
+  var saved = localStorage.getItem('arca_preview_url_v2') || './citations-app/';
   input.value = saved;
   loadIframe(saved);
 
@@ -2011,7 +2011,7 @@ function initPreview() {
   $('prev-load').addEventListener('click', function() {
     var url = input.value.trim();
     if (!url) return;
-    localStorage.setItem('arca_preview_url', url);
+    localStorage.setItem('arca_preview_url_v2', url);
     loadIframe(url);
   });
   $('prev-reload').addEventListener('click', function() {
