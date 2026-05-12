@@ -2288,23 +2288,36 @@ function citLoadStats() {
     citApi('/inscrits_email?select=id&confirme=eq.true', { write: false, headers: { Prefer: 'count=exact' } }),
     citApi('/v_stats_citations?select=*&order=nb_aime.desc&limit=5', { write: false }),
     citApi('/v_stats_auteurs?select=*&order=total_aime.desc&limit=5', { write: false }),
+    citApi('/v_stats_citations?select=*&order=nb_enregistrements.desc&limit=5', { write: false }),
+    citApi('/votes?select=id&type=eq.enregistre', { write: false, headers: { Prefer: 'count=exact' } }),
   ]).then(function(r) {
     var nbCit = r[0].length, nbAut = r[1].length, nbVot = r[2].length, nbIns = r[3].length;
-    var topCit = r[4], topAut = r[5];
+    var topCit = r[4], topAut = r[5], topEnr = r[6], nbEnr = r[7].length;
     $('cit-stats-content').innerHTML =
       '<div class="cit-stats-grid">' +
         '<div class="cit-stat-card"><div class="cit-stat-value">' + nbCit + '</div><div class="cit-stat-label">Citations</div></div>' +
         '<div class="cit-stat-card"><div class="cit-stat-value">' + nbAut + '</div><div class="cit-stat-label">Auteurs</div></div>' +
         '<div class="cit-stat-card"><div class="cit-stat-value">' + nbVot + '</div><div class="cit-stat-label">Votes</div></div>' +
+        '<div class="cit-stat-card"><div class="cit-stat-value">' + nbEnr + '</div><div class="cit-stat-label">Enregistrements</div></div>' +
         '<div class="cit-stat-card"><div class="cit-stat-value">' + nbIns + '</div><div class="cit-stat-label">Inscrits e-mail</div></div>' +
       '</div>' +
+      '<div class="cit-stats-section">Top citations enregistrées</div>' +
+      (topEnr.length === 0 || topEnr[0].nb_enregistrements === 0 ? '<div class="empty">Pas encore d\'enregistrements</div>' : topEnr.filter(function(c) { return c.nb_enregistrements > 0; }).map(function(c) {
+        return '<div class="cit-card">' +
+          '<div class="cit-text">' + esc(c.texte.slice(0, 200)) + (c.texte.length > 200 ? '…' : '') + '</div>' +
+          '<div class="cit-meta">' +
+            '<span class="cit-auteur">' + esc(c.auteur) + '</span>' +
+            '<span>🔖 ' + c.nb_enregistrements + '   ♡ ' + c.nb_aime + '   👁 ' + c.nb_vues + '</span>' +
+          '</div>' +
+        '</div>';
+      }).join('')) +
       '<div class="cit-stats-section">Top citations aimées</div>' +
       (topCit.length === 0 ? '<div class="empty">Pas encore de votes</div>' : topCit.map(function(c) {
         return '<div class="cit-card">' +
           '<div class="cit-text">' + esc(c.texte.slice(0, 200)) + (c.texte.length > 200 ? '…' : '') + '</div>' +
           '<div class="cit-meta">' +
             '<span class="cit-auteur">' + esc(c.auteur) + '</span>' +
-            '<span>♡ ' + c.nb_aime + '   ✗ ' + c.nb_pas_aime + '   👁 ' + c.nb_vues + '</span>' +
+            '<span>♡ ' + c.nb_aime + '   ✗ ' + c.nb_pas_aime + '   🔖 ' + (c.nb_enregistrements || 0) + '   👁 ' + c.nb_vues + '</span>' +
           '</div>' +
         '</div>';
       }).join('')) +
@@ -2314,7 +2327,7 @@ function citLoadStats() {
           '<div style="font:1.1em/1.2 Georgia;color:var(--navy);font-weight:bold">' + esc(a.nom) + '</div>' +
           '<div class="cit-meta">' +
             '<span>' + a.nb_citations + ' citation' + (a.nb_citations > 1 ? 's' : '') + '</span>' +
-            '<span>♡ ' + a.total_aime + '   ✗ ' + a.total_pas_aime + '</span>' +
+            '<span>♡ ' + a.total_aime + '   ✗ ' + a.total_pas_aime + '   🔖 ' + (a.total_enregistrements || 0) + '</span>' +
           '</div>' +
         '</div>';
       }).join(''));
