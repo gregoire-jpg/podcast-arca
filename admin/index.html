@@ -618,6 +618,7 @@
     <div class="docs-nav-actions">
       <button class="cit-tab on" data-cit="citations">Citations</button>
       <button class="cit-tab" data-cit="auteurs">Auteurs</button>
+      <button class="cit-tab" data-cit="annonces">Annonces</button>
       <button class="cit-tab" data-cit="inscrits">Inscrits</button>
       <button class="cit-tab" data-cit="stats">Statistiques</button>
       <button class="cit-tab" data-cit="preview">Aperçu</button>
@@ -653,6 +654,17 @@
       </div>
     </div>
     <div id="cit-auteurs-list"><div class="empty">Chargement…</div></div>
+  </div>
+
+  <!-- Sous-panel Annonces -->
+  <div class="cit-subpanel" id="cit-sub-annonces" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap">
+      <div style="font:.9em/1.4 Arial;color:var(--muted);max-width:600px">
+        Annonces affichées sous une citation dans l'app. Ciblage : citation précise, auteur, catégorie ou globale. Période optionnelle.
+      </div>
+      <button class="btn btn-navy" id="ann-add" style="padding:8px 16px">+ Nouvelle annonce</button>
+    </div>
+    <div id="ann-list"><div class="empty">Chargement…</div></div>
   </div>
 
   <!-- Sous-panel Inscrits -->
@@ -773,6 +785,81 @@
     <div class="confirm-btns">
       <button class="confirm-cancel" id="cit-auteur-cancel">Annuler</button>
       <button class="confirm-ok" id="cit-auteur-save" style="background:var(--gold)">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modale annonce -->
+<div class="confirm-mask" id="ann-mask" style="display:none">
+  <div class="confirm-box" style="max-width:680px;text-align:left;max-height:90vh;overflow-y:auto">
+    <h3 style="margin-bottom:16px;color:var(--navy)" id="ann-mask-title">Nouvelle annonce</h3>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">
+      <div>
+        <label class="dico-lbl">Titre (optionnel)</label>
+        <input type="text" id="ann-f-titre" placeholder="ex: Nouveau livre aux Éditions Beya" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.95em/1 Arial;box-sizing:border-box">
+      </div>
+      <div>
+        <label class="dico-lbl">Texte *</label>
+        <textarea id="ann-f-texte" rows="3" placeholder="Court descriptif (2-3 lignes max)" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.95em/1.4 Arial;box-sizing:border-box;resize:vertical"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label class="dico-lbl">URL image (optionnel)</label>
+          <input type="text" id="ann-f-image" placeholder="https://…" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
+        </div>
+        <div>
+          <label class="dico-lbl">URL lien (optionnel)</label>
+          <input type="text" id="ann-f-lien" placeholder="https://editionsbeya.be/…" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
+        </div>
+      </div>
+      <div>
+        <label class="dico-lbl">Texte du bouton (optionnel, défaut « Découvrir »)</label>
+        <input type="text" id="ann-f-lien-texte" placeholder="ex: Acheter, En savoir plus, Découvrir" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
+      </div>
+      <div style="border-top:1px dashed var(--border);padding-top:12px">
+        <label class="dico-lbl">Ciblage</label>
+        <select id="ann-f-cible-type" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.95em/1 Arial;box-sizing:border-box;margin-bottom:8px">
+          <option value="global">Globale — affichée sous toutes les citations</option>
+          <option value="citation">Une citation précise</option>
+          <option value="auteur">Toutes les citations d'un auteur</option>
+          <option value="categorie">Toutes les citations d'une catégorie</option>
+        </select>
+        <div id="ann-f-cible-citation-wrap" style="display:none">
+          <input type="text" id="ann-f-cible-citation-search" placeholder="Rechercher la citation par texte…" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box;margin-bottom:4px">
+          <select id="ann-f-cible-citation" size="5" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.85em/1.3 Arial;box-sizing:border-box"></select>
+        </div>
+        <div id="ann-f-cible-auteur-wrap" style="display:none">
+          <select id="ann-f-cible-auteur" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.95em/1 Arial;box-sizing:border-box"></select>
+        </div>
+        <div id="ann-f-cible-categorie-wrap" style="display:none">
+          <input type="text" id="ann-f-cible-categorie" placeholder="Nom de la catégorie (doit correspondre au champ catégorie sur les citations)" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
+          <div id="ann-f-cible-categorie-list" style="font:.8em/1.4 Arial;color:var(--muted);margin-top:4px"></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;border-top:1px dashed var(--border);padding-top:12px">
+        <div>
+          <label class="dico-lbl">Début (optionnel)</label>
+          <input type="datetime-local" id="ann-f-debut" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
+        </div>
+        <div>
+          <label class="dico-lbl">Fin (optionnel)</label>
+          <input type="datetime-local" id="ann-f-fin" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:end">
+        <div>
+          <label class="dico-lbl">Priorité</label>
+          <input type="number" id="ann-f-priorite" value="0" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding-bottom:8px">
+          <input type="checkbox" id="ann-f-active" checked style="width:18px;height:18px;accent-color:var(--green)">
+          <span style="font:.85em/1 Arial">Active</span>
+        </label>
+      </div>
+    </div>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" id="ann-mask-cancel">Annuler</button>
+      <button class="confirm-ok" id="ann-mask-save" style="background:var(--gold)">Enregistrer</button>
     </div>
   </div>
 </div>
@@ -1977,6 +2064,7 @@ document.querySelectorAll('.cit-tab').forEach(function(b) {
     if (sub === 'inscrits') citLoadInscrits();
     if (sub === 'stats') citLoadStats();
     if (sub === 'preview') initPreview();
+    if (sub === 'annonces') annLoadList();
   });
 });
 
@@ -2325,6 +2413,210 @@ function citLoadStats() {
       }).join(''));
   }).catch(function(e) { toast('Erreur stats: ' + e.message, 'err'); });
 }
+
+/* ═══════════════════ ANNONCES ═══════════════════ */
+var ANN = { list: [], curEditId: null };
+
+function annLoadList() {
+  $('ann-list').innerHTML = '<div class="empty">Chargement…</div>';
+  citApi('/annonces?select=*,citations(texte),auteurs(nom)&order=priorite.desc,created_at.desc', { write: false })
+    .then(function(rows) {
+      ANN.list = rows || [];
+      annRenderList();
+    })
+    .catch(function(e) { $('ann-list').innerHTML = '<div class="empty">Erreur : ' + esc(e.message) + '</div>'; });
+}
+
+function annRenderList() {
+  if (!ANN.list.length) { $('ann-list').innerHTML = '<div class="empty">Aucune annonce. Cliquez sur « Nouvelle annonce » pour en ajouter une.</div>'; return; }
+  var now = new Date();
+  $('ann-list').innerHTML = ANN.list.map(function(a) {
+    var cible;
+    if (a.citation_id) cible = '🎯 Citation : ' + esc((a.citations && a.citations.texte || '').slice(0, 60)) + '…';
+    else if (a.auteur_id) cible = '👤 Auteur : ' + esc(a.auteurs && a.auteurs.nom || '?');
+    else if (a.categorie) cible = '📂 Catégorie : ' + esc(a.categorie);
+    else cible = '🌐 Globale';
+
+    var periode = '';
+    if (a.debut_at || a.fin_at) {
+      var d = a.debut_at ? new Date(a.debut_at).toLocaleDateString('fr-FR') : '—';
+      var f = a.fin_at ? new Date(a.fin_at).toLocaleDateString('fr-FR') : '—';
+      periode = '<span> · 📅 ' + d + ' → ' + f + '</span>';
+    }
+
+    var enCours = a.active &&
+      (!a.debut_at || new Date(a.debut_at) <= now) &&
+      (!a.fin_at || new Date(a.fin_at) >= now);
+
+    var badge = !a.active
+      ? '<span style="background:#eee;color:#999;padding:2px 8px;border-radius:3px;font:.7em/1 Arial;letter-spacing:1px">DÉSACTIVÉE</span>'
+      : enCours
+        ? '<span style="background:rgba(39,174,96,.15);color:var(--green);padding:2px 8px;border-radius:3px;font:.7em/1 Arial;letter-spacing:1px">ACTIVE</span>'
+        : '<span style="background:rgba(200,160,96,.15);color:var(--gold);padding:2px 8px;border-radius:3px;font:.7em/1 Arial;letter-spacing:1px">HORS PÉRIODE</span>';
+
+    return '<div class="cit-card">' +
+      '<div style="display:flex;gap:14px;align-items:flex-start">' +
+        (a.image_url ? '<img src="' + esc(a.image_url) + '" style="width:60px;height:60px;object-fit:cover;border-radius:4px;flex-shrink:0" onerror="this.style.display=\'none\'">' : '') +
+        '<div style="flex:1;min-width:0">' +
+          (a.titre ? '<div style="font:1em/1.3 Georgia;color:var(--navy);font-weight:bold;margin-bottom:4px">' + esc(a.titre) + '</div>' : '') +
+          '<div style="font:.95em/1.4 Arial;color:var(--ink);font-style:italic;margin-bottom:6px">' + esc(a.texte.slice(0, 200)) + (a.texte.length > 200 ? '…' : '') + '</div>' +
+          '<div style="font:.8em/1.4 Arial;color:var(--muted)">' + cible + periode + (a.lien_url ? ' · 🔗 ' + esc(a.lien_url.slice(0, 40)) + '…' : '') + '</div>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">' +
+          badge +
+          '<div style="display:flex;gap:4px">' +
+            '<button class="cit-icon-btn" data-ann-edit="' + a.id + '" title="Modifier">✎</button>' +
+            '<button class="cit-icon-btn del" data-ann-del="' + a.id + '" title="Supprimer">✕</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  document.querySelectorAll('[data-ann-edit]').forEach(function(b) {
+    b.addEventListener('click', function() { annOpen(parseInt(b.dataset.annEdit)); });
+  });
+  document.querySelectorAll('[data-ann-del]').forEach(function(b) {
+    b.addEventListener('click', function() { annDelete(parseInt(b.dataset.annDel)); });
+  });
+}
+
+function annOpen(id) {
+  if (!citEnsureService()) return;
+  ANN.curEditId = id;
+  var a = id ? ANN.list.find(function(x) { return x.id === id; }) : null;
+
+  $('ann-mask-title').textContent = id ? 'Modifier l\'annonce' : 'Nouvelle annonce';
+  $('ann-f-titre').value = (a && a.titre) || '';
+  $('ann-f-texte').value = (a && a.texte) || '';
+  $('ann-f-image').value = (a && a.image_url) || '';
+  $('ann-f-lien').value = (a && a.lien_url) || '';
+  $('ann-f-lien-texte').value = (a && a.lien_texte) || '';
+  $('ann-f-priorite').value = a ? (a.priorite || 0) : 0;
+  $('ann-f-active').checked = a ? !!a.active : true;
+  $('ann-f-debut').value = a && a.debut_at ? a.debut_at.slice(0, 16) : '';
+  $('ann-f-fin').value = a && a.fin_at ? a.fin_at.slice(0, 16) : '';
+
+  // Ciblage
+  var cibleType = 'global';
+  if (a) {
+    if (a.citation_id) cibleType = 'citation';
+    else if (a.auteur_id) cibleType = 'auteur';
+    else if (a.categorie) cibleType = 'categorie';
+  }
+  $('ann-f-cible-type').value = cibleType;
+  annUpdateCibleVisibility();
+
+  // Peupler les selects
+  var citSel = $('ann-f-cible-citation');
+  citSel.innerHTML = CIT.citations.slice(0, 50).map(function(c) {
+    return '<option value="' + c.id + '"' + (a && a.citation_id === c.id ? ' selected' : '') + '>' +
+      esc(c.texte.slice(0, 80)) + (c.texte.length > 80 ? '…' : '') + ' — ' + esc(c.auteurs && c.auteurs.nom || '?') + '</option>';
+  }).join('');
+
+  var autSel = $('ann-f-cible-auteur');
+  autSel.innerHTML = '<option value="">— Choisir un auteur —</option>' +
+    CIT.auteurs.map(function(au) {
+      return '<option value="' + au.id + '"' + (a && a.auteur_id === au.id ? ' selected' : '') + '>' + esc(au.nom) + '</option>';
+    }).join('');
+
+  $('ann-f-cible-categorie').value = (a && a.categorie) || '';
+
+  // Liste des catégories existantes (hint)
+  var cats = {};
+  CIT.citations.forEach(function(c) { if (c.categorie) cats[c.categorie] = (cats[c.categorie] || 0) + 1; });
+  var catList = Object.keys(cats).sort().map(function(k) { return k + ' (' + cats[k] + ')'; }).join(', ');
+  $('ann-f-cible-categorie-list').textContent = catList ? 'Existantes : ' + catList : 'Aucune catégorie n\'est définie pour le moment.';
+
+  $('ann-mask').style.display = 'flex';
+}
+
+function annUpdateCibleVisibility() {
+  var t = $('ann-f-cible-type').value;
+  $('ann-f-cible-citation-wrap').style.display = (t === 'citation') ? 'block' : 'none';
+  $('ann-f-cible-auteur-wrap').style.display = (t === 'auteur') ? 'block' : 'none';
+  $('ann-f-cible-categorie-wrap').style.display = (t === 'categorie') ? 'block' : 'none';
+}
+
+function annSave() {
+  var texte = $('ann-f-texte').value.trim();
+  if (!texte) { toast('Le texte est obligatoire', 'err'); return; }
+
+  var body = {
+    titre: $('ann-f-titre').value.trim() || null,
+    texte: texte,
+    image_url: $('ann-f-image').value.trim() || null,
+    lien_url: $('ann-f-lien').value.trim() || null,
+    lien_texte: $('ann-f-lien-texte').value.trim() || null,
+    priorite: parseInt($('ann-f-priorite').value) || 0,
+    active: $('ann-f-active').checked,
+    debut_at: $('ann-f-debut').value ? new Date($('ann-f-debut').value).toISOString() : null,
+    fin_at: $('ann-f-fin').value ? new Date($('ann-f-fin').value).toISOString() : null,
+    citation_id: null,
+    auteur_id: null,
+    categorie: null,
+  };
+
+  var t = $('ann-f-cible-type').value;
+  if (t === 'citation') {
+    var cid = $('ann-f-cible-citation').value;
+    if (!cid) { toast('Sélectionne une citation', 'err'); return; }
+    body.citation_id = parseInt(cid);
+  } else if (t === 'auteur') {
+    var aid = $('ann-f-cible-auteur').value;
+    if (!aid) { toast('Sélectionne un auteur', 'err'); return; }
+    body.auteur_id = parseInt(aid);
+  } else if (t === 'categorie') {
+    var cat = $('ann-f-cible-categorie').value.trim();
+    if (!cat) { toast('Renseigne une catégorie', 'err'); return; }
+    body.categorie = cat;
+  }
+
+  var url = ANN.curEditId ? '/annonces?id=eq.' + ANN.curEditId : '/annonces';
+  var method = ANN.curEditId ? 'PATCH' : 'POST';
+
+  citApi(url, { method: method, body: JSON.stringify(body), headers: { Prefer: 'return=representation' } })
+    .then(function() {
+      $('ann-mask').style.display = 'none';
+      toast(ANN.curEditId ? 'Annonce mise à jour' : 'Annonce créée');
+      annLoadList();
+    })
+    .catch(function(e) { toast('Erreur : ' + e.message, 'err'); });
+}
+
+function annDelete(id) {
+  if (!citEnsureService()) return;
+  if (!confirm('Supprimer cette annonce définitivement ?')) return;
+  citApi('/annonces?id=eq.' + id, { method: 'DELETE' })
+    .then(function() {
+      toast('Annonce supprimée');
+      ANN.list = ANN.list.filter(function(x) { return x.id !== id; });
+      annRenderList();
+    })
+    .catch(function(e) { toast('Erreur : ' + e.message, 'err'); });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var addBtn = document.getElementById('ann-add');
+  if (addBtn) addBtn.addEventListener('click', function() { annOpen(null); });
+  var cibleSel = document.getElementById('ann-f-cible-type');
+  if (cibleSel) cibleSel.addEventListener('change', annUpdateCibleVisibility);
+  var cancel = document.getElementById('ann-mask-cancel');
+  if (cancel) cancel.addEventListener('click', function() { document.getElementById('ann-mask').style.display = 'none'; });
+  var save = document.getElementById('ann-mask-save');
+  if (save) save.addEventListener('click', annSave);
+  var citSearch = document.getElementById('ann-f-cible-citation-search');
+  if (citSearch) citSearch.addEventListener('input', function() {
+    var q = citSearch.value.toLowerCase();
+    var citSel = document.getElementById('ann-f-cible-citation');
+    var filtered = (CIT.citations || []).filter(function(c) {
+      return !q || c.texte.toLowerCase().indexOf(q) !== -1 || (c.auteurs && c.auteurs.nom && c.auteurs.nom.toLowerCase().indexOf(q) !== -1);
+    }).slice(0, 50);
+    citSel.innerHTML = filtered.map(function(c) {
+      return '<option value="' + c.id + '">' + esc(c.texte.slice(0, 80)) + (c.texte.length > 80 ? '…' : '') + ' — ' + esc(c.auteurs && c.auteurs.nom || '?') + '</option>';
+    }).join('');
+  });
+});
 
 /* ── Hook dans la nav principale Arca pour lazy load ── */
 document.querySelectorAll('.nav-btn').forEach(function(btn) {
