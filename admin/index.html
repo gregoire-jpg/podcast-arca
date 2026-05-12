@@ -660,7 +660,7 @@
   <div class="cit-subpanel" id="cit-sub-annonces" style="display:none">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap">
       <div style="font:.9em/1.4 Arial;color:var(--muted);max-width:600px">
-        Annonces affichées sous une citation dans l'app. Ciblage : citation précise, auteur, catégorie ou globale. Période optionnelle.
+        Annonces affichées sous une pensée dans l'app. Ciblage : pensée précise, auteur, catégorie ou globale. Période optionnelle.
       </div>
       <button class="btn btn-navy" id="ann-add" style="padding:8px 16px">+ Nouvelle annonce</button>
     </div>
@@ -843,20 +843,20 @@
       <div style="border-top:1px dashed var(--border);padding-top:12px">
         <label class="dico-lbl">Ciblage</label>
         <select id="ann-f-cible-type" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.95em/1 Arial;box-sizing:border-box;margin-bottom:8px">
-          <option value="global">Globale — affichée sous toutes les citations</option>
-          <option value="citation">Une citation précise</option>
-          <option value="auteur">Toutes les citations d'un auteur</option>
-          <option value="categorie">Toutes les citations d'une catégorie</option>
+          <option value="global">Globale — affichée sous toutes les pensées</option>
+          <option value="citation">Une pensée précise</option>
+          <option value="auteur">Toutes les pensées d'un auteur</option>
+          <option value="categorie">Toutes les pensées d'une catégorie</option>
         </select>
         <div id="ann-f-cible-citation-wrap" style="display:none">
-          <input type="text" id="ann-f-cible-citation-search" placeholder="Rechercher la citation par texte…" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box;margin-bottom:4px">
+          <input type="text" id="ann-f-cible-citation-search" placeholder="Rechercher la pensée par texte…" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box;margin-bottom:4px">
           <select id="ann-f-cible-citation" size="5" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.85em/1.3 Arial;box-sizing:border-box"></select>
         </div>
         <div id="ann-f-cible-auteur-wrap" style="display:none">
           <select id="ann-f-cible-auteur" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.95em/1 Arial;box-sizing:border-box"></select>
         </div>
         <div id="ann-f-cible-categorie-wrap" style="display:none">
-          <input type="text" id="ann-f-cible-categorie" placeholder="Nom de la catégorie (doit correspondre au champ catégorie sur les citations)" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
+          <input type="text" id="ann-f-cible-categorie" placeholder="Nom de la catégorie (doit correspondre au champ catégorie sur les pensées)" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
           <div id="ann-f-cible-categorie-list" style="font:.8em/1.4 Arial;color:var(--muted);margin-top:4px"></div>
         </div>
       </div>
@@ -2068,7 +2068,7 @@ function citLoad() {
     citPopulateAuteursSelect();
     citRender();
     citRenderAuteurs();
-  }).catch(function(e) { toast('Erreur chargement Citations: ' + e.message, 'err'); });
+  }).catch(function(e) { toast('Erreur chargement pensées: ' + e.message, 'err'); });
 }
 
 function citPopulateAuteursSelect() {
@@ -2396,14 +2396,14 @@ $('cit-export-csv').addEventListener('click', function() {
 /* ── Stats ── */
 function citLoadStats() {
   Promise.all([
-    citApi('/citations?select=id', { write: false, headers: { Prefer: 'count=exact' } }),
-    citApi('/auteurs?select=id', { write: false, headers: { Prefer: 'count=exact' } }),
-    citApi('/votes?select=id', { write: false, headers: { Prefer: 'count=exact' } }),
-    citApi('/inscrits_email?select=id&confirme=eq.true', { write: false, headers: { Prefer: 'count=exact' } }),
-    citApi('/v_stats_citations?select=*&order=nb_aime.desc&limit=5', { write: false }),
-    citApi('/v_stats_auteurs?select=*&order=total_aime.desc&limit=5', { write: false }),
-    citApi('/v_stats_citations?select=*&order=nb_enregistrements.desc&limit=5', { write: false }),
-    citApi('/votes?select=id&type=eq.enregistre', { write: false, headers: { Prefer: 'count=exact' } }),
+    citApi('/citations?select=id', { headers: { Prefer: 'count=exact' } }),
+    citApi('/auteurs?select=id', { headers: { Prefer: 'count=exact' } }),
+    citApi('/votes?select=id', { headers: { Prefer: 'count=exact' } }),
+    citApi('/inscrits_email?select=id&confirme=eq.true', { headers: { Prefer: 'count=exact' } }),
+    citApi('/v_stats_citations?select=*&order=nb_aime.desc&limit=5'),
+    citApi('/v_stats_auteurs?select=*&order=total_aime.desc&limit=5'),
+    citApi('/v_stats_citations?select=*&order=nb_enregistrements.desc&limit=5'),
+    citApi('/votes?select=id&type=eq.enregistre', { headers: { Prefer: 'count=exact' } }),
   ]).then(function(r) {
     var nbCit = r[0].length, nbAut = r[1].length, nbVot = r[2].length, nbIns = r[3].length;
     var topCit = r[4], topAut = r[5], topEnr = r[6], nbEnr = r[7].length;
@@ -2466,7 +2466,7 @@ function annRenderList() {
   var now = new Date();
   $('ann-list').innerHTML = ANN.list.map(function(a) {
     var cible;
-    if (a.citation_id) cible = '🎯 Citation : ' + esc((a.citations && a.citations.texte || '').slice(0, 60)) + '…';
+    if (a.citation_id) cible = '🎯 Pensée : ' + esc((a.citations && a.citations.texte || '').slice(0, 60)) + '…';
     else if (a.auteur_id) cible = '👤 Auteur : ' + esc(a.auteurs && a.auteurs.nom || '?');
     else if (a.categorie) cible = '📂 Catégorie : ' + esc(a.categorie);
     else cible = '🌐 Globale';
@@ -2594,7 +2594,7 @@ function annSave() {
   var t = $('ann-f-cible-type').value;
   if (t === 'citation') {
     var cid = $('ann-f-cible-citation').value;
-    if (!cid) { toast('Sélectionne une citation', 'err'); return; }
+    if (!cid) { toast('Sélectionne une pensée', 'err'); return; }
     body.citation_id = parseInt(cid);
   } else if (t === 'auteur') {
     var aid = $('ann-f-cible-auteur').value;
