@@ -620,6 +620,7 @@
       <button class="cit-tab" data-cit="auteurs">Auteurs</button>
       <button class="cit-tab" data-cit="inscrits">Inscrits</button>
       <button class="cit-tab" data-cit="stats">Statistiques</button>
+      <button class="cit-tab" data-cit="preview">Aperçu</button>
     </div>
   </div>
 
@@ -669,6 +670,37 @@
   <!-- Sous-panel Stats -->
   <div class="cit-subpanel" id="cit-sub-stats" style="display:none">
     <div id="cit-stats-content"><div class="empty">Chargement…</div></div>
+  </div>
+
+  <!-- Sous-panel Aperçu mobile -->
+  <div class="cit-subpanel" id="cit-sub-preview" style="display:none">
+    <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+      <select id="prev-preset" style="padding:9px 12px;border:1px solid var(--border);border-radius:6px;background:white;font:.85em/1 Arial">
+        <option value="">— Préréglages —</option>
+        <option value="http://localhost:8080">Citations · dev local (port 8080)</option>
+        <option value="https://podcast-arca.netlify.app/">Arca · site public</option>
+        <option value="https://podcast-arca.netlify.app/glossaire.html">Glossaire</option>
+        <option value="https://podcast-arca.netlify.app/dictionnaire.html">Dictionnaire</option>
+        <option value="https://podcast-arca.netlify.app/docs.html">Documentation</option>
+      </select>
+      <input type="text" id="prev-url" placeholder="URL personnalisée (https://… ou http://localhost:PORT)" style="flex:1;min-width:240px;padding:9px 12px;border:1px solid var(--border);border-radius:6px;background:white;font:.85em/1 Arial">
+      <button class="btn btn-navy" id="prev-load" style="padding:9px 18px">Charger</button>
+      <select id="prev-device" style="padding:9px 10px;border:1px solid var(--border);border-radius:6px;background:white;font:.85em/1 Arial">
+        <option value="iphone">iPhone (393×852)</option>
+        <option value="android">Android (412×915)</option>
+        <option value="small">Petit écran (360×740)</option>
+      </select>
+      <button class="btn btn-navy" id="prev-reload" style="padding:9px 14px">↻</button>
+    </div>
+
+    <div id="prev-warning" style="display:none;padding:10px 14px;background:#fff4e0;border:1px solid #e0a060;border-radius:6px;color:#7a4f10;font:.85em/1.4 Arial;margin-bottom:14px"></div>
+
+    <div style="display:flex;justify-content:center;padding:24px 0;background:linear-gradient(180deg,#ece8df 0%,var(--bg) 100%);border-radius:10px">
+      <div id="prev-frame" style="position:relative;width:393px;height:852px;background:#111;border-radius:44px;padding:14px;box-shadow:0 18px 60px rgba(0,0,0,.35),0 0 0 2px #2a2a2a inset;transition:width .25s,height .25s">
+        <div id="prev-notch" style="position:absolute;top:14px;left:50%;transform:translateX(-50%);width:100px;height:28px;background:#000;border-radius:18px;z-index:2"></div>
+        <iframe id="prev-iframe" title="Aperçu mobile" style="width:100%;height:100%;border:none;border-radius:32px;background:var(--white);display:block"></iframe>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1955,8 +1987,83 @@ document.querySelectorAll('.cit-tab').forEach(function(b) {
     $('cit-sub-' + sub).style.display = 'block';
     if (sub === 'inscrits') citLoadInscrits();
     if (sub === 'stats') citLoadStats();
+    if (sub === 'preview') initPreview();
   });
 });
+
+/* ── Aperçu mobile (iframe stylé phone) ── */
+var previewInit = false;
+function initPreview() {
+  var input = $('prev-url');
+  var iframe = $('prev-iframe');
+  var frame = $('prev-frame');
+  var notch = $('prev-notch');
+  var deviceSel = $('prev-device');
+  var presetSel = $('prev-preset');
+  var warning = $('prev-warning');
+
+  if (previewInit) return;
+
+  var saved = localStorage.getItem('arca_preview_url') || 'https://podcast-arca.netlify.app/';
+  input.value = saved;
+  loadIframe(saved);
+
+  var savedDevice = localStorage.getItem('arca_preview_device') || 'iphone';
+  deviceSel.value = savedDevice;
+  applyDevice(savedDevice);
+
+  $('prev-load').addEventListener('click', function() {
+    var url = input.value.trim();
+    if (!url) return;
+    localStorage.setItem('arca_preview_url', url);
+    loadIframe(url);
+  });
+  $('prev-reload').addEventListener('click', function() {
+    var url = input.value.trim() || iframe.src;
+    iframe.src = 'about:blank';
+    setTimeout(function() { loadIframe(url); }, 50);
+  });
+  input.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') $('prev-load').click();
+  });
+  presetSel.addEventListener('change', function() {
+    if (!presetSel.value) return;
+    input.value = presetSel.value;
+    localStorage.setItem('arca_preview_url', presetSel.value);
+    loadIframe(presetSel.value);
+    presetSel.value = '';
+  });
+  deviceSel.addEventListener('change', function() {
+    var v = deviceSel.value;
+    localStorage.setItem('arca_preview_device', v);
+    applyDevice(v);
+  });
+
+  previewInit = true;
+
+  function loadIframe(url) {
+    if (location.protocol === 'https:' && url.indexOf('http://') === 0) {
+      warning.style.display = 'block';
+      warning.innerHTML = '⚠ Mixed content : cette page est en HTTPS, l\'URL cible est en HTTP (' + url + '). Le navigateur bloquera l\'iframe. Lance Chrome avec <code style="background:rgba(0,0,0,.06);padding:1px 4px;border-radius:2px">--disable-web-security</code> ou ouvre cet admin via <code style="background:rgba(0,0,0,.06);padding:1px 4px;border-radius:2px">http://localhost</code>.';
+    } else {
+      warning.style.display = 'none';
+    }
+    iframe.src = url;
+  }
+
+  function applyDevice(v) {
+    if (v === 'android') {
+      frame.style.width = '412px'; frame.style.height = '915px'; frame.style.borderRadius = '36px';
+      iframe.style.borderRadius = '26px'; notch.style.display = 'none';
+    } else if (v === 'small') {
+      frame.style.width = '360px'; frame.style.height = '740px'; frame.style.borderRadius = '38px';
+      iframe.style.borderRadius = '26px'; notch.style.display = 'none';
+    } else {
+      frame.style.width = '393px'; frame.style.height = '852px'; frame.style.borderRadius = '44px';
+      iframe.style.borderRadius = '32px'; notch.style.display = 'block';
+    }
+  }
+}
 
 /* ── Render Citations ── */
 function citRender() {
