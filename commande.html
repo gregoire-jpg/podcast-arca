@@ -697,11 +697,33 @@ if (window.paypal && paypal.Buttons) {
     },
     onApprove: function(data, actions) {
       return actions.order.capture().then(function(details) {
-        // Paiement réussi : remplir les inputs hidden et soumettre
+        // Paiement réussi : remplir les inputs hidden
         document.querySelector('input[name="paypal-order-id"]').value = details.id;
         document.querySelector('input[name="paypal-status"]').value =
           'PAID — ' + details.status + ' — ' + (details.payer ? details.payer.email_address : '');
-        document.getElementById('commande-form').submit();
+
+        // Soumettre via fetch à Netlify Forms (méthode officielle pour JS-submit)
+        var form = document.getElementById('commande-form');
+        var formData = new FormData(form);
+        var body = new URLSearchParams(formData).toString();
+
+        fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: body
+        }).then(function(response) {
+          if (response.ok || response.status === 200) {
+            window.location.href = '/commande-merci.html';
+          } else {
+            console.error('Netlify Forms a retourné:', response.status);
+            // Paiement OK même si enregistrement échoue
+            window.location.href = '/commande-merci.html?paypal=' + details.id;
+          }
+        }).catch(function(err) {
+          console.error('Erreur fetch:', err);
+          // On redirige quand même - le paiement PayPal a réussi
+          window.location.href = '/commande-merci.html?paypal=' + details.id;
+        });
       });
     },
     onError: function(err) {
