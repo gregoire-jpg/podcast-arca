@@ -621,6 +621,7 @@
       <button class="cit-tab" data-cit="annonces">Annonces</button>
       <button class="cit-tab" data-cit="inscrits">Inscrits</button>
       <button class="cit-tab" data-cit="stats">Statistiques</button>
+      <button class="cit-tab" data-cit="reseaux">Réseaux</button>
       <button class="cit-tab" data-cit="preview">Aperçu</button>
     </div>
   </div>
@@ -682,6 +683,52 @@
   <!-- Sous-panel Stats -->
   <div class="cit-subpanel" id="cit-sub-stats" style="display:none">
     <div id="cit-stats-content"><div class="empty">Chargement…</div></div>
+  </div>
+
+  <!-- Sous-panel Réseaux sociaux -->
+  <div class="cit-subpanel" id="cit-sub-reseaux" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap">
+      <div style="font:.9em/1.5 Arial;color:var(--muted);max-width:600px">
+        Génère une image carrée 1080×1080 pour chaque pensée. L'image est stockée puis utilisée pour la publication Instagram quotidienne (et comme illustration Facebook). Choisis une pensée puis ajuste le rendu avant d'enregistrer.
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start" id="res-grid">
+      <!-- Colonne gauche : liste pensées -->
+      <div>
+        <div style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Pensées</div>
+        <input type="text" id="res-search" placeholder="Rechercher…" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box;margin-bottom:8px">
+        <div id="res-list" style="max-height:600px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:white"></div>
+      </div>
+
+      <!-- Colonne droite : preview + actions -->
+      <div>
+        <div style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Aperçu 1080×1080</div>
+        <div id="res-canvas-wrap" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:18px;display:flex;justify-content:center;align-items:center;min-height:540px">
+          <canvas id="res-canvas" width="1080" height="1080" style="width:520px;height:520px;display:block;box-shadow:0 2px 24px rgba(0,0,0,.08);background:#f8f4ee"></canvas>
+        </div>
+        <div id="res-empty" style="text-align:center;padding:40px;color:var(--muted);font-style:italic">Sélectionne une pensée à gauche.</div>
+
+        <div id="res-controls" style="display:none;margin-top:18px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <label style="font:.78em/1 Arial;color:var(--muted);letter-spacing:1px">Texte affiché</label>
+            <select id="res-mode" style="padding:6px 10px;border:1px solid var(--border);border-radius:4px;font:.85em/1 Arial">
+              <option value="auto">Auto (paire si dispo, sinon texte seul)</option>
+              <option value="principal">Texte principal seulement</option>
+              <option value="complement">Texte complément seulement</option>
+              <option value="paire">Les deux versets</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-navy" id="res-regen" style="padding:9px 18px">↻ Régénérer</button>
+            <button class="btn btn-gold" id="res-save" style="padding:9px 18px">💾 Enregistrer comme image officielle</button>
+            <button class="btn" id="res-download" style="padding:9px 18px;background:white;border:1px solid var(--border)">⬇ Télécharger</button>
+            <span id="res-status" style="font:.85em/1 Arial;color:var(--muted)"></span>
+          </div>
+          <div id="res-existant" style="display:none;background:rgba(39,174,96,.08);border-left:3px solid var(--green);padding:12px 16px;border-radius:4px;font:.85em/1.5 Arial;color:var(--navy)"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Sous-panel Aperçu mobile -->
@@ -2089,6 +2136,7 @@ document.querySelectorAll('.cit-tab').forEach(function(b) {
     if (sub === 'stats') citLoadStats();
     if (sub === 'preview') initPreview();
     if (sub === 'annonces') annLoadList();
+    if (sub === 'reseaux') resInit();
   });
 });
 
@@ -2658,6 +2706,277 @@ document.querySelectorAll('.nav-btn').forEach(function(btn) {
     btn.addEventListener('click', function() { citLoad(); });
   }
 });
+
+/* ═══════════════════════════════════════════════════════════════════
+   RÉSEAUX SOCIAUX — génération d'image 1080x1080 + upload Supabase Storage
+═══════════════════════════════════════════════════════════════════ */
+var RES = {
+  init: false,
+  fontsReady: false,
+  currentId: null,
+  current: null,
+  bucket: 'pensees-images',
+};
+
+function resInit() {
+  if (RES.init) { resRenderList(); return; }
+  RES.init = true;
+  $('res-search').addEventListener('input', resRenderList);
+  $('res-regen').addEventListener('click', resDessiner);
+  $('res-mode').addEventListener('change', resDessiner);
+  $('res-save').addEventListener('click', resSauvegarder);
+  $('res-download').addEventListener('click', resTelecharger);
+  resChargerFonts().then(resRenderList);
+}
+
+function resChargerFonts() {
+  if (RES.fontsReady) return Promise.resolve();
+  // Cormorant Garamond et Italiana — charge via @font-face puis attend document.fonts.ready
+  if (!document.getElementById('res-fonts-css')) {
+    var link = document.createElement('link');
+    link.id = 'res-fonts-css';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,300;1,400;1,500&family=Italiana&display=swap';
+    document.head.appendChild(link);
+  }
+  return document.fonts.ready.then(function() {
+    return Promise.all([
+      document.fonts.load('22px "Cormorant Garamond"'),
+      document.fonts.load('italic 22px "Cormorant Garamond"'),
+      document.fonts.load('48px "Italiana"'),
+    ]);
+  }).then(function() { RES.fontsReady = true; });
+}
+
+function resRenderList() {
+  if (!CIT.loaded) return citLoad().then(resRenderList);
+  var search = ($('res-search').value || '').toLowerCase();
+  var list = CIT.citations.filter(function(c) {
+    if (!search) return true;
+    return c.texte.toLowerCase().indexOf(search) !== -1
+      || ((c.auteurs && c.auteurs.nom) || '').toLowerCase().indexOf(search) !== -1;
+  });
+  var box = $('res-list');
+  if (list.length === 0) { box.innerHTML = '<div class="empty" style="padding:20px">Aucune pensée</div>'; return; }
+  box.innerHTML = list.map(function(c) {
+    var a = (c.auteurs && c.auteurs.nom) || '—';
+    var aperc = esc(c.texte.slice(0, 90)) + (c.texte.length > 90 ? '…' : '');
+    var dot = c.image_instagram_url
+      ? '<span title="Image générée" style="color:var(--green);font-size:.9em">●</span>'
+      : '<span title="Pas d\'image" style="color:#ddd;font-size:.9em">●</span>';
+    return '<div data-id="' + c.id + '" class="res-card" style="padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;' + (RES.currentId === c.id ? 'background:rgba(200,160,96,.1)' : '') + '">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
+        '<div style="flex:1"><div style="font:italic .88em/1.4 Georgia;color:var(--navy);margin-bottom:4px">' + aperc + '</div>' +
+        '<div style="font:.72em/1 Arial;color:var(--gold);letter-spacing:1.5px">' + esc(a) + '</div></div>' +
+        dot +
+      '</div></div>';
+  }).join('');
+  box.querySelectorAll('.res-card').forEach(function(card) {
+    card.addEventListener('click', function() { resSelectionner(parseInt(this.dataset.id)); });
+  });
+}
+
+function resSelectionner(id) {
+  RES.currentId = id;
+  RES.current = CIT.citations.find(function(c) { return c.id === id; });
+  resRenderList();
+  $('res-empty').style.display = 'none';
+  $('res-canvas-wrap').style.display = 'flex';
+  $('res-controls').style.display = 'flex';
+  var dejaImg = RES.current.image_instagram_url;
+  var box = $('res-existant');
+  if (dejaImg) {
+    box.style.display = 'block';
+    box.innerHTML = '✓ Image officielle enregistrée : <a href="' + esc(dejaImg) + '" target="_blank" style="color:var(--navy)">' + esc(dejaImg.split('/').pop()) + '</a><br><span style="font-size:.78em;color:var(--muted)">Régénérer puis « Enregistrer comme image officielle » pour remplacer.</span>';
+  } else {
+    box.style.display = 'none';
+  }
+  resDessiner();
+}
+
+function resDessiner() {
+  if (!RES.current) return;
+  resChargerFonts().then(function() {
+    var c = RES.current;
+    var mode = $('res-mode').value;
+    var canvas = $('res-canvas');
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width, H = canvas.height;
+
+    // Fond crème
+    ctx.fillStyle = '#f8f4ee';
+    ctx.fillRect(0, 0, W, H);
+
+    // Bordure or interne (encadré classique)
+    ctx.strokeStyle = '#bfa063';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(60, 60, W - 120, H - 120);
+    ctx.lineWidth = 1;
+    ctx.strokeRect(72, 72, W - 144, H - 144);
+
+    // Marque en haut
+    ctx.fillStyle = '#bfa063';
+    ctx.font = '500 22px "Cormorant Garamond", Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    var brand = 'P E N S É E S   T R A D I T I O N N E L L E S';
+    ctx.fillText(brand, W / 2, 160);
+
+    // Filet doré sous la marque
+    ctx.fillRect(W / 2 - 40, 200, 80, 1);
+
+    // Quote mark
+    ctx.fillStyle = 'rgba(191,160,99,0.5)';
+    ctx.font = '120px "Italiana", "Cormorant Garamond", Georgia, serif';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('“', W / 2, 320);
+
+    // Texte de la pensée
+    var texte = c.texte;
+    var complement = c.texte_complement;
+    var afficher = 'principal';
+    if (mode === 'auto' && complement) afficher = 'paire';
+    else if (mode === 'paire' && complement) afficher = 'paire';
+    else if (mode === 'complement' && complement) afficher = 'complement';
+
+    if (afficher === 'paire') {
+      var blocH = 380; // hauteur dispo par bloc
+      resDrawWrappedItalic(ctx, texte, W / 2, 380, W - 280, blocH, '#1f1e1b', 36);
+      // Filet entre les deux versets
+      ctx.fillStyle = '#bfa063';
+      ctx.fillRect(W / 2 - 24, 780, 48, 1);
+      resDrawWrappedItalic(ctx, complement, W / 2, 820, W - 280, blocH, '#1f1e1b', 32);
+    } else if (afficher === 'complement') {
+      resDrawWrappedItalic(ctx, complement, W / 2, 440, W - 280, 540, '#1f1e1b', 44);
+    } else {
+      resDrawWrappedItalic(ctx, texte, W / 2, 440, W - 280, 540, '#1f1e1b', 44);
+    }
+
+    // Filet en bas avant signature
+    ctx.fillStyle = '#bfa063';
+    ctx.fillRect(W / 2 - 30, H - 220, 60, 1);
+
+    // Auteur
+    ctx.fillStyle = '#4a463e';
+    ctx.font = '500 28px "Cormorant Garamond", Georgia, serif';
+    var auteur = ((c.auteurs && c.auteurs.nom) || '').toUpperCase();
+    ctx.fillText(letterSpaced(auteur, 6), W / 2, H - 180);
+
+    // Référence + source
+    var meta = [];
+    if (c.reference) meta.push(c.reference);
+    if (c.source) meta.push(c.source);
+    if (meta.length) {
+      ctx.fillStyle = 'rgba(74,70,62,0.7)';
+      ctx.font = 'italic 22px "Cormorant Garamond", Georgia, serif';
+      ctx.fillText(meta.join(' — '), W / 2, H - 130);
+    }
+  });
+}
+
+function letterSpaced(s, px) {
+  return s.split('').join(' '); // espacement léger via espace fine
+}
+
+function resDrawWrappedItalic(ctx, texte, cx, y, maxWidth, maxHeight, color, fontSize) {
+  ctx.fillStyle = color;
+  ctx.font = 'italic 500 ' + fontSize + 'px "Cormorant Garamond", Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  var words = texte.split(' ');
+  var lines = [];
+  var current = '';
+  for (var i = 0; i < words.length; i++) {
+    var test = current ? current + ' ' + words[i] : words[i];
+    if (ctx.measureText(test).width > maxWidth && current) {
+      lines.push(current);
+      current = words[i];
+    } else {
+      current = test;
+    }
+  }
+  if (current) lines.push(current);
+  var lineH = fontSize * 1.4;
+  // Si dépasse la hauteur, réduire la police progressivement
+  while (lines.length * lineH > maxHeight && fontSize > 20) {
+    fontSize -= 2;
+    ctx.font = 'italic 500 ' + fontSize + 'px "Cormorant Garamond", Georgia, serif';
+    lines = [];
+    current = '';
+    for (var j = 0; j < words.length; j++) {
+      var test2 = current ? current + ' ' + words[j] : words[j];
+      if (ctx.measureText(test2).width > maxWidth && current) {
+        lines.push(current);
+        current = words[j];
+      } else {
+        current = test2;
+      }
+    }
+    if (current) lines.push(current);
+    lineH = fontSize * 1.4;
+  }
+  var totalH = lines.length * lineH;
+  var startY = y + (maxHeight - totalH) / 2;
+  for (var k = 0; k < lines.length; k++) {
+    ctx.fillText(lines[k], cx, startY + k * lineH);
+  }
+}
+
+function resTelecharger() {
+  if (!RES.current) return;
+  var canvas = $('res-canvas');
+  canvas.toBlob(function(blob) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'pensee-' + RES.current.id + '.png';
+    a.click();
+  }, 'image/png');
+}
+
+function resSauvegarder() {
+  if (!RES.current) return;
+  var canvas = $('res-canvas');
+  $('res-status').textContent = 'Conversion…';
+  canvas.toBlob(function(blob) {
+    if (!blob) { $('res-status').textContent = 'Erreur conversion'; return; }
+    var path = 'pensee-' + RES.current.id + '-' + Date.now() + '.png';
+    $('res-status').textContent = 'Upload Storage…';
+    fetch(CIT.url + '/storage/v1/object/' + RES.bucket + '/' + path, {
+      method: 'POST',
+      headers: {
+        'apikey': CIT.service,
+        'Authorization': 'Bearer ' + CIT.service,
+        'Content-Type': 'image/png',
+        'x-upsert': 'true',
+      },
+      body: blob,
+    }).then(function(r) {
+      if (!r.ok) return r.text().then(function(t) { throw new Error(r.status + ' ' + t); });
+      return r.json();
+    }).then(function() {
+      var publicUrl = CIT.url + '/storage/v1/object/public/' + RES.bucket + '/' + path;
+      // Met à jour la citation
+      return citApi('/citations?id=eq.' + RES.current.id, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          image_instagram_url: publicUrl,
+          image_instagram_genere_le: new Date().toISOString(),
+        }),
+      }).then(function() { return publicUrl; });
+    }).then(function(url) {
+      RES.current.image_instagram_url = url;
+      var idx = CIT.citations.findIndex(function(c) { return c.id === RES.current.id; });
+      if (idx >= 0) CIT.citations[idx].image_instagram_url = url;
+      $('res-status').textContent = '✓ Enregistrée';
+      resRenderList();
+      resSelectionner(RES.current.id);
+      setTimeout(function() { $('res-status').textContent = ''; }, 3000);
+    }).catch(function(e) {
+      $('res-status').textContent = 'Erreur : ' + e.message;
+      console.error(e);
+    });
+  }, 'image/png');
+}
 
 /* ═══════════════════ INIT ═══════════════════ */
 (function() {
