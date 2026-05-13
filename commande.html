@@ -118,7 +118,7 @@ button, input, select, textarea { font-family: inherit; }
 .row-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
 /* Shipping options */
-.ship-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ship-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .ship-opt { border: 2px solid var(--border); border-radius: 5px; padding: 14px 16px; cursor: pointer; transition: border-color .2s, background .2s; }
 .ship-opt:hover { border-color: var(--gold); }
 .ship-opt.active { border-color: var(--navy); background: var(--bg); }
@@ -258,8 +258,13 @@ button, input, select, textarea { font-family: inherit; }
     <div class="card-body">
       <div class="card-title">3. Mode de livraison</div>
       <div class="ship-options" id="ship-options">
+        <label class="ship-opt" data-mode="main">
+          <input type="radio" name="livraison" value="En main propre" required>
+          <div class="ship-name">En main propre</div>
+          <div class="ship-cost" id="cost-main">0 €</div>
+        </label>
         <label class="ship-opt" data-mode="relay">
-          <input type="radio" name="livraison" value="Mondial Relay" required>
+          <input type="radio" name="livraison" value="Mondial Relay">
           <div class="ship-name">Mondial Relay</div>
           <div class="ship-cost" id="cost-relay">—</div>
         </label>
@@ -269,7 +274,7 @@ button, input, select, textarea { font-family: inherit; }
           <div class="ship-cost" id="cost-poste">—</div>
         </label>
       </div>
-      <p style="margin-top:14px;font-size:13px;color:var(--muted);font-style:italic;">Sélectionnez d'abord votre pays pour afficher les tarifs. Volume : environ 950 g par exemplaire.</p>
+      <p style="margin-top:14px;font-size:13px;color:var(--muted);font-style:italic;">Sélectionnez d'abord votre pays pour afficher les tarifs (sauf "En main propre" qui est gratuit). Volume : environ 950 g par exemplaire.</p>
     </div>
   </div>
 
@@ -349,11 +354,11 @@ var ISSUES = [
 ];
 
 var SHIPPING = {
-  'Belgique': { relay: 5,  poste: 6  },
-  'France':   { relay: 6,  poste: 12 },
-  'Italie':   { relay: 8,  poste: 14 },
-  'Espagne':  { relay: 8,  poste: 20 },
-  'autre':    { relay: null, poste: null }
+  'Belgique': { relay: 5,    poste: 6,    main: 0 },
+  'France':   { relay: 6,    poste: 12,   main: 0 },
+  'Italie':   { relay: 8,    poste: 14,   main: 0 },
+  'Espagne':  { relay: 8,    poste: 20,   main: 0 },
+  'autre':    { relay: null, poste: null, main: 0 }
 };
 
 var quantities = {};  // { 1: 0, 2: 1, ... }
@@ -461,8 +466,8 @@ function updateShipping() {
   var s = SHIPPING[pays];
   var costRelay = document.getElementById('cost-relay');
   var costPoste = document.getElementById('cost-poste');
-  var optRelay = document.querySelector('.ship-opt[data-mode="relay"]');
-  var optPoste = document.querySelector('.ship-opt[data-mode="poste"]');
+  // "En main propre" toujours gratuit, indépendant du pays
+  document.getElementById('cost-main').textContent = '0 €';
 
   if (!pays) {
     costRelay.textContent = '—';
@@ -476,6 +481,7 @@ function updateShipping() {
     costPoste.textContent = 'Nous consulter';
     costRelay.classList.add('empty');
     costPoste.classList.add('empty');
+    updateSummary();
     return;
   }
   costRelay.textContent = s.relay + ' €';
@@ -518,11 +524,15 @@ function updateSummary() {
   var fraisHtml = '';
 
   if (livraison && pays && SHIPPING[pays]) {
-    var mode = livraison.value === 'Mondial Relay' ? 'relay' : 'poste';
-    var c = SHIPPING[pays][mode];
+    var modeKey = livraison.value === 'En main propre' ? 'main'
+                : livraison.value === 'Mondial Relay' ? 'relay'
+                : 'poste';
+    var c = SHIPPING[pays][modeKey];
     if (c !== null) {
       frais = c;
-      fraisHtml = '<div class="summary-row sub"><span>Frais de port (' + livraison.value + ' · ' + pays + ')</span><span>' + frais + ' €</span></div>';
+      var label = modeKey === 'main' ? livraison.value : livraison.value + ' · ' + pays;
+      var costText = frais === 0 ? 'Gratuit' : frais + ' €';
+      fraisHtml = '<div class="summary-row sub"><span>Livraison (' + label + ')</span><span>' + costText + '</span></div>';
     } else {
       fraisHtml = '<div class="summary-row sub"><span>Frais de port</span><span style="color:var(--gold);">à confirmer</span></div>';
     }
@@ -601,7 +611,8 @@ function isOrderReady() {
   var pays = document.getElementById('pays').value;
   var livraison = document.querySelector('input[name="livraison"]:checked');
   if (!nom || !email || !adresse || !pays || !livraison) return false;
-  if (pays === 'autre') return false; // tarif port à confirmer manuellement
+  // Pays "autre" : port à confirmer manuellement, SAUF si "En main propre" (gratuit)
+  if (pays === 'autre' && livraison.value !== 'En main propre') return false;
   return true;
 }
 
