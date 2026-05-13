@@ -10,10 +10,8 @@
 //                          (doit être une adresse d'un domaine vérifié sur Brevo)
 
 exports.handler = async function(event) {
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
-  }
-
+  // Note: les invocations event-triggered (Netlify Forms) n'ont pas de httpMethod,
+  // donc on n'en exige pas. On accepte tout invocation valide avec body JSON.
   try {
     const body = JSON.parse(event.body);
 
