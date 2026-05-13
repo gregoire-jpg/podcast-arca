@@ -2839,28 +2839,41 @@ function resDessiner() {
     else if (mode === 'paire' && complement) afficher = 'paire';
     else if (mode === 'complement' && complement) afficher = 'complement';
 
+    // Zones distinctes pour le texte et la signature
+    var auteurY = H - 180; // position auteur par défaut
+    var refY = H - 130;
+    var filetBasY = H - 220;
+
     if (afficher === 'paire') {
-      var blocH = 380; // hauteur dispo par bloc
-      resDrawWrappedItalic(ctx, texte, W / 2, 380, W - 280, blocH, '#1f1e1b', 36);
-      // Filet entre les deux versets
+      // En mode paire : 2 blocs compacts, signature plus basse
+      // Bloc 1 : 290 → 510 (centré dans 220px de hauteur)
+      // Filet : 540
+      // Bloc 2 : 560 → 780
+      // Filet auteur : 810
+      // Auteur : 870, Ref : 935
+      resDrawWrappedItalic(ctx, texte, W / 2, 290, W - 280, 220, '#1f1e1b', 32);
       ctx.fillStyle = '#bfa063';
-      ctx.fillRect(W / 2 - 24, 780, 48, 1);
-      resDrawWrappedItalic(ctx, complement, W / 2, 820, W - 280, blocH, '#1f1e1b', 32);
+      ctx.fillRect(W / 2 - 24, 540, 48, 1);
+      resDrawWrappedItalic(ctx, complement, W / 2, 560, W - 280, 220, '#1f1e1b', 30);
+      filetBasY = 815;
+      auteurY = 855;
+      refY = 905;
     } else if (afficher === 'complement') {
-      resDrawWrappedItalic(ctx, complement, W / 2, 440, W - 280, 540, '#1f1e1b', 44);
+      resDrawWrappedItalic(ctx, complement, W / 2, 380, W - 280, 420, '#1f1e1b', 42);
     } else {
-      resDrawWrappedItalic(ctx, texte, W / 2, 440, W - 280, 540, '#1f1e1b', 44);
+      resDrawWrappedItalic(ctx, texte, W / 2, 380, W - 280, 420, '#1f1e1b', 42);
     }
 
     // Filet en bas avant signature
     ctx.fillStyle = '#bfa063';
-    ctx.fillRect(W / 2 - 30, H - 220, 60, 1);
+    ctx.fillRect(W / 2 - 30, filetBasY, 60, 1);
 
     // Auteur
     ctx.fillStyle = '#4a463e';
     ctx.font = '500 28px "Cormorant Garamond", Georgia, serif';
+    ctx.textAlign = 'center';
     var auteur = ((c.auteurs && c.auteurs.nom) || '').toUpperCase();
-    ctx.fillText(letterSpaced(auteur, 6), W / 2, H - 180);
+    ctx.fillText(letterSpaced(auteur, 6), W / 2, auteurY);
 
     // Référence + source
     var meta = [];
@@ -2869,7 +2882,7 @@ function resDessiner() {
     if (meta.length) {
       ctx.fillStyle = 'rgba(74,70,62,0.7)';
       ctx.font = 'italic 22px "Cormorant Garamond", Georgia, serif';
-      ctx.fillText(meta.join(' — '), W / 2, H - 130);
+      ctx.fillText(meta.join(' — '), W / 2, refY);
     }
   });
 }
