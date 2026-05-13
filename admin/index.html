@@ -693,6 +693,26 @@
       </div>
     </div>
 
+    <!-- Génération en masse -->
+    <div style="background:var(--white);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:8px;padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div style="flex:1;min-width:240px">
+        <div style="font:bold .9em/1.3 Arial;color:var(--navy)" id="res-bulk-stats">Chargement…</div>
+        <div style="font:.78em/1.4 Arial;color:var(--muted);margin-top:2px">Génère et stocke les images Instagram pour toutes les pensées qui n'en ont pas encore.</div>
+      </div>
+      <button class="btn btn-gold" id="res-bulk-go" style="padding:10px 20px">⚡ Générer toutes les images manquantes</button>
+      <button class="btn" id="res-bulk-stop" style="padding:10px 20px;background:var(--white);border:1px solid var(--border);display:none">■ Arrêter</button>
+    </div>
+    <div id="res-bulk-progress" style="display:none;background:var(--white);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;font:.85em/1 Arial;color:var(--navy);margin-bottom:8px">
+        <span id="res-bulk-label">En cours…</span>
+        <span id="res-bulk-count"></span>
+      </div>
+      <div style="background:var(--bg);height:6px;border-radius:3px;overflow:hidden">
+        <div id="res-bulk-bar" style="background:var(--gold);height:100%;width:0%;transition:width .2s"></div>
+      </div>
+      <div id="res-bulk-current" style="font:italic .8em/1.4 Georgia;color:var(--muted);margin-top:6px;min-height:1.2em"></div>
+    </div>
+
     <div style="display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start" id="res-grid">
       <!-- Colonne gauche : liste pensées -->
       <div>
@@ -2719,14 +2739,107 @@ var RES = {
 };
 
 function resInit() {
-  if (RES.init) { resRenderList(); return; }
+  if (RES.init) { resRenderList(); resUpdateBulkStats(); return; }
   RES.init = true;
   $('res-search').addEventListener('input', resRenderList);
   $('res-regen').addEventListener('click', resDessiner);
   $('res-mode').addEventListener('change', resDessiner);
   $('res-save').addEventListener('click', resSauvegarder);
   $('res-download').addEventListener('click', resTelecharger);
-  resChargerFonts().then(resRenderList);
+  $('res-bulk-go').addEventListener('click', resBulkLancer);
+  $('res-bulk-stop').addEventListener('click', function() { RES.bulkStop = true; });
+  resChargerFonts().then(function() { resRenderList(); resUpdateBulkStats(); });
+}
+
+function resUpdateBulkStats() {
+  if (!CIT.loaded) return;
+  var total = CIT.citations.length;
+  var avec = CIT.citations.filter(function(c) { return c.image_instagram_url; }).length;
+  var sans = total - avec;
+  $('res-bulk-stats').textContent = avec + ' / ' + total + ' pensées avec image (' + sans + ' à générer)';
+  $('res-bulk-go').disabled = sans === 0;
+  $('res-bulk-go').textContent = sans === 0
+    ? '✓ Toutes les images sont générées'
+    : '⚡ Générer toutes les images manquantes (' + sans + ')';
+}
+
+function resBulkLancer() {
+  if (!confirm('Cela va générer et stocker une image pour chaque pensée sans image (≈ 2-3 secondes par pensée). Continuer ?')) return;
+  RES.bulkStop = false;
+  var aFaire = CIT.citations.filter(function(c) { return !c.image_instagram_url; });
+  if (aFaire.length === 0) return;
+
+  $('res-bulk-go').style.display = 'none';
+  $('res-bulk-stop').style.display = 'inline-block';
+  $('res-bulk-progress').style.display = 'block';
+  $('res-bulk-bar').style.width = '0%';
+  $('res-bulk-label').textContent = 'Génération en cours…';
+
+  var i = 0;
+  var ok = 0, ko = 0;
+  function suivante() {
+    if (RES.bulkStop || i >= aFaire.length) {
+      $('res-bulk-go').style.display = 'inline-block';
+      $('res-bulk-stop').style.display = 'none';
+      $('res-bulk-label').textContent = RES.bulkStop ? 'Arrêté' : 'Terminé';
+      $('res-bulk-current').textContent = '✓ ' + ok + ' réussies, ' + ko + ' échouées';
+      resUpdateBulkStats();
+      resRenderList();
+      return;
+    }
+    var c = aFaire[i];
+    var pct = Math.round((i / aFaire.length) * 100);
+    $('res-bulk-bar').style.width = pct + '%';
+    $('res-bulk-count').textContent = (i + 1) + ' / ' + aFaire.length;
+    $('res-bulk-current').textContent = '« ' + c.texte.slice(0, 90) + (c.texte.length > 90 ? '…' : '') + ' »';
+
+    // Sélectionne la citation, dessine, attend, upload
+    RES.current = c;
+    RES.currentId = c.id;
+    $('res-empty').style.display = 'none';
+    $('res-canvas-wrap').style.display = 'flex';
+    $('res-controls').style.display = 'flex';
+    resDessiner();
+    setTimeout(function() {
+      var canvas = $('res-canvas');
+      canvas.toBlob(function(blob) {
+        if (!blob) { ko++; i++; setTimeout(suivante, 100); return; }
+        var path = 'pensee-' + c.id + '-' + Date.now() + '.png';
+        fetch(CIT.url + '/storage/v1/object/' + RES.bucket + '/' + path, {
+          method: 'POST',
+          headers: {
+            'apikey': CIT.service,
+            'Authorization': 'Bearer ' + CIT.service,
+            'Content-Type': 'image/png',
+            'x-upsert': 'true',
+          },
+          body: blob,
+        }).then(function(r) {
+          if (!r.ok) throw new Error('upload ' + r.status);
+          var url = CIT.url + '/storage/v1/object/public/' + RES.bucket + '/' + path;
+          return citApi('/citations?id=eq.' + c.id, {
+            method: 'PATCH',
+            body: JSON.stringify({
+              image_instagram_url: url,
+              image_instagram_genere_le: new Date().toISOString(),
+            }),
+          }).then(function() { return url; });
+        }).then(function(url) {
+          c.image_instagram_url = url;
+          var idx = CIT.citations.findIndex(function(x) { return x.id === c.id; });
+          if (idx >= 0) CIT.citations[idx].image_instagram_url = url;
+          ok++;
+        }).catch(function(e) {
+          console.error('Erreur image pensée', c.id, e);
+          ko++;
+        }).then(function() {
+          i++;
+          setTimeout(suivante, 200); // pause de 200ms entre chaque pour ne pas saturer
+        });
+      }, 'image/png');
+    }, 600); // attendre que les fonts soient appliquées et le canvas dessiné
+  }
+  suivante();
 }
 
 function resChargerFonts() {
@@ -2982,6 +3095,7 @@ function resSauvegarder() {
       if (idx >= 0) CIT.citations[idx].image_instagram_url = url;
       $('res-status').textContent = '✓ Enregistrée';
       resRenderList();
+      resUpdateBulkStats();
       resSelectionner(RES.current.id);
       setTimeout(function() { $('res-status').textContent = ''; }, 3000);
     }).catch(function(e) {
