@@ -1,12 +1,13 @@
 // Netlify Function — submission-created.js
 // Déclenchée automatiquement à chaque soumission du formulaire commande-arca.
-// Envoie un email HTML stylisé aux couleurs ARCA via Resend.
+// Envoie un email HTML stylisé aux couleurs ARCA via Brevo (ex-Sendinblue).
 //
-// Variables d'environnement requises (Netlify → Site settings → Environment variables):
-//   - RESEND_API_KEY        : clé API Resend (re_...)
-//   - ORDER_EMAIL_TO        : destinataire(s) — ex: info@arca-librairie.com (séparer par virgule pour plusieurs)
-//   - ORDER_EMAIL_FROM      : expéditeur — ex: commandes@arca-librairie.com (doit être verifié sur Resend)
-//                              OU 'onboarding@resend.dev' pour tester
+// Variables d'environnement requises (Netlify → Site configuration → Environment variables):
+//   - BREVO_API_KEY     : clé API Brevo (xkeysib-...)
+//   - ORDER_EMAIL_TO    : destinataire(s) — ex: info@arca-librairie.com
+//                          (séparer par virgule pour plusieurs)
+//   - ORDER_EMAIL_FROM  : expéditeur — ex: commandes@arca-librairie.com
+//                          (doit être une adresse d'un domaine vérifié sur Brevo)
 
 exports.handler = async function(event) {
   if (event.httpMethod !== "POST") {
@@ -29,37 +30,39 @@ exports.handler = async function(event) {
     const subjectPrefix = isPaid ? "✓ PAYÉ" : "⏳ À traiter";
     const subject = `${subjectPrefix} · Commande ARCA · ${totalEUR} · ${d.nom || "Sans nom"}`;
 
-    const apiKey = process.env.RESEND_API_KEY;
-    const to = (process.env.ORDER_EMAIL_TO || "").split(",").map(s => s.trim()).filter(Boolean);
-    const from = process.env.ORDER_EMAIL_FROM || "onboarding@resend.dev";
-    if (!apiKey || !to.length) {
-      console.error("Configuration manquante: RESEND_API_KEY ou ORDER_EMAIL_TO");
+    const apiKey = process.env.BREVO_API_KEY;
+    const toRaw = (process.env.ORDER_EMAIL_TO || "").split(",").map(s => s.trim()).filter(Boolean);
+    const fromEmail = process.env.ORDER_EMAIL_FROM || "";
+    if (!apiKey || !toRaw.length || !fromEmail) {
+      console.error("Configuration manquante: BREVO_API_KEY, ORDER_EMAIL_TO ou ORDER_EMAIL_FROM");
       return { statusCode: 500, body: "Missing env vars" };
     }
 
-    const replyTo = d.email || undefined;
     const payload = {
-      from: from,
-      to: to,
+      sender: { name: "ARCA Commandes", email: fromEmail },
+      to: toRaw.map(e => ({ email: e })),
       subject: subject,
-      html: html,
-      text: text
+      htmlContent: html,
+      textContent: text
     };
-    if (replyTo) payload.reply_to = replyTo;
+    if (d.email) {
+      payload.replyTo = { email: d.email, name: d.nom || "" };
+    }
 
-    const resp = await fetch("https://api.resend.com/emails", {
+    const resp = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
+        "accept": "application/json",
+        "api-key": apiKey,
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(payload)
     });
 
     if (!resp.ok) {
       const err = await resp.text();
-      console.error("Resend error:", resp.status, err);
-      return { statusCode: 500, body: "Resend error: " + err };
+      console.error("Brevo error:", resp.status, err);
+      return { statusCode: 500, body: "Brevo error: " + err };
     }
 
     return { statusCode: 200, body: "Email sent" };
@@ -70,7 +73,7 @@ exports.handler = async function(event) {
 };
 
 // ─────────────────────────────────────────────────────────────
-// Génération du HTML
+// Génération du HTML stylisé ARCA
 // ─────────────────────────────────────────────────────────────
 
 function esc(s) {
@@ -156,7 +159,7 @@ function buildEmailHtml(d) {
   ${etiquetteLink ? `<tr><td style="padding:0 36px 20px;">
     <table cellpadding="0" cellspacing="0">
       <tr><td style="background:#c8a060;border-radius:4px;">
-        <a href="${esc(etiquetteLink)}" style="display:inline-block;padding:11px 22px;font:bold 11px Arial;letter-spacing:1.5px;text-transform:uppercase;color:#fff;text-decoration:none;">🖨 Imprimer l'étiquette (A6)</a>
+        <a href="${esc(etiquetteLink)}" style="display:inline-block;padding:11px 22px;font:bold 11px Arial;letter-spacing:1.5px;text-transform:uppercase;color:#fff;text-decoration:none;">🖨 Imprimer l'étiquette (A6 paysage)</a>
       </td></tr>
     </table>
   </td></tr>` : ""}
