@@ -189,7 +189,7 @@ button, input, select, textarea { font-family: inherit; }
 
 <div class="container">
 
-<form name="commande-arca" method="POST" action="/commande-merci.html" data-netlify="true" netlify-honeypot="bot-field" id="commande-form">
+<form id="commande-form" onsubmit="return false;">
   <input type="hidden" name="form-name" value="commande-arca">
   <p style="display:none"><label>Ne pas remplir : <input name="bot-field"></label></p>
   <!-- Champs qty-n1..qty-n8 déclarés ici pour la détection Netlify au build,
@@ -333,7 +333,7 @@ button, input, select, textarea { font-family: inherit; }
     </div>
   </div>
 
-  <button type="submit" class="submit-btn" id="submit-btn" disabled>Envoyer ma commande</button>
+  <button type="button" class="submit-btn" id="submit-btn" disabled onclick="submitOrder()">Envoyer ma commande</button>
   <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:14px;line-height:1.6;">
     Votre commande sera confirmée par e-mail dans les 24h avec les informations de paiement.<br>
     Pour toute question : <a href="mailto:info@arca-librairie.com" style="color:var(--gold);">info@arca-librairie.com</a>
@@ -697,28 +697,11 @@ if (window.paypal && paypal.Buttons) {
     },
     onApprove: function(data, actions) {
       return actions.order.capture().then(function(details) {
-        // Paiement réussi : remplir les inputs hidden
         document.querySelector('input[name="paypal-order-id"]').value = details.id;
         document.querySelector('input[name="paypal-status"]').value =
           'PAID — ' + details.status + ' — ' + (details.payer ? details.payer.email_address : '');
-
-        // Soumettre via fetch à Netlify Forms (méthode officielle pour JS-submit)
-        var form = document.getElementById('commande-form');
-        var formData = new FormData(form);
-        var body = new URLSearchParams(formData).toString();
-
-        fetch('/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: body
-        }).then(function(response) {
-          // Toujours rediriger vers la page de remerciement PayPal
-          window.location.href = '/commande-merci.html?paid=paypal&id=' + details.id;
-        }).catch(function(err) {
-          console.error('Erreur fetch:', err);
-          // On redirige quand même - le paiement PayPal a réussi
-          window.location.href = '/commande-merci.html?paid=paypal&id=' + details.id;
-        });
+        // Envoyer directement à la fonction Brevo
+        sendOrderToFunction(true, details.id);
       });
     },
     onError: function(err) {
@@ -730,6 +713,67 @@ if (window.paypal && paypal.Buttons) {
 
 // État initial
 updatePayPalState();
+
+// ── Envoi de la commande directement à la fonction Brevo ──
+function sendOrderToFunction(isPaypal, paypalId) {
+  var form = document.getElementById('commande-form');
+  var data = {};
+  // Récupérer tous les inputs/textareas/selects nommés
+  form.querySelectorAll('input[name], textarea[name], select[name]').forEach(function(el){
+    if (el.type === 'radio' && !el.checked) return;
+    if (el.type === 'checkbox' && !el.checked) return;
+    data[el.name] = el.value;
+  });
+
+  var btn = document.getElementById('submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Envoi en cours…'; }
+
+  fetch('/.netlify/functions/submission-created', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ form_name: 'commande-arca', data: data })
+  })
+  .then(function(r){ return r.text().then(function(t){ return { ok: r.ok, status: r.status, text: t }; }); })
+  .then(function(res){
+    if (!res.ok) {
+      console.error('Erreur fonction:', res.status, res.text);
+      alert("Erreur lors de l'envoi de votre commande. Merci de nous contacter à info@arca-librairie.com.\n\n(" + res.status + ')');
+      if (btn) { btn.disabled = false; btn.textContent = 'Envoyer ma commande'; }
+      return;
+    }
+    // Succès → redirection
+    var url = isPaypal
+      ? '/commande-merci.html?paid=paypal&id=' + encodeURIComponent(paypalId)
+      : '/commande-merci.html';
+    window.location.href = url;
+  })
+  .catch(function(err){
+    console.error('Erreur réseau:', err);
+    if (isPaypal) {
+      // Paiement PayPal déjà réussi → on redirige quand même
+      window.location.href = '/commande-merci.html?paid=paypal&id=' + encodeURIComponent(paypalId);
+    } else {
+      alert("Erreur réseau. Merci de réessayer ou de nous contacter à info@arca-librairie.com.");
+      if (btn) { btn.disabled = false; btn.textContent = 'Envoyer ma commande'; }
+    }
+  });
+}
+
+function submitOrder() {
+  // Validation simple
+  var nom = document.getElementById('nom').value.trim();
+  var email = document.getElementById('email').value.trim();
+  var adresse = document.getElementById('adresse').value.trim();
+  var pays = document.getElementById('pays').value;
+  var livraison = document.querySelector('input[name="livraison"]:checked');
+  var paiement = document.querySelector('input[name="paiement"]:checked');
+  var t = getCurrentTotal();
+  if (t.qty === 0) { alert('Veuillez sélectionner au moins un exemplaire.'); return; }
+  if (!nom || !email || !adresse || !pays || !livraison || !paiement) {
+    alert('Merci de remplir tous les champs requis.'); return;
+  }
+  sendOrderToFunction(false, '');
+}
 
 // Init
 renderIssues();
