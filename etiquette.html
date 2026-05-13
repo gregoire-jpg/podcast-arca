@@ -47,21 +47,21 @@ body { font-family: Georgia, serif; background: #f0ede8; color: var(--navy); pad
 .preview-label { font: 600 11px/1 Arial; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; padding-left: 4px; }
 
 .label-page {
-  /* Représente une feuille A4 entière à l'écran */
-  width: 210mm; max-width: 100%;
+  /* Représente une feuille A4 en PAYSAGE à l'écran */
+  width: 297mm; max-width: 100%;
   background: #fff;
   box-shadow: 0 2px 12px rgba(0,0,0,.08);
   position: relative;
-  aspect-ratio: 210 / 297;
+  aspect-ratio: 297 / 210;
   margin: 0 auto;
 }
 
 .label {
-  /* L'étiquette A6 dans le coin haut-gauche de la feuille */
+  /* L'étiquette A6 PAYSAGE (148.5×105mm) dans le coin haut-gauche */
   position: absolute;
   top: 0; left: 0;
-  width: 105mm; height: 148.5mm;
-  padding: 12mm 10mm;
+  width: 148.5mm; height: 105mm;
+  padding: 10mm 14mm;
   border: 2px dashed #d4ccc0; /* visible à l'écran, masqué à l'impression */
   display: flex; flex-direction: column;
 }
@@ -69,7 +69,7 @@ body { font-family: Georgia, serif; background: #f0ede8; color: var(--navy); pad
   font: 9pt/1.4 Arial;
   color: #666;
   text-align: right;
-  margin-bottom: 14mm;
+  margin-bottom: 8mm;
   padding-bottom: 4mm;
   border-bottom: 1px solid #e2ddd8;
 }
@@ -103,15 +103,15 @@ body { font-family: Georgia, serif; background: #f0ede8; color: var(--navy); pad
   .editor, .preview-label { display: none !important; }
   .preview-wrap { margin: 0; max-width: none; }
   .label-page {
-    width: 210mm; height: 297mm; max-width: none;
+    width: 297mm; height: 210mm; max-width: none;
     box-shadow: none; aspect-ratio: auto;
   }
   .label {
     border: none;
-    padding: 12mm 10mm;
+    padding: 10mm 14mm;
   }
   .cut-mark { border-color: #999; }
-  @page { size: A4; margin: 0; }
+  @page { size: A4 landscape; margin: 0; }
 }
 </style>
 </head>
@@ -120,7 +120,7 @@ body { font-family: Georgia, serif; background: #f0ede8; color: var(--navy); pad
 <!-- Zone de saisie -->
 <div class="editor" id="editor">
   <h1>Étiquette d'expédition</h1>
-  <p class="sub">Remplissez ci-dessous (ou ouvrez directement depuis le lien d'un e-mail de commande). L'étiquette s'imprimera dans le quart supérieur gauche d'une feuille A4 que vous pourrez ensuite découper.</p>
+  <p class="sub">Remplissez ci-dessous (ou ouvrez directement depuis le lien d'un e-mail de commande). L'étiquette s'imprimera au format A6 paysage dans le coin supérieur gauche d'une feuille A4 (orientation paysage) que vous pourrez ensuite découper.</p>
 
   <div class="row">
     <label for="nom">Nom du destinataire</label>
@@ -132,7 +132,7 @@ body { font-family: Georgia, serif; background: #f0ede8; color: var(--navy); pad
   </div>
 
   <div class="actions">
-    <button type="button" class="btn btn-print" onclick="window.print()">🖨 Imprimer (A6 / quart de A4)</button>
+    <button type="button" class="btn btn-print" onclick="window.print()">🖨 Imprimer (A6 paysage / quart de A4)</button>
     <button type="button" class="btn btn-back" onclick="updatePreview()">↻ Mettre à jour l'aperçu</button>
   </div>
 
