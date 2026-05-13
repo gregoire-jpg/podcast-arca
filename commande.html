@@ -190,22 +190,21 @@ button, input, select, textarea { font-family: inherit; }
 
 <div class="container">
 
-<!-- Form detection statique pour Netlify (cachée, sert juste à déclarer les champs au build) -->
-<form name="commande-arca" data-netlify="true" netlify-honeypot="bot-field" hidden>
-  <input name="form-name" value="commande-arca">
-  <input name="bot-field">
-  <input name="nom"><input name="email"><input name="telephone">
-  <input name="adresse"><input name="pays">
-  <input name="livraison"><input name="paiement">
-  <input name="qty-n1"><input name="qty-n2"><input name="qty-n3"><input name="qty-n4">
-  <input name="qty-n5"><input name="qty-n6"><input name="qty-n7"><input name="qty-n8">
-  <input name="commande-details"><input name="lien-etiquette">
-  <input name="paypal-order-id"><input name="paypal-status">
-</form>
-
 <form name="commande-arca" method="POST" action="/commande-merci.html" data-netlify="true" netlify-honeypot="bot-field" id="commande-form">
   <input type="hidden" name="form-name" value="commande-arca">
   <p style="display:none"><label>Ne pas remplir : <input name="bot-field"></label></p>
+  <!-- Champs qty-n1..qty-n8 déclarés ici pour la détection Netlify au build,
+       les vraies valeurs seront mises à jour par JS via les inputs visibles -->
+  <input type="hidden" name="qty-n1" value="0">
+  <input type="hidden" name="qty-n2" value="0">
+  <input type="hidden" name="qty-n3" value="0">
+  <input type="hidden" name="qty-n4" value="0">
+  <input type="hidden" name="qty-n5" value="0">
+  <input type="hidden" name="qty-n6" value="0">
+  <input type="hidden" name="qty-n7" value="0">
+  <input type="hidden" name="qty-n8" value="0">
+  <input type="hidden" name="paypal-order-id" value="">
+  <input type="hidden" name="paypal-status" value="">
 
   <!-- Info souscription -->
   <div class="info-note">
@@ -416,7 +415,7 @@ function renderOldIssues() {
       '<div class="issue-price">' + iss.price + ' €</div>' +
       '<div class="qty-row">' +
         '<button type="button" class="qty-btn" data-act="minus" data-num="' + iss.num + '">−</button>' +
-        '<input type="number" class="qty-input" min="0" max="50" value="0" data-num="' + iss.num + '" name="qty-n' + iss.num + '">' +
+        '<input type="number" class="qty-input" min="0" max="50" value="0" data-num="' + iss.num + '">' +
         '<button type="button" class="qty-btn" data-act="plus" data-num="' + iss.num + '">+</button>' +
       '</div>' +
     '</div>';
@@ -456,17 +455,10 @@ function renderIssues() {
 
 function onQtyChange(num, v) {
   quantities[num] = v;
-  var card = document.querySelector('[data-num="' + num + '"]');
-  if (card) {
-    if (card.classList.contains('issue') || card.classList.contains('issue-featured')) {
-      card.classList.toggle('has-qty', v > 0);
-    } else {
-      // C'est l'input — remonter au parent card
-      var parent = card.closest('.issue, .issue-featured');
-      if (parent) parent.classList.toggle('has-qty', v > 0);
-    }
-  }
-  // Sécurité supplémentaire : trouver toutes les cards et leur input
+  // Mettre à jour l'input caché pour la soumission Netlify Forms
+  var hidden = document.querySelector('input[type="hidden"][name="qty-n' + num + '"]');
+  if (hidden) hidden.value = v;
+  // Mise à jour visuelle des cards
   var featCard = document.querySelector('.issue-featured[data-num="' + num + '"]');
   if (featCard) featCard.classList.toggle('has-qty', v > 0);
   var issueCard = document.querySelector('.issue[data-num="' + num + '"]');
@@ -706,22 +698,11 @@ if (window.paypal && paypal.Buttons) {
     },
     onApprove: function(data, actions) {
       return actions.order.capture().then(function(details) {
-        // Paiement réussi : soumettre la commande à Netlify Forms avec le PayPal Order ID
-        var form = document.getElementById('commande-form');
-        var hidden = document.createElement('input');
-        hidden.type = 'hidden';
-        hidden.name = 'paypal-order-id';
-        hidden.value = details.id;
-        form.appendChild(hidden);
-
-        var hiddenStatus = document.createElement('input');
-        hiddenStatus.type = 'hidden';
-        hiddenStatus.name = 'paypal-status';
-        hiddenStatus.value = 'PAID — ' + details.status + ' — ' + (details.payer ? details.payer.email_address : '');
-        form.appendChild(hiddenStatus);
-
-        // Soumettre le formulaire (Netlify enregistre + redirige)
-        form.submit();
+        // Paiement réussi : remplir les inputs hidden et soumettre
+        document.querySelector('input[name="paypal-order-id"]').value = details.id;
+        document.querySelector('input[name="paypal-status"]').value =
+          'PAID — ' + details.status + ' — ' + (details.payer ? details.payer.email_address : '');
+        document.getElementById('commande-form').submit();
       });
     },
     onError: function(err) {
