@@ -36,6 +36,63 @@ button, input, select, textarea { font-family: inherit; }
 .issue-price { font: 14px/1 Arial; color: var(--muted); margin-bottom: 10px; }
 .issue-price .promo { color: var(--green); font-weight: bold; }
 .issue-price .old { text-decoration: line-through; color: #aaa; margin-left: 4px; }
+
+/* N°8 featured card */
+.issue-featured {
+  position: relative;
+  background: linear-gradient(135deg, #2d3461 0%, #1e2245 100%);
+  border: 2px solid #c8a060;
+  border-radius: 6px;
+  padding: 22px 26px;
+  color: #fff;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 26px;
+}
+.issue-featured.has-qty { background: linear-gradient(135deg, #1e2245 0%, #131730 100%); }
+.feat-badge {
+  position: absolute; top: -10px; left: 24px;
+  background: #c8a060; color: #fff;
+  font: 600 10px/1 Arial; letter-spacing: 2px; text-transform: uppercase;
+  padding: 5px 12px; border-radius: 3px;
+}
+.feat-left { min-width: 0; }
+.feat-num { font: 600 10px/1 Arial; color: #c8a060; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+.feat-title { font: normal 22px/1.2 Georgia; color: #fff; margin-bottom: 2px; }
+.feat-sub { font: italic 13px/1.4 Georgia; color: rgba(255,255,255,.7); margin-bottom: 10px; }
+.feat-price { display: flex; align-items: baseline; gap: 10px; }
+.feat-price .promo { font: bold 28px/1 Georgia; color: #c8a060; }
+.feat-price .old { font: 16px/1 Georgia; color: rgba(255,255,255,.4); text-decoration: line-through; }
+.feat-price .label { font: 11px/1 Arial; color: rgba(255,255,255,.5); letter-spacing: 1px; text-transform: uppercase; margin-left: 4px; }
+.feat-right { display: flex; align-items: center; gap: 8px; }
+.feat-right .qty-btn {
+  width: 34px; height: 34px; border: 1px solid rgba(255,255,255,.25);
+  background: rgba(255,255,255,.08); color: #fff; border-radius: 4px;
+  cursor: pointer; font-size: 16px; transition: background .15s;
+}
+.feat-right .qty-btn:hover { background: #c8a060; border-color: #c8a060; }
+.feat-right .qty-input {
+  width: 50px; text-align: center; padding: 7px 4px;
+  border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08);
+  border-radius: 4px; color: #fff; font: 600 16px/1 Arial;
+  -moz-appearance: textfield;
+}
+.feat-right .qty-input::-webkit-outer-spin-button,
+.feat-right .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.feat-right .qty-input:focus { outline: none; border-color: #c8a060; }
+
+/* Subtitle "Anciens numéros" */
+.sub-section {
+  font: 600 12px/1 Arial;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-bottom: 10px;
+  margin: 8px 0 16px;
+  border-bottom: 1px solid var(--border);
+}
 .qty-row { display: flex; align-items: center; gap: 8px; }
 .qty-btn { width: 28px; height: 28px; border: 1px solid var(--border); background: #fff; border-radius: 4px; cursor: pointer; font-size: 14px; color: var(--navy); transition: background .15s, border-color .15s; }
 .qty-btn:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
@@ -112,6 +169,9 @@ button, input, select, textarea { font-family: inherit; }
   .row-grid, .ship-options, .pay-options { grid-template-columns: 1fr; }
   .issues { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .issue { padding: 12px; }
+  .issue-featured { grid-template-columns: 1fr; gap: 16px; padding: 22px 20px; }
+  .feat-right { justify-content: center; }
+  .feat-title { font-size: 19px; }
 }
 </style>
 </head>
@@ -139,7 +199,14 @@ button, input, select, textarea { font-family: inherit; }
   <div class="card">
     <div class="card-body">
       <div class="card-title">1. Numéros souhaités</div>
+
+      <!-- N°8 mis en avant -->
+      <div id="featured-n8"></div>
+
+      <!-- Anciens numéros 1 à 7 -->
+      <div class="sub-section">Anciens numéros (1 à 7) — 20 € l'exemplaire</div>
       <div class="issues" id="issues-grid"></div>
+
       <input type="hidden" name="commande-details" id="commande-details">
     </div>
   </div>
@@ -272,19 +339,43 @@ var SHIPPING = {
 
 var quantities = {};  // { 1: 0, 2: 1, ... }
 
-// ── Rendu des numéros ──
-function renderIssues() {
+// ── Rendu du N°8 mis en avant ──
+function renderFeatured() {
+  var iss = ISSUES.find(function(i){ return i.num === 8; });
+  if (!iss) return;
+  var box = document.getElementById('featured-n8');
+  box.innerHTML =
+    '<div class="issue-featured" data-num="8">' +
+      '<div class="feat-badge">★ Souscription · jusqu’au 25 mai</div>' +
+      '<div class="feat-left">' +
+        '<div class="feat-num">Numéro 8 — Dernier paru</div>' +
+        '<div class="feat-title">Revue ARCA n°8</div>' +
+        '<div class="feat-sub">Lettres, hermétisme, alchimie, traditions spirituelles</div>' +
+        '<div class="feat-price">' +
+          '<span class="promo">15 €</span>' +
+          '<span class="old">20 €</span>' +
+          '<span class="label">tarif souscription</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="feat-right">' +
+        '<button type="button" class="qty-btn" data-act="minus" data-num="8">−</button>' +
+        '<input type="number" class="qty-input" min="0" max="50" value="0" data-num="8" name="qty-n8">' +
+        '<button type="button" class="qty-btn" data-act="plus" data-num="8">+</button>' +
+      '</div>' +
+    '</div>';
+  attachQtyListeners(box);
+}
+
+// ── Rendu des anciens numéros (1-7) ──
+function renderOldIssues() {
   var grid = document.getElementById('issues-grid');
   var html = '';
   ISSUES.forEach(function(iss){
-    var priceHtml = iss.promo
-      ? '<span class="promo">' + iss.promo + ' €</span><span class="old">' + iss.price + ' €</span>'
-      : iss.price + ' €';
-    var promoLabel = iss.promo ? '<div style="font:9px/1 Arial;color:var(--gold);letter-spacing:.5px;text-transform:uppercase;margin-top:2px;">' + iss.promoLabel + '</div>' : '';
+    if (iss.num === 8) return;  // N°8 traité séparément
     html += '<div class="issue" data-num="' + iss.num + '">' +
       '<div class="issue-num">Numéro ' + iss.num + '</div>' +
-      '<div class="issue-title">' + iss.title + promoLabel + '</div>' +
-      '<div class="issue-price">' + priceHtml + '</div>' +
+      '<div class="issue-title">N° ' + iss.num + '</div>' +
+      '<div class="issue-price">' + iss.price + ' €</div>' +
       '<div class="qty-row">' +
         '<button type="button" class="qty-btn" data-act="minus" data-num="' + iss.num + '">−</button>' +
         '<input type="number" class="qty-input" min="0" max="50" value="0" data-num="' + iss.num + '" name="qty-n' + iss.num + '">' +
@@ -293,12 +384,16 @@ function renderIssues() {
     '</div>';
   });
   grid.innerHTML = html;
-  // Listeners
-  grid.querySelectorAll('.qty-btn').forEach(function(btn){
+  attachQtyListeners(grid);
+}
+
+// ── Attacher les listeners +/- et input ──
+function attachQtyListeners(container) {
+  container.querySelectorAll('.qty-btn').forEach(function(btn){
     btn.addEventListener('click', function(){
       var num = parseInt(this.dataset.num, 10);
       var act = this.dataset.act;
-      var input = grid.querySelector('input[data-num="' + num + '"]');
+      var input = document.querySelector('input[data-num="' + num + '"]');
       var v = parseInt(input.value, 10) || 0;
       if (act === 'plus') v = Math.min(50, v + 1);
       else v = Math.max(0, v - 1);
@@ -306,7 +401,7 @@ function renderIssues() {
       onQtyChange(num, v);
     });
   });
-  grid.querySelectorAll('.qty-input').forEach(function(inp){
+  container.querySelectorAll('.qty-input').forEach(function(inp){
     inp.addEventListener('input', function(){
       var num = parseInt(this.dataset.num, 10);
       var v = Math.max(0, Math.min(50, parseInt(this.value, 10) || 0));
@@ -316,10 +411,28 @@ function renderIssues() {
   });
 }
 
+function renderIssues() {
+  renderFeatured();
+  renderOldIssues();
+}
+
 function onQtyChange(num, v) {
   quantities[num] = v;
-  var card = document.querySelector('.issue[data-num="' + num + '"]');
-  if (card) card.classList.toggle('has-qty', v > 0);
+  var card = document.querySelector('[data-num="' + num + '"]');
+  if (card) {
+    if (card.classList.contains('issue') || card.classList.contains('issue-featured')) {
+      card.classList.toggle('has-qty', v > 0);
+    } else {
+      // C'est l'input — remonter au parent card
+      var parent = card.closest('.issue, .issue-featured');
+      if (parent) parent.classList.toggle('has-qty', v > 0);
+    }
+  }
+  // Sécurité supplémentaire : trouver toutes les cards et leur input
+  var featCard = document.querySelector('.issue-featured[data-num="' + num + '"]');
+  if (featCard) featCard.classList.toggle('has-qty', v > 0);
+  var issueCard = document.querySelector('.issue[data-num="' + num + '"]');
+  if (issueCard) issueCard.classList.toggle('has-qty', v > 0);
   updateSummary();
 }
 
