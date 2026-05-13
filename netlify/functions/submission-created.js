@@ -10,48 +10,23 @@
 //                          (doit être une adresse d'un domaine vérifié sur Brevo)
 
 exports.handler = async function(event) {
-  // Note: les invocations event-triggered (Netlify Forms) n'ont pas de httpMethod,
-  // donc on n'en exige pas. On accepte tout invocation valide avec body JSON.
+  // Note: les invocations event-triggered (Netlify Forms) n'ont pas de httpMethod.
   try {
     const body = JSON.parse(event.body);
-
-    // === MODE DEBUG: envoyer le body brut par email pour comprendre la structure ===
     const apiKey = process.env.BREVO_API_KEY;
     const toRaw = (process.env.ORDER_EMAIL_TO || "").split(",").map(s => s.trim()).filter(Boolean);
     const fromEmail = process.env.ORDER_EMAIL_FROM || "";
-    if (apiKey && toRaw.length && fromEmail) {
-      const debugHtml = `<h2>Debug Netlify Function</h2>
-<p><strong>Top-level keys:</strong> ${Object.keys(body).join(", ")}</p>
-<p><strong>Body content:</strong></p>
-<pre style="background:#f4f4f4;padding:14px;border-radius:4px;font-size:11px;white-space:pre-wrap;word-break:break-all;">${
-  String(JSON.stringify(body, null, 2)).replace(/[<>&]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;"}[c])).substring(0, 8000)
-}</pre>`;
-      try {
-        await fetch("https://api.brevo.com/v3/smtp/email", {
-          method: "POST",
-          headers: { "accept":"application/json","api-key": apiKey,"Content-Type":"application/json" },
-          body: JSON.stringify({
-            sender: { name: "ARCA Debug", email: fromEmail },
-            to: toRaw.map(e => ({ email: e })),
-            subject: "🔍 DEBUG Netlify Function — keys: " + Object.keys(body).join(","),
-            htmlContent: debugHtml
-          })
-        });
-      } catch(e) { console.error("Debug email failed:", e); }
-    }
 
-    // Tenter d'extraire form_name à plusieurs endroits possibles
+    // Netlify Forms peut envelopper la soumission dans payload
     const submission = body.payload || body;
     const formName = submission.form_name || submission.formName || body.form_name;
-    console.log("Detected form_name:", formName);
+    console.log("submission-created invoked, form_name =", formName);
 
     if (formName !== "commande-arca") {
-      console.log("Ignored — form_name doesn't match");
       return { statusCode: 200, body: "Ignored (form_name=" + formName + ")" };
     }
 
     const d = submission.data || body.data || {};
-    console.log("Data fields:", Object.keys(d));
     console.log("Processing commande for:", d.nom, "/", d.email, "/ paiement:", d.paiement);
     const html = buildEmailHtml(d);
     const text = buildEmailText(d);
@@ -62,9 +37,6 @@ exports.handler = async function(event) {
     const subjectPrefix = isPaid ? "✓ PAYÉ" : "⏳ À traiter";
     const subject = `${subjectPrefix} · Commande ARCA · ${totalEUR} · ${d.nom || "Sans nom"}`;
 
-    const apiKey = process.env.BREVO_API_KEY;
-    const toRaw = (process.env.ORDER_EMAIL_TO || "").split(",").map(s => s.trim()).filter(Boolean);
-    const fromEmail = process.env.ORDER_EMAIL_FROM || "";
     if (!apiKey || !toRaw.length || !fromEmail) {
       console.error("Configuration manquante: BREVO_API_KEY, ORDER_EMAIL_TO ou ORDER_EMAIL_FROM");
       return { statusCode: 500, body: "Missing env vars" };
