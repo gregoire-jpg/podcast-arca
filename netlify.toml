@@ -83,6 +83,11 @@
   [headers.values]
     Content-Security-Policy = "frame-ancestors 'self' https://arca-revue.com"
 
+[[headers]]
+  for = "/n8-sommaire.html"
+  [headers.values]
+    Content-Security-Policy = "frame-ancestors 'self' https://arca-revue.com"
+
 # dictionnaire.html integrable
 [[headers]]
   for = "/dictionnaire.html"
