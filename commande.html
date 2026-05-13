@@ -190,7 +190,20 @@ button, input, select, textarea { font-family: inherit; }
 
 <div class="container">
 
-<form name="commande-arca" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="commande-form">
+<!-- Form detection statique pour Netlify (cachée, sert juste à déclarer les champs au build) -->
+<form name="commande-arca" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input name="form-name" value="commande-arca">
+  <input name="bot-field">
+  <input name="nom"><input name="email"><input name="telephone">
+  <input name="adresse"><input name="pays">
+  <input name="livraison"><input name="paiement">
+  <input name="qty-n1"><input name="qty-n2"><input name="qty-n3"><input name="qty-n4">
+  <input name="qty-n5"><input name="qty-n6"><input name="qty-n7"><input name="qty-n8">
+  <input name="commande-details"><input name="lien-etiquette">
+  <input name="paypal-order-id"><input name="paypal-status">
+</form>
+
+<form name="commande-arca" method="POST" action="/commande-merci.html" data-netlify="true" netlify-honeypot="bot-field" id="commande-form">
   <input type="hidden" name="form-name" value="commande-arca">
   <p style="display:none"><label>Ne pas remplir : <input name="bot-field"></label></p>
 
