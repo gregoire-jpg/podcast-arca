@@ -206,8 +206,8 @@ button, input, select, textarea { font-family: inherit; }
   <input type="hidden" name="paypal-status" value="">
 
   <!-- Info souscription -->
-  <div class="info-note">
-    <p><strong>Souscription au n°8</strong> ouverte du 18 au 25 mai à minuit au tarif préférentiel de <strong>15 €</strong> (au lieu de 20 €). Les autres numéros sont à 20 € l'exemplaire (dans la limite des stocks).</p>
+  <div class="info-note" id="info-note">
+    <!-- Texte injecté par JS selon que la souscription est active ou non -->
   </div>
 
   <!-- ── Numéros ── -->
@@ -354,6 +354,11 @@ button, input, select, textarea { font-family: inherit; }
 'use strict';
 
 // ── Données ──
+// Fin de la souscription préférentielle : 25 mai 2026 à minuit (heure belge = UTC+2 en mai)
+// Donc le passage au prix normal se fait le 26 mai à 00:00 CEST = 25 mai 22:00 UTC
+var PROMO_DEADLINE = new Date('2026-05-25T22:00:00Z');
+var PROMO_ACTIVE = new Date() < PROMO_DEADLINE;
+
 var ISSUES = [
   { num: 1, title: 'N° 1', price: 20, promo: null },
   { num: 2, title: 'N° 2', price: 20, promo: null },
@@ -362,7 +367,7 @@ var ISSUES = [
   { num: 5, title: 'N° 5', price: 20, promo: null },
   { num: 6, title: 'N° 6', price: 20, promo: null },
   { num: 7, title: 'N° 7', price: 20, promo: null },
-  { num: 8, title: 'N° 8', price: 20, promo: 15, promoLabel: 'Souscription' }
+  { num: 8, title: 'N° 8', price: 20, promo: PROMO_ACTIVE ? 15 : null, promoLabel: 'Souscription' }
 ];
 
 var SHIPPING = {
@@ -380,18 +385,20 @@ function renderFeatured() {
   var iss = ISSUES.find(function(i){ return i.num === 8; });
   if (!iss) return;
   var box = document.getElementById('featured-n8');
+  var badgeHtml = PROMO_ACTIVE
+    ? '<div class="feat-badge">★ Souscription · jusqu’au 25 mai</div>'
+    : '<div class="feat-badge" style="background:#3a8a4a;">★ Dernier paru</div>';
+  var priceHtml = PROMO_ACTIVE
+    ? '<span class="promo">15 €</span><span class="old">20 €</span><span class="label">tarif souscription</span>'
+    : '<span class="promo">20 €</span><span class="label">l\'exemplaire</span>';
   box.innerHTML =
     '<div class="issue-featured" data-num="8">' +
-      '<div class="feat-badge">★ Souscription · jusqu’au 25 mai</div>' +
+      badgeHtml +
       '<div class="feat-left">' +
         '<div class="feat-num">Numéro 8 — Dernier paru</div>' +
         '<div class="feat-title">Revue ARCA n°8</div>' +
         '<div class="feat-sub">Lettres, hermétisme, alchimie, traditions spirituelles</div>' +
-        '<div class="feat-price">' +
-          '<span class="promo">15 €</span>' +
-          '<span class="old">20 €</span>' +
-          '<span class="label">tarif souscription</span>' +
-        '</div>' +
+        '<div class="feat-price">' + priceHtml + '</div>' +
       '</div>' +
       '<div class="feat-right">' +
         '<button type="button" class="qty-btn" data-act="minus" data-num="8">−</button>' +
@@ -774,6 +781,11 @@ function submitOrder() {
   }
   sendOrderToFunction(false, '');
 }
+
+// Texte d'info en haut selon la période
+document.getElementById('info-note').innerHTML = PROMO_ACTIVE
+  ? '<p><strong>Souscription au n°8</strong> ouverte du 18 au 25 mai à minuit au tarif préférentiel de <strong>15 €</strong> (au lieu de 20 €). Les autres numéros sont à 20 € l\'exemplaire (dans la limite des stocks).</p>'
+  : '<p>Tous les numéros de la revue ARCA sont disponibles au prix de <strong>20 €</strong> l\'exemplaire (dans la limite des stocks).</p>';
 
 // Init
 renderIssues();
