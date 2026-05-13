@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Commande — Revue ARCA</title>
+<!-- ⚠ REMPLACE 'YOUR_PAYPAL_CLIENT_ID' par ton Client ID PayPal
+     Sandbox (test) : utilise ton ID Sandbox
+     Production : remplace par ton ID Live -->
+<script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=EUR&disable-funding=credit,paylater" data-namespace="paypal"></script>
 <style>
 :root {
   --navy:#2d3461; --navy-dk:#1e2245; --gold:#c8a060;
@@ -283,7 +287,22 @@ button, input, select, textarea { font-family: inherit; }
           <div class="pay-name">💳 PayPal</div>
         </label>
       </div>
-      <p style="margin-top:14px;font-size:13px;color:var(--muted);font-style:italic;">Pas de paiements en espèces. Les informations de paiement vous seront communiquées par retour d'e-mail.</p>
+
+      <!-- Note virement (affichée par défaut) -->
+      <p id="note-virement" style="margin-top:14px;font-size:13px;color:var(--muted);font-style:italic;">Les informations de paiement (RIB) vous seront communiquées par retour d'e-mail après confirmation du montant.</p>
+
+      <!-- Zone PayPal (cachée par défaut) -->
+      <div id="paypal-zone" style="display:none;margin-top:18px;">
+        <div id="paypal-info" style="padding:14px 18px;background:#fffbf4;border-left:3px solid #c8a060;border-radius:0 4px 4px 0;margin-bottom:14px;">
+          <p style="margin:0;font-size:13.5px;line-height:1.65;color:#444;">
+            <strong style="color:#2d3461;">Paiement sécurisé via PayPal</strong> — le bouton apparaîtra une fois tous les champs remplis. Le montant inclut les frais de port.
+          </p>
+        </div>
+        <div id="paypal-button-container"></div>
+        <p id="paypal-missing" style="margin-top:10px;font-size:12.5px;color:var(--muted);text-align:center;font-style:italic;display:none;">
+          Veuillez d'abord compléter votre adresse et choisir un mode de livraison ci-dessus.
+        </p>
+      </div>
     </div>
   </div>
 
@@ -532,14 +551,145 @@ document.querySelectorAll('input[name="paiement"]').forEach(function(r){
   r.addEventListener('change', function(){
     document.querySelectorAll('.pay-opt').forEach(function(o){ o.classList.remove('active'); });
     this.closest('.pay-opt').classList.add('active');
+    togglePaymentZone(this.value);
   });
 });
 
-// Submit handler (Netlify Forms gère l'envoi)
-document.getElementById('commande-form').addEventListener('submit', function(e){
-  // Netlify intercepte normalement, mais on peut afficher un message custom après redirect
-  // (gestion native par Netlify, redirige vers /commande-merci.html si on en crée une)
+// ═══════════════════ PAYPAL INTEGRATION ═══════════════════
+
+function togglePaymentZone(mode) {
+  var noteVir = document.getElementById('note-virement');
+  var pzone = document.getElementById('paypal-zone');
+  if (mode === 'PayPal') {
+    noteVir.style.display = 'none';
+    pzone.style.display = 'block';
+    updatePayPalState();
+  } else {
+    noteVir.style.display = 'block';
+    pzone.style.display = 'none';
+  }
+}
+
+// Calcule le total actuel (revues + port)
+function getCurrentTotal() {
+  var totalRevues = 0, totalQty = 0;
+  ISSUES.forEach(function(iss){
+    var q = quantities[iss.num] || 0;
+    if (!q) return;
+    var price = iss.promo || iss.price;
+    totalRevues += q * price;
+    totalQty += q;
+  });
+  var pays = document.getElementById('pays').value;
+  var livraison = document.querySelector('input[name="livraison"]:checked');
+  var frais = 0;
+  if (livraison && pays && SHIPPING[pays]) {
+    var mode = livraison.value === 'Mondial Relay' ? 'relay' : 'poste';
+    var c = SHIPPING[pays][mode];
+    if (c !== null) frais = c;
+  }
+  return { revues: totalRevues, port: frais, total: totalRevues + frais, qty: totalQty };
+}
+
+// Vérifie si la commande PayPal peut démarrer
+function isOrderReady() {
+  var t = getCurrentTotal();
+  if (t.qty === 0 || t.total === 0) return false;
+  var nom = document.getElementById('nom').value.trim();
+  var email = document.getElementById('email').value.trim();
+  var adresse = document.getElementById('adresse').value.trim();
+  var pays = document.getElementById('pays').value;
+  var livraison = document.querySelector('input[name="livraison"]:checked');
+  if (!nom || !email || !adresse || !pays || !livraison) return false;
+  if (pays === 'autre') return false; // tarif port à confirmer manuellement
+  return true;
+}
+
+function updatePayPalState() {
+  var ready = isOrderReady();
+  var missing = document.getElementById('paypal-missing');
+  var btnContainer = document.getElementById('paypal-button-container');
+  if (ready) {
+    missing.style.display = 'none';
+    btnContainer.style.opacity = '1';
+    btnContainer.style.pointerEvents = 'auto';
+  } else {
+    missing.style.display = 'block';
+    btnContainer.style.opacity = '.4';
+    btnContainer.style.pointerEvents = 'none';
+  }
+}
+
+// Re-vérifier quand n'importe quel champ change
+['nom', 'email', 'adresse', 'pays'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', updatePayPalState);
+  document.getElementById(id).addEventListener('change', updatePayPalState);
 });
+document.querySelectorAll('input[name="livraison"]').forEach(function(r){
+  r.addEventListener('change', updatePayPalState);
+});
+
+// Rendu du bouton PayPal
+if (window.paypal && paypal.Buttons) {
+  paypal.Buttons({
+    style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal', height: 45 },
+    createOrder: function(data, actions) {
+      var t = getCurrentTotal();
+      if (t.total === 0) {
+        alert('Veuillez sélectionner au moins un exemplaire.');
+        return null;
+      }
+      // Construire la description
+      var items = [];
+      ISSUES.forEach(function(iss){
+        var q = quantities[iss.num] || 0;
+        if (!q) return;
+        items.push('N°' + iss.num + ' × ' + q);
+      });
+      var desc = 'Revue ARCA — ' + items.join(', ');
+      return actions.order.create({
+        purchase_units: [{
+          description: desc.substring(0, 127), // PayPal limit
+          amount: {
+            value: t.total.toFixed(2),
+            currency_code: 'EUR',
+            breakdown: {
+              item_total: { currency_code: 'EUR', value: t.revues.toFixed(2) },
+              shipping:   { currency_code: 'EUR', value: t.port.toFixed(2) }
+            }
+          }
+        }]
+      });
+    },
+    onApprove: function(data, actions) {
+      return actions.order.capture().then(function(details) {
+        // Paiement réussi : soumettre la commande à Netlify Forms avec le PayPal Order ID
+        var form = document.getElementById('commande-form');
+        var hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = 'paypal-order-id';
+        hidden.value = details.id;
+        form.appendChild(hidden);
+
+        var hiddenStatus = document.createElement('input');
+        hiddenStatus.type = 'hidden';
+        hiddenStatus.name = 'paypal-status';
+        hiddenStatus.value = 'PAID — ' + details.status + ' — ' + (details.payer ? details.payer.email_address : '');
+        form.appendChild(hiddenStatus);
+
+        // Soumettre le formulaire (Netlify enregistre + redirige)
+        form.submit();
+      });
+    },
+    onError: function(err) {
+      console.error('Erreur PayPal :', err);
+      alert('Une erreur est survenue lors du paiement. Merci de réessayer ou de nous contacter à info@arca-librairie.com.');
+    }
+  }).render('#paypal-button-container');
+}
+
+// État initial
+updatePayPalState();
 
 // Init
 renderIssues();
