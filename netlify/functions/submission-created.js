@@ -16,13 +16,33 @@ exports.handler = async function(event) {
 
   try {
     const body = JSON.parse(event.body);
-    // DEBUG: afficher la structure complète pour identifier le format Netlify
-    console.log("=== EVENT BODY KEYS ===", Object.keys(body));
-    console.log("=== BODY SAMPLE ===", JSON.stringify(body).substring(0, 500));
 
-    // Netlify Forms peut envoyer dans différents formats selon la version :
-    //   - direct: { form_name, data, ... }
-    //   - wrappé: { payload: { form_name, data, ... } }
+    // === MODE DEBUG: envoyer le body brut par email pour comprendre la structure ===
+    const apiKey = process.env.BREVO_API_KEY;
+    const toRaw = (process.env.ORDER_EMAIL_TO || "").split(",").map(s => s.trim()).filter(Boolean);
+    const fromEmail = process.env.ORDER_EMAIL_FROM || "";
+    if (apiKey && toRaw.length && fromEmail) {
+      const debugHtml = `<h2>Debug Netlify Function</h2>
+<p><strong>Top-level keys:</strong> ${Object.keys(body).join(", ")}</p>
+<p><strong>Body content:</strong></p>
+<pre style="background:#f4f4f4;padding:14px;border-radius:4px;font-size:11px;white-space:pre-wrap;word-break:break-all;">${
+  String(JSON.stringify(body, null, 2)).replace(/[<>&]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;"}[c])).substring(0, 8000)
+}</pre>`;
+      try {
+        await fetch("https://api.brevo.com/v3/smtp/email", {
+          method: "POST",
+          headers: { "accept":"application/json","api-key": apiKey,"Content-Type":"application/json" },
+          body: JSON.stringify({
+            sender: { name: "ARCA Debug", email: fromEmail },
+            to: toRaw.map(e => ({ email: e })),
+            subject: "🔍 DEBUG Netlify Function — keys: " + Object.keys(body).join(","),
+            htmlContent: debugHtml
+          })
+        });
+      } catch(e) { console.error("Debug email failed:", e); }
+    }
+
+    // Tenter d'extraire form_name à plusieurs endroits possibles
     const submission = body.payload || body;
     const formName = submission.form_name || submission.formName || body.form_name;
     console.log("Detected form_name:", formName);
