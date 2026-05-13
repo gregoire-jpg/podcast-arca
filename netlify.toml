@@ -88,6 +88,11 @@
   [headers.values]
     Content-Security-Policy = "frame-ancestors 'self' https://arca-revue.com"
 
+[[headers]]
+  for = "/etiquette.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
 # dictionnaire.html integrable
 [[headers]]
   for = "/dictionnaire.html"

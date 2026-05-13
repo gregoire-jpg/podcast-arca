@@ -212,6 +212,7 @@ button, input, select, textarea { font-family: inherit; }
       <div class="issues" id="issues-grid"></div>
 
       <input type="hidden" name="commande-details" id="commande-details">
+      <input type="hidden" name="lien-etiquette" id="lien-etiquette">
     </div>
   </div>
 
@@ -546,6 +547,21 @@ function updateSummary() {
   sumEl.innerHTML = detailsHtml + fraisHtml + totalHtml + note;
   document.getElementById('submit-btn').disabled = false;
   document.getElementById('commande-details').value = detailsText.join(' | ') + ' | Sous-total revues: ' + totalRevues + ' € | Port: ' + frais + ' € | TOTAL: ' + total + ' €';
+
+  // Lien direct vers /etiquette.html avec adresse pré-remplie
+  // (apparaît dans l'email Netlify pour impression A6 en un clic)
+  var nom = document.getElementById('nom').value.trim();
+  var adresse = document.getElementById('adresse').value.trim();
+  var paysVal = document.getElementById('pays').value;
+  if (nom || adresse) {
+    var fullAdr = adresse + (paysVal && paysVal !== 'autre' ? '\n' + paysVal : '');
+    var url = window.location.origin + '/etiquette.html'
+      + '?nom=' + encodeURIComponent(nom)
+      + '&adresse=' + encodeURIComponent(fullAdr);
+    document.getElementById('lien-etiquette').value = url;
+  } else {
+    document.getElementById('lien-etiquette').value = '';
+  }
 }
 
 // ── Listeners ──
@@ -633,7 +649,10 @@ function updatePayPalState() {
 
 // Re-vérifier quand n'importe quel champ change
 ['nom', 'email', 'adresse', 'pays'].forEach(function(id){
-  document.getElementById(id).addEventListener('input', updatePayPalState);
+  document.getElementById(id).addEventListener('input', function(){
+    updatePayPalState();
+    updateSummary();  // pour régénérer le lien-etiquette
+  });
   document.getElementById(id).addEventListener('change', updatePayPalState);
 });
 document.querySelectorAll('input[name="livraison"]').forEach(function(r){
