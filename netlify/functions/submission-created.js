@@ -15,12 +15,17 @@ exports.handler = async function(event) {
   }
 
   try {
-    const submission = JSON.parse(event.body);
+    const body = JSON.parse(event.body);
+    // Netlify Forms enveloppe la soumission dans `payload`, mais nos tests directs
+    // envoient les données à plat. On gère les deux cas.
+    const submission = body.payload || body;
     if (submission.form_name !== "commande-arca") {
+      console.log("Ignored (form_name=" + submission.form_name + ")");
       return { statusCode: 200, body: "Ignored (not commande-arca)" };
     }
 
     const d = submission.data || {};
+    console.log("Processing commande for:", d.nom, "/", d.email, "/ paiement:", d.paiement);
     const html = buildEmailHtml(d);
     const text = buildEmailText(d);
     const totalLine = d["commande-details"] || "";
