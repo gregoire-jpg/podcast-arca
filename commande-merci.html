@@ -5,18 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Commande reçue — Revue ARCA</title>
 <style>
-:root { --navy:#2d3461; --gold:#c8a060; --bg:#f0ede8; }
+:root { --navy:#2d3461; --navy-dk:#1e2245; --gold:#c8a060; --bg:#f0ede8; --border:#e2ddd8; --muted:#777; --green:#3a8a4a; }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: Georgia, serif; background: var(--bg); color: var(--navy); padding: 0; }
+body { font-family: Georgia, serif; background: var(--bg); color: var(--navy); padding: 0; line-height: 1.5; }
 .hdr { background: var(--navy); padding: 48px 20px; text-align: center; color: #fff; }
 .hdr h1 { font: 38px/1 Georgia; letter-spacing: 10px; text-transform: uppercase; font-weight: normal; }
 .hdr .rule { width: 44px; height: 2px; background: var(--gold); margin: 16px auto; }
 .hdr p { font: italic 14px/1 Georgia; color: rgba(255,255,255,.65); }
 .box { max-width: 640px; margin: 40px auto; padding: 48px 32px; background: #fff; border-radius: 6px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
-.check { width: 70px; height: 70px; border-radius: 50%; background: var(--gold); color: #fff; font-size: 38px; line-height: 70px; margin: 0 auto 20px; }
-h2 { font: normal 26px/1.3 Georgia; color: var(--navy); margin-bottom: 16px; }
+.check { width: 70px; height: 70px; border-radius: 50%; color: #fff; font-size: 38px; line-height: 70px; margin: 0 auto 20px; }
+.check.gold  { background: var(--gold); }
+.check.green { background: var(--green); }
+h2 { font: normal 26px/1.35 Georgia; color: var(--navy); margin-bottom: 16px; }
 p { font: 15px/1.7 Georgia; color: #444; margin-bottom: 14px; }
-.contact { margin-top: 26px; padding-top: 22px; border-top: 1px solid #e2ddd8; font-size: 13px; color: #777; }
+.ref { display: inline-block; padding: 8px 14px; background: var(--bg); border-radius: 4px; font: 600 12px/1 'Courier New', monospace; color: var(--navy); letter-spacing: .5px; margin-top: 6px; word-break: break-all; }
+.steps { margin: 28px 0 22px; padding: 20px 24px; background: var(--bg); border-radius: 6px; text-align: left; }
+.steps-title { font: 600 11px/1 Arial; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
+.steps p { margin-bottom: 8px; font-size: 14px; color: #444; }
+.steps p:last-child { margin-bottom: 0; }
+.contact { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); }
 .contact a { color: var(--gold); text-decoration: none; }
 </style>
 </head>
@@ -28,15 +35,54 @@ p { font: 15px/1.7 Georgia; color: #444; margin-bottom: 14px; }
   <p>Revue &amp; Librairie</p>
 </header>
 
-<div class="box">
-  <div class="check">✓</div>
+<!-- ── Message PayPal (paiement réussi) ── -->
+<div class="box" id="box-paypal" style="display:none">
+  <div class="check green">✓</div>
+  <h2>Votre paiement a bien été reçu</h2>
+  <p>Merci pour votre commande et votre confiance.<br>Votre paiement <strong style="color:var(--navy)">PayPal</strong> a été enregistré avec succès.</p>
+  <div id="ref-block" style="display:none">
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:4px;">Référence de transaction :</p>
+    <div class="ref" id="paypal-ref">—</div>
+  </div>
+  <div class="steps">
+    <div class="steps-title">Prochaines étapes</div>
+    <p><strong style="color:var(--navy)">1.</strong> Vous allez recevoir un e-mail de confirmation PayPal sous quelques minutes.</p>
+    <p><strong style="color:var(--navy)">2.</strong> Nous préparons votre colis et vous informerons de l'expédition dans les jours qui suivent.</p>
+    <p><strong style="color:var(--navy)">3.</strong> Si vous avez choisi "En main propre", nous vous contacterons pour convenir d'un rendez-vous.</p>
+  </div>
+  <div class="contact">
+    Une question ? <a href="mailto:info@arca-librairie.com">info@arca-librairie.com</a>
+  </div>
+</div>
+
+<!-- ── Message Virement (commande à confirmer) ── -->
+<div class="box" id="box-virement" style="display:none">
+  <div class="check gold">✓</div>
   <h2>Merci, votre commande nous est bien parvenue.</h2>
-  <p>Nous vous contacterons dans les 24 heures à l'adresse e-mail indiquée avec la confirmation du montant total et les informations de paiement (virement bancaire ou PayPal).</p>
+  <p>Nous vous contacterons dans les <strong style="color:var(--navy)">24 heures</strong> à l'adresse e-mail indiquée avec la confirmation du montant total et les informations de paiement par virement bancaire.</p>
   <p style="font-style:italic;color:#555;">Votre commande doit être confirmée avant le 25 mai à minuit pour bénéficier du tarif souscription du n°8.</p>
   <div class="contact">
     Pour toute question : <a href="mailto:info@arca-librairie.com">info@arca-librairie.com</a>
   </div>
 </div>
+
+<script>
+'use strict';
+var params = new URLSearchParams(window.location.search);
+var paid = params.get('paid');
+var paypalId = params.get('id');
+
+if (paid === 'paypal') {
+  document.getElementById('box-paypal').style.display = 'block';
+  if (paypalId) {
+    document.getElementById('ref-block').style.display = 'block';
+    document.getElementById('paypal-ref').textContent = paypalId;
+  }
+} else {
+  // Par défaut : message virement (commande standard à confirmer)
+  document.getElementById('box-virement').style.display = 'block';
+}
+</script>
 
 </body>
 </html>

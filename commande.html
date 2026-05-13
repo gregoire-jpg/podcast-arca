@@ -712,17 +712,12 @@ if (window.paypal && paypal.Buttons) {
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: body
         }).then(function(response) {
-          if (response.ok || response.status === 200) {
-            window.location.href = '/commande-merci.html';
-          } else {
-            console.error('Netlify Forms a retourné:', response.status);
-            // Paiement OK même si enregistrement échoue
-            window.location.href = '/commande-merci.html?paypal=' + details.id;
-          }
+          // Toujours rediriger vers la page de remerciement PayPal
+          window.location.href = '/commande-merci.html?paid=paypal&id=' + details.id;
         }).catch(function(err) {
           console.error('Erreur fetch:', err);
           // On redirige quand même - le paiement PayPal a réussi
-          window.location.href = '/commande-merci.html?paypal=' + details.id;
+          window.location.href = '/commande-merci.html?paid=paypal&id=' + details.id;
         });
       });
     },
