@@ -16,15 +16,24 @@ exports.handler = async function(event) {
 
   try {
     const body = JSON.parse(event.body);
-    // Netlify Forms enveloppe la soumission dans `payload`, mais nos tests directs
-    // envoient les données à plat. On gère les deux cas.
+    // DEBUG: afficher la structure complète pour identifier le format Netlify
+    console.log("=== EVENT BODY KEYS ===", Object.keys(body));
+    console.log("=== BODY SAMPLE ===", JSON.stringify(body).substring(0, 500));
+
+    // Netlify Forms peut envoyer dans différents formats selon la version :
+    //   - direct: { form_name, data, ... }
+    //   - wrappé: { payload: { form_name, data, ... } }
     const submission = body.payload || body;
-    if (submission.form_name !== "commande-arca") {
-      console.log("Ignored (form_name=" + submission.form_name + ")");
-      return { statusCode: 200, body: "Ignored (not commande-arca)" };
+    const formName = submission.form_name || submission.formName || body.form_name;
+    console.log("Detected form_name:", formName);
+
+    if (formName !== "commande-arca") {
+      console.log("Ignored — form_name doesn't match");
+      return { statusCode: 200, body: "Ignored (form_name=" + formName + ")" };
     }
 
-    const d = submission.data || {};
+    const d = submission.data || body.data || {};
+    console.log("Data fields:", Object.keys(d));
     console.log("Processing commande for:", d.nom, "/", d.email, "/ paiement:", d.paiement);
     const html = buildEmailHtml(d);
     const text = buildEmailText(d);
