@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commande — Revue ARCA</title>
+<style>
+:root {
+  --navy:#2d3461; --navy-dk:#1e2245; --gold:#c8a060;
+  --white:#fff; --bg:#faf8f5; --border:#e2ddd8; --muted:#777;
+  --green:#3a8a4a; --red:#c0392b;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Georgia, serif; background: #f0ede8; color: var(--navy); line-height: 1.5; }
+button, input, select, textarea { font-family: inherit; }
+
+/* Header */
+.hdr { background: var(--navy); padding: 48px 20px 40px; text-align: center; }
+.hdr .eyebrow { display: block; font: 11px/1 Arial; letter-spacing: 5px; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
+.hdr h1 { font: 38px/1 Georgia; letter-spacing: 10px; text-transform: uppercase; color: #fff; font-weight: normal; margin-bottom: 14px; }
+.hdr .rule { width: 44px; height: 2px; background: var(--gold); margin: 0 auto 16px; }
+.hdr p { font: italic 14px/1 Georgia; color: rgba(255,255,255,.65); }
+
+/* Container */
+.container { max-width: 760px; margin: 0 auto; padding: 32px 20px 80px; }
+.card { background: #fff; border-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,.06); margin-bottom: 24px; overflow: hidden; }
+.card-body { padding: 28px 32px; }
+.card-title { font: 600 14px/1 Arial; letter-spacing: 1.5px; text-transform: uppercase; color: var(--navy); padding-bottom: 14px; margin-bottom: 18px; border-bottom: 2px solid var(--gold); }
+
+/* Issues grid */
+.issues { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
+.issue { background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 14px 16px; transition: border-color .2s; }
+.issue.has-qty { border-color: var(--gold); background: #fffbf4; }
+.issue-num { font: 600 11px/1 Arial; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+.issue-title { font: 600 13px/1.3 Georgia; color: var(--navy); margin-bottom: 4px; min-height: 32px; }
+.issue-price { font: 14px/1 Arial; color: var(--muted); margin-bottom: 10px; }
+.issue-price .promo { color: var(--green); font-weight: bold; }
+.issue-price .old { text-decoration: line-through; color: #aaa; margin-left: 4px; }
+.qty-row { display: flex; align-items: center; gap: 8px; }
+.qty-btn { width: 28px; height: 28px; border: 1px solid var(--border); background: #fff; border-radius: 4px; cursor: pointer; font-size: 14px; color: var(--navy); transition: background .15s, border-color .15s; }
+.qty-btn:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+.qty-input { flex: 1; text-align: center; padding: 5px 4px; border: 1px solid var(--border); border-radius: 4px; font: 600 14px/1 Arial; color: var(--navy); width: 0; min-width: 0; -moz-appearance: textfield; }
+.qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.qty-input:focus { outline: none; border-color: var(--gold); }
+
+/* Form inputs */
+.row { margin-bottom: 18px; }
+.row:last-child { margin-bottom: 0; }
+.row label { display: block; font: 600 11px/1 Arial; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.row label .req { color: var(--red); }
+.row input[type=text], .row input[type=email], .row textarea, .row select {
+  width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 5px;
+  font: 15px/1.4 Georgia; color: var(--navy); background: #fff; transition: border-color .2s;
+}
+.row input:focus, .row textarea:focus, .row select:focus { outline: none; border-color: var(--gold); }
+.row textarea { resize: vertical; min-height: 80px; }
+.row-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* Shipping options */
+.ship-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ship-opt { border: 2px solid var(--border); border-radius: 5px; padding: 14px 16px; cursor: pointer; transition: border-color .2s, background .2s; }
+.ship-opt:hover { border-color: var(--gold); }
+.ship-opt.active { border-color: var(--navy); background: var(--bg); }
+.ship-opt input { display: none; }
+.ship-name { font: 600 13px/1 Arial; color: var(--navy); letter-spacing: .5px; text-transform: uppercase; margin-bottom: 6px; }
+.ship-cost { font: 20px/1 Georgia; font-weight: bold; color: var(--gold); }
+.ship-cost.empty { color: var(--muted); font-size: 14px; font-style: italic; }
+
+/* Payment options */
+.pay-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pay-opt { border: 2px solid var(--border); border-radius: 5px; padding: 14px; cursor: pointer; text-align: center; transition: border-color .2s, background .2s; }
+.pay-opt:hover { border-color: var(--gold); }
+.pay-opt.active { border-color: var(--navy); background: var(--bg); }
+.pay-opt input { display: none; }
+.pay-name { font: 600 13px/1 Arial; color: var(--navy); letter-spacing: 1px; text-transform: uppercase; }
+
+/* Summary */
+.summary-card { background: var(--navy); color: #fff; }
+.summary-card .card-body { padding: 26px 32px; }
+.summary-title { font: 600 14px/1 Arial; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+.summary-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; color: rgba(255,255,255,.85); }
+.summary-row.sub { border-top: 1px solid rgba(255,255,255,.18); margin-top: 6px; padding-top: 12px; }
+.summary-row.total { border-top: 2px solid var(--gold); margin-top: 8px; padding-top: 14px; font: 600 22px/1 Georgia; color: #fff; }
+.summary-row.empty { color: rgba(255,255,255,.5); font-style: italic; text-align: center; justify-content: center; padding: 20px 0; }
+
+/* Submit */
+.submit-btn {
+  display: block; width: 100%; padding: 16px 24px; border: none;
+  background: var(--gold); color: #fff; font: 600 13px/1 Arial; letter-spacing: 2px; text-transform: uppercase;
+  border-radius: 5px; cursor: pointer; transition: background .2s, transform .1s; margin-top: 18px;
+}
+.submit-btn:hover:not(:disabled) { background: #b8904f; }
+.submit-btn:active:not(:disabled) { transform: scale(.98); }
+.submit-btn:disabled { background: rgba(255,255,255,.2); color: rgba(255,255,255,.5); cursor: not-allowed; }
+
+/* Info note */
+.info-note { background: #fffbf4; border-left: 3px solid var(--gold); padding: 14px 18px; margin-bottom: 24px; border-radius: 0 4px 4px 0; }
+.info-note strong { color: var(--navy); }
+.info-note p { font-size: 14px; line-height: 1.65; color: #444; margin: 0; }
+
+/* Success message */
+.success { background: #e8f5ea; border: 1px solid var(--green); color: #1a5028; padding: 28px; border-radius: 6px; text-align: center; }
+.success h3 { font: normal 22px/1 Georgia; color: var(--green); margin-bottom: 10px; }
+.success p { color: #1a5028; }
+
+/* Mobile */
+@media (max-width: 600px) {
+  .hdr { padding: 36px 16px 30px; }
+  .hdr h1 { font-size: 28px; letter-spacing: 6px; }
+  .container { padding: 20px 12px 60px; }
+  .card-body { padding: 22px 20px; }
+  .row-grid, .ship-options, .pay-options { grid-template-columns: 1fr; }
+  .issues { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .issue { padding: 12px; }
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <span class="eyebrow">Revue &amp; Librairie</span>
+  <h1>ARCA</h1>
+  <div class="rule"></div>
+  <p>Commande de la revue · Numéros 1 à 8</p>
+</header>
+
+<div class="container">
+
+<form name="commande-arca" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="commande-form">
+  <input type="hidden" name="form-name" value="commande-arca">
+  <p style="display:none"><label>Ne pas remplir : <input name="bot-field"></label></p>
+
+  <!-- Info souscription -->
+  <div class="info-note">
+    <p><strong>Souscription au n°8</strong> ouverte du 18 au 25 mai à minuit au tarif préférentiel de <strong>15 €</strong> (au lieu de 20 €). Les autres numéros sont à 20 € l'exemplaire (dans la limite des stocks).</p>
+  </div>
+
+  <!-- ── Numéros ── -->
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">1. Numéros souhaités</div>
+      <div class="issues" id="issues-grid"></div>
+      <input type="hidden" name="commande-details" id="commande-details">
+    </div>
+  </div>
+
+  <!-- ── Coordonnées ── -->
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">2. Vos coordonnées</div>
+      <div class="row-grid">
+        <div class="row">
+          <label for="nom">Nom complet <span class="req">*</span></label>
+          <input type="text" id="nom" name="nom" required>
+        </div>
+        <div class="row">
+          <label for="email">E-mail <span class="req">*</span></label>
+          <input type="email" id="email" name="email" required>
+        </div>
+      </div>
+      <div class="row">
+        <label for="adresse">Adresse complète de livraison <span class="req">*</span></label>
+        <textarea id="adresse" name="adresse" required placeholder="Rue, numéro&#10;Code postal, ville"></textarea>
+      </div>
+      <div class="row-grid">
+        <div class="row">
+          <label for="pays">Pays <span class="req">*</span></label>
+          <select id="pays" name="pays" required>
+            <option value="">— Choisir —</option>
+            <option value="Belgique">Belgique</option>
+            <option value="France">France</option>
+            <option value="Italie">Italie</option>
+            <option value="Espagne">Espagne</option>
+            <option value="autre">Autre pays (nous consulter)</option>
+          </select>
+        </div>
+        <div class="row">
+          <label for="telephone">Téléphone (optionnel)</label>
+          <input type="text" id="telephone" name="telephone">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Livraison ── -->
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">3. Mode de livraison</div>
+      <div class="ship-options" id="ship-options">
+        <label class="ship-opt" data-mode="relay">
+          <input type="radio" name="livraison" value="Mondial Relay" required>
+          <div class="ship-name">Mondial Relay</div>
+          <div class="ship-cost" id="cost-relay">—</div>
+        </label>
+        <label class="ship-opt" data-mode="poste">
+          <input type="radio" name="livraison" value="Poste avec suivi">
+          <div class="ship-name">Poste avec suivi</div>
+          <div class="ship-cost" id="cost-poste">—</div>
+        </label>
+      </div>
+      <p style="margin-top:14px;font-size:13px;color:var(--muted);font-style:italic;">Sélectionnez d'abord votre pays pour afficher les tarifs. Volume : environ 950 g par exemplaire.</p>
+    </div>
+  </div>
+
+  <!-- ── Paiement ── -->
+  <div class="card">
+    <div class="card-body">
+      <div class="card-title">4. Mode de paiement</div>
+      <div class="pay-options">
+        <label class="pay-opt">
+          <input type="radio" name="paiement" value="Virement bancaire" required>
+          <div class="pay-name">🏦 Virement bancaire</div>
+        </label>
+        <label class="pay-opt">
+          <input type="radio" name="paiement" value="PayPal">
+          <div class="pay-name">💳 PayPal</div>
+        </label>
+      </div>
+      <p style="margin-top:14px;font-size:13px;color:var(--muted);font-style:italic;">Pas de paiements en espèces. Les informations de paiement vous seront communiquées par retour d'e-mail.</p>
+    </div>
+  </div>
+
+  <!-- ── Récapitulatif ── -->
+  <div class="card summary-card">
+    <div class="card-body">
+      <div class="summary-title">Récapitulatif de la commande</div>
+      <div id="summary-content">
+        <div class="summary-row empty">Aucun exemplaire sélectionné</div>
+      </div>
+    </div>
+  </div>
+
+  <button type="submit" class="submit-btn" id="submit-btn" disabled>Envoyer ma commande</button>
+  <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:14px;line-height:1.6;">
+    Votre commande sera confirmée par e-mail dans les 24h avec les informations de paiement.<br>
+    Pour toute question : <a href="mailto:info@arca-librairie.com" style="color:var(--gold);">info@arca-librairie.com</a>
+  </p>
+
+</form>
+
+<!-- Message succès (caché par défaut) -->
+<div class="success" id="success-msg" style="display:none;">
+  <h3>✓ Votre commande a bien été envoyée !</h3>
+  <p>Nous vous contacterons dans les 24h à l'adresse e-mail indiquée avec les informations de paiement et la confirmation du montant total.</p>
+  <p style="margin-top:14px;">Merci pour votre confiance.</p>
+</div>
+
+</div>
+
+<script>
+'use strict';
+
+// ── Données ──
+var ISSUES = [
+  { num: 1, title: 'N° 1', price: 20, promo: null },
+  { num: 2, title: 'N° 2', price: 20, promo: null },
+  { num: 3, title: 'N° 3', price: 20, promo: null },
+  { num: 4, title: 'N° 4', price: 20, promo: null },
+  { num: 5, title: 'N° 5', price: 20, promo: null },
+  { num: 6, title: 'N° 6', price: 20, promo: null },
+  { num: 7, title: 'N° 7', price: 20, promo: null },
+  { num: 8, title: 'N° 8', price: 20, promo: 15, promoLabel: 'Souscription' }
+];
+
+var SHIPPING = {
+  'Belgique': { relay: 5,  poste: 6  },
+  'France':   { relay: 6,  poste: 12 },
+  'Italie':   { relay: 8,  poste: 14 },
+  'Espagne':  { relay: 8,  poste: 20 },
+  'autre':    { relay: null, poste: null }
+};
+
+var quantities = {};  // { 1: 0, 2: 1, ... }
+
+// ── Rendu des numéros ──
+function renderIssues() {
+  var grid = document.getElementById('issues-grid');
+  var html = '';
+  ISSUES.forEach(function(iss){
+    var priceHtml = iss.promo
+      ? '<span class="promo">' + iss.promo + ' €</span><span class="old">' + iss.price + ' €</span>'
+      : iss.price + ' €';
+    var promoLabel = iss.promo ? '<div style="font:9px/1 Arial;color:var(--gold);letter-spacing:.5px;text-transform:uppercase;margin-top:2px;">' + iss.promoLabel + '</div>' : '';
+    html += '<div class="issue" data-num="' + iss.num + '">' +
+      '<div class="issue-num">Numéro ' + iss.num + '</div>' +
+      '<div class="issue-title">' + iss.title + promoLabel + '</div>' +
+      '<div class="issue-price">' + priceHtml + '</div>' +
+      '<div class="qty-row">' +
+        '<button type="button" class="qty-btn" data-act="minus" data-num="' + iss.num + '">−</button>' +
+        '<input type="number" class="qty-input" min="0" max="50" value="0" data-num="' + iss.num + '" name="qty-n' + iss.num + '">' +
+        '<button type="button" class="qty-btn" data-act="plus" data-num="' + iss.num + '">+</button>' +
+      '</div>' +
+    '</div>';
+  });
+  grid.innerHTML = html;
+  // Listeners
+  grid.querySelectorAll('.qty-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var num = parseInt(this.dataset.num, 10);
+      var act = this.dataset.act;
+      var input = grid.querySelector('input[data-num="' + num + '"]');
+      var v = parseInt(input.value, 10) || 0;
+      if (act === 'plus') v = Math.min(50, v + 1);
+      else v = Math.max(0, v - 1);
+      input.value = v;
+      onQtyChange(num, v);
+    });
+  });
+  grid.querySelectorAll('.qty-input').forEach(function(inp){
+    inp.addEventListener('input', function(){
+      var num = parseInt(this.dataset.num, 10);
+      var v = Math.max(0, Math.min(50, parseInt(this.value, 10) || 0));
+      this.value = v;
+      onQtyChange(num, v);
+    });
+  });
+}
+
+function onQtyChange(num, v) {
+  quantities[num] = v;
+  var card = document.querySelector('.issue[data-num="' + num + '"]');
+  if (card) card.classList.toggle('has-qty', v > 0);
+  updateSummary();
+}
+
+// ── Frais de port ──
+function updateShipping() {
+  var pays = document.getElementById('pays').value;
+  var s = SHIPPING[pays];
+  var costRelay = document.getElementById('cost-relay');
+  var costPoste = document.getElementById('cost-poste');
+  var optRelay = document.querySelector('.ship-opt[data-mode="relay"]');
+  var optPoste = document.querySelector('.ship-opt[data-mode="poste"]');
+
+  if (!pays) {
+    costRelay.textContent = '—';
+    costPoste.textContent = '—';
+    costRelay.classList.remove('empty');
+    costPoste.classList.remove('empty');
+    return;
+  }
+  if (pays === 'autre' || !s) {
+    costRelay.textContent = 'Nous consulter';
+    costPoste.textContent = 'Nous consulter';
+    costRelay.classList.add('empty');
+    costPoste.classList.add('empty');
+    return;
+  }
+  costRelay.textContent = s.relay + ' €';
+  costPoste.textContent = s.poste + ' €';
+  costRelay.classList.remove('empty');
+  costPoste.classList.remove('empty');
+  updateSummary();
+}
+
+// ── Récapitulatif ──
+function updateSummary() {
+  var sumEl = document.getElementById('summary-content');
+  var totalQty = 0;
+  var totalRevues = 0;
+  var detailsHtml = '';
+  var detailsText = [];
+
+  ISSUES.forEach(function(iss){
+    var q = quantities[iss.num] || 0;
+    if (!q) return;
+    var price = iss.promo || iss.price;
+    var sub = q * price;
+    totalQty += q;
+    totalRevues += sub;
+    detailsHtml += '<div class="summary-row"><span>' + iss.title + ' × ' + q + (iss.promo ? ' (souscription)' : '') + '</span><span>' + sub + ' €</span></div>';
+    detailsText.push(iss.title + ' × ' + q + ' = ' + sub + ' €');
+  });
+
+  if (totalQty === 0) {
+    sumEl.innerHTML = '<div class="summary-row empty">Aucun exemplaire sélectionné</div>';
+    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('commande-details').value = '';
+    return;
+  }
+
+  // Frais de port
+  var pays = document.getElementById('pays').value;
+  var livraison = document.querySelector('input[name="livraison"]:checked');
+  var frais = 0;
+  var fraisHtml = '';
+
+  if (livraison && pays && SHIPPING[pays]) {
+    var mode = livraison.value === 'Mondial Relay' ? 'relay' : 'poste';
+    var c = SHIPPING[pays][mode];
+    if (c !== null) {
+      frais = c;
+      fraisHtml = '<div class="summary-row sub"><span>Frais de port (' + livraison.value + ' · ' + pays + ')</span><span>' + frais + ' €</span></div>';
+    } else {
+      fraisHtml = '<div class="summary-row sub"><span>Frais de port</span><span style="color:var(--gold);">à confirmer</span></div>';
+    }
+  }
+
+  var total = totalRevues + frais;
+  var totalHtml = '<div class="summary-row total"><span>Total</span><span>' + total + ' €' + (livraison && pays && pays !== 'autre' ? '' : '*') + '</span></div>';
+  var note = (!livraison || !pays || pays === 'autre')
+    ? '<p style="font-size:11px;color:rgba(255,255,255,.55);margin-top:8px;font-style:italic;">* Total hors frais de port (à confirmer)</p>' : '';
+
+  sumEl.innerHTML = detailsHtml + fraisHtml + totalHtml + note;
+  document.getElementById('submit-btn').disabled = false;
+  document.getElementById('commande-details').value = detailsText.join(' | ') + ' | Sous-total revues: ' + totalRevues + ' € | Port: ' + frais + ' € | TOTAL: ' + total + ' €';
+}
+
+// ── Listeners ──
+document.getElementById('pays').addEventListener('change', updateShipping);
+document.querySelectorAll('input[name="livraison"]').forEach(function(r){
+  r.addEventListener('change', function(){
+    document.querySelectorAll('.ship-opt').forEach(function(o){ o.classList.remove('active'); });
+    this.closest('.ship-opt').classList.add('active');
+    updateSummary();
+  });
+});
+document.querySelectorAll('input[name="paiement"]').forEach(function(r){
+  r.addEventListener('change', function(){
+    document.querySelectorAll('.pay-opt').forEach(function(o){ o.classList.remove('active'); });
+    this.closest('.pay-opt').classList.add('active');
+  });
+});
+
+// Submit handler (Netlify Forms gère l'envoi)
+document.getElementById('commande-form').addEventListener('submit', function(e){
+  // Netlify intercepte normalement, mais on peut afficher un message custom après redirect
+  // (gestion native par Netlify, redirige vers /commande-merci.html si on en crée une)
+});
+
+// Init
+renderIssues();
+</script>
+
+</body>
+</html>

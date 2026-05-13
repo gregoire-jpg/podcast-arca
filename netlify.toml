@@ -72,6 +72,17 @@
   [headers.values]
     Content-Security-Policy = "frame-ancestors 'self' https://arca-revue.com"
 
+# commande.html : autoriser l'intégration depuis arca-revue.com
+[[headers]]
+  for = "/commande.html"
+  [headers.values]
+    Content-Security-Policy = "frame-ancestors 'self' https://arca-revue.com"
+
+[[headers]]
+  for = "/commande-merci.html"
+  [headers.values]
+    Content-Security-Policy = "frame-ancestors 'self' https://arca-revue.com"
+
 # dictionnaire.html integrable
 [[headers]]
   for = "/dictionnaire.html"
