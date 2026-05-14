@@ -34,14 +34,16 @@ button, input, select, textarea { font-family: inherit; }
 .card-title { font: 600 14px/1 Arial; letter-spacing: 1.5px; text-transform: uppercase; color: var(--navy); padding-bottom: 14px; margin-bottom: 18px; border-bottom: 2px solid var(--gold); }
 
 /* Issues — anciens numéros : cards pleine largeur, horizontales, compactes */
-.issues { display: flex; flex-direction: column; gap: 8px; }
-.issue { background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 10px 16px; transition: border-color .2s; display: flex; align-items: center; gap: 18px; }
+.issues { display: flex; flex-direction: column; gap: 6px; }
+.issue { background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 6px 14px; transition: border-color .2s; display: flex; align-items: center; gap: 16px; }
 .issue.has-qty { border-color: var(--gold); background: #fffbf4; }
 .issue-title { font: 600 15px/1 Georgia; color: var(--navy); flex: 0 0 auto; min-width: 50px; }
 .issue-price { font: 14px/1 Arial; color: var(--muted); flex: 0 0 auto; min-width: 44px; }
 .issue-toc { font: 10px/1 Arial; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); text-decoration: none; cursor: pointer; border: 0; background: none; padding: 0; flex: 0 0 auto; }
 .issue-toc:hover { color: var(--navy); text-decoration: underline; }
-.issue .qty-row { margin-left: auto; flex: 0 0 auto; }
+.issue .qty-row { margin-left: auto; flex: 0 0 auto; gap: 4px; }
+.issue .qty-input { flex: 0 0 auto; width: 38px; padding: 3px 2px; font-size: 13px; }
+.issue .qty-btn { width: 26px; height: 26px; }
 .feat-toc { display: inline-block; margin-top: 14px; font: 11px/1 Arial; letter-spacing: 1.5px; text-transform: uppercase; color: #c8a060; text-decoration: none; cursor: pointer; border: 0; background: none; padding: 0; }
 .feat-toc:hover { color: #fff; }
 .issue-price .promo { color: var(--green); font-weight: bold; }
