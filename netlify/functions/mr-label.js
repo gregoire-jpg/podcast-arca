@@ -115,7 +115,7 @@ async function createLabel(orderData) {
           emailField: 'info@arca-librairie.com'
         }
       },
-      addresseeField: {
+      recipientField: {
         addressField: {
           firstNameField: dest.firstName,
           lastNameField: dest.lastName,
