@@ -92,14 +92,17 @@ async function createLabel(orderData) {
     shipmentsListField: [{
       userReferenceField: userReference,
       shipmentReferenceField: userReference,
-      deliveryModeField: '24R',
-      shippingProductCodeField: '24R',
-      serviceCodeField: '24R',
+      // Champs candidats pour le mode de livraison (warning 10023 si manquant)
+      modeField: '24R',
+      modeLivField: '24R',
+      modeLivraisonField: '24R',
       pickupLocationField: {
         typeField: 'Sender'
       },
       deliveryLocationField: {
-        typeField: 'PickupPoint',
+        modeField: '24R',
+        modeLivField: '24R',
+        typeField: 'ParcelShop',
         idField: relayCode,
         countryCodeField: destCountry
       },
