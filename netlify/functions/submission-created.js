@@ -173,6 +173,20 @@ function buildEmailHtml(d, mrLabel) {
     </table>
   </td></tr>` : "";
 
+  // Bouton "Créer l'étiquette sur MR Connect" — toujours visible si livraison MR,
+  // que la génération API ait marché ou non. Sert de filet de sécurité pour
+  // créer l'étiquette manuellement en 30 sec sans réencoder les infos.
+  const mrConnectButton = isMondialRelay ? `
+  <tr><td style="padding:0 36px 18px;">
+    <table cellpadding="0" cellspacing="0">
+      <tr><td style="background:#c8a060;border-radius:4px;">
+        <a href="https://connect.mondialrelay.com/" target="_blank" style="display:inline-block;padding:12px 22px;font:bold 11px Arial;letter-spacing:1.5px;text-transform:uppercase;color:#fff;text-decoration:none;">
+          📦 Créer l'étiquette sur MR Connect →
+        </a>
+      </td></tr>
+    </table>
+  </td></tr>` : "";
+
   // Bloc étiquette Mondial Relay générée automatiquement
   let mrLabelBlock = "";
   if (isMondialRelay && mrLabel) {
@@ -238,6 +252,9 @@ function buildEmailHtml(d, mrLabel) {
 
   <!-- POINT RELAIS MONDIAL RELAY -->
   ${mrBlock}
+
+  <!-- BOUTON MR CONNECT (toujours présent si livraison MR) -->
+  ${mrConnectButton}
 
   <!-- ÉTIQUETTE MONDIAL RELAY (générée auto) -->
   ${mrLabelBlock}
