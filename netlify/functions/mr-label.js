@@ -1,5 +1,5 @@
 // Module Mondial Relay : génération d'étiquettes en 2 appels SOAP
-//   1. WSI3_CreationExpedition  -> crée l'expédition, renvoie ExpeditionNum
+//   1. WSI2_CreationEtiquette  -> crée l'expédition, renvoie ExpeditionNum
 //   2. WSI3_GetEtiquettes       -> récupère les URL PDF de l'étiquette
 // Utilisé par submission-created.js — pas un endpoint HTTP en soi.
 //
@@ -249,7 +249,7 @@ async function createLabel(orderData) {
   // hors-ligne en cas d erreur MD5 (STAT=97). On masque seulement la cle privee.
   const sigConcat = SIG_ORDER.map(k => params[k] || '').join('');
   const sigDebug = {
-    method: 'WSI3_CreationExpedition',
+    method: 'WSI2_CreationEtiquette',
     enseigne: ENSEIGNE,
     keyLen: PRIVATE_KEY.length,
     concatLen: sigConcat.length,
@@ -259,14 +259,14 @@ async function createLabel(orderData) {
   console.log('[MR] signature debug:', JSON.stringify(sigDebug));
   const fieldsXml = SIG_ORDER.map(k => `      <${k}>${escXml(params[k])}</${k}>`).join('\n');
 
-  // ─── Étape 1/2 : WSI3_CreationExpedition (crée l'expédition) ───
+  // ─── Étape 1/2 : WSI2_CreationEtiquette (crée l'expédition) ───
   const soapBody = `<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
   <soap:Body>
-    <WSI3_CreationExpedition xmlns="http://www.mondialrelay.fr/webservice/">
+    <WSI2_CreationEtiquette xmlns="http://www.mondialrelay.fr/webservice/">
 ${fieldsXml}
       <Security>${security}</Security>
-    </WSI3_CreationExpedition>
+    </WSI2_CreationEtiquette>
   </soap:Body>
 </soap:Envelope>`;
 
@@ -275,44 +275,50 @@ ${fieldsXml}
       method: 'POST',
       headers: {
         'Content-Type': 'text/xml; charset=utf-8',
-        'SOAPAction': '"http://www.mondialrelay.fr/webservice/WSI3_CreationExpedition"'
+        'SOAPAction': '"http://www.mondialrelay.fr/webservice/WSI2_CreationEtiquette"'
       },
       body: soapBody
     });
     const xml = await resp.text();
-    console.log('[MR][WSI4] HTTP status:', resp.status);
-    console.log('[MR][WSI4] XML response (full):', xml);
+    console.log('[MR][WSI2] HTTP status:', resp.status);
+    console.log('[MR][WSI2] XML response (full):', xml);
     const stat = parseXmlValue(xml, 'STAT');
     if (stat && stat !== '0') {
       return {
-        error: `Mondial Relay STAT=${stat} (WSI3_CreationExpedition)`,
+        error: `Mondial Relay STAT=${stat} (WSI2_CreationEtiquette)`,
         xml: xml.substring(0, 800),
         sigDebug: stat === '97' ? sigDebug : undefined
       };
     }
     const expedition = parseXmlValue(xml, 'ExpeditionNum');
-    if (!expedition) {
-      return { error: 'Réponse MR vide : pas de ExpeditionNum (STAT=' + (stat || 'absent') + ')', xml: xml.substring(0, 800) };
+    let urlPdf = parseXmlValue(xml, 'URL_Etiquette');
+    let urlA4 = parseXmlValue(xml, 'URL_PDF_A4');
+    let urlA5 = parseXmlValue(xml, 'URL_PDF_A5');
+    // WSI2 retourne souvent des URLs relatives — préfixer
+    const prefix = 'https://www.mondialrelay.com';
+    if (urlPdf && urlPdf.startsWith('/')) urlPdf = prefix + urlPdf;
+    if (urlA4 && urlA4.startsWith('/')) urlA4 = prefix + urlA4;
+    if (urlA5 && urlA5.startsWith('/')) urlA5 = prefix + urlA5;
+
+    // Si on a l'expédition mais pas l'URL, on tente le fallback WSI3_GetEtiquettes
+    if (expedition && !urlPdf && !urlA4 && !urlA5) {
+      const labelData = await getLabelPdf(expedition, PRIVATE_KEY);
+      if (!labelData.error) {
+        urlPdf = labelData.url_pdf || urlPdf;
+        urlA4 = labelData.url_a4 || urlA4;
+        urlA5 = labelData.url_a5 || urlA5;
+      }
     }
 
-    // ─── Étape 2/2 : WSI3_GetEtiquettes (récupère l'URL du PDF) ───
-    const labelData = await getLabelPdf(expedition, PRIVATE_KEY);
-    if (labelData.error) {
-      // L'expédition est créée mais on n'a pas pu récupérer le PDF.
-      // Pas un échec total : l'utilisateur peut imprimer depuis MR Connect.
-      return {
-        success: true,
-        expedition: expedition,
-        warning: 'Expédition créée mais récupération PDF échouée : ' + labelData.error,
-        url_pdf: '', url_a4: '', url_a5: ''
-      };
+    if (!expedition && !urlPdf && !urlA4 && !urlA5) {
+      return { error: 'Réponse MR vide ou tags non reconnus (STAT=' + (stat || 'absent') + ')', xml: xml.substring(0, 800) };
     }
     return {
       success: true,
       expedition: expedition,
-      url_pdf: labelData.url_pdf,
-      url_a4: labelData.url_a4,
-      url_a5: labelData.url_a5,
+      url_pdf: urlPdf,
+      url_a4: urlA4,
+      url_a5: urlA5,
       xml_debug: TEST_MODE ? xml.substring(0, 500) : undefined
     };
   } catch (e) {
