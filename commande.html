@@ -136,12 +136,13 @@ button, input, select, textarea { font-family: inherit; }
 .ship-cost.empty { color: var(--muted); font-size: 14px; font-style: italic; }
 
 /* Payment options */
-.pay-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.pay-opt { border: 2px solid var(--border); border-radius: 5px; padding: 14px; cursor: pointer; text-align: center; transition: border-color .2s, background .2s; }
+.pay-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.pay-opt { border: 2px solid var(--border); border-radius: 5px; padding: 12px 10px; cursor: pointer; text-align: center; transition: border-color .2s, background .2s; }
 .pay-opt:hover { border-color: var(--gold); }
 .pay-opt.active { border-color: var(--navy); background: var(--bg); }
 .pay-opt input { display: none; }
-.pay-name { font: 600 13px/1 Arial; color: var(--navy); letter-spacing: 1px; text-transform: uppercase; }
+.pay-name { font: 600 12px/1.2 Arial; color: var(--navy); letter-spacing: .8px; text-transform: uppercase; }
+.pay-sub { display: block; font: 10px/1.2 Arial; color: var(--muted); letter-spacing: 0; text-transform: none; margin-top: 3px; font-weight: normal; }
 
 /* Summary */
 .summary-card { background: var(--navy); color: #fff; }
@@ -498,16 +499,38 @@ button, input, select, textarea { font-family: inherit; }
       <div class="pay-options">
         <label class="pay-opt">
           <input type="radio" name="paiement" value="Virement bancaire" required>
-          <div class="pay-name">🏦 Virement bancaire</div>
+          <div class="pay-name">🏦 Virement</div>
+          <span class="pay-sub">par retour de mail</span>
+        </label>
+        <label class="pay-opt">
+          <input type="radio" name="paiement" value="Carte / Bancontact">
+          <div class="pay-name">💳 Carte</div>
+          <span class="pay-sub">Bancontact, Visa, Mastercard</span>
         </label>
         <label class="pay-opt">
           <input type="radio" name="paiement" value="PayPal">
-          <div class="pay-name">💳 PayPal</div>
+          <div class="pay-name">PayPal</div>
+          <span class="pay-sub">compte ou carte</span>
         </label>
       </div>
 
       <!-- Note virement (affichée par défaut) -->
       <p id="note-virement" style="margin-top:14px;font-size:13px;color:var(--muted);font-style:italic;">Les informations de paiement (RIB) vous seront communiquées par retour d'e-mail après confirmation du montant.</p>
+
+      <!-- Zone Stripe (cachée par défaut) -->
+      <div id="stripe-zone" style="display:none;margin-top:18px;">
+        <div style="padding:14px 18px;background:#fffbf4;border-left:3px solid #c8a060;border-radius:0 4px 4px 0;margin-bottom:14px;">
+          <p style="margin:0;font-size:13.5px;line-height:1.65;color:#444;">
+            <strong style="color:#2d3461;">Paiement sécurisé via Stripe</strong> — vous serez redirigé vers la page de paiement Stripe pour finaliser avec Bancontact, Visa, Mastercard, Apple Pay ou Google Pay.
+          </p>
+        </div>
+        <button type="button" id="stripe-btn" onclick="payerAvecStripe()" style="display:block;width:100%;padding:16px 24px;border:none;background:#635bff;color:#fff;font:600 13px/1 Arial;letter-spacing:1.5px;text-transform:uppercase;border-radius:5px;cursor:pointer;">
+          Payer avec Stripe →
+        </button>
+        <p id="stripe-missing" style="margin-top:10px;font-size:12.5px;color:var(--muted);text-align:center;font-style:italic;display:none;">
+          Veuillez d'abord compléter votre adresse et choisir un mode de livraison.
+        </p>
+      </div>
 
       <!-- Zone PayPal (cachée par défaut) -->
       <div id="paypal-zone" style="display:none;margin-top:18px;">
@@ -901,17 +924,85 @@ document.querySelectorAll('input[name="paiement"]').forEach(function(r){
 function togglePaymentZone(mode) {
   var noteVir = document.getElementById('note-virement');
   var pzone = document.getElementById('paypal-zone');
+  var szone = document.getElementById('stripe-zone');
   var submitBtn = document.getElementById('submit-btn');
+  // Masquer toutes les zones par défaut
+  noteVir.style.display = 'none';
+  pzone.style.display = 'none';
+  szone.style.display = 'none';
+  if (submitBtn) submitBtn.style.display = 'none';
+
   if (mode === 'PayPal') {
-    noteVir.style.display = 'none';
     pzone.style.display = 'block';
-    if (submitBtn) submitBtn.style.display = 'none';
     updatePayPalState();
+  } else if (mode === 'Carte / Bancontact') {
+    szone.style.display = 'block';
+    updateStripeState();
   } else {
+    // Virement bancaire (défaut)
     noteVir.style.display = 'block';
-    pzone.style.display = 'none';
     if (submitBtn) submitBtn.style.display = 'block';
   }
+}
+
+// État du bouton Stripe : grisé tant que le formulaire n'est pas prêt
+function updateStripeState() {
+  var btn = document.getElementById('stripe-btn');
+  var missing = document.getElementById('stripe-missing');
+  if (!btn) return;
+  var ready = isOrderReady();
+  btn.disabled = !ready;
+  btn.style.opacity = ready ? '1' : '.4';
+  btn.style.cursor = ready ? 'pointer' : 'not-allowed';
+  if (missing) missing.style.display = ready ? 'none' : 'block';
+}
+
+// Click "Payer avec Stripe"
+function payerAvecStripe() {
+  if (!isOrderReady()) {
+    alert('Veuillez compléter tous les champs requis.');
+    return;
+  }
+  syncAdresse();
+  var btn = document.getElementById('stripe-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Redirection vers Stripe…'; }
+
+  // Récupère toutes les données du formulaire
+  var form = document.getElementById('commande-form');
+  var data = {};
+  form.querySelectorAll('input[name], textarea[name], select[name]').forEach(function(el){
+    if (el.type === 'radio' && !el.checked) return;
+    if (el.type === 'checkbox' && !el.checked) return;
+    data[el.name] = el.value;
+  });
+
+  fetch('/.netlify/functions/create-stripe-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if (!res.url) {
+      alert("Erreur lors de l'initialisation du paiement Stripe. Merci de réessayer ou de nous contacter à info@arca-librairie.com.");
+      if (btn) { btn.disabled = false; btn.textContent = 'Payer avec Stripe →'; }
+      return;
+    }
+    // Redirection : si on est dans une iframe (arca-revue.com), navigation au niveau parent
+    // car Stripe Checkout refuse d'être rendu dans une iframe.
+    try {
+      if (window.top && window.top !== window) {
+        window.top.location.href = res.url;
+        return;
+      }
+    } catch(e) { /* cross-origin : on tombe sur le fallback */ }
+    window.location.href = res.url;
+  })
+  .catch(function(err){
+    console.error('Erreur Stripe:', err);
+    alert("Erreur réseau. Merci de réessayer.");
+    if (btn) { btn.disabled = false; btn.textContent = 'Payer avec Stripe →'; }
+  });
 }
 
 // Calcule le total actuel (revues + port)
@@ -987,15 +1078,20 @@ function syncAdresse() {
   document.getElementById(id).addEventListener('input', function(){
     syncAdresse();
     updatePayPalState();
+    updateStripeState();
     updateSummary();  // pour régénérer le lien-etiquette
   });
   document.getElementById(id).addEventListener('change', function(){
     syncAdresse();
     updatePayPalState();
+    updateStripeState();
   });
 });
 document.querySelectorAll('input[name="livraison"]').forEach(function(r){
-  r.addEventListener('change', updatePayPalState);
+  r.addEventListener('change', function(){
+    updatePayPalState();
+    updateStripeState();
+  });
 });
 
 // Rendu du bouton PayPal

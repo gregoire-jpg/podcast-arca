@@ -69,13 +69,21 @@ p { font: 15px/1.7 Georgia; color: #444; margin-bottom: 14px; }
 'use strict';
 var params = new URLSearchParams(window.location.search);
 var paid = params.get('paid');
-var paypalId = params.get('id');
+var refId = params.get('id');
 
-if (paid === 'paypal') {
+if (paid === 'paypal' || paid === 'stripe') {
+  // Affichage commun pour PayPal et Stripe (paiement reçu)
   document.getElementById('box-paypal').style.display = 'block';
-  if (paypalId) {
+  if (paid === 'stripe') {
+    // Adapter le texte pour Stripe
+    var h2 = document.querySelector('#box-paypal h2');
+    if (h2) h2.textContent = 'Votre paiement a bien été reçu';
+    var p = document.querySelector('#box-paypal > p');
+    if (p) p.innerHTML = "Merci pour votre commande et votre confiance.<br>Votre paiement par <strong style=\"color:#2d3461\">carte bancaire</strong> a été enregistré avec succès.";
+  }
+  if (refId) {
     document.getElementById('ref-block').style.display = 'block';
-    document.getElementById('paypal-ref').textContent = paypalId;
+    document.getElementById('paypal-ref').textContent = refId;
   }
 } else {
   // Par défaut : message virement (commande standard à confirmer)
