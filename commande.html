@@ -173,6 +173,39 @@ button, input, select, textarea { font-family: inherit; }
 .success h3 { font: normal 22px/1 Georgia; color: var(--green); margin-bottom: 10px; }
 .success p { color: #1a5028; }
 
+/* ═══ Présentation (bloc intro magazine-style) ═══ */
+.intro {
+  display: flex; align-items: stretch; gap: 0;
+  background: #fff; border-radius: 6px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  margin-bottom: 22px; overflow: hidden;
+}
+.intro-cover {
+  width: 160px; flex-shrink: 0;
+  background: linear-gradient(135deg, #2d3461 0%, #1e2245 100%);
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px 14px;
+}
+.intro-cover::before {
+  content: ""; position: absolute; inset: 8px;
+  border: 1px solid rgba(200,160,96,.4); border-radius: 2px; pointer-events: none;
+}
+.intro-cover-inner { text-align: center; position: relative; z-index: 1; }
+.intro-eyebrow { font: 9px/1 Arial; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+.intro-arca { font: 28px/1 Georgia; letter-spacing: 8px; text-transform: uppercase; color: #fff; font-weight: normal; }
+.intro-rule { width: 28px; height: 1px; background: var(--gold); margin: 12px auto; }
+.intro-tag { font: italic 10px/1.4 Georgia; color: rgba(255,255,255,.6); letter-spacing: .5px; }
+.intro-text { flex: 1; padding: 28px 28px; display: flex; flex-direction: column; justify-content: center; }
+.intro-lead { font: italic 18px/1.5 Georgia; color: var(--navy); margin: 0 0 10px; }
+.intro-body { font: 14.5px/1.65 Georgia; color: #555; margin: 0; }
+@media (max-width: 600px) {
+  .intro { flex-direction: column; }
+  .intro-cover { width: 100%; padding: 24px; }
+  .intro-text { padding: 22px 20px; }
+  .intro-lead { font-size: 16px; }
+}
+
 /* ═══ Wizard progress bar ═══ */
 .wizard-progress {
   display: flex; align-items: center; gap: 0;
@@ -304,6 +337,22 @@ button, input, select, textarea { font-family: inherit; }
   <input type="hidden" name="qty-n9" value="0">
   <input type="hidden" name="paypal-order-id" value="">
   <input type="hidden" name="paypal-status" value="">
+
+  <!-- Présentation de la revue -->
+  <section class="intro">
+    <div class="intro-cover">
+      <div class="intro-cover-inner">
+        <div class="intro-eyebrow">Revue &amp; Librairie</div>
+        <div class="intro-arca">ARCA</div>
+        <div class="intro-rule"></div>
+        <div class="intro-tag">Hermétisme · Alchimie<br>Traditions spirituelles</div>
+      </div>
+    </div>
+    <div class="intro-text">
+      <p class="intro-lead">ARCA est une revue belge d'hermétisme, d'alchimie et de traditions spirituelles.</p>
+      <p class="intro-body">Huit numéros parus depuis 2016, plus un recueil de prières issues des grandes traditions.</p>
+    </div>
+  </section>
 
   <!-- Info souscription -->
   <div class="info-note" id="info-note">
