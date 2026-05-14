@@ -245,8 +245,22 @@ button, input, select, textarea { font-family: inherit; }
         </div>
       </div>
       <div class="row">
-        <label for="adresse">Adresse complète de livraison <span class="req">*</span></label>
-        <textarea id="adresse" name="adresse" required placeholder="Rue, numéro&#10;Code postal, ville"></textarea>
+        <label for="rue">Rue et numéro <span class="req">*</span></label>
+        <input type="text" id="rue" name="rue" required maxlength="64" placeholder="Ex : Rue du Lambais 70">
+      </div>
+      <div class="row">
+        <label for="complement">Complément d'adresse (optionnel)</label>
+        <input type="text" id="complement" name="complement" maxlength="32" placeholder="Bâtiment, étage, appartement…">
+      </div>
+      <div class="row-grid">
+        <div class="row" style="max-width:140px;">
+          <label for="cp">Code postal <span class="req">*</span></label>
+          <input type="text" id="cp" name="cp" required maxlength="5" inputmode="numeric" pattern="[0-9]{4,5}" placeholder="1390">
+        </div>
+        <div class="row">
+          <label for="ville">Ville <span class="req">*</span></label>
+          <input type="text" id="ville" name="ville" required maxlength="26" placeholder="Grez-Doiceau">
+        </div>
       </div>
       <div class="row-grid">
         <div class="row">
@@ -265,6 +279,8 @@ button, input, select, textarea { font-family: inherit; }
           <input type="text" id="telephone" name="telephone">
         </div>
       </div>
+      <!-- Champ "adresse" agrégé automatiquement depuis rue/complément/CP/ville (compat MR + email) -->
+      <input type="hidden" id="adresse" name="adresse">
     </div>
   </div>
 
@@ -705,10 +721,12 @@ function isOrderReady() {
   if (t.qty === 0 || t.total === 0) return false;
   var nom = document.getElementById('nom').value.trim();
   var email = document.getElementById('email').value.trim();
-  var adresse = document.getElementById('adresse').value.trim();
+  var rue = document.getElementById('rue').value.trim();
+  var cp = document.getElementById('cp').value.trim();
+  var ville = document.getElementById('ville').value.trim();
   var pays = document.getElementById('pays').value;
   var livraison = document.querySelector('input[name="livraison"]:checked');
-  if (!nom || !email || !adresse || !pays || !livraison) return false;
+  if (!nom || !email || !rue || !cp || !ville || !pays || !livraison) return false;
   // Pays "autre" : port à confirmer manuellement, SAUF si "En main propre" (gratuit)
   if (pays === 'autre' && livraison.value !== 'En main propre') return false;
   // Mondial Relay : il faut avoir choisi un point relais
@@ -731,13 +749,30 @@ function updatePayPalState() {
   }
 }
 
+// Agrège rue + complément + CP + ville dans le champ hidden "adresse"
+function syncAdresse() {
+  var rue = document.getElementById('rue').value.trim();
+  var cmp = document.getElementById('complement').value.trim();
+  var cp = document.getElementById('cp').value.trim();
+  var ville = document.getElementById('ville').value.trim();
+  var lines = [];
+  if (rue) lines.push(rue);
+  if (cmp) lines.push(cmp);
+  if (cp || ville) lines.push((cp + ' ' + ville).trim());
+  document.getElementById('adresse').value = lines.join('\n');
+}
+
 // Re-vérifier quand n'importe quel champ change
-['nom', 'email', 'adresse', 'pays'].forEach(function(id){
+['nom', 'email', 'rue', 'complement', 'cp', 'ville', 'pays'].forEach(function(id){
   document.getElementById(id).addEventListener('input', function(){
+    syncAdresse();
     updatePayPalState();
     updateSummary();  // pour régénérer le lien-etiquette
   });
-  document.getElementById(id).addEventListener('change', updatePayPalState);
+  document.getElementById(id).addEventListener('change', function(){
+    syncAdresse();
+    updatePayPalState();
+  });
 });
 document.querySelectorAll('input[name="livraison"]').forEach(function(r){
   r.addEventListener('change', updatePayPalState);
@@ -841,15 +876,18 @@ function sendOrderToFunction(isPaypal, paypalId) {
 
 function submitOrder() {
   // Validation simple
+  syncAdresse();
   var nom = document.getElementById('nom').value.trim();
   var email = document.getElementById('email').value.trim();
-  var adresse = document.getElementById('adresse').value.trim();
+  var rue = document.getElementById('rue').value.trim();
+  var cp = document.getElementById('cp').value.trim();
+  var ville = document.getElementById('ville').value.trim();
   var pays = document.getElementById('pays').value;
   var livraison = document.querySelector('input[name="livraison"]:checked');
   var paiement = document.querySelector('input[name="paiement"]:checked');
   var t = getCurrentTotal();
   if (t.qty === 0) { alert('Veuillez sélectionner au moins un exemplaire.'); return; }
-  if (!nom || !email || !adresse || !pays || !livraison || !paiement) {
+  if (!nom || !email || !rue || !cp || !ville || !pays || !livraison || !paiement) {
     alert('Merci de remplir tous les champs requis.'); return;
   }
   if (livraison.value === 'Mondial Relay' && !MR_SELECTED) {

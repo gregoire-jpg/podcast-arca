@@ -67,7 +67,7 @@ function cleanForMR(str, maxLen) {
 }
 
 function parseDestAddress(orderData) {
-  // Sépare le nom et l'adresse pour Mondial Relay (max 32 chars/ligne)
+  // Nom complet (max 32 chars par ligne, jusqu'à 2 lignes pour prénom/nom)
   const fullName = cleanForMR(orderData.nom || '', 64);
   const nameParts = fullName.split(' ');
   let Dest_Ad1 = '', Dest_Ad2 = '';
@@ -78,30 +78,34 @@ function parseDestAddress(orderData) {
     Dest_Ad2 = nameParts.slice(1).join(' ').substring(0, 32);
   }
 
-  // Parse les lignes d'adresse pour trouver CP, Ville et lignes de rue
-  const rawLines = String(orderData.adresse || '')
-    .split('\n').map(s => s.trim()).filter(Boolean);
-  let Dest_CP = '', Dest_Ville = '';
-  const streetLines = [];
-
-  for (const line of rawLines) {
-    // Cherche un code postal (4-5 chiffres au début) suivi de la ville
-    const m = line.match(/^(\d{4,5})\s+(.+)$/);
-    if (m && !Dest_CP) {
-      Dest_CP = m[1];
-      Dest_Ville = cleanForMR(m[2], 26);
-    } else {
-      streetLines.push(line);
+  // Cas nominal : champs structurés rue/cp/ville fournis par le formulaire
+  let Dest_Ad3 = '', Dest_Ad4 = '', Dest_CP = '', Dest_Ville = '';
+  if (orderData.rue || orderData.cp || orderData.ville) {
+    Dest_Ad3 = cleanForMR(orderData.rue || '', 32);
+    Dest_Ad4 = cleanForMR(orderData.complement || '', 32);
+    Dest_CP = String(orderData.cp || '').replace(/\D/g, '').substring(0, 5);
+    Dest_Ville = cleanForMR(orderData.ville || '', 26);
+  } else {
+    // Fallback : parsing du textarea "adresse" (anciennes commandes)
+    const rawLines = String(orderData.adresse || '')
+      .split('\n').map(s => s.trim()).filter(Boolean);
+    const streetLines = [];
+    for (const line of rawLines) {
+      const m = line.match(/^(\d{4,5})\s+(.+)$/);
+      if (m && !Dest_CP) {
+        Dest_CP = m[1];
+        Dest_Ville = cleanForMR(m[2], 26);
+      } else {
+        streetLines.push(line);
+      }
     }
-  }
-  // Fallback si pas trouvé
-  if (!Dest_CP) {
-    Dest_CP = '0000';
-    Dest_Ville = cleanForMR(orderData.pays || 'BRUXELLES', 26);
+    Dest_Ad3 = cleanForMR(streetLines[0] || '', 32);
+    Dest_Ad4 = cleanForMR(streetLines.slice(1).join(' '), 32);
   }
 
-  const Dest_Ad3 = cleanForMR(streetLines[0] || '', 32);
-  const Dest_Ad4 = cleanForMR(streetLines.slice(1).join(' '), 32);
+  // Garde-fous
+  if (!Dest_CP) Dest_CP = '0000';
+  if (!Dest_Ville) Dest_Ville = cleanForMR(orderData.pays || 'BRUXELLES', 26);
 
   return { Dest_Ad1, Dest_Ad2, Dest_Ad3, Dest_Ad4, Dest_CP, Dest_Ville };
 }
