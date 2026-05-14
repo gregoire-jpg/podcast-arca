@@ -1029,6 +1029,9 @@ function sendOrderToFunction(isPaypal, paypalId) {
     }
     // Succès → si on est dans une iframe, on demande au parent de rediriger
     // (pour sortir du cadre arca-revue.com/arca-revue/). Sinon redirection locale.
+    var url = isPaypal
+      ? '/commande-merci.html?paid=paypal&id=' + encodeURIComponent(paypalId)
+      : '/commande-merci.html';
     if (window.parent !== window) {
       try {
         window.parent.postMessage({
@@ -1037,11 +1040,14 @@ function sendOrderToFunction(isPaypal, paypalId) {
           paypalId: paypalId || ''
         }, '*');
       } catch(e) {}
+      // Filet de securite : si le parent ne redirige pas en 3 secondes
+      // (embed snippet non a jour), on redirige nous-meme l'iframe pour
+      // ne pas laisser l'utilisateur bloque sur "Envoi en cours...".
+      setTimeout(function(){
+        try { window.location.href = url; } catch(e) {}
+      }, 3000);
       return;
     }
-    var url = isPaypal
-      ? '/commande-merci.html?paid=paypal&id=' + encodeURIComponent(paypalId)
-      : '/commande-merci.html';
     window.location.href = url;
   })
   .catch(function(err){
