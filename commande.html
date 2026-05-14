@@ -354,11 +354,6 @@ button, input, select, textarea { font-family: inherit; }
     </div>
   </section>
 
-  <!-- Info souscription -->
-  <div class="info-note" id="info-note">
-    <!-- Texte injecté par JS selon que la souscription est active ou non -->
-  </div>
-
   <!-- ══ Barre de progression du tunnel ══ -->
   <div class="wizard-progress" role="navigation" aria-label="Étapes de la commande">
     <button type="button" class="wp-step active" data-step="1">
@@ -623,7 +618,7 @@ button, input, select, textarea { font-family: inherit; }
 <div class="modal-overlay" id="sommaire-modal" hidden>
   <div class="modal-content">
     <button type="button" class="modal-close" onclick="closeSommaire()" aria-label="Fermer">×</button>
-    <iframe id="sommaire-iframe" src="about:blank" title="Sommaire"></iframe>
+    <iframe id="sommaire-iframe" src="about:blank" title="Table des matières"></iframe>
   </div>
 </div>
 
@@ -683,7 +678,7 @@ function renderFeatured() {
     ? '<span class="promo">15 €</span><span class="old">20 €</span><span class="label">tarif souscription</span>'
     : '<span class="promo">20 €</span><span class="label">l\'exemplaire</span>';
   var tocLink = SOMMAIRES[8]
-    ? '<button type="button" class="feat-toc" onclick="openSommaire(8)">Voir le sommaire →</button>'
+    ? '<button type="button" class="feat-toc" onclick="openSommaire(8)">Voir la table des matières →</button>'
     : '';
   box.innerHTML =
     '<div class="issue-featured" data-num="8">' +
@@ -712,7 +707,7 @@ function renderOldIssues() {
     if (iss.num === 8) return;       // N°8 traité séparément (featured)
     if (iss.type !== 'revue') return;  // exclure les hors-collection
     var tocLink = SOMMAIRES[iss.num]
-      ? '<button type="button" class="issue-toc" onclick="openSommaire(' + iss.num + ')">Sommaire →</button>'
+      ? '<button type="button" class="issue-toc" onclick="openSommaire(' + iss.num + ')">Table des matières →</button>'
       : '';
     html += '<div class="issue" data-num="' + iss.num + '">' +
       '<div class="issue-title">N° ' + iss.num + '</div>' +
@@ -736,7 +731,7 @@ function renderHorsCollection() {
   ISSUES.forEach(function(iss){
     if (iss.type !== 'hc') return;
     var tocLink = SOMMAIRES[iss.num]
-      ? '<button type="button" class="issue-toc" onclick="openSommaire(' + iss.num + ')">Sommaire →</button>'
+      ? '<button type="button" class="issue-toc" onclick="openSommaire(' + iss.num + ')">Table des matières →</button>'
       : '';
     html += '<div class="issue" data-num="' + iss.num + '">' +
       '<div class="issue-title">' + iss.title + '</div>' +
@@ -1289,11 +1284,6 @@ function submitOrder() {
   }
   sendOrderToFunction(false, '');
 }
-
-// Texte d'info en haut selon la période
-document.getElementById('info-note').innerHTML = PROMO_ACTIVE
-  ? '<p><strong>Souscription au n°8</strong> ouverte du 18 au 25 mai à minuit au tarif préférentiel de <strong>15 €</strong> (au lieu de 20 €). Les autres numéros sont à 20 € l\'exemplaire (dans la limite des stocks).</p>'
-  : '<p>Tous les numéros de la revue ARCA sont disponibles au prix de <strong>20 €</strong> l\'exemplaire (dans la limite des stocks).</p>';
 
 // ═══════════════════ WIZARD NAVIGATION ═══════════════════
 var TOTAL_STEPS = 4;
