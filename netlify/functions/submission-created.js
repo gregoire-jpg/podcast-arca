@@ -81,8 +81,38 @@ exports.handler = async function(event) {
 
     if (!resp.ok) {
       const err = await resp.text();
-      console.error("Brevo error:", resp.status, err);
-      return { statusCode: 500, body: "Brevo error: " + err };
+      console.error("Brevo error (interne ARCA):", resp.status, err);
+      // On continue quand même pour tenter l'envoi au client
+    }
+
+    // ─── Email de confirmation au client (sans l'étiquette MR) ───
+    if (d.email) {
+      try {
+        const clientHtml = buildClientEmailHtml(d, mrLabel);
+        const clientText = buildClientEmailText(d, mrLabel);
+        const clientSubject = isPaid
+          ? `Votre commande ARCA · Paiement reçu`
+          : `Votre commande ARCA · Bien reçue`;
+        const clientPayload = {
+          sender: { name: "ARCA Revue & Librairie", email: fromEmail },
+          to: [{ email: d.email, name: d.nom || "" }],
+          replyTo: { email: "info@arca-librairie.com", name: "ARCA" },
+          subject: clientSubject,
+          htmlContent: clientHtml,
+          textContent: clientText
+        };
+        const clientResp = await fetch("https://api.brevo.com/v3/smtp/email", {
+          method: "POST",
+          headers: { "accept": "application/json", "api-key": apiKey, "Content-Type": "application/json" },
+          body: JSON.stringify(clientPayload)
+        });
+        if (!clientResp.ok) {
+          const err2 = await clientResp.text();
+          console.error("Brevo error (client):", clientResp.status, err2);
+        }
+      } catch (e) {
+        console.error("Erreur envoi mail client:", e.message);
+      }
     }
 
     return { statusCode: 200, body: "Email sent" };
@@ -173,10 +203,10 @@ function buildEmailHtml(d, mrLabel) {
     </table>
   </td></tr>` : "";
 
-  // Bouton "Créer l'étiquette sur MR Connect" — toujours visible si livraison MR,
-  // que la génération API ait marché ou non. Sert de filet de sécurité pour
-  // créer l'étiquette manuellement en 30 sec sans réencoder les infos.
-  const mrConnectButton = isMondialRelay ? `
+  // Bouton "Créer l'étiquette sur MR Connect" — uniquement en filet de sécurité
+  // (affiché si livraison MR mais la génération API a échoué).
+  const mrApiFailed = isMondialRelay && (!mrLabel || !mrLabel.success);
+  const mrConnectButton = mrApiFailed ? `
   <tr><td style="padding:0 36px 18px;">
     <table cellpadding="0" cellspacing="0">
       <tr><td style="background:#c8a060;border-radius:4px;">
@@ -351,5 +381,121 @@ function buildEmailText(d, mrLabel) {
   } else if (mrLabel && mrLabel.error) {
     txt += `\n⚠ MR : ${mrLabel.error}\n`;
   }
+  return txt;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Email de confirmation au client (stylisé ARCA, sans l'étiquette MR)
+// ═══════════════════════════════════════════════════════════════
+function buildClientEmailHtml(d, mrLabel) {
+  const isPaid = (d["paypal-status"] || "").startsWith("PAID");
+  const isMondialRelay = (d.livraison || "") === "Mondial Relay";
+  const total = ((d["commande-details"] || "").match(/TOTAL:\s*(\d+)\s*€/) || [])[1] || "—";
+
+  // Lignes commande
+  const CAT = {
+    1:['N°1',20], 2:['N°2',20], 3:['N°3',20], 4:['N°4',20], 5:['N°5',20],
+    6:['N°6',20], 7:['N°7',20], 8:['N°8',15], 9:['Recueil de prières',20]
+  };
+  let rows = "";
+  for (let i = 1; i <= 9; i++) {
+    const q = parseInt(d["qty-n" + i] || "0", 10);
+    if (q > 0) {
+      const [title, price] = CAT[i];
+      rows += `<tr><td style="padding:6px 0;font:14px Georgia;color:#444;">${title} × ${q}</td><td style="padding:6px 0;font:14px Georgia;color:#2d3461;text-align:right;">${price * q} €</td></tr>`;
+    }
+  }
+
+  // Bloc suivi Mondial Relay (si étiquette générée)
+  let trackingBlock = "";
+  if (isMondialRelay && mrLabel && mrLabel.success && mrLabel.expedition) {
+    const cp = String(d.cp || "").replace(/\D/g, "");
+    const trackUrl = `https://www.mondialrelay.com/suivi-de-colis/?numeroExpedition=${encodeURIComponent(mrLabel.expedition)}&codePostal=${encodeURIComponent(cp)}`;
+    trackingBlock = `
+    <tr><td style="padding:0 36px 20px;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#fffbf4;border:1px solid #c8a060;border-radius:5px;">
+        <tr><td style="padding:18px 22px;">
+          <p style="margin:0 0 6px;font:11px Arial;letter-spacing:2px;text-transform:uppercase;color:#c8a060;font-weight:bold;">📦 Suivi de votre colis</p>
+          <p style="margin:0 0 10px;font:14px Georgia;color:#444;">Numéro d'expédition : <strong style="color:#2d3461;font-family:'Courier New',monospace;">${esc(mrLabel.expedition)}</strong></p>
+          <table cellpadding="0" cellspacing="0"><tr><td style="background:#2d3461;border-radius:4px;">
+            <a href="${esc(trackUrl)}" style="display:inline-block;padding:10px 20px;font:bold 11px Arial;letter-spacing:1.5px;text-transform:uppercase;color:#fff;text-decoration:none;">Suivre mon colis →</a>
+          </td></tr></table>
+        </td></tr>
+      </table>
+    </td></tr>`;
+  }
+
+  // Message selon mode paiement
+  const paymentMsg = isPaid
+    ? `<p style="margin:0;font:15px/1.7 Georgia;color:#444;">Votre paiement <strong style="color:#2d3461;">PayPal</strong> a bien été enregistré. Nous préparons votre commande.</p>`
+    : `<p style="margin:0;font:15px/1.7 Georgia;color:#444;">Vous recevrez les informations de paiement par <strong style="color:#2d3461;">virement bancaire</strong> dans les 24 heures.</p>`;
+
+  return `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f0ede8;font-family:Georgia,serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f0ede8;"><tr><td align="center" style="padding:30px 16px;">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#fff;border-radius:5px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.1);">
+
+  <!-- HEADER -->
+  <tr><td style="background:#2d3461;padding:38px 36px 30px;text-align:center;">
+    <p style="margin:0 0 8px;font:11px Arial;letter-spacing:4px;text-transform:uppercase;color:#c8a060;">Revue &amp; Librairie</p>
+    <h1 style="margin:0 0 12px;font:34px/1 Georgia;letter-spacing:10px;text-transform:uppercase;color:#fff;font-weight:normal;">ARCA</h1>
+    <div style="width:40px;height:2px;background:#c8a060;margin:0 auto;"></div>
+  </td></tr>
+
+  <!-- INTRO -->
+  <tr><td style="padding:32px 36px 20px;">
+    <h2 style="margin:0 0 14px;font:normal 22px/1.3 Georgia;color:#2d3461;">Merci pour votre commande, ${esc((d.nom || "").split(' ')[0] || "")}.</h2>
+    ${paymentMsg}
+  </td></tr>
+
+  <!-- SUIVI MR -->
+  ${trackingBlock}
+
+  <!-- RÉCAP -->
+  <tr><td style="padding:0 36px 24px;">
+    <p style="margin:0 0 10px;font:11px Arial;letter-spacing:2px;text-transform:uppercase;color:#c8a060;font-weight:bold;">— Récapitulatif —</p>
+    <table width="100%" cellpadding="0" cellspacing="0">
+      ${rows}
+      <tr><td colspan="2" style="padding:10px 0 0;border-top:2px solid #c8a060;"></td></tr>
+      <tr><td style="padding:8px 0;font:bold 16px Georgia;color:#2d3461;">Total ${isMondialRelay ? "(livraison incluse)" : ""}</td>
+          <td style="padding:8px 0;font:bold 18px Georgia;color:#2d3461;text-align:right;">${esc(total)} €</td></tr>
+    </table>
+  </td></tr>
+
+  <!-- LIVRAISON -->
+  <tr><td style="padding:0 36px 28px;">
+    <p style="margin:0 0 6px;font:11px Arial;letter-spacing:2px;text-transform:uppercase;color:#c8a060;font-weight:bold;">— Livraison —</p>
+    <p style="margin:0;font:14px/1.6 Georgia;color:#444;"><strong style="color:#2d3461;">${esc(d.livraison || "—")}</strong>${isMondialRelay && d["mr-relay-info"] ? `<br><span style="font-size:13px;color:#777;">${esc(d["mr-relay-info"])}</span>` : ""}</p>
+  </td></tr>
+
+  <!-- FOOTER -->
+  <tr><td style="background:#1e2245;padding:22px 36px;text-align:center;">
+    <p style="margin:0 0 6px;font:13px Georgia;color:rgba(255,255,255,.7);">Une question ?</p>
+    <p style="margin:0;font:13px Georgia;"><a href="mailto:info@arca-librairie.com" style="color:#c8a060;text-decoration:none;">info@arca-librairie.com</a></p>
+  </td></tr>
+
+</table>
+</td></tr></table>
+</body></html>`;
+}
+
+function buildClientEmailText(d, mrLabel) {
+  const isPaid = (d["paypal-status"] || "").startsWith("PAID");
+  const isMondialRelay = (d.livraison || "") === "Mondial Relay";
+  let txt = `MERCI POUR VOTRE COMMANDE — ARCA\n\n`;
+  txt += `Bonjour ${(d.nom || "").split(' ')[0] || ""},\n\n`;
+  txt += isPaid
+    ? `Votre paiement PayPal a bien été enregistré. Nous préparons votre commande.\n\n`
+    : `Vous recevrez les informations de paiement par virement bancaire dans les 24h.\n\n`;
+  if (isMondialRelay && mrLabel && mrLabel.success && mrLabel.expedition) {
+    const cp = String(d.cp || "").replace(/\D/g, "");
+    txt += `SUIVI MONDIAL RELAY\n`;
+    txt += `  Numéro d'expédition : ${mrLabel.expedition}\n`;
+    txt += `  Suivre : https://www.mondialrelay.com/suivi-de-colis/?numeroExpedition=${encodeURIComponent(mrLabel.expedition)}&codePostal=${encodeURIComponent(cp)}\n\n`;
+  }
+  txt += `LIVRAISON : ${d.livraison || "—"}\n`;
+  if (isMondialRelay && d["mr-relay-info"]) txt += `  ${d["mr-relay-info"]}\n`;
+  txt += `\nUne question ? info@arca-librairie.com\n`;
   return txt;
 }

@@ -46,7 +46,6 @@ async function createLabel(orderData) {
   if (!URL || !LOGIN || !PASSWORD || !BRAND) {
     return { error: 'MR_API2_* env vars not configured' };
   }
-  console.log('[MR REST] brand:', BRAND, '| login:', LOGIN.replace(/(.{3}).*(@.*)/, '$1***$2'));
 
   // Code point relais : 6 chiffres
   const relayCodeRaw = String(orderData['mr-relay-code'] || '').replace(/\D/g, '');
@@ -59,12 +58,12 @@ async function createLabel(orderData) {
 
   const dest = parseDest(orderData);
 
-  // Poids total (950g revues 1-8, 600g recueil n9)
-  const WEIGHTS = { 1:950, 2:950, 3:950, 4:950, 5:950, 6:950, 7:950, 8:950, 9:600 };
+  // Poids total mesurés : 600g par revue ARCA, 350g pour le recueil de prières
+  const WEIGHTS = { 1:600, 2:600, 3:600, 4:600, 5:600, 6:600, 7:600, 8:600, 9:350 };
   let totalWeight = 0;
   for (let i = 1; i <= 9; i++) {
     const q = parseInt(orderData['qty-n' + i] || '0', 10);
-    totalWeight += q * (WEIGHTS[i] || 950);
+    totalWeight += q * (WEIGHTS[i] || 600);
   }
   const weight = Math.max(totalWeight, 100);
 
@@ -148,8 +147,7 @@ async function createLabel(orderData) {
   const authHeader = 'Basic ' + Buffer.from(LOGIN + ':' + PASSWORD).toString('base64');
 
   try {
-    console.log('[MR REST] POST', URL);
-    console.log('[MR REST] body:', JSON.stringify(body));
+    console.log('[MR] POST', URL, '| order:', orderNo, '| weight:', weight, 'g');
     const resp = await fetch(URL, {
       method: 'POST',
       headers: {
@@ -160,7 +158,8 @@ async function createLabel(orderData) {
       body: JSON.stringify(body)
     });
     const text = await resp.text();
-    console.log('[MR REST] HTTP', resp.status, '| response:', text.substring(0, 1000));
+    console.log('[MR] HTTP', resp.status);
+    if (!resp.ok) console.log('[MR] error response:', text.substring(0, 600));
 
     if (!resp.ok) {
       return {
