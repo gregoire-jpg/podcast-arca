@@ -182,7 +182,8 @@ function buildEmailHtml(d, mrLabel) {
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#fef0f0;border:1px solid #c44;border-radius:4px;">
       <tr><td style="padding:16px 20px;">
         <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#c44;font-weight:bold;">⚠ Étiquette MR non générée</p>
-        <p style="margin:0;font:13px Georgia;color:#444;">${esc(mrLabel.error || "Erreur inconnue")} — créer l'étiquette manuellement sur connect.mondialrelay.com</p>
+        <p style="margin:0 0 10px;font:13px Georgia;color:#444;">${esc(mrLabel.error || "Erreur inconnue")} — créer l'étiquette manuellement sur connect.mondialrelay.com</p>
+        ${mrLabel.xml ? `<p style="margin:14px 0 4px;font:11px Arial;color:#888;text-transform:uppercase;letter-spacing:1px;">Réponse XML brute (debug)</p><div style="margin:0;padding:10px;background:#fff;border:1px solid #eee;border-radius:3px;font:11px/1.4 'Courier New',monospace;color:#555;word-break:break-all;">${esc(mrLabel.xml)}</div>` : ""}
       </td></tr>
     </table>
   </td></tr>`;
