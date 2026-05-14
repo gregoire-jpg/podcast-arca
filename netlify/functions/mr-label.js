@@ -109,8 +109,8 @@ async function createLabel(orderData) {
         },
         deliveryModeField: {
           modeField: '24R',
-          // Le XSD donne l'exemple "FR00001" -> format = code pays + ID relais
-          locationField: destCountry + relayCode
+          // Format Location : essayer "BE-040638" (avec tiret, comme l'affichage du widget)
+          locationField: destCountry + '-' + relayCode
         },
         collectionModeField: {
           modeField: 'REL'
