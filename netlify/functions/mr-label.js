@@ -73,8 +73,15 @@ async function createLabel(orderData) {
 
   // Corps de la requête JSON — suffixe "Field" obligatoire sur TOUS les noms
   // (convention de sérialisation WCF/.NET utilisée par MR Connect API)
+  // L'API attend login + password + customerId + culture dans contextField
+  // (le Basic Auth HTTP n'est pas utilisé).
   const body = {
     contextField: {
+      loginField: LOGIN,
+      passwordField: PASSWORD,
+      customerIdField: BRAND,
+      cultureField: 'fr-FR',
+      versionAPIField: '1.0',
       brandField: BRAND
     },
     outputOptionsField: {
@@ -144,13 +151,13 @@ async function createLabel(orderData) {
     if (!resp.ok) {
       return {
         error: 'MR REST HTTP ' + resp.status,
-        xml: text.substring(0, 800)
+        xml: text.substring(0, 2000)
       };
     }
 
     let data;
     try { data = JSON.parse(text); } catch (e) {
-      return { error: 'Réponse MR non-JSON', xml: text.substring(0, 800) };
+      return { error: 'Réponse MR non-JSON', xml: text.substring(0, 2000) };
     }
 
     // Si MR retourne une erreur dans statusListField (HTTP 200 mais Level=Error)
@@ -159,7 +166,7 @@ async function createLabel(orderData) {
     if (errorStatus) {
       return {
         error: `MR API code ${errorStatus.codeField}: ${errorStatus.messageField}`,
-        xml: text.substring(0, 800)
+        xml: text.substring(0, 2000)
       };
     }
 
@@ -179,7 +186,7 @@ async function createLabel(orderData) {
     if (!expedition && !labelUrl) {
       return {
         error: 'Réponse MR sans expédition ni URL étiquette',
-        xml: text.substring(0, 800)
+        xml: text.substring(0, 2000)
       };
     }
 
