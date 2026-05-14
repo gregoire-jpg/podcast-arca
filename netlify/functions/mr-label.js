@@ -71,53 +71,54 @@ async function createLabel(orderData) {
   // Référence client unique
   const userReference = 'ARCA-' + Date.now().toString().slice(-9);
 
-  // Corps de la requête JSON conforme à l'API 2 (Connect Shipment API)
+  // Corps de la requête JSON — suffixe "Field" obligatoire sur TOUS les noms
+  // (convention de sérialisation WCF/.NET utilisée par MR Connect API)
   const body = {
-    context: {
-      brand: BRAND
+    contextField: {
+      brandField: BRAND
     },
-    outputOptions: {
-      outputFormat: '10x15',
-      outputType: 'PdfUrl',
-      returnType: 'CreateAndPrint'
+    outputOptionsField: {
+      outputFormatField: '10x15',
+      outputTypeField: 'PdfUrl',
+      returnTypeField: 'CreateAndPrint'
     },
-    shipmentCreationList: [{
-      userReference: userReference,
-      shipmentReference: userReference,
-      shippingProductCode: '24R',
-      pickupLocation: {
-        type: 'Sender'
+    shipmentsListField: [{
+      userReferenceField: userReference,
+      shipmentReferenceField: userReference,
+      shippingProductCodeField: '24R',
+      pickupLocationField: {
+        typeField: 'Sender'
       },
-      deliveryLocation: {
-        type: 'PickupPoint',
-        id: relayCode,
-        countryCode: destCountry
+      deliveryLocationField: {
+        typeField: 'PickupPoint',
+        idField: relayCode,
+        countryCodeField: destCountry
       },
-      parcels: [{
-        content: 'Revue ARCA',
-        weight: { value: weight, unit: 'gr' }
+      parcelsField: [{
+        contentField: 'Revue ARCA',
+        weightField: { valueField: weight, unitField: 'gr' }
       }],
-      sender: {
-        address: {
-          companyName: 'Arca Societas',
-          streetName: 'Rue du Lambais 70',
-          countryCode: 'BE',
-          postCode: '1390',
-          city: 'Grez-Doiceau',
-          email: 'info@arca-librairie.com'
+      senderField: {
+        addressField: {
+          companyNameField: 'Arca Societas',
+          streetNameField: 'Rue du Lambais 70',
+          countryCodeField: 'BE',
+          postCodeField: '1390',
+          cityField: 'Grez-Doiceau',
+          emailField: 'info@arca-librairie.com'
         }
       },
-      addressee: {
-        address: {
-          firstName: dest.firstName,
-          lastName: dest.lastName,
-          streetName: dest.streetName,
-          addressAdd1: dest.addressAdd1,
-          countryCode: destCountry,
-          postCode: dest.postCode,
-          city: dest.city,
-          phoneNumber: dest.phoneNumber,
-          email: dest.email
+      addresseeField: {
+        addressField: {
+          firstNameField: dest.firstName,
+          lastNameField: dest.lastName,
+          streetNameField: dest.streetName,
+          addressAdd1Field: dest.addressAdd1,
+          countryCodeField: destCountry,
+          postCodeField: dest.postCode,
+          cityField: dest.city,
+          phoneNumberField: dest.phoneNumber,
+          emailField: dest.email
         }
       }
     }]
@@ -152,12 +153,27 @@ async function createLabel(orderData) {
       return { error: 'Réponse MR non-JSON', xml: text.substring(0, 800) };
     }
 
-    // Extraire le 1er shipment de la réponse
-    const shipment = (data.shipmentsList && data.shipmentsList[0]) || data.shipment || data;
-    const expedition = shipment.shipmentNumber || shipment.trackingNumber || shipment.parcelNumber || '';
-    const labelUrl = shipment.labelUrl
-                  || (shipment.outputFiles && shipment.outputFiles[0] && shipment.outputFiles[0].url)
-                  || shipment.url
+    // Si MR retourne une erreur dans statusListField (HTTP 200 mais Level=Error)
+    const statusList = data.statusListField || [];
+    const errorStatus = statusList.find(s => (s.levelField || '').toLowerCase() === 'error');
+    if (errorStatus) {
+      return {
+        error: `MR API code ${errorStatus.codeField}: ${errorStatus.messageField}`,
+        xml: text.substring(0, 800)
+      };
+    }
+
+    // Extraire le 1er shipment de la réponse (avec suffixe Field)
+    const list = data.shipmentsListField || [];
+    const shipment = list[0] || {};
+    const expedition = shipment.shipmentNumberField
+                     || shipment.trackingNumberField
+                     || shipment.parcelNumberField
+                     || '';
+    const outputFiles = shipment.outputFilesField || [];
+    const labelUrl = shipment.labelUrlField
+                  || (outputFiles[0] && (outputFiles[0].urlField || outputFiles[0].outputField))
+                  || shipment.urlField
                   || '';
 
     if (!expedition && !labelUrl) {
