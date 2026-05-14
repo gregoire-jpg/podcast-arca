@@ -521,5 +521,19 @@ body { font-family: Georgia, serif; background: #f0ede8; color: var(--navy); lin
 
 </div>
 
+<script>
+// Mode "embed" : quand la page est chargée dans le modal du tunnel de commande,
+// on masque le bloc CTA (souscription + bouton Commander) qui devient redondant.
+(function(){
+  if (/[?&]embed=1\b/.test(window.location.search)) {
+    var cta = document.querySelector('.cta-block');
+    if (cta) cta.style.display = 'none';
+    // Footer également superflu en embed
+    var fn = document.querySelector('.footer-note');
+    if (fn) fn.style.display = 'none';
+  }
+})();
+</script>
+
 </body>
 </html>

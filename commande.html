@@ -33,13 +33,17 @@ button, input, select, textarea { font-family: inherit; }
 .card-body { padding: 28px 32px; }
 .card-title { font: 600 14px/1 Arial; letter-spacing: 1.5px; text-transform: uppercase; color: var(--navy); padding-bottom: 14px; margin-bottom: 18px; border-bottom: 2px solid var(--gold); }
 
-/* Issues grid */
-.issues { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
-.issue { background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 14px 16px; transition: border-color .2s; }
+/* Issues grid (anciens numéros : compact, 4 colonnes sur desktop) */
+.issues { display: grid; grid-template-columns: repeat(auto-fill, minmax(125px, 1fr)); gap: 10px; }
+.issue { background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 10px 12px; transition: border-color .2s; }
 .issue.has-qty { border-color: var(--gold); background: #fffbf4; }
-.issue-num { font: 600 11px/1 Arial; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
-.issue-title { font: 600 13px/1.3 Georgia; color: var(--navy); margin-bottom: 4px; min-height: 32px; }
-.issue-price { font: 14px/1 Arial; color: var(--muted); margin-bottom: 10px; }
+.issue-num { font: 600 10px/1 Arial; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
+.issue-title { font: 600 14px/1.2 Georgia; color: var(--navy); margin-bottom: 3px; }
+.issue-price { font: 13px/1 Arial; color: var(--muted); margin-bottom: 8px; }
+.issue-toc { display: inline-block; margin-top: 6px; font: 10px/1 Arial; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); text-decoration: none; cursor: pointer; border: 0; background: none; padding: 0; }
+.issue-toc:hover { color: var(--navy); text-decoration: underline; }
+.feat-toc { display: inline-block; margin-top: 14px; font: 11px/1 Arial; letter-spacing: 1.5px; text-transform: uppercase; color: #c8a060; text-decoration: none; cursor: pointer; border: 0; background: none; padding: 0; }
+.feat-toc:hover { color: #fff; }
 .issue-price .promo { color: var(--green); font-weight: bold; }
 .issue-price .old { text-decoration: line-through; color: #aaa; margin-left: 4px; }
 
@@ -238,6 +242,15 @@ button, input, select, textarea { font-family: inherit; }
 .btn-next:disabled { opacity: .35; cursor: not-allowed; }
 .btn-nav.alone-right { margin-left: auto; }
 
+/* Modal sommaire (popup interne, ne sort pas du tunnel) */
+.modal-overlay { position: fixed; inset: 0; background: rgba(30,34,69,.85); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px; animation: fadeIn .15s ease-out; }
+.modal-overlay[hidden] { display: none; }
+.modal-content { background: #fff; border-radius: 6px; max-width: 900px; width: 100%; max-height: 92vh; position: relative; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 8px 40px rgba(0,0,0,.4); }
+.modal-close { position: absolute; top: 12px; right: 14px; background: rgba(0,0,0,.55); color: #fff; border: 0; border-radius: 50%; width: 36px; height: 36px; font: 600 22px/1 Arial; cursor: pointer; z-index: 10; transition: background .15s; }
+.modal-close:hover { background: #2d3461; }
+#sommaire-iframe { flex: 1; width: 100%; border: 0; min-height: 500px; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
 /* Mobile */
 @media (max-width: 600px) {
   .hdr { padding: 36px 16px 30px; }
@@ -245,8 +258,8 @@ button, input, select, textarea { font-family: inherit; }
   .container { padding: 20px 12px 60px; }
   .card-body { padding: 22px 20px; }
   .row-grid, .ship-options, .pay-options { grid-template-columns: 1fr; }
-  .issues { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .issue { padding: 12px; }
+  .issues { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .issue { padding: 10px; }
   .issue-featured { grid-template-columns: 1fr; gap: 16px; padding: 22px 20px; }
   .feat-right { justify-content: center; }
   .feat-title { font-size: 19px; }
@@ -529,6 +542,14 @@ button, input, select, textarea { font-family: inherit; }
 
 </div>
 
+<!-- Modal sommaire — affichage de la table des matières sans quitter le tunnel -->
+<div class="modal-overlay" id="sommaire-modal" hidden>
+  <div class="modal-content">
+    <button type="button" class="modal-close" onclick="closeSommaire()" aria-label="Fermer">×</button>
+    <iframe id="sommaire-iframe" src="about:blank" title="Sommaire"></iframe>
+  </div>
+</div>
+
 <script>
 'use strict';
 
@@ -539,16 +560,20 @@ var PROMO_DEADLINE = new Date('2026-05-25T22:00:00Z');
 var PROMO_ACTIVE = new Date() < PROMO_DEADLINE;
 
 var ISSUES = [
-  { num: 1, title: 'N° 1', price: 20, promo: null, weight: 950, type: 'revue' },
-  { num: 2, title: 'N° 2', price: 20, promo: null, weight: 950, type: 'revue' },
-  { num: 3, title: 'N° 3', price: 20, promo: null, weight: 950, type: 'revue' },
-  { num: 4, title: 'N° 4', price: 20, promo: null, weight: 950, type: 'revue' },
-  { num: 5, title: 'N° 5', price: 20, promo: null, weight: 950, type: 'revue' },
-  { num: 6, title: 'N° 6', price: 20, promo: null, weight: 950, type: 'revue' },
-  { num: 7, title: 'N° 7', price: 20, promo: null, weight: 950, type: 'revue' },
-  { num: 8, title: 'N° 8', price: 20, promo: PROMO_ACTIVE ? 15 : null, weight: 950, type: 'revue', promoLabel: 'Souscription' },
-  { num: 9, title: 'Recueil de prières', price: 20, promo: null, weight: 600, type: 'hc', overline: 'Hors collection' }
+  { num: 1, title: 'N° 1', price: 20, promo: null, weight: 600, type: 'revue' },
+  { num: 2, title: 'N° 2', price: 20, promo: null, weight: 600, type: 'revue' },
+  { num: 3, title: 'N° 3', price: 20, promo: null, weight: 600, type: 'revue' },
+  { num: 4, title: 'N° 4', price: 20, promo: null, weight: 600, type: 'revue' },
+  { num: 5, title: 'N° 5', price: 20, promo: null, weight: 600, type: 'revue' },
+  { num: 6, title: 'N° 6', price: 20, promo: null, weight: 600, type: 'revue' },
+  { num: 7, title: 'N° 7', price: 20, promo: null, weight: 600, type: 'revue' },
+  { num: 8, title: 'N° 8', price: 20, promo: PROMO_ACTIVE ? 15 : null, weight: 600, type: 'revue', promoLabel: 'Souscription' },
+  { num: 9, title: 'Recueil de prières', price: 20, promo: null, weight: 350, type: 'hc', overline: 'Hors collection' }
 ];
+
+// Sommaires disponibles : map num -> URL relative. Ajouter ici quand un sommaire
+// d'un autre numéro est publié (ex : 7: '/n7-sommaire.html').
+var SOMMAIRES = { 8: '/n8-sommaire.html?embed=1' };
 
 var SHIPPING = {
   'Belgique': { relay: 5,    poste: 6,    main: 0 },
@@ -571,6 +596,9 @@ function renderFeatured() {
   var priceHtml = PROMO_ACTIVE
     ? '<span class="promo">15 €</span><span class="old">20 €</span><span class="label">tarif souscription</span>'
     : '<span class="promo">20 €</span><span class="label">l\'exemplaire</span>';
+  var tocLink = SOMMAIRES[8]
+    ? '<button type="button" class="feat-toc" onclick="openSommaire(8)">Voir le sommaire →</button>'
+    : '';
   box.innerHTML =
     '<div class="issue-featured" data-num="8">' +
       badgeHtml +
@@ -579,6 +607,7 @@ function renderFeatured() {
         '<div class="feat-title">Revue ARCA n°8</div>' +
         '<div class="feat-sub">Lettres, hermétisme, alchimie, traditions spirituelles</div>' +
         '<div class="feat-price">' + priceHtml + '</div>' +
+        tocLink +
       '</div>' +
       '<div class="feat-right">' +
         '<button type="button" class="qty-btn" data-act="minus" data-num="8">−</button>' +
@@ -596,8 +625,10 @@ function renderOldIssues() {
   ISSUES.forEach(function(iss){
     if (iss.num === 8) return;       // N°8 traité séparément (featured)
     if (iss.type !== 'revue') return;  // exclure les hors-collection
+    var tocLink = SOMMAIRES[iss.num]
+      ? '<button type="button" class="issue-toc" onclick="openSommaire(' + iss.num + ')">Sommaire →</button>'
+      : '';
     html += '<div class="issue" data-num="' + iss.num + '">' +
-      '<div class="issue-num">Numéro ' + iss.num + '</div>' +
       '<div class="issue-title">N° ' + iss.num + '</div>' +
       '<div class="issue-price">' + iss.price + ' €</div>' +
       '<div class="qty-row">' +
@@ -605,6 +636,7 @@ function renderOldIssues() {
         '<input type="number" class="qty-input" min="0" max="50" value="0" data-num="' + iss.num + '">' +
         '<button type="button" class="qty-btn" data-act="plus" data-num="' + iss.num + '">+</button>' +
       '</div>' +
+      tocLink +
     '</div>';
   });
   grid.innerHTML = html;
@@ -1224,6 +1256,32 @@ updateSummary = function() { _origUpdateSummary.apply(this, arguments); updateCa
     }
   }
 })();
+
+// ═══════════════════ MODAL SOMMAIRE ═══════════════════
+function openSommaire(num) {
+  var url = SOMMAIRES[num];
+  if (!url) return;
+  var modal = document.getElementById('sommaire-modal');
+  var iframe = document.getElementById('sommaire-iframe');
+  iframe.src = url;
+  modal.hidden = false;
+  document.body.style.overflow = 'hidden';
+}
+function closeSommaire() {
+  var modal = document.getElementById('sommaire-modal');
+  var iframe = document.getElementById('sommaire-iframe');
+  modal.hidden = true;
+  iframe.src = 'about:blank';
+  document.body.style.overflow = '';
+}
+// Fermer avec Escape
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape' && !document.getElementById('sommaire-modal').hidden) closeSommaire();
+});
+// Fermer en cliquant sur le fond (en dehors du contenu)
+document.getElementById('sommaire-modal').addEventListener('click', function(e){
+  if (e.target === this) closeSommaire();
+});
 
 // Init
 renderIssues();
