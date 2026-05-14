@@ -37,19 +37,44 @@ exports.handler = async function(event) {
     params.append('payment_method_types[]', 'bancontact');
     if (d.email) params.append('customer_email', d.email);
 
-    let idx = 0;
+    // Détection Pack complet : au moins 1 de chaque (n1..n9)
+    let packComplet = true;
     for (let i = 1; i <= 9; i++) {
-      const q = parseInt(d['qty-n' + i] || '0', 10);
-      if (q <= 0) continue;
-      const cat = CATALOG[i];
-      // Après deadline, n°8 repasse à 20€
-      const isPromoActive = new Date() < PROMO_DEADLINE;
-      const unitAmount = (i === 8 && !isPromoActive) ? 2000 : cat.price;
+      if (parseInt(d['qty-n' + i] || '0', 10) < 1) { packComplet = false; break; }
+    }
+
+    let idx = 0;
+    const isPromoActive = new Date() < PROMO_DEADLINE;
+    const PACK_DISCOUNT_EUR = 50;
+
+    if (packComplet) {
+      // Une seule ligne "Pack complet" avec le prix réduit
+      let brutTotal = 0;
+      for (let i = 1; i <= 9; i++) {
+        const q = parseInt(d['qty-n' + i] || '0', 10);
+        const cat = CATALOG[i];
+        const unitAmount = (i === 8 && !isPromoActive) ? 2000 : cat.price;
+        brutTotal += q * unitAmount;
+      }
+      const packTotalCents = brutTotal - PACK_DISCOUNT_EUR * 100;
       params.append(`line_items[${idx}][price_data][currency]`, 'eur');
-      params.append(`line_items[${idx}][price_data][product_data][name]`, cat.title);
-      params.append(`line_items[${idx}][price_data][unit_amount]`, String(unitAmount));
-      params.append(`line_items[${idx}][quantity]`, String(q));
+      params.append(`line_items[${idx}][price_data][product_data][name]`, 'Pack complet ARCA — 8 numéros + recueil de prières');
+      params.append(`line_items[${idx}][price_data][unit_amount]`, String(packTotalCents));
+      params.append(`line_items[${idx}][quantity]`, '1');
       idx++;
+    } else {
+      // Mode normal : une ligne par numéro
+      for (let i = 1; i <= 9; i++) {
+        const q = parseInt(d['qty-n' + i] || '0', 10);
+        if (q <= 0) continue;
+        const cat = CATALOG[i];
+        const unitAmount = (i === 8 && !isPromoActive) ? 2000 : cat.price;
+        params.append(`line_items[${idx}][price_data][currency]`, 'eur');
+        params.append(`line_items[${idx}][price_data][product_data][name]`, cat.title);
+        params.append(`line_items[${idx}][price_data][unit_amount]`, String(unitAmount));
+        params.append(`line_items[${idx}][quantity]`, String(q));
+        idx++;
+      }
     }
     if (idx === 0) return { statusCode: 400, body: 'Aucun article dans la commande' };
 

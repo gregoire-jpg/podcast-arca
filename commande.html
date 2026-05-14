@@ -95,6 +95,41 @@ button, input, select, textarea { font-family: inherit; }
 .feat-right .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .feat-right .qty-input:focus { outline: none; border-color: #c8a060; }
 
+/* Pack complet (8 numéros + recueil) */
+.issue-pack {
+  position: relative;
+  background: var(--bg);
+  border: 2px dashed var(--gold);
+  border-radius: 6px;
+  padding: 22px 26px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 26px;
+}
+.pack-badge {
+  position: absolute; top: -10px; left: 24px;
+  background: var(--navy); color: #fff;
+  font: 600 10px/1 Arial; letter-spacing: 2px; text-transform: uppercase;
+  padding: 5px 12px; border-radius: 3px;
+}
+.pack-title { font: normal 20px/1.2 Georgia; color: var(--navy); margin-bottom: 4px; }
+.pack-desc { font: italic 13px/1.5 Georgia; color: #555; margin-bottom: 10px; }
+.pack-price { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.pack-price .promo { font: bold 26px/1 Georgia; color: var(--gold); white-space: nowrap; }
+.pack-price .old { font: 15px/1 Georgia; color: #aaa; text-decoration: line-through; white-space: nowrap; }
+.pack-price .save { font: 10px/1 Arial; color: var(--green); letter-spacing: 1px; text-transform: uppercase; background: #e8f5ea; padding: 4px 8px; border-radius: 3px; white-space: nowrap; }
+.pack-btn {
+  padding: 13px 22px; background: var(--navy); color: #fff;
+  border: 0; border-radius: 5px; cursor: pointer;
+  font: 600 11px/1 Arial; letter-spacing: 1.5px; text-transform: uppercase;
+  white-space: nowrap; transition: background .15s;
+}
+.pack-btn:hover { background: var(--navy-dk); }
+.pack-btn.added { background: var(--green); }
+.pack-btn.added::before { content: "✓ "; }
+
 /* Subtitle "Anciens numéros" */
 .sub-section {
   font: 600 12px/1 Arial;
@@ -117,13 +152,15 @@ button, input, select, textarea { font-family: inherit; }
 .row:last-child { margin-bottom: 0; }
 .row label { display: block; font: 600 11px/1 Arial; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
 .row label .req { color: var(--red); }
-.row input[type=text], .row input[type=email], .row textarea, .row select {
+.row input[type=text], .row input[type=email], .row input[type=tel], .row input[type=number], .row textarea, .row select {
   width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 5px;
   font: 15px/1.4 Georgia; color: var(--navy); background: #fff; transition: border-color .2s;
 }
 .row input:focus, .row textarea:focus, .row select:focus { outline: none; border-color: var(--gold); }
 .row textarea { resize: vertical; min-height: 80px; }
 .row-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+/* Code postal compact uniquement sur desktop (sur mobile il prend toute la largeur) */
+@media (min-width: 601px) { .row-cp { max-width: 140px; } }
 
 /* Shipping options */
 .ship-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -355,6 +392,20 @@ button, input, select, textarea { font-family: inherit; }
     gap: 12px;
     padding-top: 6px;
   }
+
+  /* Pack card mobile : empile verticalement, bouton pleine largeur */
+  .issue-pack {
+    grid-template-columns: 1fr;
+    padding: 26px 18px 18px;
+    margin-top: 18px;
+  }
+  .pack-badge {
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+  .pack-title { font-size: 18px; }
+  .pack-btn { width: 100%; padding: 14px; }
   .wizard-progress { padding: 14px 12px; }
   .wp-label { display: none; }
   .wp-rule { min-width: 10px; margin: 0 6px; }
@@ -447,6 +498,21 @@ button, input, select, textarea { font-family: inherit; }
       <!-- N°8 mis en avant -->
       <div id="featured-n8"></div>
 
+      <!-- Pack complet (8 numéros + recueil) -->
+      <div class="issue-pack">
+        <div class="pack-badge">★ Pack complet</div>
+        <div class="pack-info">
+          <div class="pack-title">Les 8 numéros + le recueil de prières</div>
+          <div class="pack-desc">L'intégrale ARCA en un clic, avec une réduction immédiate.</div>
+          <div class="pack-price">
+            <span class="promo" id="pack-price-promo">— €</span>
+            <span class="old" id="pack-price-old">— €</span>
+            <span class="save">économie de 50 €</span>
+          </div>
+        </div>
+        <button type="button" class="pack-btn" id="pack-btn" onclick="ajouterPack()">Ajouter le pack</button>
+      </div>
+
       <!-- Anciens numéros 1 à 7 -->
       <div class="sub-section">Anciens numéros (1 à 7) — 20 € l'exemplaire</div>
       <div class="issues" id="issues-grid"></div>
@@ -490,7 +556,7 @@ button, input, select, textarea { font-family: inherit; }
         <input type="text" id="complement" name="complement" maxlength="32" placeholder="Bâtiment, étage, appartement…" autocomplete="address-line2">
       </div>
       <div class="row-grid">
-        <div class="row" style="max-width:140px;">
+        <div class="row row-cp">
           <label for="cp">Code postal <span class="req">*</span></label>
           <input type="text" id="cp" name="cp" required maxlength="5" inputmode="numeric" pattern="[0-9]{4,5}" placeholder="1390" autocomplete="postal-code">
         </div>
@@ -844,6 +910,45 @@ function onQtyChange(num, v) {
   updateSummary();
 }
 
+// ── Pack complet : -50€ si au moins 1 de chaque (n1..n9) ──
+var PACK_DISCOUNT = 50;
+function isPackComplet() {
+  for (var i = 1; i <= 9; i++) {
+    if (!quantities[i] || quantities[i] < 1) return false;
+  }
+  return true;
+}
+function ajouterPack() {
+  for (var i = 1; i <= 9; i++) {
+    if (!quantities[i] || quantities[i] < 1) {
+      var inp = document.querySelector('input[data-num="' + i + '"]');
+      if (inp) inp.value = 1;
+      onQtyChange(i, 1);
+    }
+  }
+}
+// Affichage prix du pack (dynamique selon la promo n°8)
+function updatePackPriceDisplay() {
+  var n8 = (PROMO_ACTIVE ? 15 : 20);
+  var brut = (7 * 20) + n8 + 20;            // 7 anciens + n8 + recueil
+  var pack = brut - PACK_DISCOUNT;
+  var promoEl = document.getElementById('pack-price-promo');
+  var oldEl = document.getElementById('pack-price-old');
+  if (promoEl) promoEl.textContent = pack + ' €';
+  if (oldEl) oldEl.textContent = brut + ' €';
+}
+function updatePackButton() {
+  var btn = document.getElementById('pack-btn');
+  if (!btn) return;
+  if (isPackComplet()) {
+    btn.classList.add('added');
+    btn.textContent = 'Pack ajouté';
+  } else {
+    btn.classList.remove('added');
+    btn.textContent = 'Ajouter le pack';
+  }
+}
+
 // ── Frais de port ──
 function updateShipping() {
   var pays = document.getElementById('pays').value;
@@ -898,8 +1003,18 @@ function updateSummary() {
     sumEl.innerHTML = '<div class="summary-row empty">Aucun exemplaire sélectionné</div>';
     document.getElementById('submit-btn').disabled = true;
     document.getElementById('commande-details').value = '';
+    updatePackButton();
     return;
   }
+
+  // Pack complet : -50€ si au moins 1 de chaque (n1..n9)
+  var packActive = isPackComplet();
+  if (packActive) {
+    detailsHtml += '<div class="summary-row" style="color:#c8a060;"><span>★ Pack complet — réduction</span><span>−' + PACK_DISCOUNT + ' €</span></div>';
+    detailsText.push('Pack complet -' + PACK_DISCOUNT + ' €');
+    totalRevues -= PACK_DISCOUNT;
+  }
+  updatePackButton();
 
   // Frais de port
   var pays = document.getElementById('pays').value;
@@ -1112,6 +1227,9 @@ function getCurrentTotal() {
     totalRevues += q * price;
     totalQty += q;
   });
+  // Réduction Pack complet
+  var packDiscount = isPackComplet() ? PACK_DISCOUNT : 0;
+  totalRevues -= packDiscount;
   var pays = document.getElementById('pays').value;
   var livraison = document.querySelector('input[name="livraison"]:checked');
   var frais = 0;
@@ -1120,7 +1238,7 @@ function getCurrentTotal() {
     var c = SHIPPING[pays][mode];
     if (c !== null) frais = c;
   }
-  return { revues: totalRevues, port: frais, total: totalRevues + frais, qty: totalQty };
+  return { revues: totalRevues, port: frais, total: totalRevues + frais, qty: totalQty, packDiscount: packDiscount };
 }
 
 // Vérifie si la commande PayPal peut démarrer
@@ -1209,16 +1327,23 @@ if (window.paypal && paypal.Buttons) {
         items.push('N°' + iss.num + ' × ' + q);
       });
       var desc = 'Revue ARCA — ' + items.join(', ');
+      // t.revues est deja apres reduction. On passe le brut + discount pour PayPal.
+      var packDisc = t.packDiscount || 0;
+      var revuesBrut = t.revues + packDisc;
+      var paypalBreakdown = {
+        item_total: { currency_code: 'EUR', value: revuesBrut.toFixed(2) },
+        shipping:   { currency_code: 'EUR', value: t.port.toFixed(2) }
+      };
+      if (packDisc > 0) {
+        paypalBreakdown.discount = { currency_code: 'EUR', value: packDisc.toFixed(2) };
+      }
       return actions.order.create({
         purchase_units: [{
-          description: desc.substring(0, 127), // PayPal limit
+          description: desc.substring(0, 127),
           amount: {
             value: t.total.toFixed(2),
             currency_code: 'EUR',
-            breakdown: {
-              item_total: { currency_code: 'EUR', value: t.revues.toFixed(2) },
-              shipping:   { currency_code: 'EUR', value: t.port.toFixed(2) }
-            }
+            breakdown: paypalBreakdown
           }
         }]
       });
@@ -1491,6 +1616,7 @@ document.getElementById('sommaire-modal').addEventListener('click', function(e){
 // Init
 renderIssues();
 updateCartStrip();
+updatePackPriceDisplay();
 
 // ═══════════════════ EMBED (iframe auto-resize) ═══════════════════
 // Mesure le contenu visible (header + container) et envoie la hauteur au parent.
