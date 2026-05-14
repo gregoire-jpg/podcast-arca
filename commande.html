@@ -1174,31 +1174,48 @@ renderIssues();
 updateCartStrip();
 
 // ═══════════════════ EMBED (iframe auto-resize) ═══════════════════
-// Quand commande.html est integre via iframe sur arca-revue.com (ou autre),
-// on envoie la hauteur du contenu au parent pour qu'il ajuste la hauteur de l'iframe.
+// Mesure le contenu visible (header + container) et envoie la hauteur au parent.
+// On ne mesure PAS document.body car le SDK PayPal et le widget MR peuvent
+// injecter des elements en position absolue qui faussent scrollHeight.
 (function setupEmbedAutoResize(){
-  if (window.parent === window) return;  // pas dans une iframe : rien a faire
+  if (window.parent === window) return;
+  var lastSent = 0;
+  var pending = null;
+
+  function measure() {
+    var hdr = document.querySelector('.hdr');
+    var container = document.querySelector('.container');
+    var hdrH = hdr ? hdr.getBoundingClientRect().height : 0;
+    var contH = container ? container.getBoundingClientRect().height : 0;
+    return Math.ceil(hdrH + contH + 8);
+  }
+
   function postHeight() {
-    var h = Math.max(
-      document.body.scrollHeight,
-      document.documentElement.scrollHeight,
-      document.body.offsetHeight,
-      document.documentElement.offsetHeight
-    );
+    pending = null;
+    var h = measure();
+    if (h <= 0) return;
+    if (Math.abs(h - lastSent) < 4) return;  // anti-boucle
+    lastSent = h;
     try { window.parent.postMessage({ type: 'arca-commande-height', height: h }, '*'); } catch(e) {}
   }
-  // Premier envoi des que le DOM est pret
-  setTimeout(postHeight, 50);
-  // ResizeObserver : reaction au moindre changement de taille
-  if (window.ResizeObserver) {
-    new ResizeObserver(postHeight).observe(document.body);
+
+  function debouncedPost() {
+    if (pending) clearTimeout(pending);
+    pending = setTimeout(postHeight, 60);
   }
-  // Filets de securite
+
+  setTimeout(postHeight, 50);
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(debouncedPost);
+    var hdr = document.querySelector('.hdr');
+    var container = document.querySelector('.container');
+    if (hdr) ro.observe(hdr);
+    if (container) ro.observe(container);
+  }
   window.addEventListener('load', postHeight);
-  window.addEventListener('resize', postHeight);
-  // Quand on change d'etape, recalculer
+  window.addEventListener('resize', debouncedPost);
   document.addEventListener('click', function(e){
-    if (e.target.closest('.btn-nav, .wp-step')) setTimeout(postHeight, 80);
+    if (e.target.closest('.btn-nav, .wp-step')) setTimeout(postHeight, 100);
   });
 })();
 </script>
