@@ -1,5 +1,6 @@
-// Module Mondial Relay : génération d'étiquettes via WSI2_CreationEtiquette
-// (méthode SOAP qui crée l'expédition + retourne l'URL du PDF en un appel).
+// Module Mondial Relay : génération d'étiquettes en 2 appels SOAP
+//   1. WSI4_CreationExpedition  -> crée l'expédition, renvoie ExpeditionNum
+//   2. WSI3_GetEtiquettes       -> récupère les URL PDF de l'étiquette
 // Utilisé par submission-created.js — pas un endpoint HTTP en soi.
 //
 // Variables d'env:
@@ -122,6 +123,55 @@ function parseXmlValue(xml, tag) {
   return m ? m[1].trim() : '';
 }
 
+// ─── WSI3_GetEtiquettes : récupère les URLs PDF d'une expédition existante ───
+// Signature MD5 = Enseigne + Expeditions + Langue + PrivateKey, en majuscules
+async function getLabelPdf(expeditionNum, privateKey) {
+  const langue = 'FR';
+  const concat = ENSEIGNE + expeditionNum + langue + privateKey;
+  const security = md5Upper(concat);
+  const soapBody = `<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <WSI3_GetEtiquettes xmlns="http://www.mondialrelay.fr/webservice/">
+      <Enseigne>${escXml(ENSEIGNE)}</Enseigne>
+      <Expeditions>${escXml(expeditionNum)}</Expeditions>
+      <Langue>${langue}</Langue>
+      <Security>${security}</Security>
+    </WSI3_GetEtiquettes>
+  </soap:Body>
+</soap:Envelope>`;
+  try {
+    const resp = await fetch('https://api.mondialrelay.com/Web_Services.asmx', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/xml; charset=utf-8',
+        'SOAPAction': '"http://www.mondialrelay.fr/webservice/WSI3_GetEtiquettes"'
+      },
+      body: soapBody
+    });
+    const xml = await resp.text();
+    console.log('[MR][WSI3] HTTP status:', resp.status);
+    console.log('[MR][WSI3] XML response (full):', xml);
+    const stat = parseXmlValue(xml, 'STAT');
+    if (stat && stat !== '0') {
+      return { error: `WSI3_GetEtiquettes STAT=${stat}` };
+    }
+    let urlPdf = parseXmlValue(xml, 'URL_PDF') || parseXmlValue(xml, 'URL_Etiquette');
+    let urlA4 = parseXmlValue(xml, 'URL_PDF_A4');
+    let urlA5 = parseXmlValue(xml, 'URL_PDF_A5');
+    const prefix = 'https://www.mondialrelay.com';
+    if (urlPdf && urlPdf.startsWith('/')) urlPdf = prefix + urlPdf;
+    if (urlA4 && urlA4.startsWith('/')) urlA4 = prefix + urlA4;
+    if (urlA5 && urlA5.startsWith('/')) urlA5 = prefix + urlA5;
+    if (!urlPdf && !urlA4 && !urlA5) {
+      return { error: 'Aucune URL PDF dans la réponse WSI3' };
+    }
+    return { url_pdf: urlPdf, url_a4: urlA4, url_a5: urlA5 };
+  } catch (e) {
+    return { error: 'WSI3 fetch failed: ' + e.message };
+  }
+}
+
 async function createLabel(orderData) {
   // En mode test, MR impose la clé sandbox "PrivateK"
   const PRIVATE_KEY = TEST_MODE ? 'PrivateK' : (process.env.MR_PRIVATE_KEY || '').trim();
@@ -199,6 +249,7 @@ async function createLabel(orderData) {
   // hors-ligne en cas d erreur MD5 (STAT=97). On masque seulement la cle privee.
   const sigConcat = SIG_ORDER.map(k => params[k] || '').join('');
   const sigDebug = {
+    method: 'WSI4_CreationExpedition',
     enseigne: ENSEIGNE,
     keyLen: PRIVATE_KEY.length,
     concatLen: sigConcat.length,
@@ -208,13 +259,14 @@ async function createLabel(orderData) {
   console.log('[MR] signature debug:', JSON.stringify(sigDebug));
   const fieldsXml = SIG_ORDER.map(k => `      <${k}>${escXml(params[k])}</${k}>`).join('\n');
 
+  // ─── Étape 1/2 : WSI4_CreationExpedition (crée l'expédition) ───
   const soapBody = `<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
   <soap:Body>
-    <WSI2_CreationEtiquette xmlns="http://www.mondialrelay.fr/webservice/">
+    <WSI4_CreationExpedition xmlns="http://www.mondialrelay.fr/webservice/">
 ${fieldsXml}
       <Security>${security}</Security>
-    </WSI2_CreationEtiquette>
+    </WSI4_CreationExpedition>
   </soap:Body>
 </soap:Envelope>`;
 
@@ -223,40 +275,44 @@ ${fieldsXml}
       method: 'POST',
       headers: {
         'Content-Type': 'text/xml; charset=utf-8',
-        'SOAPAction': '"http://www.mondialrelay.fr/webservice/WSI2_CreationEtiquette"'
+        'SOAPAction': '"http://www.mondialrelay.fr/webservice/WSI4_CreationExpedition"'
       },
       body: soapBody
     });
     const xml = await resp.text();
-    console.log('[MR] HTTP status:', resp.status);
-    console.log('[MR] XML response (full):', xml);
+    console.log('[MR][WSI4] HTTP status:', resp.status);
+    console.log('[MR][WSI4] XML response (full):', xml);
     const stat = parseXmlValue(xml, 'STAT');
     if (stat && stat !== '0') {
       return {
-        error: `Mondial Relay STAT=${stat}`,
+        error: `Mondial Relay STAT=${stat} (WSI4_CreationExpedition)`,
         xml: xml.substring(0, 800),
         sigDebug: stat === '97' ? sigDebug : undefined
       };
     }
     const expedition = parseXmlValue(xml, 'ExpeditionNum');
-    let urlPdf = parseXmlValue(xml, 'URL_Etiquette');
-    let urlA4 = parseXmlValue(xml, 'URL_PDF_A4');
-    let urlA5 = parseXmlValue(xml, 'URL_PDF_A5');
-    // MR retourne souvent des URLs relatives — préfixer si besoin
-    const prefix = 'https://www.mondialrelay.com';
-    if (urlPdf && urlPdf.startsWith('/')) urlPdf = prefix + urlPdf;
-    if (urlA4 && urlA4.startsWith('/')) urlA4 = prefix + urlA4;
-    if (urlA5 && urlA5.startsWith('/')) urlA5 = prefix + urlA5;
-    // Si STAT=0 mais aucune URL/expedition extraite => problème de parsing
-    if (!expedition && !urlPdf && !urlA4 && !urlA5) {
-      return { error: 'Réponse MR vide ou tags non reconnus (STAT=' + (stat || 'absent') + ')', xml: xml.substring(0, 800) };
+    if (!expedition) {
+      return { error: 'Réponse MR vide : pas de ExpeditionNum (STAT=' + (stat || 'absent') + ')', xml: xml.substring(0, 800) };
+    }
+
+    // ─── Étape 2/2 : WSI3_GetEtiquettes (récupère l'URL du PDF) ───
+    const labelData = await getLabelPdf(expedition, PRIVATE_KEY);
+    if (labelData.error) {
+      // L'expédition est créée mais on n'a pas pu récupérer le PDF.
+      // Pas un échec total : l'utilisateur peut imprimer depuis MR Connect.
+      return {
+        success: true,
+        expedition: expedition,
+        warning: 'Expédition créée mais récupération PDF échouée : ' + labelData.error,
+        url_pdf: '', url_a4: '', url_a5: ''
+      };
     }
     return {
       success: true,
       expedition: expedition,
-      url_pdf: urlPdf,
-      url_a4: urlA4,
-      url_a5: urlA5,
+      url_pdf: labelData.url_pdf,
+      url_a4: labelData.url_a4,
+      url_a5: labelData.url_a5,
       xml_debug: TEST_MODE ? xml.substring(0, 500) : undefined
     };
   } catch (e) {
