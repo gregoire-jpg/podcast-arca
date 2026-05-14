@@ -120,10 +120,13 @@ function parseXmlValue(xml, tag) {
 
 async function createLabel(orderData) {
   // En mode test, MR impose la clé sandbox "PrivateK"
-  const PRIVATE_KEY = TEST_MODE ? 'PrivateK' : process.env.MR_PRIVATE_KEY;
+  const PRIVATE_KEY = TEST_MODE ? 'PrivateK' : (process.env.MR_PRIVATE_KEY || '').trim();
   if (!PRIVATE_KEY) return { error: 'MR_PRIVATE_KEY not configured' };
+  // Log de diagnostic : longueur + premier/dernier caractere (sans exposer la cle)
   console.log('[MR] mode:', TEST_MODE ? 'TEST (BDTEST13)' : 'PROD (' + ENSEIGNE + ')',
-              '| key length:', PRIVATE_KEY.length);
+              '| key length:', PRIVATE_KEY.length,
+              '| key[0]:', PRIVATE_KEY[0] || '(empty)',
+              '| key[last]:', PRIVATE_KEY[PRIVATE_KEY.length - 1] || '(empty)');
 
   // Code point relais : doit être 6 chiffres exactement
   // Le widget MR renvoie typiquement la valeur brute (ex "040638"), mais
