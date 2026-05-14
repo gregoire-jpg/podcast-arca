@@ -1,4 +1,5 @@
-// Module Mondial Relay : génération d'étiquettes via WSI4 SOAP API
+// Module Mondial Relay : génération d'étiquettes via WSI2_CreationEtiquette
+// (méthode SOAP qui crée l'expédition + retourne l'URL du PDF en un appel).
 // Utilisé par submission-created.js — pas un endpoint HTTP en soi.
 //
 // Variables d'env:
@@ -121,7 +122,17 @@ async function createLabel(orderData) {
   // En mode test, MR impose la clé sandbox "PrivateK"
   const PRIVATE_KEY = TEST_MODE ? 'PrivateK' : process.env.MR_PRIVATE_KEY;
   if (!PRIVATE_KEY) return { error: 'MR_PRIVATE_KEY not configured' };
-  if (TEST_MODE) console.log('[MR] TEST_MODE actif (enseigne BDTEST13)');
+  console.log('[MR] mode:', TEST_MODE ? 'TEST (BDTEST13)' : 'PROD (' + ENSEIGNE + ')',
+              '| key length:', PRIVATE_KEY.length);
+
+  // Code point relais : doit être 6 chiffres exactement
+  // Le widget MR renvoie typiquement la valeur brute (ex "040638"), mais
+  // on nettoie défensivement au cas où un préfixe "BE-" se glisse.
+  const relayCodeClean = String(orderData['mr-relay-code'] || '').replace(/\D/g, '');
+  if (!relayCodeClean) {
+    return { error: 'Code point relais manquant (mr-relay-code vide)' };
+  }
+  const relayCode = relayCodeClean.padStart(6, '0').substring(0, 6);
 
   const countryMap = { 'Belgique':'BE','France':'FR','Italie':'IT','Espagne':'ES','autre':'BE' };
   const Dest_Pays = countryMap[orderData.pays] || 'BE';
@@ -153,9 +164,9 @@ async function createLabel(orderData) {
     Dest_Ville: destInfo.Dest_Ville,
     Dest_CP: destInfo.Dest_CP,
     Dest_Pays: Dest_Pays,
-    Dest_Tel1: cleanForMR(orderData.telephone || '', 15),
+    Dest_Tel1: cleanForMR((orderData.telephone || '').trim(), 15),
     Dest_Tel2: '',
-    Dest_Mail: orderData.email || '',
+    Dest_Mail: (orderData.email || '').trim(),
     Poids: poids,
     NbColis: '1',
     CRT_Valeur: '0',
@@ -165,7 +176,7 @@ async function createLabel(orderData) {
     COL_Rel_Pays: '',
     COL_Rel: '',
     LIV_Rel_Pays: Dest_Pays,
-    LIV_Rel: (orderData['mr-relay-code'] || '').padStart(6, '0'),
+    LIV_Rel: relayCode,
     TAvisage: '',
     TReprise: '',
     Montage: '',
