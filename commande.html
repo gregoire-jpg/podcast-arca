@@ -282,6 +282,7 @@ button, input, select, textarea { font-family: inherit; }
   <input type="hidden" name="qty-n6" value="0">
   <input type="hidden" name="qty-n7" value="0">
   <input type="hidden" name="qty-n8" value="0">
+  <input type="hidden" name="qty-n9" value="0">
   <input type="hidden" name="paypal-order-id" value="">
   <input type="hidden" name="paypal-status" value="">
 
@@ -333,6 +334,10 @@ button, input, select, textarea { font-family: inherit; }
       <!-- Anciens numéros 1 à 7 -->
       <div class="sub-section">Anciens numéros (1 à 7) — 20 € l'exemplaire</div>
       <div class="issues" id="issues-grid"></div>
+
+      <!-- Hors collection (recueil de prières, etc.) -->
+      <div class="sub-section" style="margin-top:22px;">Hors collection</div>
+      <div class="issues" id="issues-hc"></div>
 
       <input type="hidden" name="commande-details" id="commande-details">
       <input type="hidden" name="lien-etiquette" id="lien-etiquette">
@@ -534,14 +539,15 @@ var PROMO_DEADLINE = new Date('2026-05-25T22:00:00Z');
 var PROMO_ACTIVE = new Date() < PROMO_DEADLINE;
 
 var ISSUES = [
-  { num: 1, title: 'N° 1', price: 20, promo: null },
-  { num: 2, title: 'N° 2', price: 20, promo: null },
-  { num: 3, title: 'N° 3', price: 20, promo: null },
-  { num: 4, title: 'N° 4', price: 20, promo: null },
-  { num: 5, title: 'N° 5', price: 20, promo: null },
-  { num: 6, title: 'N° 6', price: 20, promo: null },
-  { num: 7, title: 'N° 7', price: 20, promo: null },
-  { num: 8, title: 'N° 8', price: 20, promo: PROMO_ACTIVE ? 15 : null, promoLabel: 'Souscription' }
+  { num: 1, title: 'N° 1', price: 20, promo: null, weight: 950, type: 'revue' },
+  { num: 2, title: 'N° 2', price: 20, promo: null, weight: 950, type: 'revue' },
+  { num: 3, title: 'N° 3', price: 20, promo: null, weight: 950, type: 'revue' },
+  { num: 4, title: 'N° 4', price: 20, promo: null, weight: 950, type: 'revue' },
+  { num: 5, title: 'N° 5', price: 20, promo: null, weight: 950, type: 'revue' },
+  { num: 6, title: 'N° 6', price: 20, promo: null, weight: 950, type: 'revue' },
+  { num: 7, title: 'N° 7', price: 20, promo: null, weight: 950, type: 'revue' },
+  { num: 8, title: 'N° 8', price: 20, promo: PROMO_ACTIVE ? 15 : null, weight: 950, type: 'revue', promoLabel: 'Souscription' },
+  { num: 9, title: 'Recueil de prières', price: 20, promo: null, weight: 600, type: 'hc', overline: 'Hors collection' }
 ];
 
 var SHIPPING = {
@@ -588,10 +594,32 @@ function renderOldIssues() {
   var grid = document.getElementById('issues-grid');
   var html = '';
   ISSUES.forEach(function(iss){
-    if (iss.num === 8) return;  // N°8 traité séparément
+    if (iss.num === 8) return;       // N°8 traité séparément (featured)
+    if (iss.type !== 'revue') return;  // exclure les hors-collection
     html += '<div class="issue" data-num="' + iss.num + '">' +
       '<div class="issue-num">Numéro ' + iss.num + '</div>' +
       '<div class="issue-title">N° ' + iss.num + '</div>' +
+      '<div class="issue-price">' + iss.price + ' €</div>' +
+      '<div class="qty-row">' +
+        '<button type="button" class="qty-btn" data-act="minus" data-num="' + iss.num + '">−</button>' +
+        '<input type="number" class="qty-input" min="0" max="50" value="0" data-num="' + iss.num + '">' +
+        '<button type="button" class="qty-btn" data-act="plus" data-num="' + iss.num + '">+</button>' +
+      '</div>' +
+    '</div>';
+  });
+  grid.innerHTML = html;
+  attachQtyListeners(grid);
+}
+
+// ── Rendu des titres hors collection ──
+function renderHorsCollection() {
+  var grid = document.getElementById('issues-hc');
+  var html = '';
+  ISSUES.forEach(function(iss){
+    if (iss.type !== 'hc') return;
+    html += '<div class="issue" data-num="' + iss.num + '" style="grid-column:span 2;">' +
+      '<div class="issue-num">' + (iss.overline || 'Hors collection') + '</div>' +
+      '<div class="issue-title">' + iss.title + '</div>' +
       '<div class="issue-price">' + iss.price + ' €</div>' +
       '<div class="qty-row">' +
         '<button type="button" class="qty-btn" data-act="minus" data-num="' + iss.num + '">−</button>' +
@@ -631,6 +659,7 @@ function attachQtyListeners(container) {
 function renderIssues() {
   renderFeatured();
   renderOldIssues();
+  renderHorsCollection();
 }
 
 function onQtyChange(num, v) {

@@ -128,12 +128,14 @@ async function createLabel(orderData) {
 
   const destInfo = parseDestAddress(orderData);
 
-  // Poids : 950g par exemplaire (estimation)
-  let totalQty = 0;
-  for (let i = 1; i <= 8; i++) {
-    totalQty += parseInt(orderData['qty-n' + i] || '0', 10);
+  // Poids par item (950g revues 1-8, 600g recueil hors-collection n9)
+  const WEIGHTS = { 1:950, 2:950, 3:950, 4:950, 5:950, 6:950, 7:950, 8:950, 9:600 };
+  let totalWeight = 0;
+  for (let i = 1; i <= 9; i++) {
+    const q = parseInt(orderData['qty-n' + i] || '0', 10);
+    totalWeight += q * (WEIGHTS[i] || 950);
   }
-  const poids = String(Math.max(totalQty * 950, 100));
+  const poids = String(Math.max(totalWeight, 100));
 
   const params = {
     Enseigne: ENSEIGNE,

@@ -105,17 +105,31 @@ function esc(s) {
 }
 
 function buildEmailHtml(d, mrLabel) {
+  // Catalogue (titres + prix + badge) — doit rester aligné avec ISSUES dans commande.html
+  const CATALOG = {
+    1: { title: 'N°1', price: 20, badge: null },
+    2: { title: 'N°2', price: 20, badge: null },
+    3: { title: 'N°3', price: 20, badge: null },
+    4: { title: 'N°4', price: 20, badge: null },
+    5: { title: 'N°5', price: 20, badge: null },
+    6: { title: 'N°6', price: 20, badge: null },
+    7: { title: 'N°7', price: 20, badge: null },
+    8: { title: 'N°8', price: 15, badge: 'souscription' },
+    9: { title: 'Recueil de prières', price: 20, badge: 'hors collection' }
+  };
   // Numéros commandés
   const qtyRows = [];
   let totalQty = 0;
-  for (let i = 1; i <= 8; i++) {
+  for (let i = 1; i <= 9; i++) {
     const q = parseInt(d["qty-n" + i] || "0", 10);
     if (q > 0) {
+      const cat = CATALOG[i];
       totalQty += q;
-      const price = i === 8 ? 15 : 20;
+      const price = cat.price;
       const sub = price * q;
+      const badgeHtml = cat.badge ? ` <span style="color:#c8a060;font-size:10px;letter-spacing:1px;text-transform:uppercase;">${cat.badge}</span>` : "";
       qtyRows.push(
-        `<tr><td style="padding:8px 10px;border-bottom:1px solid #e2ddd8;font:14px Georgia,serif;color:#2d3461;"><strong>N°${i}</strong>${i === 8 ? ' <span style="color:#c8a060;font-size:10px;letter-spacing:1px;text-transform:uppercase;">souscription</span>' : ""}</td>` +
+        `<tr><td style="padding:8px 10px;border-bottom:1px solid #e2ddd8;font:14px Georgia,serif;color:#2d3461;"><strong>${cat.title}</strong>${badgeHtml}</td>` +
         `<td style="padding:8px 10px;border-bottom:1px solid #e2ddd8;font:14px Georgia,serif;color:#444;text-align:center;">× ${q}</td>` +
         `<td style="padding:8px 10px;border-bottom:1px solid #e2ddd8;font:14px Georgia,serif;color:#444;text-align:right;">${price} €</td>` +
         `<td style="padding:8px 10px;border-bottom:1px solid #e2ddd8;font:bold 14px Georgia,serif;color:#2d3461;text-align:right;">${sub} €</td></tr>`
@@ -287,11 +301,17 @@ function buildEmailText(d, mrLabel) {
   txt += "CLIENT\n";
   txt += `  ${d.nom || "—"}\n  ${d.email || "—"}${d.telephone ? " · " + d.telephone : ""}\n  ${d.adresse || "—"}\n  ${d.pays || "—"}\n\n`;
   txt += "COMMANDE\n";
-  for (let i = 1; i <= 8; i++) {
+  const CAT_TXT = {
+    1: ['N°1', 20, null], 2: ['N°2', 20, null], 3: ['N°3', 20, null],
+    4: ['N°4', 20, null], 5: ['N°5', 20, null], 6: ['N°6', 20, null],
+    7: ['N°7', 20, null], 8: ['N°8', 15, 'souscription'],
+    9: ['Recueil de prières', 20, 'hors collection']
+  };
+  for (let i = 1; i <= 9; i++) {
     const q = parseInt(d["qty-n" + i] || "0", 10);
     if (q > 0) {
-      const price = i === 8 ? 15 : 20;
-      txt += `  N°${i}${i === 8 ? " (souscription)" : ""}  × ${q} = ${price * q} €\n`;
+      const [title, price, badge] = CAT_TXT[i];
+      txt += `  ${title}${badge ? ' (' + badge + ')' : ''}  × ${q} = ${price * q} €\n`;
     }
   }
   txt += `\n  ${d["commande-details"] || ""}\n\n`;
