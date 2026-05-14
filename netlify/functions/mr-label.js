@@ -1,12 +1,15 @@
 // Module Mondial Relay : génération d'étiquettes via WSI4 SOAP API
 // Utilisé par submission-created.js — pas un endpoint HTTP en soi.
 //
-// Variables d'env requises:
+// Variables d'env:
 //   - MR_PRIVATE_KEY : clé privée Mondial Relay (NE PAS exposer client-side)
+//   - MR_TEST_MODE   : si "1", utilise le compte sandbox BDTEST13 / PrivateK
+//                      (pas de facturation, étiquette factice, pour dry-run)
 
 const crypto = require('crypto');
 
-const ENSEIGNE = 'CC23X55I';
+const TEST_MODE = process.env.MR_TEST_MODE === '1';
+const ENSEIGNE = TEST_MODE ? 'BDTEST13' : 'CC23X55I';
 
 // Adresse expéditeur — Arca Societas (BCE BE 0642.988.452)
 const SENDER = {
@@ -110,8 +113,10 @@ function parseXmlValue(xml, tag) {
 }
 
 async function createLabel(orderData) {
-  const PRIVATE_KEY = process.env.MR_PRIVATE_KEY;
+  // En mode test, MR impose la clé sandbox "PrivateK"
+  const PRIVATE_KEY = TEST_MODE ? 'PrivateK' : process.env.MR_PRIVATE_KEY;
   if (!PRIVATE_KEY) return { error: 'MR_PRIVATE_KEY not configured' };
+  if (TEST_MODE) console.log('[MR] TEST_MODE actif (enseigne BDTEST13)');
 
   const countryMap = { 'Belgique':'BE','France':'FR','Italie':'IT','Espagne':'ES','autre':'BE' };
   const Dest_Pays = countryMap[orderData.pays] || 'BE';
