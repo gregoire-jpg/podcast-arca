@@ -25,7 +25,7 @@ const SENDER = {
   Expe_Mail: 'info@arca-librairie.com'
 };
 
-// Ordre des champs pour la signature MD5 (cf. doc Mondial Relay WSI4)
+// Ordre des champs pour la signature MD5 (cf. doc Mondial Relay WSI2_CreationEtiquette)
 const SIG_ORDER = [
   'Enseigne','ModeCol','ModeLiv','NDossier','NClient',
   'Expe_Langage','Expe_Ad1','Expe_Ad2','Expe_Ad3','Expe_Ad4',
@@ -180,10 +180,10 @@ async function createLabel(orderData) {
   const soapBody = `<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
   <soap:Body>
-    <WSI4_CreationEtiquette xmlns="http://www.mondialrelay.fr/webservice/">
+    <WSI2_CreationEtiquette xmlns="http://www.mondialrelay.fr/webservice/">
 ${fieldsXml}
       <Security>${security}</Security>
-    </WSI4_CreationEtiquette>
+    </WSI2_CreationEtiquette>
   </soap:Body>
 </soap:Envelope>`;
 
@@ -192,7 +192,7 @@ ${fieldsXml}
       method: 'POST',
       headers: {
         'Content-Type': 'text/xml; charset=utf-8',
-        'SOAPAction': 'http://www.mondialrelay.fr/webservice/WSI4_CreationEtiquette'
+        'SOAPAction': '"http://www.mondialrelay.fr/webservice/WSI2_CreationEtiquette"'
       },
       body: soapBody
     });
