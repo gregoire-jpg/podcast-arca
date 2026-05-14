@@ -11,11 +11,11 @@
 const crypto = require('crypto');
 
 const TEST_MODE = process.env.MR_TEST_MODE === '1';
-// Enseigne API : par defaut le code alphanumerique CC23X55I.
-// Si MR_ENSEIGNE est defini en env (par ex le code marque numerique "41"),
-// on l utilise — permet de tester rapidement quel code MR attend
-// dans la signature MD5 sans toucher au code.
-const ENSEIGNE = TEST_MODE ? 'BDTEST13' : (process.env.MR_ENSEIGNE || 'CC23X55I');
+// Code enseigne ARCA (cf. MR Connect, Paramètres API)
+// - Production : CC23X55I
+// - Sandbox    : TTMRSDBX
+// Override possible via env var MR_ENSEIGNE.
+const ENSEIGNE = TEST_MODE ? 'TTMRSDBX' : (process.env.MR_ENSEIGNE || 'CC23X55I');
 
 // Adresse expéditeur — Arca Societas (BCE BE 0642.988.452)
 const SENDER = {
@@ -141,7 +141,7 @@ async function getLabelPdf(expeditionNum, privateKey) {
   </soap:Body>
 </soap:Envelope>`;
   try {
-    const resp = await fetch('https://api.mondialrelay.com/Web_Services.asmx', {
+    const resp = await fetch('https://api.mondialrelay.com/WebService.asmx', {
       method: 'POST',
       headers: {
         'Content-Type': 'text/xml; charset=utf-8',
@@ -271,7 +271,7 @@ ${fieldsXml}
 </soap:Envelope>`;
 
   try {
-    const resp = await fetch('https://api.mondialrelay.com/Web_Services.asmx', {
+    const resp = await fetch('https://api.mondialrelay.com/WebService.asmx', {
       method: 'POST',
       headers: {
         'Content-Type': 'text/xml; charset=utf-8',
