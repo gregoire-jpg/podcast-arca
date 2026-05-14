@@ -68,72 +68,84 @@ async function createLabel(orderData) {
   }
   const weight = Math.max(totalWeight, 100);
 
-  // Référence client unique
-  const userReference = 'ARCA-' + Date.now().toString().slice(-9);
+  // Référence commande (max 15 chars)
+  const orderNo = ('ARCA' + Date.now()).substring(0, 15);
 
-  // Corps de la requête JSON — suffixe "Field" obligatoire sur TOUS les noms
-  // (convention de sérialisation WCF/.NET utilisée par MR Connect API)
-  // L'API attend login + password + customerId + culture dans contextField
-  // (le Basic Auth HTTP n'est pas utilisé).
+  // Valeur totale (assurance/douane) - 20€ par item moyen
+  let totalValue = 0;
+  for (let i = 1; i <= 9; i++) {
+    totalValue += parseInt(orderData['qty-n' + i] || '0', 10) * 20;
+  }
+  if (totalValue === 0) totalValue = 20;
+
+  // Téléphone : MR exige format "+\d{3,20}", on omet si format incompatible
+  const phoneClean = dest.phoneNumber.replace(/\D/g, '');
+  const phoneNo = phoneClean.length >= 3 ? '+' + phoneClean.substring(0, 19) : '';
+
+  // Structure JSON conforme au XSD officiel de l'API 2 Connect Shipment :
+  //   - Wrappers (ShipmentsList, Parcels) sont des objets contenant un array
+  //   - DeliveryMode/CollectionMode ont @Mode + @Location comme attributs imbriqués
+  //   - Tous les noms sont en PascalCase avec suffixe "Field"
+  //   - PhoneNo doit matcher /\+\d{3,20}/
   const body = {
     contextField: {
       loginField: LOGIN,
       passwordField: PASSWORD,
       customerIdField: BRAND,
       cultureField: 'fr-FR',
-      versionAPIField: '1.0',
-      brandField: BRAND
+      versionAPIField: '1.0'
     },
     outputOptionsField: {
       outputFormatField: '10x15',
-      outputTypeField: 'PdfUrl',
-      returnTypeField: 'CreateAndPrint'
+      outputTypeField: 'PdfUrl'
     },
-    shipmentsListField: [{
-      userReferenceField: userReference,
-      shipmentReferenceField: userReference,
-      // Champs candidats pour le mode de livraison (warning 10023 si manquant)
-      modeField: '24R',
-      modeLivField: '24R',
-      modeLivraisonField: '24R',
-      pickupLocationField: {
-        typeField: 'Sender'
-      },
-      deliveryLocationField: {
-        modeField: '24R',
-        modeLivField: '24R',
-        typeField: 'ParcelShop',
-        idField: relayCode,
-        countryCodeField: destCountry
-      },
-      parcelsField: [{
-        contentField: 'Revue ARCA',
-        weightField: { valueField: weight, unitField: 'gr' }
-      }],
-      senderField: {
-        addressField: {
-          companyNameField: 'Arca Societas',
-          streetNameField: 'Rue du Lambais 70',
-          countryCodeField: 'BE',
-          postCodeField: '1390',
-          cityField: 'Grez-Doiceau',
-          emailField: 'info@arca-librairie.com'
+    shipmentsListField: {
+      shipmentField: [{
+        orderNoField: orderNo,
+        customerNoField: '',
+        parcelCountField: 1,
+        shipmentValueField: {
+          amountField: totalValue,
+          currencyField: 'EUR'
+        },
+        deliveryModeField: {
+          modeField: '24R',
+          locationField: relayCode
+        },
+        collectionModeField: {
+          modeField: 'REL'
+        },
+        parcelsField: {
+          parcelField: [{
+            contentField: 'Revue ARCA',
+            weightField: { valueField: weight, unitField: 'gr' }
+          }]
+        },
+        senderField: {
+          addressField: {
+            lastnameField: 'Arca Societas',
+            streetnameField: 'Rue du Lambais',
+            houseNoField: '70',
+            countryCodeField: 'BE',
+            postCodeField: '1390',
+            cityField: 'Grez-Doiceau',
+            emailField: 'info@arca-librairie.com'
+          }
+        },
+        recipientField: {
+          addressField: Object.assign({
+            firstnameField: dest.firstName,
+            lastnameField: dest.lastName,
+            streetnameField: dest.streetName,
+            countryCodeField: destCountry,
+            postCodeField: dest.postCode,
+            cityField: dest.city,
+            emailField: dest.email
+          }, phoneNo ? { phoneNoField: phoneNo } : {},
+            dest.addressAdd1 ? { addressAdd1Field: dest.addressAdd1 } : {})
         }
-      },
-      recipientField: {
-        addressField: {
-          firstNameField: dest.firstName,
-          lastNameField: dest.lastName,
-          streetNameField: dest.streetName,
-          addressAdd1Field: dest.addressAdd1,
-          countryCodeField: destCountry,
-          postCodeField: dest.postCode,
-          cityField: dest.city,
-          phoneNumberField: dest.phoneNumber,
-          emailField: dest.email
-        }
-      }
-    }]
+      }]
+    }
   };
 
   const authHeader = 'Basic ' + Buffer.from(LOGIN + ':' + PASSWORD).toString('base64');
@@ -165,9 +177,12 @@ async function createLabel(orderData) {
       return { error: 'Réponse MR non-JSON', xml: text.substring(0, 2000) };
     }
 
-    // Si MR retourne une erreur dans statusListField (HTTP 200 mais Level=Error)
-    const statusList = data.statusListField || [];
-    const errorStatus = statusList.find(s => (s.levelField || '').toLowerCase() === 'error');
+    // Si MR retourne une erreur dans statusListField (Level=Error ou Critical error)
+    // statusListField peut être un array OU un objet enveloppant { statusField: [] }
+    const statusRaw = data.statusListField;
+    const statusList = Array.isArray(statusRaw) ? statusRaw
+                     : (statusRaw && statusRaw.statusField) || [];
+    const errorStatus = statusList.find(s => /error/i.test(s.levelField || ''));
     if (errorStatus) {
       return {
         error: `MR API code ${errorStatus.codeField}: ${errorStatus.messageField}`,
@@ -175,18 +190,20 @@ async function createLabel(orderData) {
       };
     }
 
-    // Extraire le 1er shipment de la réponse (avec suffixe Field)
-    const list = data.shipmentsListField || [];
-    const shipment = list[0] || {};
-    const expedition = shipment.shipmentNumberField
-                     || shipment.trackingNumberField
-                     || shipment.parcelNumberField
-                     || '';
-    const outputFiles = shipment.outputFilesField || [];
-    const labelUrl = shipment.labelUrlField
-                  || (outputFiles[0] && (outputFiles[0].urlField || outputFiles[0].outputField))
-                  || shipment.urlField
-                  || '';
+    // Parser la structure conforme au XSD de réponse :
+    // shipmentsListField.shipmentField[].labelListField.labelField.outputField
+    const shipments = (data.shipmentsListField && data.shipmentsListField.shipmentField) || [];
+    const shipment = (Array.isArray(shipments) ? shipments[0] : shipments) || {};
+    const labelWrap = shipment.labelListField || {};
+    const label = (Array.isArray(labelWrap.labelField) ? labelWrap.labelField[0] : labelWrap.labelField) || {};
+    const labelUrl = label.outputField || '';
+
+    // Numéro d'expédition : on cherche dans les barcodes
+    const rawContent = label.rawContentField || {};
+    const barcodesWrap = rawContent.barcodesField || {};
+    const barcodes = barcodesWrap.barcodeField || [];
+    const barcodeList = Array.isArray(barcodes) ? barcodes : [barcodes];
+    const expedition = (barcodeList[0] && (barcodeList[0].valueField || barcodeList[0].displayedValueField)) || '';
 
     if (!expedition && !labelUrl) {
       return {
