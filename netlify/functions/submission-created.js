@@ -181,8 +181,11 @@ function buildEmailHtml(d, mrLabel) {
   const paypalStatus = d["paypal-status"] || "";
   const paypalId = d["paypal-order-id"] || "";
   const isPaid = paypalStatus.startsWith("PAID");
+  // Détection du provider à partir de paypal-status ou du mode paiement choisi
+  const isStripe = /stripe/i.test(paypalStatus) || /carte|bancontact/i.test(d.paiement || "");
+  const provider = isStripe ? "Stripe" : "PayPal";
   const statusBadge = isPaid
-    ? `<div style="display:inline-block;padding:6px 14px;background:#3a8a4a;color:#fff;font:bold 11px Arial;letter-spacing:1.5px;text-transform:uppercase;border-radius:4px;">✓ Payé via PayPal</div>`
+    ? `<div style="display:inline-block;padding:6px 14px;background:#3a8a4a;color:#fff;font:bold 11px Arial;letter-spacing:1.5px;text-transform:uppercase;border-radius:4px;">✓ Payé via ${provider}</div>`
     : `<div style="display:inline-block;padding:6px 14px;background:#c8a060;color:#fff;font:bold 11px Arial;letter-spacing:1.5px;text-transform:uppercase;border-radius:4px;">⏳ Paiement à recevoir</div>`;
 
   // Lien étiquette
@@ -388,7 +391,10 @@ function buildEmailText(d, mrLabel) {
 // Email de confirmation au client (stylisé ARCA, sans l'étiquette MR)
 // ═══════════════════════════════════════════════════════════════
 function buildClientEmailHtml(d, mrLabel) {
-  const isPaid = (d["paypal-status"] || "").startsWith("PAID");
+  const paypalStatus = d["paypal-status"] || "";
+  const isPaid = paypalStatus.startsWith("PAID");
+  const isStripe = /stripe/i.test(paypalStatus) || /carte|bancontact/i.test(d.paiement || "");
+  const providerLabel = isStripe ? "par carte bancaire" : "PayPal";
   const isMondialRelay = (d.livraison || "") === "Mondial Relay";
   const total = ((d["commande-details"] || "").match(/TOTAL:\s*(\d+)\s*€/) || [])[1] || "—";
 
@@ -426,9 +432,22 @@ function buildClientEmailHtml(d, mrLabel) {
   }
 
   // Message selon mode paiement
+  const total = ((d["commande-details"] || "").match(/TOTAL:\s*(\d+)\s*€/) || [])[1] || "—";
+  const ref = `ARCA ${(d.nom || "").trim()}`.substring(0, 35);
   const paymentMsg = isPaid
-    ? `<p style="margin:0;font:15px/1.7 Georgia;color:#444;">Votre paiement <strong style="color:#2d3461;">PayPal</strong> a bien été enregistré. Nous préparons votre commande.</p>`
-    : `<p style="margin:0;font:15px/1.7 Georgia;color:#444;">Vous recevrez les informations de paiement par <strong style="color:#2d3461;">virement bancaire</strong> dans les 24 heures.</p>`;
+    ? `<p style="margin:0;font:15px/1.7 Georgia;color:#444;">Votre paiement <strong style="color:#2d3461;">${providerLabel}</strong> a bien été enregistré. Nous préparons votre commande.</p>`
+    : `<p style="margin:0 0 18px;font:15px/1.7 Georgia;color:#444;">Voici les coordonnées pour effectuer votre <strong style="color:#2d3461;">virement bancaire</strong>. Dès réception, nous préparerons votre commande.</p>
+       <table width="100%" cellpadding="0" cellspacing="0" style="background:#faf8f5;border:1px solid #e2ddd8;border-radius:5px;">
+         <tr><td style="padding:18px 22px;">
+           <table width="100%" cellpadding="0" cellspacing="0" style="font:14px/1.7 Georgia;color:#2d3461;">
+             <tr><td style="color:#777;font-size:12px;letter-spacing:1px;text-transform:uppercase;width:140px;padding:3px 0;">Bénéficiaire</td><td style="padding:3px 0;">ARCA Societas SRL</td></tr>
+             <tr><td style="color:#777;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:3px 0;">IBAN</td><td style="padding:3px 0;"><strong style="font-family:'Courier New',monospace;letter-spacing:.5px;">BE92 0017 7210 5023</strong></td></tr>
+             <tr><td style="color:#777;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:3px 0;">BIC</td><td style="padding:3px 0;"><strong style="font-family:'Courier New',monospace;letter-spacing:.5px;">GEBABEBB</strong></td></tr>
+             <tr><td style="color:#777;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:3px 0;border-top:1px solid #e2ddd8;">Montant</td><td style="padding:3px 0;border-top:1px solid #e2ddd8;"><strong style="color:#c8a060;font-size:16px;">${esc(total)} €</strong></td></tr>
+             <tr><td style="color:#777;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:3px 0;">Communication</td><td style="padding:3px 0;font-family:'Courier New',monospace;font-size:13px;letter-spacing:.5px;">${esc(ref)}</td></tr>
+           </table>
+         </td></tr>
+       </table>`;
 
   return `<!DOCTYPE html>
 <html lang="fr"><head><meta charset="UTF-8"></head>
@@ -481,13 +500,26 @@ function buildClientEmailHtml(d, mrLabel) {
 }
 
 function buildClientEmailText(d, mrLabel) {
-  const isPaid = (d["paypal-status"] || "").startsWith("PAID");
+  const paypalStatus = d["paypal-status"] || "";
+  const isPaid = paypalStatus.startsWith("PAID");
+  const isStripe = /stripe/i.test(paypalStatus) || /carte|bancontact/i.test(d.paiement || "");
+  const providerLabel = isStripe ? "par carte bancaire" : "PayPal";
   const isMondialRelay = (d.livraison || "") === "Mondial Relay";
+  const total = ((d["commande-details"] || "").match(/TOTAL:\s*(\d+)\s*€/) || [])[1] || "—";
+  const ref = `ARCA ${(d.nom || "").trim()}`.substring(0, 35);
   let txt = `MERCI POUR VOTRE COMMANDE — ARCA\n\n`;
   txt += `Bonjour ${(d.nom || "").split(' ')[0] || ""},\n\n`;
-  txt += isPaid
-    ? `Votre paiement PayPal a bien été enregistré. Nous préparons votre commande.\n\n`
-    : `Vous recevrez les informations de paiement par virement bancaire dans les 24h.\n\n`;
+  if (isPaid) {
+    txt += `Votre paiement ${providerLabel} a bien été enregistré. Nous préparons votre commande.\n\n`;
+  } else {
+    txt += `COORDONNÉES BANCAIRES POUR LE VIREMENT\n`;
+    txt += `  Bénéficiaire  : ARCA Societas SRL\n`;
+    txt += `  IBAN          : BE92 0017 7210 5023\n`;
+    txt += `  BIC           : GEBABEBB\n`;
+    txt += `  Montant       : ${total} €\n`;
+    txt += `  Communication : ${ref}\n\n`;
+    txt += `Dès réception de votre virement, nous préparerons votre commande.\n\n`;
+  }
   if (isMondialRelay && mrLabel && mrLabel.success && mrLabel.expedition) {
     const cp = String(d.cp || "").replace(/\D/g, "");
     txt += `SUIVI MONDIAL RELAY\n`;
