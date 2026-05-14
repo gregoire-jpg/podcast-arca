@@ -295,10 +295,21 @@ button, input, select, textarea { font-family: inherit; }
   .card-body { padding: 22px 20px; }
   .row-grid, .ship-options, .pay-options { grid-template-columns: 1fr; }
   .issues { gap: 6px; }
-  .issue { padding: 8px 12px; gap: 10px; }
-  .issue-title { font-size: 14px; min-width: 38px; }
-  .issue-price { font-size: 12.5px; min-width: 36px; }
-  .issue-toc { font-size: 9px; letter-spacing: .5px; }
+  /* Mobile : layout 2 lignes — ligne 1 (titre/prix/qty), ligne 2 (table matières) */
+  .issue { padding: 8px 14px 10px; gap: 12px; flex-wrap: wrap; }
+  .issue-title { font-size: 14px; min-width: 38px; order: 1; }
+  .issue-price { font-size: 12.5px; min-width: 36px; order: 2; }
+  .issue .qty-row { order: 3; margin-left: auto; }
+  .issue-toc {
+    order: 4;
+    flex-basis: 100%;
+    text-align: center;
+    padding: 7px 0 2px;
+    margin-top: 4px;
+    border-top: 1px solid #efeae3;
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
   .issue-featured { grid-template-columns: 1fr; gap: 16px; padding: 22px 20px; }
   .feat-right { justify-content: center; }
   .feat-title { font-size: 19px; }
