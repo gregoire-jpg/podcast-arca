@@ -353,35 +353,35 @@ button, input, select, textarea { font-family: inherit; }
       <div class="row-grid">
         <div class="row">
           <label for="nom">Nom complet <span class="req">*</span></label>
-          <input type="text" id="nom" name="nom" required>
+          <input type="text" id="nom" name="nom" required autocomplete="name">
         </div>
         <div class="row">
           <label for="email">E-mail <span class="req">*</span></label>
-          <input type="email" id="email" name="email" required>
+          <input type="email" id="email" name="email" required autocomplete="email">
         </div>
       </div>
       <div class="row">
         <label for="rue">Rue et numéro <span class="req">*</span></label>
-        <input type="text" id="rue" name="rue" required maxlength="64" placeholder="Ex : Rue du Lambais 70">
+        <input type="text" id="rue" name="rue" required maxlength="64" placeholder="Ex : Rue du Lambais 70" autocomplete="address-line1">
       </div>
       <div class="row">
         <label for="complement">Complément d'adresse (optionnel)</label>
-        <input type="text" id="complement" name="complement" maxlength="32" placeholder="Bâtiment, étage, appartement…">
+        <input type="text" id="complement" name="complement" maxlength="32" placeholder="Bâtiment, étage, appartement…" autocomplete="address-line2">
       </div>
       <div class="row-grid">
         <div class="row" style="max-width:140px;">
           <label for="cp">Code postal <span class="req">*</span></label>
-          <input type="text" id="cp" name="cp" required maxlength="5" inputmode="numeric" pattern="[0-9]{4,5}" placeholder="1390">
+          <input type="text" id="cp" name="cp" required maxlength="5" inputmode="numeric" pattern="[0-9]{4,5}" placeholder="1390" autocomplete="postal-code">
         </div>
         <div class="row">
           <label for="ville">Ville <span class="req">*</span></label>
-          <input type="text" id="ville" name="ville" required maxlength="26" placeholder="Grez-Doiceau">
+          <input type="text" id="ville" name="ville" required maxlength="26" placeholder="Grez-Doiceau" autocomplete="address-level2">
         </div>
       </div>
       <div class="row-grid">
         <div class="row">
           <label for="pays">Pays <span class="req">*</span></label>
-          <select id="pays" name="pays" required>
+          <select id="pays" name="pays" required autocomplete="country-name">
             <option value="">— Choisir —</option>
             <option value="Belgique">Belgique</option>
             <option value="France">France</option>
@@ -392,7 +392,7 @@ button, input, select, textarea { font-family: inherit; }
         </div>
         <div class="row">
           <label for="telephone">Téléphone (optionnel)</label>
-          <input type="text" id="telephone" name="telephone">
+          <input type="tel" id="telephone" name="telephone" autocomplete="tel">
         </div>
       </div>
       <!-- Champ "adresse" agrégé automatiquement depuis rue/complément/CP/ville (compat MR + email) -->
