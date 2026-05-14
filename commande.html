@@ -310,9 +310,51 @@ button, input, select, textarea { font-family: inherit; }
     font-size: 10px;
     letter-spacing: 1px;
   }
-  .issue-featured { grid-template-columns: 1fr; gap: 16px; padding: 22px 20px; }
-  .feat-right { justify-content: center; }
-  .feat-title { font-size: 19px; }
+
+  /* ── Mobile : card N°8 featured ── */
+  .issue-featured {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 30px 20px 22px;
+    margin-top: 18px;       /* place pour le badge en haut */
+    margin-bottom: 28px;
+  }
+  .feat-badge {
+    /* badge centre en haut, taille adaptee, pas de wrap */
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    padding: 6px 14px;
+    max-width: calc(100% - 32px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .feat-num { font-size: 9px; letter-spacing: 1.5px; }
+  .feat-title { font-size: 22px; line-height: 1.15; }
+  .feat-sub { font-size: 12.5px; }
+  /* Prix : empeche le wrap "15" / "€" */
+  .feat-price { flex-wrap: wrap; gap: 8px 12px; align-items: baseline; }
+  .feat-price .promo,
+  .feat-price .old { white-space: nowrap; }
+  .feat-price .promo { font-size: 26px; }
+  .feat-price .label { width: 100%; margin: 4px 0 0; letter-spacing: 1.5px; }
+  /* Lien table des matieres pleine largeur, separe */
+  .feat-toc {
+    display: block; width: 100%;
+    text-align: center;
+    margin-top: 6px; padding-top: 14px;
+    border-top: 1px solid rgba(200,160,96,.2);
+    font-size: 10px; letter-spacing: 1.5px;
+  }
+  /* Boutons quantite centres */
+  .feat-right {
+    justify-content: center;
+    gap: 12px;
+    padding-top: 6px;
+  }
   .wizard-progress { padding: 14px 12px; }
   .wp-label { display: none; }
   .wp-rule { min-width: 10px; margin: 0 6px; }
