@@ -107,7 +107,8 @@ function parseDestAddress(orderData) {
 }
 
 function parseXmlValue(xml, tag) {
-  const re = new RegExp('<' + tag + '[^>]*>([^<]*)</' + tag + '>');
+  // Gère préfixes namespace éventuels (<a:STAT>, <ns:STAT>, etc.)
+  const re = new RegExp('<(?:[a-zA-Z][a-zA-Z0-9]*:)?' + tag + '[^>]*>([^<]*)</(?:[a-zA-Z][a-zA-Z0-9]*:)?' + tag + '>');
   const m = xml.match(re);
   return m ? m[1].trim() : '';
 }
@@ -192,20 +193,32 @@ ${fieldsXml}
       body: soapBody
     });
     const xml = await resp.text();
+    console.log('[MR] HTTP status:', resp.status);
+    console.log('[MR] XML response (full):', xml);
     const stat = parseXmlValue(xml, 'STAT');
     if (stat && stat !== '0') {
-      return { error: `Mondial Relay STAT=${stat}`, xml: xml.substring(0, 400) };
+      return { error: `Mondial Relay STAT=${stat}`, xml: xml.substring(0, 800) };
     }
     const expedition = parseXmlValue(xml, 'ExpeditionNum');
-    const urlPdf = parseXmlValue(xml, 'URL_Etiquette');
-    const urlA4 = parseXmlValue(xml, 'URL_PDF_A4');
-    const urlA5 = parseXmlValue(xml, 'URL_PDF_A5');
+    let urlPdf = parseXmlValue(xml, 'URL_Etiquette');
+    let urlA4 = parseXmlValue(xml, 'URL_PDF_A4');
+    let urlA5 = parseXmlValue(xml, 'URL_PDF_A5');
+    // MR retourne souvent des URLs relatives — préfixer si besoin
+    const prefix = 'https://www.mondialrelay.com';
+    if (urlPdf && urlPdf.startsWith('/')) urlPdf = prefix + urlPdf;
+    if (urlA4 && urlA4.startsWith('/')) urlA4 = prefix + urlA4;
+    if (urlA5 && urlA5.startsWith('/')) urlA5 = prefix + urlA5;
+    // Si STAT=0 mais aucune URL/expedition extraite => problème de parsing
+    if (!expedition && !urlPdf && !urlA4 && !urlA5) {
+      return { error: 'Réponse MR vide ou tags non reconnus (STAT=' + (stat || 'absent') + ')', xml: xml.substring(0, 800) };
+    }
     return {
       success: true,
       expedition: expedition,
       url_pdf: urlPdf,
       url_a4: urlA4,
-      url_a5: urlA5
+      url_a5: urlA5,
+      xml_debug: TEST_MODE ? xml.substring(0, 500) : undefined
     };
   } catch (e) {
     return { error: 'API request failed: ' + e.message };
