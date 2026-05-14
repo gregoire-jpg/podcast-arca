@@ -8,6 +8,9 @@
 //                          (séparer par virgule pour plusieurs)
 //   - ORDER_EMAIL_FROM  : expéditeur — ex: commandes@arca-librairie.com
 //                          (doit être une adresse d'un domaine vérifié sur Brevo)
+//   - MR_PRIVATE_KEY    : clé privée Mondial Relay (pour génération auto étiquette)
+
+const { createLabel } = require('./mr-label');
 
 exports.handler = async function(event) {
   // Note: les invocations event-triggered (Netlify Forms) n'ont pas de httpMethod.
@@ -28,8 +31,21 @@ exports.handler = async function(event) {
 
     const d = submission.data || body.data || {};
     console.log("Processing commande for:", d.nom, "/", d.email, "/ paiement:", d.paiement);
-    const html = buildEmailHtml(d);
-    const text = buildEmailText(d);
+
+    // Génération étiquette Mondial Relay si applicable
+    let mrLabel = null;
+    if ((d.livraison || "") === "Mondial Relay" && d["mr-relay-code"]) {
+      console.log("Génération étiquette Mondial Relay pour code relais", d["mr-relay-code"]);
+      mrLabel = await createLabel(d);
+      if (mrLabel.error) {
+        console.error("Erreur Mondial Relay:", mrLabel.error);
+      } else {
+        console.log("Étiquette MR créée:", mrLabel.expedition);
+      }
+    }
+
+    const html = buildEmailHtml(d, mrLabel);
+    const text = buildEmailText(d, mrLabel);
     const totalLine = d["commande-details"] || "";
     const totalMatch = totalLine.match(/TOTAL:\s*(\d+)/);
     const totalEUR = totalMatch ? totalMatch[1] + " €" : "—";
@@ -88,7 +104,7 @@ function esc(s) {
     .replace(/"/g, "&quot;");
 }
 
-function buildEmailHtml(d) {
+function buildEmailHtml(d, mrLabel) {
   // Numéros commandés
   const qtyRows = [];
   let totalQty = 0;
@@ -143,6 +159,36 @@ function buildEmailHtml(d) {
     </table>
   </td></tr>` : "";
 
+  // Bloc étiquette Mondial Relay générée automatiquement
+  let mrLabelBlock = "";
+  if (isMondialRelay && mrLabel) {
+    if (mrLabel.success) {
+      const labelUrl = mrLabel.url_a4 || mrLabel.url_pdf || mrLabel.url_a5 || "";
+      mrLabelBlock = `
+  <tr><td style="padding:0 36px 20px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#eef7ee;border:1px solid #3a8a4a;border-radius:4px;">
+      <tr><td style="padding:16px 20px;">
+        <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#3a8a4a;font-weight:bold;">✓ Étiquette Mondial Relay générée</p>
+        <p style="margin:0 0 10px;font:13.5px Georgia;color:#444;">N° expédition : <strong style="color:#2d3461;">${esc(mrLabel.expedition || "—")}</strong></p>
+        ${labelUrl ? `<table cellpadding="0" cellspacing="0"><tr><td style="background:#3a8a4a;border-radius:4px;">
+          <a href="${esc(labelUrl)}" style="display:inline-block;padding:11px 22px;font:bold 11px Arial;letter-spacing:1.5px;text-transform:uppercase;color:#fff;text-decoration:none;">🖨 Télécharger l'étiquette PDF</a>
+        </td></tr></table>` : ""}
+      </td></tr>
+    </table>
+  </td></tr>`;
+    } else {
+      mrLabelBlock = `
+  <tr><td style="padding:0 36px 20px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#fef0f0;border:1px solid #c44;border-radius:4px;">
+      <tr><td style="padding:16px 20px;">
+        <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#c44;font-weight:bold;">⚠ Étiquette MR non générée</p>
+        <p style="margin:0;font:13px Georgia;color:#444;">${esc(mrLabel.error || "Erreur inconnue")} — créer l'étiquette manuellement sur connect.mondialrelay.com</p>
+      </td></tr>
+    </table>
+  </td></tr>`;
+    }
+  }
+
   return `<!DOCTYPE html>
 <html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
 <body style="margin:0;padding:0;background:#f0ede8;font-family:Georgia,serif;">
@@ -176,6 +222,9 @@ function buildEmailHtml(d) {
 
   <!-- POINT RELAIS MONDIAL RELAY -->
   ${mrBlock}
+
+  <!-- ÉTIQUETTE MONDIAL RELAY (générée auto) -->
+  ${mrLabelBlock}
 
   <!-- ÉTIQUETTE -->
   ${etiquetteLink && !isMondialRelay ? `<tr><td style="padding:0 36px 20px;">
@@ -231,7 +280,7 @@ function buildEmailHtml(d) {
 </body></html>`;
 }
 
-function buildEmailText(d) {
+function buildEmailText(d, mrLabel) {
   let txt = "NOUVELLE COMMANDE ARCA\n";
   txt += "═══════════════════════════════════════\n\n";
   txt += "CLIENT\n";
@@ -256,6 +305,12 @@ function buildEmailText(d) {
   }
   if (d["lien-etiquette"]) {
     txt += `\nÉTIQUETTE : ${d["lien-etiquette"]}\n`;
+  }
+  if (mrLabel && mrLabel.success) {
+    txt += `\nÉTIQUETTE MR : ${mrLabel.url_a4 || mrLabel.url_pdf || ""}\n`;
+    txt += `  Expédition : ${mrLabel.expedition || "—"}\n`;
+  } else if (mrLabel && mrLabel.error) {
+    txt += `\n⚠ MR : ${mrLabel.error}\n`;
   }
   return txt;
 }
