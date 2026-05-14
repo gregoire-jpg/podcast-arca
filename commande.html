@@ -998,7 +998,18 @@ function sendOrderToFunction(isPaypal, paypalId) {
       if (btn) { btn.disabled = false; btn.textContent = 'Envoyer ma commande'; }
       return;
     }
-    // Succès → redirection
+    // Succès → si on est dans une iframe, on demande au parent de rediriger
+    // (pour sortir du cadre arca-revue.com/arca-revue/). Sinon redirection locale.
+    if (window.parent !== window) {
+      try {
+        window.parent.postMessage({
+          type: 'arca-commande-success',
+          isPaypal: !!isPaypal,
+          paypalId: paypalId || ''
+        }, '*');
+      } catch(e) {}
+      return;
+    }
     var url = isPaypal
       ? '/commande-merci.html?paid=paypal&id=' + encodeURIComponent(paypalId)
       : '/commande-merci.html';
@@ -1008,6 +1019,16 @@ function sendOrderToFunction(isPaypal, paypalId) {
     console.error('Erreur réseau:', err);
     if (isPaypal) {
       // Paiement PayPal déjà réussi → on redirige quand même
+      if (window.parent !== window) {
+        try {
+          window.parent.postMessage({
+            type: 'arca-commande-success',
+            isPaypal: true,
+            paypalId: paypalId || ''
+          }, '*');
+        } catch(e) {}
+        return;
+      }
       window.location.href = '/commande-merci.html?paid=paypal&id=' + encodeURIComponent(paypalId);
     } else {
       alert("Erreur réseau. Merci de réessayer ou de nous contacter à info@arca-librairie.com.");
