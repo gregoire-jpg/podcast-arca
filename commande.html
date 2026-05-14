@@ -166,6 +166,78 @@ button, input, select, textarea { font-family: inherit; }
 .success h3 { font: normal 22px/1 Georgia; color: var(--green); margin-bottom: 10px; }
 .success p { color: #1a5028; }
 
+/* ═══ Wizard progress bar ═══ */
+.wizard-progress {
+  display: flex; align-items: center; gap: 0;
+  background: #fff; border-radius: 6px;
+  padding: 18px 22px; margin-bottom: 22px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+}
+.wp-step {
+  display: flex; align-items: center; gap: 10px;
+  background: none; border: 0; padding: 0; cursor: default;
+  opacity: .45; transition: opacity .2s;
+  font-family: inherit;
+}
+.wp-step.active, .wp-step.done { opacity: 1; }
+.wp-step.done { cursor: pointer; }
+.wp-step.done:hover { opacity: .8; }
+.wp-num {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--border); color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  font: 600 13px/1 Arial; flex-shrink: 0;
+  transition: background .2s, color .2s;
+}
+.wp-step.active .wp-num { background: var(--gold); color: #fff; }
+.wp-step.done .wp-num { background: var(--navy); color: #fff; }
+.wp-step.done .wp-num-txt { display: none; }
+.wp-step.done .wp-num::before { content: "✓"; font: 600 15px/1 Arial; }
+.wp-label {
+  font: 600 11px/1.2 Arial; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--muted);
+  white-space: nowrap;
+}
+.wp-step.active .wp-label, .wp-step.done .wp-label { color: var(--navy); }
+.wp-rule { flex: 1; height: 2px; background: var(--border); margin: 0 14px; min-width: 14px; transition: background .2s; }
+.wp-rule.done { background: var(--navy); }
+
+/* ═══ Cart strip ═══ */
+.cart-strip {
+  background: var(--navy); color: #fff; border-radius: 5px;
+  padding: 12px 20px; margin-bottom: 22px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.cs-label { font: 11px/1 Arial; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); }
+.cs-total { font: 600 18px/1 Georgia; }
+.cs-total .star { color: var(--gold); font-size: 14px; }
+.cs-total.empty { font-style: italic; opacity: .55; font-weight: normal; font-size: 14px; }
+
+/* ═══ Step visibility ═══ */
+.step { display: none; }
+.step.active { display: block; }
+
+/* ═══ Navigation buttons ═══ */
+.wizard-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; margin-top: 24px;
+}
+.btn-nav {
+  padding: 14px 28px; border-radius: 5px;
+  font: 600 12px/1 Arial; letter-spacing: 1.5px; text-transform: uppercase;
+  cursor: pointer; transition: background .2s, opacity .15s, border-color .2s;
+}
+.btn-back {
+  background: #fff; border: 1.5px solid var(--border); color: var(--muted);
+}
+.btn-back:hover { border-color: var(--navy); color: var(--navy); }
+.btn-next {
+  background: var(--gold); color: #fff; border: 1.5px solid var(--gold);
+}
+.btn-next:hover:not(:disabled) { background: #b8904f; border-color: #b8904f; }
+.btn-next:disabled { opacity: .35; cursor: not-allowed; }
+.btn-nav.alone-right { margin-left: auto; }
+
 /* Mobile */
 @media (max-width: 600px) {
   .hdr { padding: 36px 16px 30px; }
@@ -178,6 +250,11 @@ button, input, select, textarea { font-family: inherit; }
   .issue-featured { grid-template-columns: 1fr; gap: 16px; padding: 22px 20px; }
   .feat-right { justify-content: center; }
   .feat-title { font-size: 19px; }
+  .wizard-progress { padding: 14px 12px; }
+  .wp-label { display: none; }
+  .wp-rule { min-width: 10px; margin: 0 6px; }
+  .cart-strip { padding: 10px 14px; }
+  .btn-nav { padding: 12px 18px; font-size: 11px; }
 }
 </style>
 </head>
@@ -213,7 +290,39 @@ button, input, select, textarea { font-family: inherit; }
     <!-- Texte injecté par JS selon que la souscription est active ou non -->
   </div>
 
-  <!-- ── Numéros ── -->
+  <!-- ══ Barre de progression du tunnel ══ -->
+  <div class="wizard-progress" role="navigation" aria-label="Étapes de la commande">
+    <button type="button" class="wp-step active" data-step="1">
+      <span class="wp-num"><span class="wp-num-txt">1</span></span>
+      <span class="wp-label">Numéros</span>
+    </button>
+    <span class="wp-rule" data-after="1"></span>
+    <button type="button" class="wp-step" data-step="2">
+      <span class="wp-num"><span class="wp-num-txt">2</span></span>
+      <span class="wp-label">Coordonnées</span>
+    </button>
+    <span class="wp-rule" data-after="2"></span>
+    <button type="button" class="wp-step" data-step="3">
+      <span class="wp-num"><span class="wp-num-txt">3</span></span>
+      <span class="wp-label">Livraison</span>
+    </button>
+    <span class="wp-rule" data-after="3"></span>
+    <button type="button" class="wp-step" data-step="4">
+      <span class="wp-num"><span class="wp-num-txt">4</span></span>
+      <span class="wp-label">Paiement</span>
+    </button>
+  </div>
+
+  <!-- ══ Mini-panier (visible sur toutes les étapes) ══ -->
+  <div class="cart-strip" id="cart-strip">
+    <span class="cs-label">Panier</span>
+    <span class="cs-total empty" id="cart-strip-total">Aucun exemplaire</span>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- ÉTAPE 1 — Numéros                                      -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <section class="step active" data-step="1">
   <div class="card">
     <div class="card-body">
       <div class="card-title">1. Numéros souhaités</div>
@@ -229,8 +338,15 @@ button, input, select, textarea { font-family: inherit; }
       <input type="hidden" name="lien-etiquette" id="lien-etiquette">
     </div>
   </div>
+  <div class="wizard-nav">
+    <button type="button" class="btn-nav btn-next alone-right" onclick="goToStep(2)">Continuer →</button>
+  </div>
+  </section>
 
-  <!-- ── Coordonnées ── -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- ÉTAPE 2 — Coordonnées                                  -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <section class="step" data-step="2">
   <div class="card">
     <div class="card-body">
       <div class="card-title">2. Vos coordonnées</div>
@@ -283,8 +399,16 @@ button, input, select, textarea { font-family: inherit; }
       <input type="hidden" id="adresse" name="adresse">
     </div>
   </div>
+  <div class="wizard-nav">
+    <button type="button" class="btn-nav btn-back" onclick="goToStep(1, true)">← Retour</button>
+    <button type="button" class="btn-nav btn-next" onclick="goToStep(3)">Continuer →</button>
+  </div>
+  </section>
 
-  <!-- ── Livraison ── -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- ÉTAPE 3 — Livraison                                    -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <section class="step" data-step="3">
   <div class="card">
     <div class="card-body">
       <div class="card-title">3. Mode de livraison</div>
@@ -324,8 +448,27 @@ button, input, select, textarea { font-family: inherit; }
       </div>
     </div>
   </div>
+  <div class="wizard-nav">
+    <button type="button" class="btn-nav btn-back" onclick="goToStep(2, true)">← Retour</button>
+    <button type="button" class="btn-nav btn-next" onclick="goToStep(4)">Continuer →</button>
+  </div>
+  </section>
 
-  <!-- ── Paiement ── -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- ÉTAPE 4 — Récap + Paiement                             -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <section class="step" data-step="4">
+
+  <!-- Récapitulatif complet -->
+  <div class="card summary-card">
+    <div class="card-body">
+      <div class="summary-title">Récapitulatif de la commande</div>
+      <div id="summary-content">
+        <div class="summary-row empty">Aucun exemplaire sélectionné</div>
+      </div>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-body">
       <div class="card-title">4. Mode de paiement</div>
@@ -358,21 +501,17 @@ button, input, select, textarea { font-family: inherit; }
     </div>
   </div>
 
-  <!-- ── Récapitulatif ── -->
-  <div class="card summary-card">
-    <div class="card-body">
-      <div class="summary-title">Récapitulatif de la commande</div>
-      <div id="summary-content">
-        <div class="summary-row empty">Aucun exemplaire sélectionné</div>
-      </div>
-    </div>
-  </div>
-
+  <!-- Bouton final (Virement) — masqué automatiquement quand PayPal sélectionné -->
   <button type="button" class="submit-btn" id="submit-btn" disabled onclick="submitOrder()">Envoyer ma commande</button>
   <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:14px;line-height:1.6;">
     Votre commande sera confirmée par e-mail dans les 24h avec les informations de paiement.<br>
     Pour toute question : <a href="mailto:info@arca-librairie.com" style="color:var(--gold);">info@arca-librairie.com</a>
   </p>
+
+  <div class="wizard-nav">
+    <button type="button" class="btn-nav btn-back" onclick="goToStep(3, true)">← Retour</button>
+  </div>
+  </section>
 
 </form>
 
@@ -684,13 +823,16 @@ document.querySelectorAll('input[name="paiement"]').forEach(function(r){
 function togglePaymentZone(mode) {
   var noteVir = document.getElementById('note-virement');
   var pzone = document.getElementById('paypal-zone');
+  var submitBtn = document.getElementById('submit-btn');
   if (mode === 'PayPal') {
     noteVir.style.display = 'none';
     pzone.style.display = 'block';
+    if (submitBtn) submitBtn.style.display = 'none';
     updatePayPalState();
   } else {
     noteVir.style.display = 'block';
     pzone.style.display = 'none';
+    if (submitBtn) submitBtn.style.display = 'block';
   }
 }
 
@@ -903,8 +1045,133 @@ document.getElementById('info-note').innerHTML = PROMO_ACTIVE
   ? '<p><strong>Souscription au n°8</strong> ouverte du 18 au 25 mai à minuit au tarif préférentiel de <strong>15 €</strong> (au lieu de 20 €). Les autres numéros sont à 20 € l\'exemplaire (dans la limite des stocks).</p>'
   : '<p>Tous les numéros de la revue ARCA sont disponibles au prix de <strong>20 €</strong> l\'exemplaire (dans la limite des stocks).</p>';
 
+// ═══════════════════ WIZARD NAVIGATION ═══════════════════
+var TOTAL_STEPS = 4;
+var currentStep = 1;
+var maxStepReached = 1;  // pour autoriser le clic sur les étapes deja franchies
+
+function goToStep(n, skipValidation) {
+  if (n < 1 || n > TOTAL_STEPS) return;
+  if (!skipValidation && n > currentStep && !validateStep(currentStep)) return;
+  currentStep = n;
+  if (n > maxStepReached) maxStepReached = n;
+
+  // Affichage des sections
+  document.querySelectorAll('.step').forEach(function(s){
+    s.classList.toggle('active', parseInt(s.dataset.step, 10) === n);
+  });
+  // Progress bar
+  document.querySelectorAll('.wp-step').forEach(function(wp){
+    var sn = parseInt(wp.dataset.step, 10);
+    wp.classList.toggle('active', sn === n);
+    wp.classList.toggle('done', sn < n || (sn < maxStepReached && sn !== n));
+    // On enleve "done" si c'est l'etape active
+    if (sn === n) wp.classList.remove('done');
+  });
+  document.querySelectorAll('.wp-rule').forEach(function(r){
+    var after = parseInt(r.dataset.after, 10);
+    r.classList.toggle('done', after < n);
+  });
+
+  // URL hash
+  try { history.replaceState(null, '', '#etape-' + n); } catch(e) {}
+
+  // Scroll en haut de la zone wizard
+  var anchor = document.querySelector('.wizard-progress');
+  if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Quand on entre dans l'etape 4 : rafraichir le recap + l'etat PayPal
+  if (n === 4) {
+    updateSummary();
+    updatePayPalState();
+  }
+  // Quand on entre dans l'etape 3 : recalculer les frais de port (au cas où pays vient d'etre saisi)
+  if (n === 3) {
+    updateShipping();
+  }
+}
+
+function validateStep(n) {
+  if (n === 1) {
+    var t = getCurrentTotal();
+    if (t.qty === 0) { alert('Veuillez sélectionner au moins un exemplaire.'); return false; }
+    return true;
+  }
+  if (n === 2) {
+    syncAdresse();
+    var nom = document.getElementById('nom').value.trim();
+    var email = document.getElementById('email').value.trim();
+    var rue = document.getElementById('rue').value.trim();
+    var cp = document.getElementById('cp').value.trim();
+    var ville = document.getElementById('ville').value.trim();
+    var pays = document.getElementById('pays').value;
+    if (!nom || !email || !rue || !cp || !ville || !pays) {
+      alert('Merci de compléter tous les champs obligatoires (nom, e-mail, adresse, pays).');
+      return false;
+    }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      alert('Adresse e-mail invalide.'); return false;
+    }
+    return true;
+  }
+  if (n === 3) {
+    var livraison = document.querySelector('input[name="livraison"]:checked');
+    if (!livraison) { alert('Veuillez choisir un mode de livraison.'); return false; }
+    if (livraison.value === 'Mondial Relay' && !MR_SELECTED) {
+      document.getElementById('mr-warning').style.display = 'block';
+      document.getElementById('mr-block').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return false;
+    }
+    return true;
+  }
+  return true;
+}
+
+// Click sur la progress bar pour revenir en arriere (sur les etapes deja franchies)
+document.querySelectorAll('.wp-step').forEach(function(wp){
+  wp.addEventListener('click', function(){
+    var n = parseInt(this.dataset.step, 10);
+    if (n <= maxStepReached) goToStep(n, true);
+  });
+});
+
+// Mini panier (cart strip) — mise a jour live
+function updateCartStrip() {
+  var t = getCurrentTotal();
+  var el = document.getElementById('cart-strip-total');
+  if (!el) return;
+  if (t.qty === 0) {
+    el.className = 'cs-total empty';
+    el.textContent = 'Aucun exemplaire';
+    return;
+  }
+  el.className = 'cs-total';
+  var portFinalise = t.port > 0 || (document.querySelector('input[name="livraison"]:checked') && document.getElementById('pays').value && document.getElementById('pays').value !== 'autre');
+  el.innerHTML = t.qty + ' ex. · <strong>' + t.total + ' €</strong>' + (portFinalise ? '' : ' <span class="star">*</span>');
+}
+
+// Hook : on declenche updateCartStrip a chaque mise a jour du recap
+var _origUpdateSummary = updateSummary;
+updateSummary = function() { _origUpdateSummary.apply(this, arguments); updateCartStrip(); };
+
+// Init depuis le hash de l'URL (#etape-N)
+(function initFromHash(){
+  var m = (window.location.hash || '').match(/^#etape-(\d+)$/);
+  if (m) {
+    var n = parseInt(m[1], 10);
+    if (n >= 1 && n <= TOTAL_STEPS) {
+      // Toujours partir de l'etape 1 pour les visites directes — sauf si c'est l'etape 1
+      // (l'utilisateur ne doit pas pouvoir sauter des etapes sans valider)
+      if (n === 1) return;
+      // Pour les autres : on autorise uniquement si on a rechargé apres avoir avance
+      // -> on ne fait rien ici, on reste sur l'etape 1
+    }
+  }
+})();
+
 // Init
 renderIssues();
+updateCartStrip();
 </script>
 
 </body>
