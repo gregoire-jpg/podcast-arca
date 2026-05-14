@@ -191,6 +191,17 @@ async function createLabel(orderData) {
   };
 
   const security = buildSignature(params, PRIVATE_KEY);
+  // Diagnostic : on conserve le contenu signe pour pouvoir verifier
+  // hors-ligne en cas d erreur MD5 (STAT=97). On masque seulement la cle privee.
+  const sigConcat = SIG_ORDER.map(k => params[k] || '').join('');
+  const sigDebug = {
+    enseigne: ENSEIGNE,
+    keyLen: PRIVATE_KEY.length,
+    concatLen: sigConcat.length,
+    concatPreview: sigConcat.substring(0, 200) + (sigConcat.length > 200 ? '...' : ''),
+    signature: security
+  };
+  console.log('[MR] signature debug:', JSON.stringify(sigDebug));
   const fieldsXml = SIG_ORDER.map(k => `      <${k}>${escXml(params[k])}</${k}>`).join('\n');
 
   const soapBody = `<?xml version="1.0" encoding="utf-8"?>
@@ -217,7 +228,11 @@ ${fieldsXml}
     console.log('[MR] XML response (full):', xml);
     const stat = parseXmlValue(xml, 'STAT');
     if (stat && stat !== '0') {
-      return { error: `Mondial Relay STAT=${stat}`, xml: xml.substring(0, 800) };
+      return {
+        error: `Mondial Relay STAT=${stat}`,
+        xml: xml.substring(0, 800),
+        sigDebug: stat === '97' ? sigDebug : undefined
+      };
     }
     const expedition = parseXmlValue(xml, 'ExpeditionNum');
     let urlPdf = parseXmlValue(xml, 'URL_Etiquette');
