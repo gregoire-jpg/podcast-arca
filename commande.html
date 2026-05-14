@@ -576,9 +576,18 @@ var ISSUES = [
   { num: 9, title: 'Recueil de prières', price: 20, promo: null, weight: 350, type: 'hc', overline: 'Hors collection' }
 ];
 
-// Sommaires disponibles : map num -> URL relative. Ajouter ici quand un sommaire
-// d'un autre numéro est publié (ex : 7: '/n7-sommaire.html').
-var SOMMAIRES = { 8: '/n8-sommaire.html?embed=1' };
+// Sommaires disponibles : map num -> URL relative
+var SOMMAIRES = {
+  1: '/n1-sommaire.html?embed=1',
+  2: '/n2-sommaire.html?embed=1',
+  3: '/n3-sommaire.html?embed=1',
+  4: '/n4-sommaire.html?embed=1',
+  5: '/n5-sommaire.html?embed=1',
+  6: '/n6-sommaire.html?embed=1',
+  7: '/n7-sommaire.html?embed=1',
+  8: '/n8-sommaire.html?embed=1',
+  9: '/recueil-prieres-sommaire.html?embed=1'
+};
 
 var SHIPPING = {
   'Belgique': { relay: 5,    poste: 6,    main: 0 },
@@ -654,10 +663,13 @@ function renderHorsCollection() {
   var html = '';
   ISSUES.forEach(function(iss){
     if (iss.type !== 'hc') return;
-    html += '<div class="issue" data-num="' + iss.num + '" style="grid-column:span 2;">' +
-      '<div class="issue-num">' + (iss.overline || 'Hors collection') + '</div>' +
+    var tocLink = SOMMAIRES[iss.num]
+      ? '<button type="button" class="issue-toc" onclick="openSommaire(' + iss.num + ')">Sommaire →</button>'
+      : '';
+    html += '<div class="issue" data-num="' + iss.num + '">' +
       '<div class="issue-title">' + iss.title + '</div>' +
       '<div class="issue-price">' + iss.price + ' €</div>' +
+      tocLink +
       '<div class="qty-row">' +
         '<button type="button" class="qty-btn" data-act="minus" data-num="' + iss.num + '">−</button>' +
         '<input type="number" class="qty-input" min="0" max="50" value="0" data-num="' + iss.num + '">' +
