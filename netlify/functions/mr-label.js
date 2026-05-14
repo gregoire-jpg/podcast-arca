@@ -1,5 +1,5 @@
 // Module Mondial Relay : génération d'étiquettes en 2 appels SOAP
-//   1. WSI4_CreationExpedition  -> crée l'expédition, renvoie ExpeditionNum
+//   1. WSI3_CreationExpedition  -> crée l'expédition, renvoie ExpeditionNum
 //   2. WSI3_GetEtiquettes       -> récupère les URL PDF de l'étiquette
 // Utilisé par submission-created.js — pas un endpoint HTTP en soi.
 //
@@ -249,7 +249,7 @@ async function createLabel(orderData) {
   // hors-ligne en cas d erreur MD5 (STAT=97). On masque seulement la cle privee.
   const sigConcat = SIG_ORDER.map(k => params[k] || '').join('');
   const sigDebug = {
-    method: 'WSI4_CreationExpedition',
+    method: 'WSI3_CreationExpedition',
     enseigne: ENSEIGNE,
     keyLen: PRIVATE_KEY.length,
     concatLen: sigConcat.length,
@@ -259,14 +259,14 @@ async function createLabel(orderData) {
   console.log('[MR] signature debug:', JSON.stringify(sigDebug));
   const fieldsXml = SIG_ORDER.map(k => `      <${k}>${escXml(params[k])}</${k}>`).join('\n');
 
-  // ─── Étape 1/2 : WSI4_CreationExpedition (crée l'expédition) ───
+  // ─── Étape 1/2 : WSI3_CreationExpedition (crée l'expédition) ───
   const soapBody = `<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
   <soap:Body>
-    <WSI4_CreationExpedition xmlns="http://www.mondialrelay.fr/webservice/">
+    <WSI3_CreationExpedition xmlns="http://www.mondialrelay.fr/webservice/">
 ${fieldsXml}
       <Security>${security}</Security>
-    </WSI4_CreationExpedition>
+    </WSI3_CreationExpedition>
   </soap:Body>
 </soap:Envelope>`;
 
@@ -275,7 +275,7 @@ ${fieldsXml}
       method: 'POST',
       headers: {
         'Content-Type': 'text/xml; charset=utf-8',
-        'SOAPAction': '"http://www.mondialrelay.fr/webservice/WSI4_CreationExpedition"'
+        'SOAPAction': '"http://www.mondialrelay.fr/webservice/WSI3_CreationExpedition"'
       },
       body: soapBody
     });
@@ -285,7 +285,7 @@ ${fieldsXml}
     const stat = parseXmlValue(xml, 'STAT');
     if (stat && stat !== '0') {
       return {
-        error: `Mondial Relay STAT=${stat} (WSI4_CreationExpedition)`,
+        error: `Mondial Relay STAT=${stat} (WSI3_CreationExpedition)`,
         xml: xml.substring(0, 800),
         sigDebug: stat === '97' ? sigDebug : undefined
       };
