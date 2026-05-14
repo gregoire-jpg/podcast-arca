@@ -7,6 +7,9 @@
 <!-- PayPal SDK — Mode SANDBOX (test, pas de vrais paiements)
      Pour passer en production: remplacer par le Client ID LIVE -->
 <script src="https://www.paypal.com/sdk/js?client-id=AX6aRxyRUzXzz7Xbq4fqy3s8CTsYm6ncPsFoMW0OHMaf_iaggRVJ5LdwziC0PIzV8ZVon5kPNfv3VzPw&currency=EUR&disable-funding=credit,paylater" data-namespace="paypal"></script>
+<!-- Mondial Relay widget (carte interactive de selection de point relais) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://widget.mondialrelay.com/parcelshop-picker/jquery.plugin.mondialrelay.parcelshoppicker.min.js"></script>
 <style>
 :root {
   --navy:#2d3461; --navy-dk:#1e2245; --gold:#c8a060;
@@ -287,6 +290,22 @@ button, input, select, textarea { font-family: inherit; }
         </label>
       </div>
       <p style="margin-top:14px;font-size:13px;color:var(--muted);font-style:italic;">Sélectionnez d'abord votre pays pour afficher les tarifs (sauf "En main propre" qui est gratuit). Volume : environ 950 g par exemplaire.</p>
+
+      <!-- ── Widget Mondial Relay (caché par défaut) ── -->
+      <div id="mr-block" style="display:none;margin-top:18px;">
+        <div style="padding:14px 18px;background:#fffbf4;border-left:3px solid var(--gold);border-radius:0 4px 4px 0;margin-bottom:14px;">
+          <p style="margin:0;font-size:13.5px;line-height:1.65;color:#444;">
+            <strong style="color:var(--navy);">Choisissez votre point relais Mondial Relay</strong> sur la carte ci-dessous. Renseignez d'abord votre code postal.
+          </p>
+        </div>
+        <div id="MR_Widget" style="width:100%;min-height:480px;border:1px solid var(--border);border-radius:5px;overflow:hidden;"></div>
+        <input type="hidden" name="mr-relay-code" id="MR_ParcelShopCode">
+        <input type="hidden" name="mr-relay-info" id="MR_RelayInfoHidden">
+        <div id="MR_ParcelShopInfo" style="margin-top:12px;font-size:13.5px;color:var(--navy);"></div>
+        <p id="mr-warning" style="margin-top:10px;font-size:12.5px;color:var(--red);text-align:center;display:none;font-style:italic;">
+          ⚠ Veuillez sélectionner un point relais avant de continuer.
+        </p>
+      </div>
     </div>
   </div>
 
@@ -581,9 +600,62 @@ document.querySelectorAll('input[name="livraison"]').forEach(function(r){
   r.addEventListener('change', function(){
     document.querySelectorAll('.ship-opt').forEach(function(o){ o.classList.remove('active'); });
     this.closest('.ship-opt').classList.add('active');
+    toggleMondialRelayWidget(this.value);
     updateSummary();
   });
 });
+
+// ── Widget Mondial Relay ──
+var MR_INITIALIZED = false;
+var MR_SELECTED = null;
+
+function toggleMondialRelayWidget(mode) {
+  var block = document.getElementById('mr-block');
+  if (mode === 'Mondial Relay') {
+    block.style.display = 'block';
+    initMondialRelayWidget();
+  } else {
+    block.style.display = 'none';
+  }
+}
+
+function initMondialRelayWidget() {
+  if (MR_INITIALIZED) return;
+  if (typeof jQuery === 'undefined' || !jQuery.fn.MR_ParcelShopPicker) {
+    // Le script n'est pas encore chargé, on réessaie dans 200 ms
+    setTimeout(initMondialRelayWidget, 200);
+    return;
+  }
+  var paysVal = document.getElementById('pays').value;
+  var countryMap = {'Belgique':'BE','France':'FR','Italie':'IT','Espagne':'ES'};
+  var country = countryMap[paysVal] || 'BE';
+
+  jQuery("#MR_Widget").MR_ParcelShopPicker({
+    Target: "#MR_ParcelShopCode",
+    TargetDisplay: "#MR_ParcelShopInfo",
+    // ⚠ Brand "BDTEST" = code de test public Mondial Relay.
+    // À remplacer par votre code marchand après inscription sur mondialrelay.fr/professionnels
+    Brand: "BDTEST",
+    Country: country,
+    AllowedCountries: "FR,BE,LU,NL,ES",
+    PostCode: "",
+    Weight: "1000",
+    NbResults: 7,
+    MapDisplay: true,
+    OnParcelShopSelected: function(data) {
+      MR_SELECTED = data;
+      // Stocker les infos complètes dans un champ caché pour l'email
+      var info = (data.Nom || '') + ' — '
+               + (data.Adresse1 || '') + ' '
+               + (data.Adresse2 || '') + ', '
+               + (data.CP || '') + ' ' + (data.Ville || '')
+               + ' (' + (data.Pays || '') + ') · Code: ' + (data.ID || '');
+      document.getElementById('MR_RelayInfoHidden').value = info;
+      document.getElementById('mr-warning').style.display = 'none';
+    }
+  });
+  MR_INITIALIZED = true;
+}
 document.querySelectorAll('input[name="paiement"]').forEach(function(r){
   r.addEventListener('change', function(){
     document.querySelectorAll('.pay-opt').forEach(function(o){ o.classList.remove('active'); });
@@ -640,6 +712,8 @@ function isOrderReady() {
   if (!nom || !email || !adresse || !pays || !livraison) return false;
   // Pays "autre" : port à confirmer manuellement, SAUF si "En main propre" (gratuit)
   if (pays === 'autre' && livraison.value !== 'En main propre') return false;
+  // Mondial Relay : il faut avoir choisi un point relais
+  if (livraison.value === 'Mondial Relay' && !MR_SELECTED) return false;
   return true;
 }
 
@@ -778,6 +852,11 @@ function submitOrder() {
   if (t.qty === 0) { alert('Veuillez sélectionner au moins un exemplaire.'); return; }
   if (!nom || !email || !adresse || !pays || !livraison || !paiement) {
     alert('Merci de remplir tous les champs requis.'); return;
+  }
+  if (livraison.value === 'Mondial Relay' && !MR_SELECTED) {
+    document.getElementById('mr-warning').style.display = 'block';
+    document.getElementById('mr-block').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
   }
   sendOrderToFunction(false, '');
 }

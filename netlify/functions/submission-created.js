@@ -128,6 +128,21 @@ function buildEmailHtml(d) {
   // Lien étiquette
   const etiquetteLink = d["lien-etiquette"] || "";
 
+  // Point relais Mondial Relay
+  const mrRelayInfo = d["mr-relay-info"] || "";
+  const mrRelayCode = d["mr-relay-code"] || "";
+  const isMondialRelay = (d.livraison || "") === "Mondial Relay";
+  const mrBlock = isMondialRelay && mrRelayInfo ? `
+  <tr><td style="padding:0 36px 20px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#fffbf4;border:1px solid #c8a060;border-radius:4px;">
+      <tr><td style="padding:16px 20px;">
+        <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#c8a060;font-weight:bold;">📦 Point relais Mondial Relay</p>
+        <p style="margin:0 0 4px;font:bold 14px Georgia;color:#2d3461;">Code : ${esc(mrRelayCode)}</p>
+        <p style="margin:0;font:13.5px/1.5 Georgia;color:#444;">${esc(mrRelayInfo)}</p>
+      </td></tr>
+    </table>
+  </td></tr>` : "";
+
   return `<!DOCTYPE html>
 <html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
 <body style="margin:0;padding:0;background:#f0ede8;font-family:Georgia,serif;">
@@ -159,8 +174,11 @@ function buildEmailHtml(d) {
     <p style="margin:4px 0 0;font:13px Georgia;color:#777;">${esc(d.pays || "—")}</p>
   </td></tr>
 
+  <!-- POINT RELAIS MONDIAL RELAY -->
+  ${mrBlock}
+
   <!-- ÉTIQUETTE -->
-  ${etiquetteLink ? `<tr><td style="padding:0 36px 20px;">
+  ${etiquetteLink && !isMondialRelay ? `<tr><td style="padding:0 36px 20px;">
     <table cellpadding="0" cellspacing="0">
       <tr><td style="background:#c8a060;border-radius:4px;">
         <a href="${esc(etiquetteLink)}" style="display:inline-block;padding:11px 22px;font:bold 11px Arial;letter-spacing:1.5px;text-transform:uppercase;color:#fff;text-decoration:none;">🖨 Imprimer l'étiquette (A6 paysage)</a>
@@ -228,6 +246,9 @@ function buildEmailText(d) {
   }
   txt += `\n  ${d["commande-details"] || ""}\n\n`;
   txt += `LIVRAISON : ${d.livraison || "—"}\n`;
+  if ((d.livraison || "") === "Mondial Relay" && d["mr-relay-info"]) {
+    txt += `  POINT RELAIS : ${d["mr-relay-info"]}\n`;
+  }
   txt += `PAIEMENT  : ${d.paiement || "—"}\n`;
   if ((d["paypal-status"] || "").startsWith("PAID")) {
     txt += `STATUT    : ${d["paypal-status"]}\n`;
