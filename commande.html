@@ -33,15 +33,15 @@ button, input, select, textarea { font-family: inherit; }
 .card-body { padding: 28px 32px; }
 .card-title { font: 600 14px/1 Arial; letter-spacing: 1.5px; text-transform: uppercase; color: var(--navy); padding-bottom: 14px; margin-bottom: 18px; border-bottom: 2px solid var(--gold); }
 
-/* Issues grid (anciens numéros : compact, 4 colonnes sur desktop) */
-.issues { display: grid; grid-template-columns: repeat(auto-fill, minmax(125px, 1fr)); gap: 10px; }
-.issue { background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 10px 12px; transition: border-color .2s; }
+/* Issues — anciens numéros : cards pleine largeur, horizontales, compactes */
+.issues { display: flex; flex-direction: column; gap: 8px; }
+.issue { background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 10px 16px; transition: border-color .2s; display: flex; align-items: center; gap: 18px; }
 .issue.has-qty { border-color: var(--gold); background: #fffbf4; }
-.issue-num { font: 600 10px/1 Arial; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
-.issue-title { font: 600 14px/1.2 Georgia; color: var(--navy); margin-bottom: 3px; }
-.issue-price { font: 13px/1 Arial; color: var(--muted); margin-bottom: 8px; }
-.issue-toc { display: inline-block; margin-top: 6px; font: 10px/1 Arial; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); text-decoration: none; cursor: pointer; border: 0; background: none; padding: 0; }
+.issue-title { font: 600 15px/1 Georgia; color: var(--navy); flex: 0 0 auto; min-width: 50px; }
+.issue-price { font: 14px/1 Arial; color: var(--muted); flex: 0 0 auto; min-width: 44px; }
+.issue-toc { font: 10px/1 Arial; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); text-decoration: none; cursor: pointer; border: 0; background: none; padding: 0; flex: 0 0 auto; }
 .issue-toc:hover { color: var(--navy); text-decoration: underline; }
+.issue .qty-row { margin-left: auto; flex: 0 0 auto; }
 .feat-toc { display: inline-block; margin-top: 14px; font: 11px/1 Arial; letter-spacing: 1.5px; text-transform: uppercase; color: #c8a060; text-decoration: none; cursor: pointer; border: 0; background: none; padding: 0; }
 .feat-toc:hover { color: #fff; }
 .issue-price .promo { color: var(--green); font-weight: bold; }
@@ -258,8 +258,11 @@ button, input, select, textarea { font-family: inherit; }
   .container { padding: 20px 12px 60px; }
   .card-body { padding: 22px 20px; }
   .row-grid, .ship-options, .pay-options { grid-template-columns: 1fr; }
-  .issues { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .issue { padding: 10px; }
+  .issues { gap: 6px; }
+  .issue { padding: 8px 12px; gap: 10px; }
+  .issue-title { font-size: 14px; min-width: 38px; }
+  .issue-price { font-size: 12.5px; min-width: 36px; }
+  .issue-toc { font-size: 9px; letter-spacing: .5px; }
   .issue-featured { grid-template-columns: 1fr; gap: 16px; padding: 22px 20px; }
   .feat-right { justify-content: center; }
   .feat-title { font-size: 19px; }
@@ -631,12 +634,12 @@ function renderOldIssues() {
     html += '<div class="issue" data-num="' + iss.num + '">' +
       '<div class="issue-title">N° ' + iss.num + '</div>' +
       '<div class="issue-price">' + iss.price + ' €</div>' +
+      tocLink +
       '<div class="qty-row">' +
         '<button type="button" class="qty-btn" data-act="minus" data-num="' + iss.num + '">−</button>' +
         '<input type="number" class="qty-input" min="0" max="50" value="0" data-num="' + iss.num + '">' +
         '<button type="button" class="qty-btn" data-act="plus" data-num="' + iss.num + '">+</button>' +
       '</div>' +
-      tocLink +
     '</div>';
   });
   grid.innerHTML = html;
