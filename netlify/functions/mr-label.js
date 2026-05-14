@@ -92,7 +92,9 @@ async function createLabel(orderData) {
     shipmentsListField: [{
       userReferenceField: userReference,
       shipmentReferenceField: userReference,
+      deliveryModeField: '24R',
       shippingProductCodeField: '24R',
+      serviceCodeField: '24R',
       pickupLocationField: {
         typeField: 'Sender'
       },
