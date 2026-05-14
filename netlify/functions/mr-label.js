@@ -10,7 +10,11 @@
 const crypto = require('crypto');
 
 const TEST_MODE = process.env.MR_TEST_MODE === '1';
-const ENSEIGNE = TEST_MODE ? 'BDTEST13' : 'CC23X55I';
+// Enseigne API : par defaut le code alphanumerique CC23X55I.
+// Si MR_ENSEIGNE est defini en env (par ex le code marque numerique "41"),
+// on l utilise — permet de tester rapidement quel code MR attend
+// dans la signature MD5 sans toucher au code.
+const ENSEIGNE = TEST_MODE ? 'BDTEST13' : (process.env.MR_ENSEIGNE || 'CC23X55I');
 
 // Adresse expéditeur — Arca Societas (BCE BE 0642.988.452)
 const SENDER = {
