@@ -1172,6 +1172,35 @@ updateSummary = function() { _origUpdateSummary.apply(this, arguments); updateCa
 // Init
 renderIssues();
 updateCartStrip();
+
+// ═══════════════════ EMBED (iframe auto-resize) ═══════════════════
+// Quand commande.html est integre via iframe sur arca-revue.com (ou autre),
+// on envoie la hauteur du contenu au parent pour qu'il ajuste la hauteur de l'iframe.
+(function setupEmbedAutoResize(){
+  if (window.parent === window) return;  // pas dans une iframe : rien a faire
+  function postHeight() {
+    var h = Math.max(
+      document.body.scrollHeight,
+      document.documentElement.scrollHeight,
+      document.body.offsetHeight,
+      document.documentElement.offsetHeight
+    );
+    try { window.parent.postMessage({ type: 'arca-commande-height', height: h }, '*'); } catch(e) {}
+  }
+  // Premier envoi des que le DOM est pret
+  setTimeout(postHeight, 50);
+  // ResizeObserver : reaction au moindre changement de taille
+  if (window.ResizeObserver) {
+    new ResizeObserver(postHeight).observe(document.body);
+  }
+  // Filets de securite
+  window.addEventListener('load', postHeight);
+  window.addEventListener('resize', postHeight);
+  // Quand on change d'etape, recalculer
+  document.addEventListener('click', function(e){
+    if (e.target.closest('.btn-nav, .wp-step')) setTimeout(postHeight, 80);
+  });
+})();
 </script>
 
 </body>
