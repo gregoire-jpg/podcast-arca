@@ -99,8 +99,7 @@ async function createLabel(orderData) {
       outputFormatField: '10x15',
       outputTypeField: 'PdfUrl'
     },
-    shipmentsListField: {
-      shipmentField: [{
+    shipmentsListField: [{
         orderNoField: orderNo,
         customerNoField: '',
         parcelCountField: 1,
@@ -115,12 +114,10 @@ async function createLabel(orderData) {
         collectionModeField: {
           modeField: 'REL'
         },
-        parcelsField: {
-          parcelField: [{
-            contentField: 'Revue ARCA',
-            weightField: { valueField: weight, unitField: 'gr' }
-          }]
-        },
+        parcelsField: [{
+          contentField: 'Revue ARCA',
+          weightField: { valueField: weight, unitField: 'gr' }
+        }],
         senderField: {
           addressField: {
             lastnameField: 'Arca Societas',
@@ -145,7 +142,6 @@ async function createLabel(orderData) {
             dest.addressAdd1 ? { addressAdd1Field: dest.addressAdd1 } : {})
         }
       }]
-    }
   };
 
   const authHeader = 'Basic ' + Buffer.from(LOGIN + ':' + PASSWORD).toString('base64');
@@ -190,20 +186,24 @@ async function createLabel(orderData) {
       };
     }
 
-    // Parser la structure conforme au XSD de réponse :
-    // shipmentsListField.shipmentField[].labelListField.labelField.outputField
-    const shipments = (data.shipmentsListField && data.shipmentsListField.shipmentField) || [];
-    const shipment = (Array.isArray(shipments) ? shipments[0] : shipments) || {};
-    const labelWrap = shipment.labelListField || {};
-    const label = (Array.isArray(labelWrap.labelField) ? labelWrap.labelField[0] : labelWrap.labelField) || {};
+    // Parser la structure de la réponse — WCF aplatit les wrappers en arrays
+    // shipmentsListField[0].labelListField[0].outputField -> URL PDF
+    const shipmentsRaw = data.shipmentsListField;
+    const shipments = Array.isArray(shipmentsRaw) ? shipmentsRaw
+                    : (shipmentsRaw && shipmentsRaw.shipmentField) || [];
+    const shipment = shipments[0] || {};
+    const labelsRaw = shipment.labelListField;
+    const labels = Array.isArray(labelsRaw) ? labelsRaw
+                 : (labelsRaw && labelsRaw.labelField) ? [].concat(labelsRaw.labelField) : [];
+    const label = labels[0] || {};
     const labelUrl = label.outputField || '';
 
     // Numéro d'expédition : on cherche dans les barcodes
     const rawContent = label.rawContentField || {};
-    const barcodesWrap = rawContent.barcodesField || {};
-    const barcodes = barcodesWrap.barcodeField || [];
-    const barcodeList = Array.isArray(barcodes) ? barcodes : [barcodes];
-    const expedition = (barcodeList[0] && (barcodeList[0].valueField || barcodeList[0].displayedValueField)) || '';
+    const barcodesRaw = rawContent.barcodesField;
+    const barcodes = Array.isArray(barcodesRaw) ? barcodesRaw
+                   : (barcodesRaw && barcodesRaw.barcodeField) ? [].concat(barcodesRaw.barcodeField) : [];
+    const expedition = (barcodes[0] && (barcodes[0].valueField || barcodes[0].displayedValueField)) || '';
 
     if (!expedition && !labelUrl) {
       return {
