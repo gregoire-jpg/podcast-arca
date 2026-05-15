@@ -45,7 +45,7 @@ exports.handler = async function(event) {
 
     let idx = 0;
     const isPromoActive = new Date() < PROMO_DEADLINE;
-    const PACK_DISCOUNT_EUR = 50;
+    const PACK_DISCOUNT_EUR = 40;
 
     if (packComplet) {
       // Une seule ligne "Pack complet" avec le prix réduit

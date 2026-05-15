@@ -910,8 +910,8 @@ function onQtyChange(num, v) {
   updateSummary();
 }
 
-// ── Pack complet : -50€ si au moins 1 de chaque (n1..n9) ──
-var PACK_DISCOUNT = 50;
+// ── Pack complet : -40€ si au moins 1 de chaque (n1..n9) ──
+var PACK_DISCOUNT = 40;
 function isPackComplet() {
   for (var i = 1; i <= 9; i++) {
     if (!quantities[i] || quantities[i] < 1) return false;
@@ -1007,7 +1007,7 @@ function updateSummary() {
     return;
   }
 
-  // Pack complet : -50€ si au moins 1 de chaque (n1..n9)
+  // Pack complet : -40€ si au moins 1 de chaque (n1..n9)
   var packActive = isPackComplet();
   if (packActive) {
     detailsHtml += '<div class="summary-row" style="color:#c8a060;"><span>★ Pack complet — réduction</span><span>−' + PACK_DISCOUNT + ' €</span></div>';
