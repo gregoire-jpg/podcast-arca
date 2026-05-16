@@ -71,11 +71,17 @@ def fmt_duration(seconds):
 # ──────────────────── Dropbox ────────────────────────
 
 def make_dbx():
-    return dropbox.Dropbox(
-        oauth2_refresh_token = os.environ["DROPBOX_REFRESH_TOKEN"],
-        app_key              = os.environ["DROPBOX_APP_KEY"],
-        app_secret           = os.environ["DROPBOX_APP_SECRET"],
-    )
+    # Mode 1 (CI / long terme) : refresh token + app key/secret
+    if "DROPBOX_REFRESH_TOKEN" in os.environ:
+        return dropbox.Dropbox(
+            oauth2_refresh_token = os.environ["DROPBOX_REFRESH_TOKEN"],
+            app_key              = os.environ["DROPBOX_APP_KEY"],
+            app_secret           = os.environ["DROPBOX_APP_SECRET"],
+        )
+    # Mode 2 (one-shot local) : access token court (~4h)
+    if "DROPBOX_ACCESS_TOKEN" in os.environ:
+        return dropbox.Dropbox(os.environ["DROPBOX_ACCESS_TOKEN"])
+    raise RuntimeError("Aucun credential Dropbox dans l'env (DROPBOX_REFRESH_TOKEN+APP_KEY+APP_SECRET, ou DROPBOX_ACCESS_TOKEN).")
 
 CHUNK_SIZE = 40 * 1024 * 1024  # 40 MB par chunk
 
