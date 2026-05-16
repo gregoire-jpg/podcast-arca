@@ -3,11 +3,24 @@
 sync.py — YouTube (chaîne complète) → Dropbox → episodes.json
 
 Usage:
-  python scripts/sync.py           # Mode normal  : 15 dernières vidéos par playlist
+  python scripts/sync.py           # Mode normal  : 15 dernières vidéos par playlist + orphelines classées
   python scripts/sync.py --init    # Mode initial : TOUTES les vidéos (run une seule fois)
 
 Playlists découvertes automatiquement depuis la chaîne YouTube.
 Seules les playlists listées dans "exclude_playlists" sont ignorées.
+
+ORPHELINES : après la passe playlists, le script scanne la playlist auto "uploads"
+(UC -> UU) et détecte les vidéos qui ne sont dans aucune playlist thématique.
+Il importe celles listées dans orphans.json (avec leur classification éditoriale)
+et liste celles qui restent à classer.
+
+Format orphans.json :
+  [{ "youtube_id": "...",
+     "playlist_slug":  "entretiens-stephane-feye",
+     "playlist_title": "Entretiens avec Stéphane Feye",
+     "playlist_id":    "",         // vide si aucune playlist YT correspondante
+     "authors":        ["stephane-feye"],
+     "subject":        "entretiens" }]
 """
 
 import os, sys, json, subprocess, tempfile, time, re
@@ -27,6 +40,7 @@ except ImportError:
 ROOT          = Path(__file__).parent.parent
 CONFIG_FILE   = ROOT / "config.json"
 EPISODES_FILE = ROOT / "episodes.json"
+ORPHANS_FILE  = ROOT / "orphans.json"   # mapping youtube_id -> classification éditoriale
 DROPBOX_DIR   = "/Podcast ARCA"
 
 # ──────────────────── Utilitaires ────────────────────
@@ -153,14 +167,19 @@ def all_videos(playlist_id):
     res = subprocess.run(
         [sys.executable, "-m", "yt_dlp", "--flat-playlist", "--print", "%(id)s\t%(title)s",
          "--no-warnings", f"https://www.youtube.com/playlist?list={playlist_id}"],
-        capture_output=True, text=True,
+        capture_output=True, text=True, encoding="utf-8", errors="replace",
     )
     videos = []
-    for line in res.stdout.strip().splitlines():
+    for line in (res.stdout or "").strip().splitlines():
         parts = line.split("\t", 1)
         if len(parts) == 2:
             videos.append({"id": parts[0], "title": parts[1]})
     return videos
+
+def uploads_videos(channel_id):
+    """Toutes les vidéos de la chaîne via la playlist auto 'uploads' (UC -> UU)."""
+    uploads_id = "UU" + channel_id[2:]
+    return all_videos(uploads_id)
 
 # ──────────────────── Traitement vidéo ───────────────
 
@@ -271,6 +290,50 @@ def main():
                 added += 1
                 print(f"  ✅ {ep['title'][:55]}")
             time.sleep(1)
+
+    # ── Orphelines : vidéos uploadées sur la chaîne mais dans aucune playlist thématique ──
+    print(f"\n🔎 Scan vidéos orphelines (uploads sans playlist thématique)…")
+    all_uploads = uploads_videos(channel_id)
+    orphans = [v for v in all_uploads if v["id"] not in seen_ids]
+
+    if orphans:
+        orphans_meta = {}
+        if ORPHANS_FILE.exists():
+            for entry in load_json(ORPHANS_FILE):
+                orphans_meta[entry["youtube_id"]] = entry
+
+        to_import   = [v for v in orphans if v["id"] in orphans_meta]
+        to_classify = [v for v in orphans if v["id"] not in orphans_meta]
+
+        print(f"  {len(orphans)} orpheline(s) totales · {len(to_import)} classée(s) · {len(to_classify)} à classer")
+
+        for vid in to_import:
+            m = orphans_meta[vid["id"]]
+            pl_title = m["playlist_title"]
+            pl_slug  = m["playlist_slug"]
+            pl_meta  = {
+                "_id":     m.get("playlist_id", ""),
+                "authors": m.get("authors", []),
+                "subject": m.get("subject", ""),
+            }
+            print(f"  ⬇  [orpheline] {vid['title'][:55]}  →  {pl_slug}")
+            ep = process_video(vid["id"], pl_title, pl_slug, pl_meta)
+            if ep:
+                episodes.append(ep)
+                seen_ids.add(vid["id"])
+                save_json(EPISODES_FILE, sorted(
+                    episodes, key=lambda e: e.get("published_at", ""), reverse=True
+                ))
+                added += 1
+                print(f"  ✅ {ep['title'][:55]}")
+            time.sleep(1)
+
+        if to_classify:
+            print(f"\n⏸  {len(to_classify)} orpheline(s) en attente de classement (ajouter à {ORPHANS_FILE.name}) :")
+            for vid in to_classify:
+                print(f"    - [{vid['id']}] {vid['title'][:75]}")
+    else:
+        print("  Aucune orpheline.")
 
     episodes.sort(key=lambda e: e.get("published_at", ""), reverse=True)
     save_json(EPISODES_FILE, episodes)

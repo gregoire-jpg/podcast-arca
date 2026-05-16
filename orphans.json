@@ -1,0 +1,42 @@
+[
+  {
+    "youtube_id":     "M9leGPztlHU",
+    "playlist_slug":  "cabale-hebraique",
+    "playlist_title": "Cabale hébraïque",
+    "playlist_id":    "",
+    "authors":        ["caroline-thuysbaert"],
+    "subject":        "cabale"
+  },
+  {
+    "youtube_id":     "xifIeRyw9Eg",
+    "playlist_slug":  "entretiens-stephane-feye",
+    "playlist_title": "Entretiens avec Stéphane Feye",
+    "playlist_id":    "",
+    "authors":        ["stephane-feye"],
+    "subject":        "entretiens"
+  },
+  {
+    "youtube_id":     "n0zm33sMGhI",
+    "playlist_slug":  "entretiens-stephane-feye",
+    "playlist_title": "Entretiens avec Stéphane Feye",
+    "playlist_id":    "",
+    "authors":        ["stephane-feye"],
+    "subject":        "entretiens"
+  },
+  {
+    "youtube_id":     "XlfASaQ9k-A",
+    "playlist_slug":  "entretiens-stephane-feye",
+    "playlist_title": "Entretiens avec Stéphane Feye",
+    "playlist_id":    "",
+    "authors":        ["stephane-feye"],
+    "subject":        "entretiens"
+  },
+  {
+    "youtube_id":     "57XZP9-9Hmg",
+    "playlist_slug":  "articles-lus",
+    "playlist_title": "Articles lus",
+    "playlist_id":    "",
+    "authors":        ["Aliénor Forget"],
+    "subject":        "articles"
+  }
+]
