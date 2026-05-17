@@ -327,6 +327,20 @@ button, input, select, textarea { font-family: inherit; }
 .arca-alert-btn:hover { background: var(--gold); }
 @keyframes alertPop { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: scale(1); } }
 
+/* Rappel N°8 : bandeau discret au-dessus de "Continuer" */
+.n8-reminder { display: flex; align-items: center; gap: 16px; margin: 20px 0 0; padding: 14px 18px; background: #fffbf2; border: 1px solid var(--gold); border-radius: 4px; animation: alertPop .25s ease-out; }
+.n8-reminder[hidden] { display: none; }
+.n8-reminder-icon { color: var(--gold); font-size: 20px; flex-shrink: 0; }
+.n8-reminder-text { flex: 1; font: 14px/1.4 Georgia; color: var(--navy); }
+.n8-reminder-text strong { display: block; font-weight: bold; }
+.n8-reminder-sub { font: italic 12.5px Georgia; color: #666; }
+.n8-reminder-btn { background: var(--gold); color: #fff; border: 0; padding: 11px 18px; border-radius: 3px; font: 600 11.5px Arial; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; white-space: nowrap; transition: background .15s; }
+.n8-reminder-btn:hover { background: var(--navy); }
+@media (max-width: 600px) {
+  .n8-reminder { flex-wrap: wrap; }
+  .n8-reminder-btn { width: 100%; padding: 12px; }
+}
+
 /* Mobile */
 @media (max-width: 600px) {
   .hdr { padding: 36px 16px 30px; }
@@ -523,6 +537,16 @@ button, input, select, textarea { font-family: inherit; }
       <input type="hidden" name="lien-etiquette" id="lien-etiquette">
     </div>
   </div>
+  <!-- Rappel N°8 : visible si panier non-vide ET N°8 absent du panier -->
+  <div id="n8-reminder" class="n8-reminder" hidden>
+    <span class="n8-reminder-icon">★</span>
+    <div class="n8-reminder-text">
+      <strong>N'oubliez pas le N°8 — dernier paru</strong>
+      <span class="n8-reminder-sub" id="n8-reminder-sub"></span>
+    </div>
+    <button type="button" class="n8-reminder-btn" onclick="addN8FromReminder()">Ajouter le N°8 →</button>
+  </div>
+
   <div class="wizard-nav">
     <button type="button" class="btn-nav btn-next alone-right" onclick="goToStep(2)">Continuer →</button>
   </div>
@@ -982,6 +1006,34 @@ function onQtyChange(num, v) {
   var issueCard = document.querySelector('.issue[data-num="' + num + '"]');
   if (issueCard) issueCard.classList.toggle('has-qty', v > 0);
   updateShipping();  // recalcule frais selon nouveau poids (et appelle updateSummary)
+  updateN8Reminder();
+}
+
+// ── Rappel N°8 : visible si panier non-vide ET N°8 absent ──
+function updateN8Reminder() {
+  var reminder = document.getElementById('n8-reminder');
+  if (!reminder) return;
+  var hasN8 = (quantities[8] || 0) > 0;
+  var hasAnything = false;
+  for (var i = 1; i <= 9; i++) { if ((quantities[i] || 0) > 0) { hasAnything = true; break; } }
+  reminder.hidden = !hasAnything || hasN8;
+  // Sous-titre dynamique : tarif souscription si encore actif, sinon prix normal
+  var sub = document.getElementById('n8-reminder-sub');
+  if (sub) {
+    sub.textContent = PROMO_ACTIVE
+      ? 'Tarif souscription 15 € (au lieu de 20 €) jusqu’au 25 mai'
+      : 'L’exemplaire 20 €';
+  }
+}
+
+function addN8FromReminder() {
+  var input = document.querySelector('input[data-num="8"]');
+  var current = quantities[8] || 0;
+  if (input) input.value = current + 1;
+  onQtyChange(8, current + 1);
+  // Scroll vers la card N°8 pour feedback visuel
+  var card = document.getElementById('featured-n8');
+  if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 // ── Pack complet : -40€ si au moins 1 de chaque (n1..n9) ──
