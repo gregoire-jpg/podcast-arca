@@ -750,7 +750,7 @@ button, input, select, textarea { font-family: inherit; }
   <button type="button" class="submit-btn" id="submit-btn" disabled onclick="submitOrder()">Envoyer ma commande</button>
   <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:14px;line-height:1.6;">
     Votre commande sera confirmée par e-mail dans les 24h avec les informations de paiement.<br>
-    Pour toute question : <a href="mailto:info@arca-librairie.com" style="color:var(--gold);">info@arca-librairie.com</a>
+    Pour toute question : <a href="mailto:antoine@arca-librairie.com" style="color:var(--gold);">antoine@arca-librairie.com</a>
   </p>
 
   <div class="wizard-nav">
@@ -1360,7 +1360,7 @@ function payerAvecStripe() {
   .then(function(r){ return r.json(); })
   .then(function(res){
     if (!res.url) {
-      arcaAlert("Erreur lors de l'initialisation du paiement Stripe. Merci de réessayer ou de nous contacter à info@arca-librairie.com.");
+      arcaAlert("Erreur lors de l'initialisation du paiement Stripe. Merci de réessayer ou de nous contacter à antoine@arca-librairie.com.");
       if (btn) { btn.disabled = false; btn.textContent = 'Payer avec Stripe →'; }
       return;
     }
@@ -1524,7 +1524,7 @@ if (window.paypal && paypal.Buttons) {
     },
     onError: function(err) {
       console.error('Erreur PayPal :', err);
-      arcaAlert('Une erreur est survenue lors du paiement. Merci de réessayer ou de nous contacter à info@arca-librairie.com.');
+      arcaAlert('Une erreur est survenue lors du paiement. Merci de réessayer ou de nous contacter à antoine@arca-librairie.com.');
     }
   }).render('#paypal-button-container');
 }
@@ -1555,7 +1555,7 @@ function sendOrderToFunction(isPaypal, paypalId) {
   .then(function(res){
     if (!res.ok) {
       console.error('Erreur fonction:', res.status, res.text);
-      arcaAlert("Erreur lors de l'envoi de votre commande. Merci de nous contacter à info@arca-librairie.com.\n\n(" + res.status + ')');
+      arcaAlert("Erreur lors de l'envoi de votre commande. Merci de nous contacter à antoine@arca-librairie.com.\n\n(" + res.status + ')');
       if (btn) { btn.disabled = false; btn.textContent = 'Envoyer ma commande'; }
       return;
     }
@@ -1598,7 +1598,7 @@ function sendOrderToFunction(isPaypal, paypalId) {
       }
       window.location.href = '/commande-merci.html?paid=paypal&id=' + encodeURIComponent(paypalId);
     } else {
-      arcaAlert("Erreur réseau. Merci de réessayer ou de nous contacter à info@arca-librairie.com.");
+      arcaAlert("Erreur réseau. Merci de réessayer ou de nous contacter à antoine@arca-librairie.com.");
       if (btn) { btn.disabled = false; btn.textContent = 'Envoyer ma commande'; }
     }
   });

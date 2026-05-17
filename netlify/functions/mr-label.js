@@ -126,7 +126,7 @@ async function createLabel(orderData) {
             countryCodeField: 'BE',
             postCodeField: '1390',
             cityField: 'Grez-Doiceau',
-            emailField: 'info@arca-librairie.com'
+            emailField: 'antoine@arca-librairie.com'
           }
         },
         recipientField: {

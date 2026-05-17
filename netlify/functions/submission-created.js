@@ -4,7 +4,7 @@
 //
 // Variables d'environnement requises (Netlify → Site configuration → Environment variables):
 //   - BREVO_API_KEY     : clé API Brevo (xkeysib-...)
-//   - ORDER_EMAIL_TO    : destinataire(s) — ex: info@arca-librairie.com
+//   - ORDER_EMAIL_TO    : destinataire(s) — ex: antoine@arca-librairie.com
 //                          (séparer par virgule pour plusieurs)
 //   - ORDER_EMAIL_FROM  : expéditeur — ex: commandes@arca-librairie.com
 //                          (doit être une adresse d'un domaine vérifié sur Brevo)
@@ -96,7 +96,7 @@ exports.handler = async function(event) {
         const clientPayload = {
           sender: { name: "ARCA Revue & Librairie", email: fromEmail },
           to: [{ email: d.email, name: d.nom || "" }],
-          replyTo: { email: "info@arca-librairie.com", name: "ARCA" },
+          replyTo: { email: "antoine@arca-librairie.com", name: "ARCA" },
           subject: clientSubject,
           htmlContent: clientHtml,
           textContent: clientText
@@ -491,7 +491,7 @@ function buildClientEmailHtml(d, mrLabel) {
   <!-- FOOTER -->
   <tr><td style="background:#1e2245;padding:22px 36px;text-align:center;">
     <p style="margin:0 0 6px;font:13px Georgia;color:rgba(255,255,255,.7);">Une question ?</p>
-    <p style="margin:0;font:13px Georgia;"><a href="mailto:info@arca-librairie.com" style="color:#c8a060;text-decoration:none;">info@arca-librairie.com</a></p>
+    <p style="margin:0;font:13px Georgia;"><a href="mailto:antoine@arca-librairie.com" style="color:#c8a060;text-decoration:none;">antoine@arca-librairie.com</a></p>
   </td></tr>
 
 </table>
@@ -528,6 +528,6 @@ function buildClientEmailText(d, mrLabel) {
   }
   txt += `LIVRAISON : ${d.livraison || "—"}\n`;
   if (isMondialRelay && d["mr-relay-info"]) txt += `  ${d["mr-relay-info"]}\n`;
-  txt += `\nUne question ? info@arca-librairie.com\n`;
+  txt += `\nUne question ? antoine@arca-librairie.com\n`;
   return txt;
 }
