@@ -614,8 +614,6 @@ button, input, select, textarea { font-family: inherit; }
           <div class="ship-cost" id="cost-poste">—</div>
         </label>
       </div>
-      <p style="margin-top:14px;font-size:13px;color:var(--muted);font-style:italic;">Sélectionnez d'abord votre pays pour afficher les tarifs (sauf "En main propre" qui est gratuit). Poids : 600 g par revue ARCA, 350 g pour le recueil de prières.</p>
-
       <!-- ── Widget Mondial Relay (caché par défaut) ── -->
       <div id="mr-block" style="display:none;margin-top:18px;">
         <div style="padding:14px 18px;background:#fffbf4;border-left:3px solid var(--gold);border-radius:0 4px 4px 0;margin-bottom:14px;">
@@ -811,13 +809,53 @@ var SOMMAIRES = {
   9: '/recueil-prieres-sommaire.html?embed=1'
 };
 
-var SHIPPING = {
-  'Belgique': { relay: 5,    poste: 6,    main: 0 },
-  'France':   { relay: 6,    poste: 12,   main: 0 },
-  'Italie':   { relay: 8,    poste: 14,   main: 0 },
-  'Espagne':  { relay: 8,    poste: 20,   main: 0 },
-  'autre':    { relay: null, poste: null, main: 0 }
+// ── Grille tarifaire transport (tarifs publics B2C 2025 — ajuster si contrat) ──
+// Format : [poids_max_grammes, prix_eur]. La 1ère tranche dont weight <= poids_max s'applique.
+
+// Mondial Relay — Point Relais depuis Belgique
+var MR_RATES = {
+  'Belgique': [[1000, 4.80],[2000, 5.20],[3000, 5.85],[5000, 6.45],[7000, 7.50],[10000, 8.50],[15000, 10.50],[20000, 13.50],[30000, 17.00]],
+  'France':   [[1000, 5.70],[2000, 6.30],[3000, 7.20],[5000, 8.20],[7000, 9.50],[10000, 11.50],[15000, 14.00],[20000, 18.00],[30000, 23.00]],
+  'Italie':   [[1000, 8.00],[2000, 9.50],[3000, 11.00],[5000, 12.50],[7000, 15.50],[10000, 18.50],[15000, 22.00],[20000, 27.00],[30000, 33.00]],
+  'Espagne':  [[1000, 8.00],[2000, 9.50],[3000, 11.00],[5000, 12.50],[7000, 15.50],[10000, 18.50],[15000, 22.00],[20000, 27.00],[30000, 33.00]],
+  'autre':    null
 };
+
+// Bpost — bpack national (BE) + bpack Europe (FR/IT/ES) avec track & trace
+var BPOST_RATES = {
+  'Belgique': [[2000, 9.25],[10000, 12.38],[30000, 15.50]],
+  'France':   [[2000, 16.50],[5000, 22.00],[10000, 32.00],[30000, 52.00]],
+  'Italie':   [[2000, 17.50],[5000, 24.00],[10000, 35.00],[30000, 55.00]],
+  'Espagne':  [[2000, 17.50],[5000, 24.00],[10000, 35.00],[30000, 55.00]],
+  'autre':    null
+};
+
+function getRateFromTiers(tiers, weightG) {
+  if (!tiers) return null;
+  for (var i = 0; i < tiers.length; i++) {
+    if (weightG <= tiers[i][0]) return tiers[i][1];
+  }
+  return null;  // au-delà de la dernière tranche
+}
+
+function getCartWeightG() {
+  var w = 0;
+  ISSUES.forEach(function(iss){
+    var q = quantities[iss.num] || 0;
+    w += q * (iss.weight || 600);
+  });
+  return Math.max(w, 100);  // floor 100g pour calculs MR
+}
+
+function getShipping(pays, weightG) {
+  if (!pays || pays === 'autre') return null;
+  if (weightG === undefined) weightG = getCartWeightG();
+  return {
+    relay: getRateFromTiers(MR_RATES[pays], weightG),
+    poste: getRateFromTiers(BPOST_RATES[pays], weightG),
+    main:  0
+  };
+}
 
 var quantities = {};  // { 1: 0, 2: 1, ... }
 
@@ -943,7 +981,7 @@ function onQtyChange(num, v) {
   if (featCard) featCard.classList.toggle('has-qty', v > 0);
   var issueCard = document.querySelector('.issue[data-num="' + num + '"]');
   if (issueCard) issueCard.classList.toggle('has-qty', v > 0);
-  updateSummary();
+  updateShipping();  // recalcule frais selon nouveau poids (et appelle updateSummary)
 }
 
 // ── Pack complet : -40€ si au moins 1 de chaque (n1..n9) ──
@@ -985,10 +1023,11 @@ function updatePackButton() {
   }
 }
 
-// ── Frais de port ──
+// ── Frais de port (dynamique selon poids panier) ──
 function updateShipping() {
   var pays = document.getElementById('pays').value;
-  var s = SHIPPING[pays];
+  var weightG = getCartWeightG();
+  var s = getShipping(pays, weightG);
   var costRelay = document.getElementById('cost-relay');
   var costPoste = document.getElementById('cost-poste');
   // "En main propre" toujours gratuit, indépendant du pays
@@ -999,9 +1038,10 @@ function updateShipping() {
     costPoste.textContent = '—';
     costRelay.classList.remove('empty');
     costPoste.classList.remove('empty');
+    updateSummary();
     return;
   }
-  if (pays === 'autre' || !s) {
+  if (!s) {
     costRelay.textContent = 'Nous consulter';
     costPoste.textContent = 'Nous consulter';
     costRelay.classList.add('empty');
@@ -1009,10 +1049,10 @@ function updateShipping() {
     updateSummary();
     return;
   }
-  costRelay.textContent = s.relay + ' €';
-  costPoste.textContent = s.poste + ' €';
-  costRelay.classList.remove('empty');
-  costPoste.classList.remove('empty');
+  costRelay.textContent = (s.relay !== null) ? s.relay.toFixed(2) + ' €' : 'Nous consulter';
+  costPoste.textContent = (s.poste !== null) ? s.poste.toFixed(2) + ' €' : 'Nous consulter';
+  costRelay.classList.toggle('empty', s.relay === null);
+  costPoste.classList.toggle('empty', s.poste === null);
   updateSummary();
 }
 
@@ -1058,15 +1098,16 @@ function updateSummary() {
   var frais = 0;
   var fraisHtml = '';
 
-  if (livraison && pays && SHIPPING[pays]) {
+  var shipObj = getShipping(pays);
+  if (livraison && pays && shipObj) {
     var modeKey = livraison.value === 'En main propre' ? 'main'
                 : livraison.value === 'Mondial Relay' ? 'relay'
                 : 'poste';
-    var c = SHIPPING[pays][modeKey];
+    var c = shipObj[modeKey];
     if (c !== null) {
       frais = c;
       var label = modeKey === 'main' ? livraison.value : livraison.value + ' · ' + pays;
-      var costText = frais === 0 ? 'Gratuit' : frais + ' €';
+      var costText = frais === 0 ? 'Gratuit' : frais.toFixed(2) + ' €';
       fraisHtml = '<div class="summary-row sub"><span>Livraison (' + label + ')</span><span>' + costText + '</span></div>';
     } else {
       fraisHtml = '<div class="summary-row sub"><span>Frais de port</span><span style="color:var(--gold);">à confirmer</span></div>';
@@ -1269,9 +1310,10 @@ function getCurrentTotal() {
   var pays = document.getElementById('pays').value;
   var livraison = document.querySelector('input[name="livraison"]:checked');
   var frais = 0;
-  if (livraison && pays && SHIPPING[pays]) {
+  var shipObj2 = getShipping(pays);
+  if (livraison && pays && shipObj2) {
     var mode = livraison.value === 'Mondial Relay' ? 'relay' : 'poste';
-    var c = SHIPPING[pays][mode];
+    var c = shipObj2[mode];
     if (c !== null) frais = c;
   }
   return { revues: totalRevues, port: frais, total: totalRevues + frais, qty: totalQty, packDiscount: packDiscount };
