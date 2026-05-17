@@ -317,6 +317,16 @@ button, input, select, textarea { font-family: inherit; }
 #sommaire-iframe { flex: 1; width: 100%; border: 0; min-height: 500px; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+/* Modal alert ARCA (remplace les alert() natifs) */
+.arca-alert { max-width: 420px; padding: 0; text-align: center; animation: alertPop .2s ease-out; }
+.arca-alert-head { background: var(--navy); padding: 18px 22px 16px; }
+.arca-alert-head .mark { display: inline-block; width: 32px; height: 32px; line-height: 30px; border-radius: 50%; background: var(--gold); color: #fff; font: bold 18px/30px Arial; }
+.arca-alert-body { padding: 26px 30px 14px; font: 15px/1.5 Georgia; color: #333; }
+.arca-alert-foot { padding: 0 24px 24px; }
+.arca-alert-btn { display: inline-block; min-width: 100px; padding: 11px 26px; background: var(--navy); color: #fff; border: 0; border-radius: 4px; font: 600 12px/1 Arial; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; transition: background .15s; }
+.arca-alert-btn:hover { background: var(--gold); }
+@keyframes alertPop { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: scale(1); } }
+
 /* Mobile */
 @media (max-width: 600px) {
   .hdr { padding: 36px 16px 30px; }
@@ -729,8 +739,46 @@ button, input, select, textarea { font-family: inherit; }
   </div>
 </div>
 
+<!-- Modal alert ARCA — remplace les alert() natifs (qui affichent le domaine Netlify) -->
+<div class="modal-overlay" id="arca-alert-modal" hidden>
+  <div class="modal-content arca-alert">
+    <div class="arca-alert-head"><span class="mark">!</span></div>
+    <div class="arca-alert-body" id="arca-alert-msg">—</div>
+    <div class="arca-alert-foot">
+      <button type="button" class="arca-alert-btn" onclick="closeArcaAlert()">OK</button>
+    </div>
+  </div>
+</div>
+
 <script>
 'use strict';
+
+// ── Modal alert ARCA (remplace alert() natif qui affiche "podcast-arca.netlify.app indique") ──
+function arcaAlert(message) {
+  var modal = document.getElementById('arca-alert-modal');
+  var msgEl = document.getElementById('arca-alert-msg');
+  if (!modal || !msgEl) { window.alert(message); return; }  // filet de sécurité
+  msgEl.textContent = message;
+  modal.hidden = false;
+  // Focus sur le bouton OK pour permettre Enter/Espace de fermer
+  setTimeout(function(){ var b = modal.querySelector('.arca-alert-btn'); if (b) b.focus(); }, 50);
+}
+function closeArcaAlert() {
+  var modal = document.getElementById('arca-alert-modal');
+  if (modal) modal.hidden = true;
+}
+// Échap pour fermer
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') {
+    var m = document.getElementById('arca-alert-modal');
+    if (m && !m.hidden) closeArcaAlert();
+  }
+});
+// Clic en dehors pour fermer
+window.addEventListener('DOMContentLoaded', function(){
+  var m = document.getElementById('arca-alert-modal');
+  if (m) m.addEventListener('click', function(e){ if (e.target === m) closeArcaAlert(); });
+});
 
 // ── Données ──
 // Fin de la souscription préférentielle : 25 mai 2026 à minuit (heure belge = UTC+2 en mai)
@@ -1160,7 +1208,7 @@ function updateStripeState() {
 // Click "Payer avec Stripe"
 function payerAvecStripe() {
   if (!isOrderReady()) {
-    alert('Veuillez compléter tous les champs requis.');
+    arcaAlert('Veuillez compléter tous les champs requis.');
     return;
   }
   syncAdresse();
@@ -1184,7 +1232,7 @@ function payerAvecStripe() {
   .then(function(r){ return r.json(); })
   .then(function(res){
     if (!res.url) {
-      alert("Erreur lors de l'initialisation du paiement Stripe. Merci de réessayer ou de nous contacter à info@arca-librairie.com.");
+      arcaAlert("Erreur lors de l'initialisation du paiement Stripe. Merci de réessayer ou de nous contacter à info@arca-librairie.com.");
       if (btn) { btn.disabled = false; btn.textContent = 'Payer avec Stripe →'; }
       return;
     }
@@ -1200,7 +1248,7 @@ function payerAvecStripe() {
   })
   .catch(function(err){
     console.error('Erreur Stripe:', err);
-    alert("Erreur réseau. Merci de réessayer.");
+    arcaAlert("Erreur réseau. Merci de réessayer.");
     if (btn) { btn.disabled = false; btn.textContent = 'Payer avec Stripe →'; }
   });
 }
@@ -1304,7 +1352,7 @@ if (window.paypal && paypal.Buttons) {
     createOrder: function(data, actions) {
       var t = getCurrentTotal();
       if (t.total === 0) {
-        alert('Veuillez sélectionner au moins un exemplaire.');
+        arcaAlert('Veuillez sélectionner au moins un exemplaire.');
         return null;
       }
       // Construire la description
@@ -1347,7 +1395,7 @@ if (window.paypal && paypal.Buttons) {
     },
     onError: function(err) {
       console.error('Erreur PayPal :', err);
-      alert('Une erreur est survenue lors du paiement. Merci de réessayer ou de nous contacter à info@arca-librairie.com.');
+      arcaAlert('Une erreur est survenue lors du paiement. Merci de réessayer ou de nous contacter à info@arca-librairie.com.');
     }
   }).render('#paypal-button-container');
 }
@@ -1378,7 +1426,7 @@ function sendOrderToFunction(isPaypal, paypalId) {
   .then(function(res){
     if (!res.ok) {
       console.error('Erreur fonction:', res.status, res.text);
-      alert("Erreur lors de l'envoi de votre commande. Merci de nous contacter à info@arca-librairie.com.\n\n(" + res.status + ')');
+      arcaAlert("Erreur lors de l'envoi de votre commande. Merci de nous contacter à info@arca-librairie.com.\n\n(" + res.status + ')');
       if (btn) { btn.disabled = false; btn.textContent = 'Envoyer ma commande'; }
       return;
     }
@@ -1421,7 +1469,7 @@ function sendOrderToFunction(isPaypal, paypalId) {
       }
       window.location.href = '/commande-merci.html?paid=paypal&id=' + encodeURIComponent(paypalId);
     } else {
-      alert("Erreur réseau. Merci de réessayer ou de nous contacter à info@arca-librairie.com.");
+      arcaAlert("Erreur réseau. Merci de réessayer ou de nous contacter à info@arca-librairie.com.");
       if (btn) { btn.disabled = false; btn.textContent = 'Envoyer ma commande'; }
     }
   });
@@ -1439,9 +1487,9 @@ function submitOrder() {
   var livraison = document.querySelector('input[name="livraison"]:checked');
   var paiement = document.querySelector('input[name="paiement"]:checked');
   var t = getCurrentTotal();
-  if (t.qty === 0) { alert('Veuillez sélectionner au moins un exemplaire.'); return; }
+  if (t.qty === 0) { arcaAlert('Veuillez sélectionner au moins un exemplaire.'); return; }
   if (!nom || !email || !rue || !cp || !ville || !pays || !livraison || !paiement) {
-    alert('Merci de remplir tous les champs requis.'); return;
+    arcaAlert('Merci de remplir tous les champs requis.'); return;
   }
   if (livraison.value === 'Mondial Relay' && !MR_SELECTED) {
     document.getElementById('mr-warning').style.display = 'block';
@@ -1500,7 +1548,7 @@ function goToStep(n, skipValidation) {
 function validateStep(n) {
   if (n === 1) {
     var t = getCurrentTotal();
-    if (t.qty === 0) { alert('Veuillez sélectionner au moins un exemplaire.'); return false; }
+    if (t.qty === 0) { arcaAlert('Veuillez sélectionner au moins un exemplaire.'); return false; }
     return true;
   }
   if (n === 2) {
@@ -1512,17 +1560,17 @@ function validateStep(n) {
     var ville = document.getElementById('ville').value.trim();
     var pays = document.getElementById('pays').value;
     if (!nom || !email || !rue || !cp || !ville || !pays) {
-      alert('Merci de compléter tous les champs obligatoires (nom, e-mail, adresse, pays).');
+      arcaAlert('Merci de compléter tous les champs obligatoires (nom, e-mail, adresse, pays).');
       return false;
     }
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-      alert('Adresse e-mail invalide.'); return false;
+      arcaAlert('Adresse e-mail invalide.'); return false;
     }
     return true;
   }
   if (n === 3) {
     var livraison = document.querySelector('input[name="livraison"]:checked');
-    if (!livraison) { alert('Veuillez choisir un mode de livraison.'); return false; }
+    if (!livraison) { arcaAlert('Veuillez choisir un mode de livraison.'); return false; }
     if (livraison.value === 'Mondial Relay' && !MR_SELECTED) {
       document.getElementById('mr-warning').style.display = 'block';
       document.getElementById('mr-block').scrollIntoView({ behavior: 'smooth', block: 'center' });
