@@ -1046,14 +1046,12 @@ function onQtyChange(num, v) {
   updateN8Reminder();
 }
 
-// ── Rappel N°8 : visible si panier non-vide ET N°8 absent ──
+// ── Rappel N°8 : visible tant que le N°8 n'est pas au panier ──
 function updateN8Reminder() {
   var reminder = document.getElementById('n8-reminder');
   if (!reminder) return;
   var hasN8 = (quantities[8] || 0) > 0;
-  var hasAnything = false;
-  for (var i = 1; i <= 9; i++) { if ((quantities[i] || 0) > 0) { hasAnything = true; break; } }
-  reminder.hidden = !hasAnything || hasN8;
+  reminder.hidden = hasN8;
   // Sous-titre dynamique : tarif souscription si encore actif, sinon prix normal
   var sub = document.getElementById('n8-reminder-sub');
   if (sub) {
@@ -1784,6 +1782,7 @@ document.getElementById('sommaire-modal').addEventListener('click', function(e){
 renderIssues();
 updateCartStrip();
 updatePackPriceDisplay();
+updateN8Reminder();
 
 // ═══════════════════ EMBED (iframe auto-resize) ═══════════════════
 // Mesure le contenu visible (header + container) et envoie la hauteur au parent.
