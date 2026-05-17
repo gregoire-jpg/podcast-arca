@@ -592,10 +592,26 @@ button, input, select, textarea { font-family: inherit; }
           <label for="pays">Pays <span class="req">*</span></label>
           <select id="pays" name="pays" required autocomplete="country-name">
             <option value="">— Choisir —</option>
-            <option value="Belgique">Belgique</option>
-            <option value="France">France</option>
-            <option value="Italie">Italie</option>
-            <option value="Espagne">Espagne</option>
+            <optgroup label="Union européenne (Mondial Relay + Bpost)">
+              <option value="Belgique">Belgique</option>
+              <option value="France">France (métropolitaine)</option>
+              <option value="Luxembourg">Luxembourg</option>
+              <option value="Pays-Bas">Pays-Bas</option>
+              <option value="Allemagne">Allemagne</option>
+              <option value="Autriche">Autriche</option>
+              <option value="Italie">Italie</option>
+              <option value="Espagne">Espagne</option>
+              <option value="Portugal">Portugal</option>
+              <option value="Autres pays UE">Autres pays UE (Bpost)</option>
+            </optgroup>
+            <optgroup label="Europe hors UE (Bpost)">
+              <option value="Royaume-Uni">Royaume-Uni</option>
+              <option value="Suisse">Suisse</option>
+            </optgroup>
+            <optgroup label="International (Bpost)">
+              <option value="Canada">Canada</option>
+              <option value="DOM-TOM">DOM-TOM (Guadeloupe, Martinique, Réunion…)</option>
+            </optgroup>
             <option value="autre">Autre pays (nous consulter)</option>
           </select>
         </div>
@@ -836,22 +852,43 @@ var SOMMAIRES = {
 // ── Grille tarifaire transport (tarifs publics B2C 2025 — ajuster si contrat) ──
 // Format : [poids_max_grammes, prix_eur]. La 1ère tranche dont weight <= poids_max s'applique.
 
-// Mondial Relay — Point Relais depuis Belgique
+// Mondial Relay — Point Relais depuis Belgique (couvre BE, FR, NL, LU, DE, AT, IT, ES, PT)
 var MR_RATES = {
-  'Belgique': [[1000, 4.80],[2000, 5.20],[3000, 5.85],[5000, 6.45],[7000, 7.50],[10000, 8.50],[15000, 10.50],[20000, 13.50],[30000, 17.00]],
-  'France':   [[1000, 5.70],[2000, 6.30],[3000, 7.20],[5000, 8.20],[7000, 9.50],[10000, 11.50],[15000, 14.00],[20000, 18.00],[30000, 23.00]],
-  'Italie':   [[1000, 8.00],[2000, 9.50],[3000, 11.00],[5000, 12.50],[7000, 15.50],[10000, 18.50],[15000, 22.00],[20000, 27.00],[30000, 33.00]],
-  'Espagne':  [[1000, 8.00],[2000, 9.50],[3000, 11.00],[5000, 12.50],[7000, 15.50],[10000, 18.50],[15000, 22.00],[20000, 27.00],[30000, 33.00]],
-  'autre':    null
+  'Belgique':   [[1000, 4.80],[2000, 5.20],[3000, 5.85],[5000, 6.45],[7000, 7.50],[10000, 8.50],[15000, 10.50],[20000, 13.50],[30000, 17.00]],
+  'France':     [[1000, 5.70],[2000, 6.30],[3000, 7.20],[5000, 8.20],[7000, 9.50],[10000, 11.50],[15000, 14.00],[20000, 18.00],[30000, 23.00]],
+  'Luxembourg': [[1000, 4.80],[2000, 5.20],[3000, 5.85],[5000, 6.45],[7000, 7.50],[10000, 8.50],[15000, 10.50],[20000, 13.50],[30000, 17.00]],
+  'Pays-Bas':   [[1000, 5.20],[2000, 5.80],[3000, 6.50],[5000, 7.20],[7000, 8.50],[10000, 10.00],[15000, 12.50],[20000, 15.50],[30000, 19.50]],
+  'Allemagne':  [[1000, 5.70],[2000, 6.30],[3000, 7.20],[5000, 8.20],[7000, 9.50],[10000, 11.50],[15000, 14.00],[20000, 18.00],[30000, 23.00]],
+  'Autriche':   [[1000, 8.00],[2000, 9.50],[3000, 11.00],[5000, 12.50],[7000, 15.50],[10000, 18.50],[15000, 22.00],[20000, 27.00],[30000, 33.00]],
+  'Italie':     [[1000, 8.00],[2000, 9.50],[3000, 11.00],[5000, 12.50],[7000, 15.50],[10000, 18.50],[15000, 22.00],[20000, 27.00],[30000, 33.00]],
+  'Espagne':    [[1000, 8.00],[2000, 9.50],[3000, 11.00],[5000, 12.50],[7000, 15.50],[10000, 18.50],[15000, 22.00],[20000, 27.00],[30000, 33.00]],
+  'Portugal':   [[1000, 8.00],[2000, 9.50],[3000, 11.00],[5000, 12.50],[7000, 15.50],[10000, 18.50],[15000, 22.00],[20000, 27.00],[30000, 33.00]],
+  // MR ne livre pas hors couverture EU restreinte : Royaume-Uni, Suisse, Canada, DOM-TOM, autres → null = "Nous consulter"
+  'autre':            null
 };
 
-// Bpost — bpack national (BE) + bpack Europe (FR/IT/ES) avec track & trace
+// Bpost — bpack national (BE) + bpack Europe/World avec track & trace
 var BPOST_RATES = {
-  'Belgique': [[2000, 9.25],[10000, 12.38],[30000, 15.50]],
-  'France':   [[2000, 16.50],[5000, 22.00],[10000, 32.00],[30000, 52.00]],
-  'Italie':   [[2000, 17.50],[5000, 24.00],[10000, 35.00],[30000, 55.00]],
-  'Espagne':  [[2000, 17.50],[5000, 24.00],[10000, 35.00],[30000, 55.00]],
-  'autre':    null
+  'Belgique':         [[2000, 9.25],[10000, 12.38],[30000, 15.50]],
+  // Zone 1 Europe (proche)
+  'Luxembourg':       [[2000, 14.00],[5000, 19.00],[10000, 28.00],[30000, 45.00]],
+  'Pays-Bas':         [[2000, 14.00],[5000, 19.00],[10000, 28.00],[30000, 45.00]],
+  // Zone 2 Europe
+  'France':           [[2000, 16.50],[5000, 22.00],[10000, 32.00],[30000, 52.00]],
+  'Allemagne':        [[2000, 16.50],[5000, 22.00],[10000, 32.00],[30000, 52.00]],
+  'Autriche':         [[2000, 16.50],[5000, 22.00],[10000, 32.00],[30000, 52.00]],
+  // Zone 3 Europe
+  'Italie':           [[2000, 17.50],[5000, 24.00],[10000, 35.00],[30000, 55.00]],
+  'Espagne':          [[2000, 17.50],[5000, 24.00],[10000, 35.00],[30000, 55.00]],
+  'Portugal':         [[2000, 17.50],[5000, 24.00],[10000, 35.00],[30000, 55.00]],
+  'Royaume-Uni':      [[2000, 18.00],[5000, 25.00],[10000, 36.00],[30000, 60.00]],
+  'Autres pays UE':   [[2000, 18.00],[5000, 25.00],[10000, 36.00],[30000, 58.00]],
+  // Europe hors UE
+  'Suisse':           [[2000, 22.00],[5000, 30.00],[10000, 45.00],[30000, 80.00]],
+  // World (max 10kg pour ces destinations)
+  'Canada':           [[2000, 28.00],[5000, 48.00],[10000, 78.00]],
+  'DOM-TOM':          [[2000, 28.00],[5000, 45.00],[10000, 65.00]],
+  'autre':            null
 };
 
 function getRateFromTiers(tiers, weightG) {
