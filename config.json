@@ -23,6 +23,9 @@
   "exclude_playlists": [
     "Apprendre l'Hébreu biblique"
   ],
+  "exclude_videos": [
+    "W_ba-3tRjSA"
+  ],
   "playlist_metadata": {
     "REMPLACER_PAR_ID_PHEDRE": {
       "authors": [

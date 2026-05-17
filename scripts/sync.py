@@ -258,6 +258,7 @@ def main():
 
     channel_id      = config["channel_id"]
     exclude_titles  = set(config.get("exclude_playlists", []))
+    exclude_videos  = set(config.get("exclude_videos", []))
     pl_meta_map     = config.get("playlist_metadata", {})
 
     # ── Découverte automatique des playlists ──
@@ -284,6 +285,10 @@ def main():
             if vid["id"] in seen_ids:
                 print(f"  ✓  {vid['title'][:55]}")
                 continue
+            if vid["id"] in exclude_videos:
+                print(f"  🚫  [exclu] {vid['title'][:55]}")
+                seen_ids.add(vid["id"])  # marquer comme vu pour ignorer aussi en orpheline
+                continue
 
             print(f"  ⬇  {vid['title'][:55]}")
             ep = process_video(vid["id"], pl_title, pl_slug, pl_meta)
@@ -300,7 +305,7 @@ def main():
     # ── Orphelines : vidéos uploadées sur la chaîne mais dans aucune playlist thématique ──
     print(f"\n🔎 Scan vidéos orphelines (uploads sans playlist thématique)…")
     all_uploads = uploads_videos(channel_id)
-    orphans = [v for v in all_uploads if v["id"] not in seen_ids]
+    orphans = [v for v in all_uploads if v["id"] not in seen_ids and v["id"] not in exclude_videos]
 
     if orphans:
         orphans_meta = {}
