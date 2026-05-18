@@ -432,7 +432,6 @@ function buildClientEmailHtml(d, mrLabel) {
   }
 
   // Message selon mode paiement
-  const total = ((d["commande-details"] || "").match(/TOTAL:\s*(\d+)\s*€/) || [])[1] || "—";
   const ref = `ARCA ${(d.nom || "").trim()}`.substring(0, 35);
   const paymentMsg = isPaid
     ? `<p style="margin:0;font:15px/1.7 Georgia;color:#444;">Votre paiement <strong style="color:#2d3461;">${providerLabel}</strong> a bien été enregistré. Nous préparons votre commande.</p>`
