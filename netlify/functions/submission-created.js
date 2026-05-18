@@ -47,8 +47,8 @@ exports.handler = async function(event) {
     const html = buildEmailHtml(d, mrLabel);
     const text = buildEmailText(d, mrLabel);
     const totalLine = d["commande-details"] || "";
-    const totalMatch = totalLine.match(/TOTAL:\s*(\d+)/);
-    const totalEUR = totalMatch ? totalMatch[1] + " €" : "—";
+    const totalMatch = totalLine.match(/TOTAL:\s*(\d+(?:[.,]\d+)?)/);
+    const totalEUR = totalMatch ? totalMatch[1].replace(',', '.') + " €" : "—";
     const isPaid = (d["paypal-status"] || "").startsWith("PAID");
     const subjectPrefix = isPaid ? "✓ PAYÉ" : "⏳ À traiter";
     const subject = `${subjectPrefix} · Commande ARCA · ${totalEUR} · ${d.nom || "Sans nom"}`;
@@ -155,11 +155,13 @@ async function persistOrder(d, mrLabel) {
     if (q > 0) items.push({ num: i, title: CATALOG[i].title, qty: q, price: CATALOG[i].price });
   }
 
-  // Parsing du commande-details (TOTAL, Port, Pack)
+  // Parsing du commande-details (TOTAL, Port, Pack) — tolère décimales (3.9 ou 3,9)
   const details = d["commande-details"] || "";
-  const totalMatch = details.match(/TOTAL:\s*(\d+)/);
-  const portMatch = details.match(/Port:\s*(\d+)/);
-  const packMatch = details.match(/Pack complet -(\d+)/);
+  const num = '(\\d+(?:[.,]\\d+)?)';
+  const totalMatch = details.match(new RegExp('TOTAL:\\s*' + num));
+  const portMatch = details.match(new RegExp('Port:\\s*' + num));
+  const packMatch = details.match(new RegExp('Pack complet -' + num));
+  const parseN = m => m ? parseFloat(m[1].replace(',', '.')) : null;
 
   const paypalStatus = d["paypal-status"] || "";
   const isPaid = paypalStatus.startsWith("PAID");
@@ -177,9 +179,9 @@ async function persistOrder(d, mrLabel) {
     ville:      d.ville || null,
     pays:       d.pays || null,
     items:      items,
-    total_eur:  totalMatch ? parseFloat(totalMatch[1]) : null,
-    port_eur:   portMatch ? parseFloat(portMatch[1]) : null,
-    pack_discount_eur: packMatch ? parseFloat(packMatch[1]) : 0,
+    total_eur:  parseN(totalMatch),
+    port_eur:   parseN(portMatch),
+    pack_discount_eur: parseN(packMatch) || 0,
     livraison:     d.livraison || null,
     mr_relay_code: d["mr-relay-code"] || null,
     mr_relay_info: d["mr-relay-info"] || null,
@@ -258,12 +260,13 @@ function buildEmailHtml(d, mrLabel) {
   // Détails (sous-total / port / total)
   const details = d["commande-details"] || "";
   let sousTotal = "—", port = "—", total = "—";
-  const subMatch = details.match(/Sous-total revues:\s*(\d+)\s*€/);
-  const portMatch = details.match(/Port:\s*(\d+)\s*€/);
-  const totMatch = details.match(/TOTAL:\s*(\d+)\s*€/);
-  if (subMatch) sousTotal = subMatch[1] + " €";
-  if (portMatch) port = portMatch[1] + " €";
-  if (totMatch) total = totMatch[1] + " €";
+  // Regex tolérantes : capture décimales (3.9 ou 3,9)
+  const subMatch = details.match(/Sous-total revues:\s*(\d+(?:[.,]\d+)?)\s*€/);
+  const portMatch = details.match(/Port:\s*(\d+(?:[.,]\d+)?)\s*€/);
+  const totMatch = details.match(/TOTAL:\s*(\d+(?:[.,]\d+)?)\s*€/);
+  if (subMatch) sousTotal = subMatch[1].replace(',', '.') + " €";
+  if (portMatch) port = portMatch[1].replace(',', '.') + " €";
+  if (totMatch) total = totMatch[1].replace(',', '.') + " €";
 
   // Statut paiement
   const paypalStatus = d["paypal-status"] || "";

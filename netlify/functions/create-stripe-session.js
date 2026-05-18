@@ -79,13 +79,14 @@ exports.handler = async function(event) {
     if (idx === 0) return { statusCode: 400, body: 'Aucun article dans la commande' };
 
     // Frais de port en line item si > 0 (extrait de commande-details)
-    const portMatch = (d['commande-details'] || '').match(/Port:\s*(\d+)\s*€/);
-    const portEUR = portMatch ? parseInt(portMatch[1], 10) : 0;
+    // Regex tolérante : capture décimales (Port: 3.9 €) et virgule (Port: 3,9 €)
+    const portMatch = (d['commande-details'] || '').match(/Port:\s*(\d+(?:[.,]\d+)?)\s*€/);
+    const portEUR = portMatch ? parseFloat(portMatch[1].replace(',', '.')) : 0;
     if (portEUR > 0) {
       const portLabel = d.livraison ? `Livraison · ${d.livraison}` : 'Frais de port';
       params.append(`line_items[${idx}][price_data][currency]`, 'eur');
       params.append(`line_items[${idx}][price_data][product_data][name]`, portLabel);
-      params.append(`line_items[${idx}][price_data][unit_amount]`, String(portEUR * 100));
+      params.append(`line_items[${idx}][price_data][unit_amount]`, String(Math.round(portEUR * 100)));
       params.append(`line_items[${idx}][quantity]`, '1');
     }
 
