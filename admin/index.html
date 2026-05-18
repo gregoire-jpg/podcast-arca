@@ -820,6 +820,8 @@
 .cmd-act.reopen:hover { background:#c8a060; color:#fff; }
 .cmd-act.bpost { border-color:#E5002C; color:#E5002C; }
 .cmd-act.bpost:hover { background:#E5002C; color:#fff; }
+.cmd-act.print { border-color:#1e2245; color:#1e2245; background:#fffbf2; }
+.cmd-act.print:hover { background:#1e2245; color:#fff; }
 .cmd-detail { background:#faf8f3; border-left:3px solid var(--gold); padding:14px 18px; font:.85em/1.5 Georgia; }
 .cmd-detail strong { color:var(--navy); }
 </style>
@@ -3229,13 +3231,21 @@ CMD.render = function() {
         + '<button class="cmd-act" onclick="CMD.toggleDetail(' + o.id + ')">' + (CMD.expanded[o.id] ? 'Masquer' : 'Voir') + '</button>'
         + (function(){
             if (o.cloturee) return '';
-            if (o.livraison !== 'Poste avec suivi') return '';
-            if (o.bpost_pushed_at) {
-              return o.bpost_label_url
-                ? '<a href="' + CMD.esc(o.bpost_label_url) + '" target="_blank" class="cmd-badge paid">📄 Étiquette PDF</a>'
-                : '<span class="cmd-badge paid">✓ Bpost</span>';
+            // Bpost (Poste avec suivi)
+            if (o.livraison === 'Poste avec suivi') {
+              if (!o.bpost_pushed_at) {
+                return '<button class="cmd-act bpost" onclick="CMD.pushBpost(' + o.id + ')">📦 Envoyer à Bpost</button>';
+              }
+              if (o.bpost_label_url) {
+                return '<button class="cmd-act print" onclick="CMD.printLabel(' + JSON.stringify(o.bpost_label_url) + ')">🖨️ Imprimer étiquette</button>';
+              }
+              return '<span class="cmd-badge paid">✓ Bpost (PDF en cours)</span>';
             }
-            return '<button class="cmd-act bpost" onclick="CMD.pushBpost(' + o.id + ')">📦 Envoyer à Bpost</button>';
+            // Mondial Relay (étiquette générée par mr-label.js)
+            if (o.livraison === 'Mondial Relay' && o.mr_label_url) {
+              return '<button class="cmd-act print" onclick="CMD.printLabel(' + JSON.stringify(o.mr_label_url) + ')">🖨️ Imprimer étiquette</button>';
+            }
+            return '';
           })()
         + '<button class="cmd-act ' + (o.cloturee ? 'reopen' : 'close') + '" onclick="CMD.toggleClose(' + o.id + ')">' + (o.cloturee ? 'Rouvrir' : 'Clôturer') + '</button>'
       + '</td>'
@@ -3287,6 +3297,15 @@ CMD.toggleDetail = function(id) {
   CMD.render();
 };
 
+// Ouvre l'étiquette PDF dans un nouvel onglet (et tente d'ouvrir le dialog d'impression)
+CMD.printLabel = function(url) {
+  if (!url) { alert('Étiquette pas encore disponible.'); return; }
+  var w = window.open(url, '_blank');
+  if (!w) { alert('Pop-up bloqué — autorise les pop-ups pour podcast-arca.netlify.app puis réessaye.'); return; }
+  // Tentative d'auto-print après chargement (peut être bloqué pour PDF cross-origin — le viewer PDF natif a son propre bouton Imprimer)
+  try { w.addEventListener('load', function(){ try { w.print(); } catch(e){} }); } catch(e){}
+};
+
 CMD.pushBpost = function(id) {
   if (!confirm('Envoyer cette commande à Bpost Shipping Manager ?')) return;
   var btn = event.target;
@@ -3298,7 +3317,12 @@ CMD.pushBpost = function(id) {
   })
   .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
   .then(function(d) {
-    alert('✓ Commande envoyée à Bpost\nRéf: ' + d.bpost_reference + (d.bpost_label_url ? '\nÉtiquette PDF générée' : ''));
+    if (d.bpost_label_url) {
+      // Ouvre direct le PDF dans un nouvel onglet pour impression
+      CMD.printLabel(d.bpost_label_url);
+    } else {
+      alert('✓ Commande envoyée à Bpost\nRéf: ' + d.bpost_reference + '\n(Étiquette PDF pas encore disponible, recharge dans 30s)');
+    }
     CMD.load();   // reload pour afficher le nouvel état
   })
   .catch(function(e) {

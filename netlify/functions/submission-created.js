@@ -184,6 +184,7 @@ async function persistOrder(d, mrLabel) {
     mr_relay_code: d["mr-relay-code"] || null,
     mr_relay_info: d["mr-relay-info"] || null,
     mr_expedition: (mrLabel && mrLabel.success && mrLabel.expedition) ? mrLabel.expedition : null,
+    mr_label_url:  (mrLabel && mrLabel.success && (mrLabel.url_pdf || mrLabel.url_a6)) ? (mrLabel.url_pdf || mrLabel.url_a6) : null,
     paiement:   isStripe ? "Stripe" : (d.paiement || "PayPal"),
     paye:       isPaid,
     paid_at:    isPaid ? new Date().toISOString() : null,
