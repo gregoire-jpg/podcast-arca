@@ -825,6 +825,13 @@
 .cmd-act.print:hover { background:#1e2245; color:#fff; }
 .cmd-detail { background:#faf8f3; border-left:3px solid var(--gold); padding:14px 18px; font:.85em/1.5 Georgia; }
 .cmd-detail strong { color:var(--navy); }
+.cmd-summary { background:#fff; border:1px solid var(--border); border-radius:6px; padding:14px 18px; margin-bottom:18px; box-shadow:0 1px 4px rgba(0,0,0,.05); }
+.cmd-summary-title { font:bold .82em/1 Arial; letter-spacing:1.5px; text-transform:uppercase; color:var(--navy); margin-bottom:10px; }
+.cmd-summary-table { width:100%; border-collapse:collapse; font:.86em/1.3 Arial; }
+.cmd-summary-table th { background:transparent; color:var(--muted); padding:6px 10px; text-align:left; font:.7em/1 Arial; letter-spacing:1.2px; text-transform:uppercase; border-bottom:1px solid var(--border); }
+.cmd-summary-table th:nth-child(n+2) { text-align:center; }
+.cmd-summary-table td { padding:6px 10px; border-bottom:1px solid #f0ede8; }
+.cmd-summary-table tfoot td { border-top:2px solid var(--navy); border-bottom:none; padding-top:8px; font-size:.95em; }
 </style>
 
 <!-- Modale pensée -->
@@ -3214,12 +3221,15 @@ CMD.render = function() {
   var todoCount = CMD.orders.filter(function(o){ return !o.cloturee; }).length;
   document.getElementById('cmd-counter').textContent = todoCount + ' à traiter · ' + CMD.orders.length + ' total';
 
+  // Récap par numéro (toujours visible — basé sur TOUTES les commandes, pas filtré)
+  var summary = CMD.summaryHtml();
+
   if (!list.length) {
-    document.getElementById('cmd-list').innerHTML = '<div class="empty">Aucune commande dans cette catégorie.</div>';
+    document.getElementById('cmd-list').innerHTML = summary + '<div class="empty">Aucune commande dans cette catégorie.</div>';
     return;
   }
 
-  var html = '<table class="cmd-table">';
+  var html = summary + '<table class="cmd-table">';
   html += '<thead><tr><th>Date</th><th>Client</th><th>Items</th><th>Total</th><th>Pays</th><th>Livraison</th><th>Statut</th><th style="text-align:right">Actions</th></tr></thead><tbody>';
   list.forEach(function(o) {
     var date = new Date(o.created_at).toLocaleString('fr', { dateStyle:'short', timeStyle:'short' });
@@ -3298,6 +3308,49 @@ CMD.detailHtml = function(o) {
         + '<p><strong>Paiement</strong> : ' + CMD.esc(o.paiement || '—') + (o.paye ? ' <span class="cmd-badge paid">PAYÉ</span>' : ' <span class="cmd-badge pending">EN ATTENTE</span>') + '</p>'
         + (paymentRef ? '<p style="font:.85em/1.3 Arial;color:var(--muted)">' + paymentRef + '</p>' : '')
       + '</div>'
+    + '</div>';
+};
+
+// Récapitulatif par numéro (à expédier vs déjà clôturées vs total)
+CMD.summaryHtml = function() {
+  var titles = { 1:'N°1', 2:'N°2', 3:'N°3', 4:'N°4', 5:'N°5', 6:'N°6', 7:'N°7', 8:'N°8', 9:'Recueil' };
+  var toShip = {}, shipped = {}, total = {};
+  for (var i = 1; i <= 9; i++) { toShip[i] = 0; shipped[i] = 0; total[i] = 0; }
+  CMD.orders.forEach(function(o) {
+    (o.items || []).forEach(function(it) {
+      var n = it.num, q = it.qty || 0;
+      if (!n || q <= 0) return;
+      total[n] += q;
+      if (o.cloturee) shipped[n] += q;
+      else toShip[n] += q;
+    });
+  });
+  var totalShip = 0, totalDone = 0, totalAll = 0;
+  for (var k = 1; k <= 9; k++) { totalShip += toShip[k]; totalDone += shipped[k]; totalAll += total[k]; }
+
+  var rows = '';
+  for (var i = 1; i <= 9; i++) {
+    var hl = toShip[i] > 0 ? ' style="background:#fffbf2"' : '';
+    rows += '<tr' + hl + '>'
+      + '<td><strong>' + titles[i] + '</strong></td>'
+      + '<td style="text-align:center;color:' + (toShip[i]>0?'#c8a060':'#999') + ';font-weight:' + (toShip[i]>0?'bold':'normal') + '">' + toShip[i] + '</td>'
+      + '<td style="text-align:center;color:#999">' + shipped[i] + '</td>'
+      + '<td style="text-align:center;color:var(--navy);font-weight:bold">' + total[i] + '</td>'
+      + '</tr>';
+  }
+  return ''
+    + '<div class="cmd-summary">'
+      + '<div class="cmd-summary-title">📚 Récapitulatif par numéro</div>'
+      + '<table class="cmd-summary-table">'
+        + '<thead><tr><th>Numéro</th><th>À expédier</th><th>Clôturées</th><th>Total commandé</th></tr></thead>'
+        + '<tbody>' + rows + '</tbody>'
+        + '<tfoot><tr>'
+          + '<td><strong>TOTAL exemplaires</strong></td>'
+          + '<td style="text-align:center;color:#c8a060;font-weight:bold">' + totalShip + '</td>'
+          + '<td style="text-align:center;color:#999">' + totalDone + '</td>'
+          + '<td style="text-align:center;color:var(--navy);font-weight:bold">' + totalAll + '</td>'
+        + '</tr></tfoot>'
+      + '</table>'
     + '</div>';
 };
 
