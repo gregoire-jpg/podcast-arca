@@ -191,14 +191,12 @@ async function persistOrder(d, mrLabel) {
     notes:      null
   };
 
-  const resp = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
+  const resp = await fetch(`${SUPABASE_URL}/rest/v1/arca_orders`, {
     method: "POST",
     headers: {
       "apikey": SUPABASE_KEY,
       "Authorization": "Bearer " + SUPABASE_KEY,
       "Content-Type": "application/json",
-      "Accept-Profile": "arca",
-      "Content-Profile": "arca",
       "Prefer": "return=minimal,resolution=ignore-duplicates"  // ignore si stripe_session_id existe deja
     },
     body: JSON.stringify(row)
