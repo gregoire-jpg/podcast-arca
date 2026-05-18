@@ -115,12 +115,101 @@ exports.handler = async function(event) {
       }
     }
 
+    // ─── Persistance Supabase (table arca.orders) ───
+    // Échec ici ne bloque pas la réponse (emails déjà partis)
+    try {
+      await persistOrder(d, mrLabel);
+    } catch (e) {
+      console.error("Supabase persist error:", e.message);
+    }
+
     return { statusCode: 200, body: "Email sent" };
   } catch (err) {
     console.error("Function error:", err);
     return { statusCode: 500, body: "Error: " + err.message };
   }
 };
+
+// ─────────────────────────────────────────────────────────────
+// Persistance dans Supabase (schéma arca, table orders)
+// ─────────────────────────────────────────────────────────────
+async function persistOrder(d, mrLabel) {
+  const SUPABASE_URL = process.env.SUPABASE_URL;
+  const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    console.warn("Supabase env vars missing, skipping persistence.");
+    return;
+  }
+
+  // Items : extrait depuis qty-n1..qty-n9
+  const CATALOG = {
+    1: { title: 'N°1', price: 20 }, 2: { title: 'N°2', price: 20 },
+    3: { title: 'N°3', price: 20 }, 4: { title: 'N°4', price: 20 },
+    5: { title: 'N°5', price: 20 }, 6: { title: 'N°6', price: 20 },
+    7: { title: 'N°7', price: 20 }, 8: { title: 'N°8', price: 15 },
+    9: { title: 'Recueil de prières', price: 20 }
+  };
+  const items = [];
+  for (let i = 1; i <= 9; i++) {
+    const q = parseInt(d["qty-n" + i] || "0", 10);
+    if (q > 0) items.push({ num: i, title: CATALOG[i].title, qty: q, price: CATALOG[i].price });
+  }
+
+  // Parsing du commande-details (TOTAL, Port, Pack)
+  const details = d["commande-details"] || "";
+  const totalMatch = details.match(/TOTAL:\s*(\d+)/);
+  const portMatch = details.match(/Port:\s*(\d+)/);
+  const packMatch = details.match(/Pack complet -(\d+)/);
+
+  const paypalStatus = d["paypal-status"] || "";
+  const isPaid = paypalStatus.startsWith("PAID");
+  const isStripe = /stripe/i.test(paypalStatus) || /carte|bancontact/i.test(d.paiement || "");
+
+  const row = {
+    stripe_session_id: isStripe ? (d["paypal-order-id"] || null) : null,
+    paypal_order_id:   !isStripe ? (d["paypal-order-id"] || null) : null,
+    nom:       d.nom || "—",
+    email:     d.email || null,
+    telephone: d.telephone || null,
+    rue:        d.rue || null,
+    complement: d.complement || null,
+    cp:         d.cp || null,
+    ville:      d.ville || null,
+    pays:       d.pays || null,
+    items:      items,
+    total_eur:  totalMatch ? parseFloat(totalMatch[1]) : null,
+    port_eur:   portMatch ? parseFloat(portMatch[1]) : null,
+    pack_discount_eur: packMatch ? parseFloat(packMatch[1]) : 0,
+    livraison:     d.livraison || null,
+    mr_relay_code: d["mr-relay-code"] || null,
+    mr_relay_info: d["mr-relay-info"] || null,
+    mr_expedition: (mrLabel && mrLabel.success && mrLabel.expedition) ? mrLabel.expedition : null,
+    paiement:   isStripe ? "Stripe" : (d.paiement || "PayPal"),
+    paye:       isPaid,
+    paid_at:    isPaid ? new Date().toISOString() : null,
+    cloturee:   false,
+    notes:      null
+  };
+
+  const resp = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + SUPABASE_KEY,
+      "Content-Type": "application/json",
+      "Accept-Profile": "arca",
+      "Content-Profile": "arca",
+      "Prefer": "return=minimal,resolution=ignore-duplicates"  // ignore si stripe_session_id existe deja
+    },
+    body: JSON.stringify(row)
+  });
+
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error(`Supabase POST ${resp.status}: ${err.substring(0, 200)}`);
+  }
+  console.log("[Supabase] Commande persistée:", d.nom, "/", d.email);
+}
 
 // ─────────────────────────────────────────────────────────────
 // Génération du HTML stylisé ARCA
