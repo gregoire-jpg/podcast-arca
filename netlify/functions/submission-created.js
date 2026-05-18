@@ -191,7 +191,17 @@ async function persistOrder(d, mrLabel) {
     paye:       isPaid,
     paid_at:    isPaid ? new Date().toISOString() : null,
     cloturee:   false,
-    notes:      null
+    notes:      null,
+    // Société (B2B)
+    is_company:                d["is-company"] === "1" || d["is-company"] === true,
+    company_name:              d["company-name"] || null,
+    company_vat:               d["company-vat"] || null,
+    billing_same_as_delivery:  (d["billing-same"] === "1" || d["billing-same"] === true || !d["is-company"]),
+    billing_rue:               d["billing-rue"] || null,
+    billing_complement:        d["billing-complement"] || null,
+    billing_cp:                d["billing-cp"] || null,
+    billing_ville:             d["billing-ville"] || null,
+    billing_pays:              d["billing-pays"] || null
   };
 
   const resp = await fetch(`${SUPABASE_URL}/rest/v1/arca_orders`, {
@@ -372,6 +382,16 @@ function buildEmailHtml(d, mrLabel) {
     <p style="margin:0 0 4px;font:14px Georgia;color:#444;"><a href="mailto:${esc(d.email || "")}" style="color:#c8a060;text-decoration:none;">${esc(d.email || "—")}</a>${d.telephone ? ' · ' + esc(d.telephone) : ""}</p>
     <p style="margin:10px 0 0;font:14px/1.5 Georgia;color:#444;white-space:pre-line;">${esc(d.adresse || "—")}</p>
     <p style="margin:4px 0 0;font:13px Georgia;color:#777;">${esc(d.pays || "—")}</p>
+    ${d["is-company"] === "1" ? `
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px;background:#fffbf4;border:1px solid #c8a060;border-radius:5px;">
+      <tr><td style="padding:14px 18px;">
+        <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#c8a060;font-weight:bold;">🏢 Facturation société</p>
+        <p style="margin:0 0 3px;font:14px Georgia;color:#2d3461;"><strong>${esc(d["company-name"] || "—")}</strong></p>
+        <p style="margin:0 0 6px;font:13px 'Courier New',monospace;color:#444;">TVA : ${esc(d["company-vat"] || "—")}</p>
+        ${d["billing-same"] === "1" ? `<p style="margin:0;font:12px Georgia;color:#777;font-style:italic;">Adresse de facturation = adresse de livraison</p>`
+        : `<p style="margin:6px 0 0;font:13px/1.5 Georgia;color:#444;white-space:pre-line;">Adresse de facturation :<br>${esc(d["billing-rue"] || "")} ${esc(d["billing-complement"] || "")}<br>${esc(d["billing-cp"] || "")} ${esc(d["billing-ville"] || "")} · ${esc(d["billing-pays"] || "")}</p>`}
+      </td></tr>
+    </table>` : ""}
   </td></tr>
 
   <!-- POINT RELAIS MONDIAL RELAY -->
@@ -422,7 +442,7 @@ function buildEmailHtml(d, mrLabel) {
     <p style="margin:6px 0 0;font:13px Georgia;color:#3a8a4a;"><strong>${esc(paypalStatus)}</strong></p>
     <p style="margin:4px 0 0;font:12px 'Courier New',monospace;color:#777;">ID transaction : ${esc(paypalId)}</p>
     ` : `
-    <p style="margin:6px 0 0;font:13px Georgia;color:#c8a060;font-style:italic;">À envoyer : RIB pour virement bancaire.</p>
+    <p style="margin:6px 0 0;font:13px Georgia;color:#777;font-style:italic;">✓ Le client a reçu le RIB par e-mail.</p>
     `}
   </td></tr>
 
@@ -574,6 +594,16 @@ function buildClientEmailHtml(d, mrLabel) {
       <tr><td style="padding:8px 0;font:bold 16px Georgia;color:#2d3461;">Total ${isMondialRelay ? "(livraison incluse)" : ""}</td>
           <td style="padding:8px 0;font:bold 18px Georgia;color:#2d3461;text-align:right;">${esc(total)} €</td></tr>
     </table>
+    ${d["is-company"] === "1" ? `
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:18px;background:#faf8f3;border-left:3px solid #c8a060;border-radius:0 4px 4px 0;">
+      <tr><td style="padding:14px 18px;">
+        <p style="margin:0 0 4px;font:10px Arial;letter-spacing:2px;text-transform:uppercase;color:#c8a060;font-weight:bold;">🏢 Facturation société</p>
+        <p style="margin:0 0 3px;font:14px Georgia;color:#2d3461;"><strong>${esc(d["company-name"] || "")}</strong></p>
+        <p style="margin:0;font:13px 'Courier New',monospace;color:#444;">N° TVA : ${esc(d["company-vat"] || "")}</p>
+        ${d["billing-same"] !== "1" ? `<p style="margin:8px 0 0;font:13px/1.5 Georgia;color:#444;">Adresse de facturation :<br>${esc(d["billing-rue"] || "")} ${esc(d["billing-complement"] || "")}<br>${esc(d["billing-cp"] || "")} ${esc(d["billing-ville"] || "")} · ${esc(d["billing-pays"] || "")}</p>` : ""}
+        <p style="margin:8px 0 0;font:12px Georgia;color:#777;font-style:italic;">Une facture détaillée vous sera adressée séparément.</p>
+      </td></tr>
+    </table>` : ""}
   </td></tr>
 
   <!-- LIVRAISON -->

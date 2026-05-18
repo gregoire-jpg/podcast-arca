@@ -163,6 +163,15 @@ button, input, select, textarea { font-family: inherit; }
 /* Code postal compact uniquement sur desktop (sur mobile il prend toute la largeur) */
 @media (min-width: 601px) { .row-cp { max-width: 140px; } }
 
+/* Bloc société (optionnel) */
+.company-toggle { margin: 22px 0 14px; padding: 12px 16px; background: #faf8f5; border: 1px solid var(--border); border-radius: 5px; }
+.company-toggle-label { display: flex; align-items: center; gap: 10px; cursor: pointer; font: 14.5px/1.4 Georgia; color: var(--navy); }
+.company-toggle-label input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--gold); cursor: pointer; flex-shrink: 0; }
+.company-block { margin: 8px 0 10px; padding: 18px 18px 6px; background: #fffbf4; border: 1px solid var(--gold); border-radius: 5px; animation: alertPop .2s ease-out; }
+.company-block[hidden] { display: none; }
+.billing-address { margin-top: 10px; padding-top: 14px; border-top: 1px dashed var(--border); }
+.billing-address[hidden] { display: none; }
+
 /* Shipping options */
 .ship-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .ship-opt { border: 2px solid var(--border); border-radius: 5px; padding: 14px 16px; cursor: pointer; transition: border-color .2s, background .2s; }
@@ -624,6 +633,69 @@ button, input, select, textarea { font-family: inherit; }
       </div>
       <!-- Champ "adresse" agrégé automatiquement depuis rue/complément/CP/ville (compat MR + email) -->
       <input type="hidden" id="adresse" name="adresse">
+
+      <!-- ── Société (optionnel) ── -->
+      <div class="company-toggle">
+        <label class="company-toggle-label">
+          <input type="checkbox" id="is-company" name="is-company" value="1">
+          <span>Je commande pour une société (facturation avec n° de TVA)</span>
+        </label>
+      </div>
+
+      <div id="company-block" class="company-block" hidden>
+        <div class="row-grid">
+          <div class="row">
+            <label for="company-name">Nom de la société <span class="req">*</span></label>
+            <input type="text" id="company-name" name="company-name" maxlength="80" autocomplete="organization">
+          </div>
+          <div class="row">
+            <label for="company-vat">N° de TVA <span class="req">*</span></label>
+            <input type="text" id="company-vat" name="company-vat" maxlength="20" placeholder="BE0123456789 ou FR12345678901" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:6px">
+          <label class="company-toggle-label" style="font-size:14px">
+            <input type="checkbox" id="billing-same" name="billing-same" value="1" checked>
+            <span>Adresse de facturation identique à l'adresse de livraison</span>
+          </label>
+        </div>
+
+        <div id="billing-address" class="billing-address" hidden>
+          <div class="row">
+            <label for="billing-rue">Rue et numéro <span class="req">*</span></label>
+            <input type="text" id="billing-rue" name="billing-rue" maxlength="64" placeholder="Adresse de facturation">
+          </div>
+          <div class="row">
+            <label for="billing-complement">Complément (optionnel)</label>
+            <input type="text" id="billing-complement" name="billing-complement" maxlength="32">
+          </div>
+          <div class="row-grid">
+            <div class="row row-cp">
+              <label for="billing-cp">Code postal <span class="req">*</span></label>
+              <input type="text" id="billing-cp" name="billing-cp" maxlength="5" inputmode="numeric" pattern="[0-9]{4,5}">
+            </div>
+            <div class="row">
+              <label for="billing-ville">Ville <span class="req">*</span></label>
+              <input type="text" id="billing-ville" name="billing-ville" maxlength="26">
+            </div>
+          </div>
+          <div class="row">
+            <label for="billing-pays">Pays <span class="req">*</span></label>
+            <select id="billing-pays" name="billing-pays">
+              <option value="">— Choisir —</option>
+              <option value="Belgique">Belgique</option>
+              <option value="France">France</option>
+              <option value="Luxembourg">Luxembourg</option>
+              <option value="Pays-Bas">Pays-Bas</option>
+              <option value="Allemagne">Allemagne</option>
+              <option value="Italie">Italie</option>
+              <option value="Espagne">Espagne</option>
+              <option value="autre">Autre pays</option>
+            </select>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="wizard-nav">
@@ -1442,6 +1514,20 @@ function isOrderReady() {
   if (pays === 'autre' && livraison.value !== 'En main propre') return false;
   // Mondial Relay : il faut avoir choisi un point relais
   if (livraison.value === 'Mondial Relay' && !MR_SELECTED) return false;
+  // Société : si "société" cochée, nom + TVA requis. Si adresse facturation distincte, ses champs requis.
+  var isCompany = document.getElementById('is-company');
+  if (isCompany && isCompany.checked) {
+    if (!document.getElementById('company-name').value.trim()) return false;
+    if (!document.getElementById('company-vat').value.trim()) return false;
+    var sameAddr = document.getElementById('billing-same');
+    if (sameAddr && !sameAddr.checked) {
+      var bRue = document.getElementById('billing-rue').value.trim();
+      var bCp = document.getElementById('billing-cp').value.trim();
+      var bVille = document.getElementById('billing-ville').value.trim();
+      var bPays = document.getElementById('billing-pays').value;
+      if (!bRue || !bCp || !bVille || !bPays) return false;
+    }
+  }
   return true;
 }
 
@@ -1493,6 +1579,38 @@ document.querySelectorAll('input[name="livraison"]').forEach(function(r){
     updateStripeState();
   });
 });
+
+// Toggle bloc société
+(function() {
+  var chkCompany = document.getElementById('is-company');
+  var blockCompany = document.getElementById('company-block');
+  var chkBillingSame = document.getElementById('billing-same');
+  var blockBilling = document.getElementById('billing-address');
+  if (!chkCompany || !blockCompany) return;
+
+  function syncCompany() {
+    blockCompany.hidden = !chkCompany.checked;
+    // Si on décoche société, on remet billing-same à coché (état propre)
+    if (!chkCompany.checked && chkBillingSame) {
+      chkBillingSame.checked = true;
+      if (blockBilling) blockBilling.hidden = true;
+    }
+    updatePayPalState(); updateStripeState();
+  }
+  function syncBilling() {
+    if (blockBilling) blockBilling.hidden = chkBillingSame.checked;
+    updatePayPalState(); updateStripeState();
+  }
+  chkCompany.addEventListener('change', syncCompany);
+  if (chkBillingSame) chkBillingSame.addEventListener('change', syncBilling);
+
+  // Re-validate quand on tape dans les champs société
+  ['company-name','company-vat','billing-rue','billing-complement','billing-cp','billing-ville','billing-pays'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', function(){ updatePayPalState(); updateStripeState(); });
+    if (el) el.addEventListener('change', function(){ updatePayPalState(); updateStripeState(); });
+  });
+})();
 
 // Rendu du bouton PayPal
 if (window.paypal && paypal.Buttons) {

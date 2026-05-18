@@ -93,7 +93,9 @@ exports.handler = async function(event) {
     // Metadata : toutes les données de commande (max 500 chars/value, max 50 keys)
     const META_KEYS = ['nom','email','telephone','rue','complement','cp','ville','pays',
       'livraison','paiement','mr-relay-code','mr-relay-info','commande-details','lien-etiquette',
-      'qty-n1','qty-n2','qty-n3','qty-n4','qty-n5','qty-n6','qty-n7','qty-n8','qty-n9'];
+      'qty-n1','qty-n2','qty-n3','qty-n4','qty-n5','qty-n6','qty-n7','qty-n8','qty-n9',
+      'is-company','company-name','company-vat','billing-same',
+      'billing-rue','billing-complement','billing-cp','billing-ville','billing-pays'];
     META_KEYS.forEach(k => {
       const v = d[k];
       if (v !== undefined && v !== null && v !== '') {
