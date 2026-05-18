@@ -1417,9 +1417,11 @@ function getCurrentTotal() {
   var frais = 0;
   var shipObj2 = getShipping(pays);
   if (livraison && pays && shipObj2) {
-    var mode = livraison.value === 'Mondial Relay' ? 'relay' : 'poste';
+    var mode = livraison.value === 'Mondial Relay' ? 'relay'
+             : livraison.value === 'En main propre' ? 'main'
+             : 'poste';
     var c = shipObj2[mode];
-    if (c !== null) frais = c;
+    if (c !== null && c !== undefined) frais = c;
   }
   return { revues: totalRevues, port: frais, total: totalRevues + frais, qty: totalQty, packDiscount: packDiscount };
 }
