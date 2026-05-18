@@ -700,7 +700,8 @@
         <div style="font:bold .9em/1.3 Arial;color:var(--navy)" id="res-bulk-stats">Chargement…</div>
         <div style="font:.78em/1.4 Arial;color:var(--muted);margin-top:2px">Génère et stocke les images Instagram pour toutes les pensées qui n'en ont pas encore.</div>
       </div>
-      <button class="btn btn-gold" id="res-bulk-go" style="padding:10px 20px">⚡ Générer toutes les images manquantes</button>
+      <button class="btn btn-gold" id="res-bulk-go" style="padding:10px 20px">⚡ Générer images manquantes</button>
+      <button class="btn btn-navy" id="res-bulk-force" style="padding:10px 20px">↻ Tout regénérer</button>
       <button class="btn" id="res-bulk-stop" style="padding:10px 20px;background:var(--white);border:1px solid var(--border);display:none">■ Arrêter</button>
     </div>
     <div id="res-bulk-progress" style="display:none;background:var(--white);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin-bottom:18px">
@@ -2792,7 +2793,8 @@ function resInit() {
   $('res-mode').addEventListener('change', resDessiner);
   $('res-save').addEventListener('click', resSauvegarder);
   $('res-download').addEventListener('click', resTelecharger);
-  $('res-bulk-go').addEventListener('click', resBulkLancer);
+  $('res-bulk-go').addEventListener('click', function() { resBulkLancer(false); });
+  $('res-bulk-force').addEventListener('click', function() { resBulkLancer(true); });
   $('res-bulk-stop').addEventListener('click', function() { RES.bulkStop = true; });
   resChargerFonts().then(function() { resRenderList(); resUpdateBulkStats(); });
 }
@@ -2809,13 +2811,19 @@ function resUpdateBulkStats() {
     : '⚡ Générer toutes les images manquantes (' + sans + ')';
 }
 
-function resBulkLancer() {
-  if (!confirm('Cela va générer et stocker une image pour chaque pensée sans image (≈ 2-3 secondes par pensée). Continuer ?')) return;
-  RES.bulkStop = false;
-  var aFaire = CIT.citations.filter(function(c) { return !c.image_instagram_url; });
+function resBulkLancer(force) {
+  var aFaire = force
+    ? CIT.citations.slice()
+    : CIT.citations.filter(function(c) { return !c.image_instagram_url; });
   if (aFaire.length === 0) return;
+  var msg = force
+    ? 'Cela va REGÉNÉRER les images de ' + aFaire.length + ' pensées (≈ 1 seconde par pensée). Les anciennes seront remplacées. Continuer ?'
+    : 'Cela va générer et stocker une image pour chaque pensée sans image (≈ 1 seconde par pensée). Continuer ?';
+  if (!confirm(msg)) return;
+  RES.bulkStop = false;
 
   $('res-bulk-go').style.display = 'none';
+  $('res-bulk-force').style.display = 'none';
   $('res-bulk-stop').style.display = 'inline-block';
   $('res-bulk-progress').style.display = 'block';
   $('res-bulk-bar').style.width = '0%';
@@ -2826,6 +2834,7 @@ function resBulkLancer() {
   function suivante() {
     if (RES.bulkStop || i >= aFaire.length) {
       $('res-bulk-go').style.display = 'inline-block';
+      $('res-bulk-force').style.display = 'inline-block';
       $('res-bulk-stop').style.display = 'none';
       $('res-bulk-label').textContent = RES.bulkStop ? 'Arrêté' : 'Terminé';
       $('res-bulk-current').textContent = '✓ ' + ok + ' réussies, ' + ko + ' échouées';
