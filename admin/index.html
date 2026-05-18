@@ -818,6 +818,8 @@
 .cmd-act.close:hover { background:#3a8a4a; color:#fff; }
 .cmd-act.reopen { border-color:#c8a060; color:#c8a060; }
 .cmd-act.reopen:hover { background:#c8a060; color:#fff; }
+.cmd-act.bpost { border-color:#E5002C; color:#E5002C; }
+.cmd-act.bpost:hover { background:#E5002C; color:#fff; }
 .cmd-detail { background:#faf8f3; border-left:3px solid var(--gold); padding:14px 18px; font:.85em/1.5 Georgia; }
 .cmd-detail strong { color:var(--navy); }
 </style>
@@ -3171,9 +3173,7 @@ CMD.headers = function() {
   return {
     'apikey': CMD.service,
     'Authorization': 'Bearer ' + CMD.service,
-    'Content-Type': 'application/json',
-    'Accept-Profile': 'arca',
-    'Content-Profile': 'arca'
+    'Content-Type': 'application/json'
   };
 };
 
@@ -3184,7 +3184,7 @@ CMD.esc = function(s) {
 };
 
 CMD.load = function() {
-  fetch(CMD.url + '/rest/v1/orders?select=*&order=created_at.desc&limit=500', { headers: CMD.headers() })
+  fetch(CMD.url + '/rest/v1/arca_orders?select=*&order=created_at.desc&limit=500', { headers: CMD.headers() })
     .then(function(r) { return r.ok ? r.json() : r.text().then(function(t){ throw new Error(t); }); })
     .then(function(data) { CMD.orders = data; CMD.loaded = true; CMD.render(); })
     .catch(function(e) {
@@ -3227,6 +3227,16 @@ CMD.render = function() {
       + '<td>' + statusBadge + '</td>'
       + '<td style="text-align:right;white-space:nowrap">'
         + '<button class="cmd-act" onclick="CMD.toggleDetail(' + o.id + ')">' + (CMD.expanded[o.id] ? 'Masquer' : 'Voir') + '</button>'
+        + (function(){
+            if (o.cloturee) return '';
+            if (o.livraison !== 'Poste avec suivi') return '';
+            if (o.bpost_pushed_at) {
+              return o.bpost_label_url
+                ? '<a href="' + CMD.esc(o.bpost_label_url) + '" target="_blank" class="cmd-badge paid">📄 Étiquette PDF</a>'
+                : '<span class="cmd-badge paid">✓ Bpost</span>';
+            }
+            return '<button class="cmd-act bpost" onclick="CMD.pushBpost(' + o.id + ')">📦 Envoyer à Bpost</button>';
+          })()
         + '<button class="cmd-act ' + (o.cloturee ? 'reopen' : 'close') + '" onclick="CMD.toggleClose(' + o.id + ')">' + (o.cloturee ? 'Rouvrir' : 'Clôturer') + '</button>'
       + '</td>'
       + '</tr>';
@@ -3277,12 +3287,32 @@ CMD.toggleDetail = function(id) {
   CMD.render();
 };
 
+CMD.pushBpost = function(id) {
+  if (!confirm('Envoyer cette commande à Bpost Shipping Manager ?')) return;
+  var btn = event.target;
+  btn.disabled = true; btn.textContent = '⏳ Envoi...';
+  fetch('/.netlify/functions/bpost-push-shipment', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ order_id: id })
+  })
+  .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
+  .then(function(d) {
+    alert('✓ Commande envoyée à Bpost\nRéf: ' + d.bpost_reference + (d.bpost_label_url ? '\nÉtiquette PDF générée' : ''));
+    CMD.load();   // reload pour afficher le nouvel état
+  })
+  .catch(function(e) {
+    alert('Erreur : ' + e.message);
+    btn.disabled = false; btn.textContent = '📦 Envoyer à Bpost';
+  });
+};
+
 CMD.toggleClose = function(id) {
   var o = CMD.orders.find(function(x){ return x.id === id; });
   if (!o) return;
   var newState = !o.cloturee;
   var body = { cloturee: newState, cloturee_at: newState ? new Date().toISOString() : null };
-  fetch(CMD.url + '/rest/v1/orders?id=eq.' + id, {
+  fetch(CMD.url + '/rest/v1/arca_orders?id=eq.' + id, {
     method: 'PATCH',
     headers: CMD.headers(),
     body: JSON.stringify(body)
