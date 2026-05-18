@@ -21,10 +21,11 @@ const ISO3 = {
   'DOM-TOM': 'FRA', 'Autres pays UE': 'BEL'
 };
 
-// Poids estimé par item : revue ARCA = 600g, recueil = 350g
+// Poids mesurés (pesées réelles 2026-05-18 pour 3/4/5/7; 600g par défaut, 350g recueil)
+const WEIGHTS = { 1:600, 2:600, 3:735, 4:565, 5:506, 6:600, 7:532, 8:600, 9:350 };
 function computeWeightG(items) {
   let g = 0;
-  (items || []).forEach(i => { g += (i.qty || 0) * (i.num === 9 ? 350 : 600); });
+  (items || []).forEach(i => { g += (i.qty || 0) * (WEIGHTS[i.num] || 600); });
   return Math.max(g, 100);
 }
 

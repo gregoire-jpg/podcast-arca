@@ -485,6 +485,10 @@ function buildClientEmailHtml(d, mrLabel) {
   const providerLabel = isStripe ? "par carte bancaire" : "PayPal";
   const isMondialRelay = (d.livraison || "") === "Mondial Relay";
   const total = ((d["commande-details"] || "").match(/TOTAL:\s*(\d+)\s*€/) || [])[1] || "—";
+  const hasN8 = parseInt(d["qty-n8"] || "0", 10) > 0;
+  // Note expédition mi-juin si N°8 commandé pendant la souscription
+  const PROMO_DEADLINE = new Date('2026-05-25T22:00:00Z');
+  const isSubscriptionPeriod = hasN8 && new Date() < PROMO_DEADLINE;
 
   // Lignes commande
   const CAT = {
@@ -574,6 +578,18 @@ function buildClientEmailHtml(d, mrLabel) {
     <p style="margin:0 0 6px;font:11px Arial;letter-spacing:2px;text-transform:uppercase;color:#c8a060;font-weight:bold;">— Livraison —</p>
     <p style="margin:0;font:14px/1.6 Georgia;color:#444;"><strong style="color:#2d3461;">${esc(d.livraison || "—")}</strong>${isMondialRelay && d["mr-relay-info"] ? `<br><span style="font-size:13px;color:#777;">${esc(d["mr-relay-info"])}</span>` : ""}</p>
   </td></tr>
+${isSubscriptionPeriod ? `
+  <!-- NOTICE EXPÉDITION MI-JUIN -->
+  <tr><td style="padding:0 36px 28px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#fffbf2;border-left:4px solid #c8a060;border-radius:0 4px 4px 0;">
+      <tr><td style="padding:18px 22px;">
+        <p style="margin:0 0 8px;font:bold 12px Arial;letter-spacing:1.5px;text-transform:uppercase;color:#c8a060;">📅 Expédition mi-juin</p>
+        <p style="margin:0;font:14px/1.6 Georgia;color:#444;">
+          Le <strong style="color:#2d3461;">n°8 de la revue ARCA</strong> est en cours d'impression. Vos exemplaires partiront <strong>dès réception de l'imprimeur</strong>, vers mi-juin, dans un seul colis avec tous les autres numéros commandés.
+        </p>
+      </td></tr>
+    </table>
+  </td></tr>` : ""}
 
   <!-- FOOTER -->
   <tr><td style="background:#1e2245;padding:22px 36px;text-align:center;">

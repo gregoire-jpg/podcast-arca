@@ -58,8 +58,8 @@ async function createLabel(orderData) {
 
   const dest = parseDest(orderData);
 
-  // Poids total mesurés : 600g par revue ARCA, 350g pour le recueil de prières
-  const WEIGHTS = { 1:600, 2:600, 3:600, 4:600, 5:600, 6:600, 7:600, 8:600, 9:350 };
+  // Poids mesurés (pesées réelles 2026-05-18 pour 3/4/5/7; 600g par défaut sinon, 350g recueil)
+  const WEIGHTS = { 1:600, 2:600, 3:735, 4:565, 5:506, 6:600, 7:532, 8:600, 9:350 };
   let totalWeight = 0;
   for (let i = 1; i <= 9; i++) {
     const q = parseInt(orderData['qty-n' + i] || '0', 10);

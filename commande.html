@@ -74,6 +74,7 @@ button, input, select, textarea { font-family: inherit; }
 .feat-num { font: 600 10px/1 Arial; color: #c8a060; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
 .feat-title { font: normal 22px/1.2 Georgia; color: #fff; margin-bottom: 2px; }
 .feat-sub { font: italic 13px/1.4 Georgia; color: rgba(255,255,255,.7); margin-bottom: 10px; }
+.feat-ship { font: 12px/1.4 Arial; color: #ffd58f; background: rgba(200,160,96,.15); padding: 8px 12px; border-left: 2px solid var(--gold); border-radius: 3px; margin-top: 10px; }
 .feat-price { display: flex; align-items: baseline; gap: 10px; }
 .feat-price .promo { font: bold 28px/1 Georgia; color: #c8a060; }
 .feat-price .old { font: 16px/1 Georgia; color: rgba(255,255,255,.4); text-decoration: line-through; }
@@ -825,14 +826,15 @@ window.addEventListener('DOMContentLoaded', function(){
 var PROMO_DEADLINE = new Date('2026-05-25T22:00:00Z');
 var PROMO_ACTIVE = new Date() < PROMO_DEADLINE;
 
+// Poids mesurés (sources: pesées réelles 2026-05-18 pour 3/4/5/7; estimations 600g pour 1/2/6/8 en attente pesée)
 var ISSUES = [
   { num: 1, title: 'N° 1', price: 20, promo: null, weight: 600, type: 'revue' },
   { num: 2, title: 'N° 2', price: 20, promo: null, weight: 600, type: 'revue' },
-  { num: 3, title: 'N° 3', price: 20, promo: null, weight: 600, type: 'revue' },
-  { num: 4, title: 'N° 4', price: 20, promo: null, weight: 600, type: 'revue' },
-  { num: 5, title: 'N° 5', price: 20, promo: null, weight: 600, type: 'revue' },
+  { num: 3, title: 'N° 3', price: 20, promo: null, weight: 735, type: 'revue' },
+  { num: 4, title: 'N° 4', price: 20, promo: null, weight: 565, type: 'revue' },
+  { num: 5, title: 'N° 5', price: 20, promo: null, weight: 506, type: 'revue' },
   { num: 6, title: 'N° 6', price: 20, promo: null, weight: 600, type: 'revue' },
-  { num: 7, title: 'N° 7', price: 20, promo: null, weight: 600, type: 'revue' },
+  { num: 7, title: 'N° 7', price: 20, promo: null, weight: 532, type: 'revue' },
   { num: 8, title: 'N° 8', price: 20, promo: PROMO_ACTIVE ? 15 : null, weight: 600, type: 'revue', promoLabel: 'Souscription' },
   { num: 9, title: 'Recueil de prières', price: 20, promo: null, weight: 350, type: 'hc', overline: 'Hors collection' }
 ];
@@ -938,6 +940,9 @@ function renderFeatured() {
   var tocLink = SOMMAIRES[8]
     ? '<button type="button" class="feat-toc" onclick="openSommaire(8)">Voir la table des matières →</button>'
     : '';
+  var shipNote = PROMO_ACTIVE
+    ? '<div class="feat-ship">📅 Impression mi-juin · Expédition dès réception, avec vos autres exemplaires commandés</div>'
+    : '';
   box.innerHTML =
     '<div class="issue-featured" data-num="8">' +
       badgeHtml +
@@ -946,6 +951,7 @@ function renderFeatured() {
         '<div class="feat-title">Revue ARCA n°8</div>' +
         '<div class="feat-sub">Lettres, hermétisme, alchimie, traditions spirituelles</div>' +
         '<div class="feat-price">' + priceHtml + '</div>' +
+        shipNote +
         tocLink +
       '</div>' +
       '<div class="feat-right">' +
@@ -1210,7 +1216,15 @@ function updateSummary() {
   var note = (!livraison || !pays || pays === 'autre')
     ? '<p style="font-size:11px;color:rgba(255,255,255,.55);margin-top:8px;font-style:italic;">* Total hors frais de port (à confirmer)</p>' : '';
 
-  sumEl.innerHTML = detailsHtml + fraisHtml + totalHtml + note;
+  // Note expédition mi-juin si N°8 (souscription) dans le panier
+  var n8Note = '';
+  if (PROMO_ACTIVE && (quantities[8] || 0) > 0) {
+    n8Note = '<div style="margin-top:14px;padding:10px 12px;background:rgba(200,160,96,.18);border-left:3px solid var(--gold);border-radius:3px;font:11.5px/1.45 Arial;color:#ffd58f;">'
+           + '📅 <strong style="color:#fff;">Expédition mi-juin</strong> — Le n°8 est en cours d\'impression. Toute votre commande sera expédiée dès réception, dans un seul colis.'
+           + '</div>';
+  }
+
+  sumEl.innerHTML = detailsHtml + fraisHtml + totalHtml + note + n8Note;
   document.getElementById('submit-btn').disabled = false;
   document.getElementById('commande-details').value = detailsText.join(' | ') + ' | Sous-total revues: ' + totalRevues + ' € | Port: ' + frais + ' € | TOTAL: ' + total + ' €';
 
