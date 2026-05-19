@@ -139,11 +139,16 @@ exports.handler = async function(event) {
     }
 
     // ─── Persistance Supabase (table arca.orders) ───
+    // Skippable via `_no_persist: true` (utile pour les commandes manuelles déjà insérées par l'admin)
     // Échec ici ne bloque pas la réponse (emails déjà partis)
-    try {
-      await persistOrder(d, mrLabel);
-    } catch (e) {
-      console.error("Supabase persist error:", e.message);
+    if (!body._no_persist && !d._no_persist) {
+      try {
+        await persistOrder(d, mrLabel);
+      } catch (e) {
+        console.error("Supabase persist error:", e.message);
+      }
+    } else {
+      console.log("[Skip persist] _no_persist flag set");
     }
 
     return { statusCode: 200, body: "Email sent" };

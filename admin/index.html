@@ -892,6 +892,15 @@
         <textarea name="notes" rows="2" style="width:100%;resize:vertical"></textarea>
       </fieldset>
 
+      <!-- Envoi mail -->
+      <fieldset class="cmd-fs" style="margin-top:14px">
+        <legend>Confirmation client</legend>
+        <label style="display:flex;align-items:center;gap:8px;font-size:.92em;margin-top:0">
+          <input type="checkbox" name="send_mail" id="cmd-new-send-mail" checked>
+          ✉ Envoyer le mail de confirmation au client (sur l'email saisi ci-dessus)
+        </label>
+      </fieldset>
+
       <!-- Total + actions -->
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">
         <div style="font:1.05em Georgia;color:var(--navy)">
@@ -960,6 +969,8 @@
 .cmd-act.mr:hover { background:#c1272d; color:#fff; }
 .cmd-act.cancel { border-color:#9d1018; color:#9d1018; }
 .cmd-act.cancel:hover { background:#9d1018; color:#fff; }
+.cmd-act.mail { border-color:#3a8a4a; color:#3a8a4a; padding:6px 9px; }
+.cmd-act.mail:hover { background:#3a8a4a; color:#fff; }
 .cmd-detail { background:#faf8f3; border-left:3px solid var(--gold); padding:14px 18px; font:.85em/1.5 Georgia; }
 .cmd-detail strong { color:var(--navy); }
 .cmd-summary { background:#fff; border:1px solid var(--border); border-radius:6px; padding:14px 18px; margin-bottom:18px; box-shadow:0 1px 4px rgba(0,0,0,.05); }
@@ -3414,6 +3425,7 @@ CMD.render = function() {
             }
             return '';
           })()
+        + (o.cancelled || !o.email ? '' : '<button class="cmd-act mail" onclick="CMD.sendConfirmation(' + o.id + ')" title="Renvoyer la confirmation à ' + CMD.esc(o.email) + '">✉</button>')
         + (o.cancelled ? '' : '<button class="cmd-act ' + (o.cloturee ? 'reopen' : 'close') + '" onclick="CMD.toggleClose(' + o.id + ')">' + (o.cloturee ? 'Rouvrir' : 'Clôturer') + '</button>')
         + (o.cancelled || o.cloturee ? '' : '<button class="cmd-act cancel" onclick="CMD.toggleCancel(' + o.id + ')">✗ Annuler</button>')
       + '</td>'
@@ -3599,6 +3611,25 @@ CMD.toggleClose = function(id) {
   .catch(function(e) { alert('Erreur : ' + e.message); });
 };
 
+// Envoie (ou renvoie) le mail de confirmation au client pour une commande
+// silent=true → pas de prompt de confirmation (utilisé après création manuelle)
+CMD.sendConfirmation = function(id, silent) {
+  var o = CMD.orders.find(function(x){ return x.id === id; });
+  if (!o) return;
+  if (!o.email) { alert('Pas d\'email renseigné sur cette commande, impossible d\'envoyer.'); return; }
+  if (!silent && !confirm('Renvoyer la confirmation à ' + o.email + ' ?')) return;
+  fetch('/.netlify/functions/send-confirmation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ order_id: id })
+  })
+  .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
+  .then(function() {
+    alert('✉ Mail envoyé à ' + o.email);
+  })
+  .catch(function(e) { alert('Erreur : ' + e.message); });
+};
+
 CMD.toggleCancel = function(id) {
   var o = CMD.orders.find(function(x){ return x.id === id; });
   if (!o) return;
@@ -3756,7 +3787,13 @@ CMD.submitCreate = function() {
     if (created && created.id) CMD.orders.unshift(created);
     CMD.closeCreate();
     CMD.render();
-    alert('✓ Commande créée (id #' + (created && created.id || '?') + ').');
+    var sendMail = document.getElementById('cmd-new-send-mail');
+    if (sendMail && sendMail.checked && created && created.id && created.email) {
+      // Déclenche l'envoi du mail de confirmation en arrière-plan
+      CMD.sendConfirmation(created.id, true);
+    } else {
+      alert('✓ Commande créée (id #' + (created && created.id || '?') + ').');
+    }
   })
   .catch(function(e) {
     alert('Erreur : ' + e.message);
