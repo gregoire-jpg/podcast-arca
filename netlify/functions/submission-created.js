@@ -32,6 +32,29 @@ exports.handler = async function(event) {
     const d = submission.data || body.data || {};
     console.log("Processing commande for:", d.nom, "/", d.email, "/ paiement:", d.paiement);
 
+    // ─── Idempotence : si Stripe webhook ET redirect navigateur firent tous deux,
+    //     on ne re-envoie pas les mails. On reconnaît un duplicate via stripe_session_id.
+    const sessId = d["paypal-order-id"] || "";
+    const isStripeId = sessId.startsWith("cs_");
+    if (isStripeId && process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
+      try {
+        const checkUrl = `${process.env.SUPABASE_URL}/rest/v1/arca_orders?stripe_session_id=eq.${encodeURIComponent(sessId)}&select=id`;
+        const ck = await fetch(checkUrl, {
+          headers: { 'apikey': process.env.SUPABASE_SERVICE_KEY, 'Authorization': 'Bearer ' + process.env.SUPABASE_SERVICE_KEY }
+        });
+        if (ck.ok) {
+          const rows = await ck.json();
+          if (rows.length > 0) {
+            console.log("[Dedup] Commande Stripe déjà traitée (id=" + rows[0].id + "), skip envoi mail.");
+            return { statusCode: 200, body: "Already processed" };
+          }
+        }
+      } catch (e) {
+        console.error("[Dedup] check Supabase échec:", e.message);
+        // On continue : mieux vaut un mail en double qu'un mail manqué
+      }
+    }
+
     // Génération étiquette Mondial Relay si applicable
     let mrLabel = null;
     if ((d.livraison || "") === "Mondial Relay" && d["mr-relay-code"]) {
