@@ -472,7 +472,7 @@ function buildEmailHtml(d, mrLabel) {
     <p style="margin:6px 0 0;font:13px Georgia;color:#3a8a4a;"><strong>${esc(paypalStatus)}</strong></p>
     <p style="margin:4px 0 0;font:12px 'Courier New',monospace;color:#777;">ID transaction : ${esc(paypalId)}</p>
     ` : `
-    <p style="margin:6px 0 0;font:13px Georgia;color:#777;font-style:italic;">✓ Le client a reçu le RIB par e-mail.</p>
+    <p style="margin:6px 0 0;font:13px Georgia;color:#777;font-style:italic;">✓ Le client a reçu l'IBAN par e-mail.</p>
     `}
   </td></tr>
 
