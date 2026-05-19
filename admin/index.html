@@ -3637,7 +3637,12 @@ CMD.toggleCancel = function(id) {
   var msg = newState ? 'Annuler définitivement cette commande ?\n(elle sortira de la liste « À traiter ».)'
                      : 'Restaurer cette commande annulée ?';
   if (!confirm(msg)) return;
-  var reason = newState ? (prompt('Raison de l\'annulation (optionnel) :', '') || null) : null;
+  var reason = newState ? (prompt('Raison de l\'annulation (optionnel — sera visible dans le mail si tu en envoies un) :', '') || null) : null;
+  // Si annulation + email client → proposer d'envoyer un mail
+  var notifyClient = false;
+  if (newState && o.email) {
+    notifyClient = confirm('Prévenir le client par mail à ' + o.email + ' ?\n\nOK = envoyer un mail d\'annulation\nAnnuler = annulation silencieuse');
+  }
   var body = {
     cancelled: newState,
     cancelled_at: newState ? new Date().toISOString() : null,
@@ -3652,6 +3657,17 @@ CMD.toggleCancel = function(id) {
     if (!r.ok) return r.text().then(function(t){ throw new Error(t); });
     o.cancelled = newState; o.cancelled_at = body.cancelled_at; o.cancel_reason = reason;
     CMD.render();
+    if (notifyClient) {
+      // Envoi du mail d'annulation en arrière-plan
+      fetch('/.netlify/functions/send-cancellation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: id, reason: reason || '' })
+      })
+      .then(function(r2) { return r2.json().then(function(d){ if (!r2.ok) throw new Error(d.error || 'HTTP '+r2.status); return d; }); })
+      .then(function() { alert('✓ Commande annulée et mail envoyé à ' + o.email); })
+      .catch(function(e) { alert('Commande annulée mais erreur envoi mail : ' + e.message); });
+    }
   })
   .catch(function(e) { alert('Erreur : ' + e.message); });
 };
