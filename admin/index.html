@@ -919,9 +919,11 @@
 .cmd-fs label { display:block; margin-top:8px; font:.82em/1.4 Arial; color:#555; }
 .cmd-fs input, .cmd-fs select, .cmd-fs textarea { width:100%; padding:7px 9px; border:1px solid var(--border); border-radius:4px; font:.95em Arial; margin-top:3px; box-sizing:border-box; }
 .cmd-fs .req { color:#c1272d; font-weight:bold; }
-.cmd-item-row { display:grid; grid-template-columns:1fr 60px; gap:6px; align-items:center; }
-.cmd-item-row label { font:.85em Arial; color:#444; margin:0; }
-.cmd-item-row input { width:100%; text-align:center; padding:5px 4px; }
+.cmd-item-row { display:grid; grid-template-columns:1fr 64px; gap:10px; align-items:center; padding:8px 10px; background:#faf8f3; border:1px solid var(--border); border-radius:4px; }
+.cmd-item-row label { font:.85em/1.25 Arial; color:#2d3461; font-weight:600; margin:0; }
+.cmd-item-row label small { display:block; font-weight:normal; color:#888; font-size:.85em; margin-top:1px; }
+.cmd-item-row input { width:100%; text-align:center; padding:7px 4px; font-size:1em; font-weight:bold; background:#fff; }
+.cmd-item-row input[value="0"], .cmd-item-row input:placeholder-shown { color:#bbb; font-weight:normal; }
 @media (max-width:680px) {
   .cmd-form-grid, #cmd-new-items { grid-template-columns:1fr !important; }
 }
@@ -3648,10 +3650,10 @@ CMD.openCreate = function() {
   for (var i = 1; i <= 9; i++) {
     var c = CMD.CATALOG_FULL[i];
     var price = (i === 8) ? n8Price : c.price;
-    var label = c.title + ' <span style="color:#888">· ' + price + ' €</span>';
+    var label = c.title + '<small>' + price + ' €</small>';
     html += '<div class="cmd-item-row">'
       + '<label>' + label + '</label>'
-      + '<input type="number" min="0" max="50" value="0" data-num="' + i + '" data-price="' + price + '" oninput="CMD.computeTotal()">'
+      + '<input type="number" min="0" max="50" placeholder="0" data-num="' + i + '" data-price="' + price + '" oninput="CMD.computeTotal()">'
       + '</div>';
   }
   document.getElementById('cmd-new-items').innerHTML = html;
