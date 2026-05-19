@@ -38,6 +38,37 @@ function parseDest(orderData) {
   };
 }
 
+// Normalise un téléphone au format international "+\d{3,20}" attendu par MR.
+// rawPhone peut être : "0471056595", "00 32 471 05 65 95", "+32471056595", "042 23 01 90"...
+// country : code ISO2 ('BE', 'FR', 'IT', 'ES', etc.)
+function normalizePhoneIntl(rawPhone, country) {
+  const COUNTRY_DIAL = {
+    BE:'32', FR:'33', IT:'39', ES:'34', DE:'49', NL:'31', LU:'352',
+    AT:'43', PT:'351', PL:'48', GB:'44', CH:'41', CA:'1'
+  };
+  let s = String(rawPhone || '').trim();
+  if (!s) return '';
+  const hadPlus = s.startsWith('+');
+  let digits = s.replace(/\D/g, '');
+  if (!digits) return '';
+  // "0032..." → on retire le 00 (préfixe d'appel international à l'ancienne)
+  if (!hadPlus && digits.startsWith('00')) {
+    digits = digits.substring(2);
+  } else if (!hadPlus && digits.startsWith('0')) {
+    // Trunk prefix national (0 belge, français, etc.) → on le retire et on préfixe le code pays
+    const code = COUNTRY_DIAL[country];
+    if (!code) return '';
+    digits = code + digits.substring(1);
+  } else if (!hadPlus) {
+    // Pas de préfixe : on tente d'ajouter le code pays si pas déjà présent
+    const code = COUNTRY_DIAL[country];
+    if (code && !digits.startsWith(code)) digits = code + digits;
+  }
+  digits = digits.substring(0, 19);
+  if (digits.length < 3) return '';
+  return '+' + digits;
+}
+
 async function createLabel(orderData) {
   const URL = process.env.MR_API2_URL;
   const LOGIN = process.env.MR_API2_LOGIN;
@@ -77,9 +108,9 @@ async function createLabel(orderData) {
   }
   if (totalValue === 0) totalValue = 20;
 
-  // Téléphone : MR exige format "+\d{3,20}", on omet si format incompatible
-  const phoneClean = dest.phoneNumber.replace(/\D/g, '');
-  const phoneNo = phoneClean.length >= 3 ? '+' + phoneClean.substring(0, 19) : '';
+  // Téléphone : MR exige format "+\d{3,20}".
+  // On normalise au format international en fonction du pays (BE, FR, etc.).
+  const phoneNo = normalizePhoneIntl(dest.phoneNumber, destCountry);
 
   // Structure JSON conforme au XSD officiel de l'API 2 Connect Shipment :
   //   - Wrappers (ShipmentsList, Parcels) sont des objets contenant un array
