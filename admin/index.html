@@ -823,6 +823,8 @@
 .cmd-act.bpost:hover { background:#E5002C; color:#fff; }
 .cmd-act.print { border-color:#1e2245; color:#1e2245; background:#fffbf2; }
 .cmd-act.print:hover { background:#1e2245; color:#fff; }
+.cmd-act.mr { border-color:#c1272d; color:#c1272d; background:#fffbf2; }
+.cmd-act.mr:hover { background:#c1272d; color:#fff; }
 .cmd-detail { background:#faf8f3; border-left:3px solid var(--gold); padding:14px 18px; font:.85em/1.5 Georgia; }
 .cmd-detail strong { color:var(--navy); }
 .cmd-summary { background:#fff; border:1px solid var(--border); border-radius:6px; padding:14px 18px; margin-bottom:18px; box-shadow:0 1px 4px rgba(0,0,0,.05); }
@@ -3260,9 +3262,15 @@ CMD.render = function() {
               }
               return '<span class="cmd-badge paid">✓ Bpost (PDF en cours)</span>';
             }
-            // Mondial Relay (étiquette générée par mr-label.js)
-            if (o.livraison === 'Mondial Relay' && o.mr_label_url) {
-              return '<button class="cmd-act print" onclick="CMD.printLabel(' + JSON.stringify(o.mr_label_url) + ')">🖨️ Imprimer étiquette</button>';
+            // Mondial Relay
+            if (o.livraison === 'Mondial Relay') {
+              if (o.mr_label_url) {
+                return '<button class="cmd-act print" onclick="CMD.printLabel(' + JSON.stringify(o.mr_label_url) + ')">🖨️ Imprimer étiquette</button>';
+              }
+              // Pas encore d'étiquette MR → bouton pour la générer
+              if (o.mr_relay_code) {
+                return '<button class="cmd-act mr" onclick="CMD.regenMr(' + o.id + ')">📍 Générer étiquette MR</button>';
+              }
             }
             return '';
           })()
@@ -3370,6 +3378,31 @@ CMD.summaryHtml = function() {
 CMD.toggleDetail = function(id) {
   CMD.expanded[id] = !CMD.expanded[id];
   CMD.render();
+};
+
+// Génère l'étiquette MR pour une commande qui n'en a pas encore
+CMD.regenMr = function(id) {
+  if (!confirm('Générer l\'étiquette Mondial Relay pour cette commande ?')) return;
+  var btn = event.target;
+  btn.disabled = true; btn.textContent = '⏳ Génération...';
+  fetch('/.netlify/functions/regenerate-mr-label', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ order_id: id })
+  })
+  .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
+  .then(function(d) {
+    if (d.mr_label_url) {
+      CMD.printLabel(d.mr_label_url);  // ouvre direct le PDF
+    } else {
+      alert('Étiquette générée (n° ' + d.mr_expedition + ') mais URL PDF absente.');
+    }
+    CMD.load();
+  })
+  .catch(function(e) {
+    alert('Erreur : ' + e.message);
+    btn.disabled = false; btn.textContent = '📍 Générer étiquette MR';
+  });
 };
 
 // Ouvre l'étiquette PDF dans un nouvel onglet (et tente d'ouvrir le dialog d'impression)
