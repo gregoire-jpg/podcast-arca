@@ -83,6 +83,15 @@ exports.handler = async function(event) {
       return { statusCode: 500, body: "Missing env vars" };
     }
 
+    // Validation email client : Brevo rejette les emails mal formés (ex: client tape "orange.f" au lieu de "orange.fr")
+    // Si l'email client est invalide, on ne le met PAS en replyTo (sinon la requête entière échoue)
+    // et on ne tente PAS d'envoyer au client (Brevo refusera de toute façon).
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    const clientEmailValid = d.email && EMAIL_REGEX.test(d.email);
+    if (d.email && !clientEmailValid) {
+      console.warn("[Email invalide] '" + d.email + "' — replyTo et envoi client skippés. Corrige en BDD pour relancer manuellement.");
+    }
+
     const payload = {
       sender: { name: "ARCA Commandes", email: fromEmail },
       to: toRaw.map(e => ({ email: e })),
@@ -90,7 +99,7 @@ exports.handler = async function(event) {
       htmlContent: html,
       textContent: text
     };
-    if (d.email) {
+    if (clientEmailValid) {
       payload.replyTo = { email: d.email, name: d.nom || "" };
     }
 
@@ -111,7 +120,7 @@ exports.handler = async function(event) {
     }
 
     // ─── Email de confirmation au client (sans l'étiquette MR) ───
-    if (d.email) {
+    if (clientEmailValid) {
       try {
         const clientHtml = buildClientEmailHtml(d, mrLabel);
         const clientText = buildClientEmailText(d, mrLabel);
