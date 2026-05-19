@@ -38,14 +38,27 @@
       display: flex; align-items: center; justify-content: space-between;
       position: sticky; top: 0; z-index: 100;
       box-shadow: 0 2px 10px rgba(0,0,0,.3);
+      gap: 12px;
     }
-    .admin-brand { font: .8em/1 Georgia, serif; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); padding: 18px 0; margin-right: 20px; }
-    .admin-nav   { display: flex; }
-    .nav-btn { padding: 18px 16px; background: none; border: none; border-bottom: 3px solid transparent; color: rgba(255,255,255,.5); font-size: .78em; letter-spacing: 1.5px; text-transform: uppercase; transition: color .2s, border-color .2s; }
+    .admin-brand { font: .8em/1 Georgia, serif; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); padding: 18px 0; margin-right: 20px; white-space: nowrap; }
+    .admin-nav   { display: flex; overflow-x: auto; scrollbar-width: thin; }
+    .admin-nav::-webkit-scrollbar { height: 3px; }
+    .admin-nav::-webkit-scrollbar-thumb { background: rgba(200,160,96,.4); border-radius: 2px; }
+    .nav-btn { padding: 18px 16px; background: none; border: none; border-bottom: 3px solid transparent; color: rgba(255,255,255,.5); font-size: .78em; letter-spacing: 1.5px; text-transform: uppercase; transition: color .2s, border-color .2s; white-space: nowrap; flex-shrink: 0; cursor: pointer; }
     .nav-btn:hover { color: var(--white); }
     .nav-btn.on { color: var(--gold); border-bottom-color: var(--gold); }
-    .btn-logout { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); color: rgba(255,255,255,.6); padding: 7px 16px; border-radius: 6px; font-size: .78em; transition: background .2s; }
+    .btn-logout { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); color: rgba(255,255,255,.6); padding: 7px 16px; border-radius: 6px; font-size: .78em; transition: background .2s; white-space: nowrap; flex-shrink: 0; }
     .btn-logout:hover { background: rgba(255,255,255,.15); color: var(--white); }
+
+    /* Mobile : header compact + nav scrollable horizontalement */
+    @media (max-width: 768px) {
+      .admin-header { padding: 0 12px; flex-wrap: wrap; gap: 0; }
+      .admin-header > div { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
+      .admin-brand { font-size: .7em; letter-spacing: 2px; padding: 14px 0; margin-right: 4px; }
+      .admin-nav { flex: 1; min-width: 0; }
+      .nav-btn { padding: 14px 10px; font-size: .72em; letter-spacing: 1px; }
+      .btn-logout { padding: 6px 10px; font-size: .7em; }
+    }
 
     /* Panels */
     .panel { display: none; padding: 28px; max-width: 1080px; margin: 0 auto; }
