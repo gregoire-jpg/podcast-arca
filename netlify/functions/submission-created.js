@@ -552,7 +552,8 @@ function buildClientEmailHtml(d, mrLabel) {
   const isStripe = /stripe/i.test(paypalStatus) || /carte|bancontact/i.test(d.paiement || "");
   const providerLabel = isStripe ? "par carte bancaire" : "PayPal";
   const isMondialRelay = (d.livraison || "") === "Mondial Relay";
-  const total = ((d["commande-details"] || "").match(/TOTAL:\s*(\d+)\s*€/) || [])[1] || "—";
+  const totMatchClient = (d["commande-details"] || "").match(/TOTAL:\s*(\d+(?:[.,]\d+)?)\s*€/);
+  const total = totMatchClient ? totMatchClient[1].replace(',', '.') : "—";
   const packMatchClient = (d["commande-details"] || "").match(/Pack complet -(\d+(?:[.,]\d+)?)/);
   const packDiscountClient = packMatchClient ? parseFloat(packMatchClient[1].replace(',', '.')) : 0;
   const hasN8 = parseInt(d["qty-n8"] || "0", 10) > 0;
@@ -692,7 +693,8 @@ function buildClientEmailText(d, mrLabel) {
   const isStripe = /stripe/i.test(paypalStatus) || /carte|bancontact/i.test(d.paiement || "");
   const providerLabel = isStripe ? "par carte bancaire" : "PayPal";
   const isMondialRelay = (d.livraison || "") === "Mondial Relay";
-  const total = ((d["commande-details"] || "").match(/TOTAL:\s*(\d+)\s*€/) || [])[1] || "—";
+  const totMatch = (d["commande-details"] || "").match(/TOTAL:\s*(\d+(?:[.,]\d+)?)\s*€/);
+  const total = totMatch ? totMatch[1].replace(',', '.') : "—";
   const ref = `ARCA ${(d.nom || "").trim()}`.substring(0, 35);
   let txt = `MERCI POUR VOTRE COMMANDE — ARCA\n\n`;
   txt += `Bonjour ${(d.nom || "").split(' ')[0] || ""},\n\n`;
