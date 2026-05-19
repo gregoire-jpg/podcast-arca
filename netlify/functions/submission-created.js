@@ -306,13 +306,15 @@ function buildEmailHtml(d, mrLabel) {
     }
   }
 
-  // Détails (sous-total / port / total)
+  // Détails (sous-total / port / total / pack)
   const details = d["commande-details"] || "";
   let sousTotal = "—", port = "—", total = "—";
   // Regex tolérantes : capture décimales (3.9 ou 3,9)
   const subMatch = details.match(/Sous-total revues:\s*(\d+(?:[.,]\d+)?)\s*€/);
   const portMatch = details.match(/Port:\s*(\d+(?:[.,]\d+)?)\s*€/);
   const totMatch = details.match(/TOTAL:\s*(\d+(?:[.,]\d+)?)\s*€/);
+  const packMatch = details.match(/Pack complet -(\d+(?:[.,]\d+)?)/);
+  const parseN = m => m ? parseFloat(m[1].replace(',', '.')) : null;
   if (subMatch) sousTotal = subMatch[1].replace(',', '.') + " €";
   if (portMatch) port = portMatch[1].replace(',', '.') + " €";
   if (totMatch) total = totMatch[1].replace(',', '.') + " €";
@@ -464,6 +466,10 @@ function buildEmailHtml(d, mrLabel) {
       <tbody>${qtyRows.join("")}</tbody>
     </table>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px;">
+      ${packMatch ? `
+      <tr><td style="padding:4px 0;font:13.5px Georgia;color:#c8a060;font-style:italic;">★ Pack complet — réduction</td>
+          <td style="padding:4px 0;font:13.5px Georgia;color:#c8a060;font-style:italic;text-align:right;">−${parseN(packMatch)} €</td></tr>
+      ` : ''}
       <tr><td style="padding:4px 0;font:13.5px Georgia;color:#444;">Sous-total revues</td>
           <td style="padding:4px 0;font:13.5px Georgia;color:#444;text-align:right;">${esc(sousTotal)}</td></tr>
       <tr><td style="padding:4px 0;font:13.5px Georgia;color:#444;">Frais de port (${esc(d.livraison || "")})</td>
@@ -547,6 +553,8 @@ function buildClientEmailHtml(d, mrLabel) {
   const providerLabel = isStripe ? "par carte bancaire" : "PayPal";
   const isMondialRelay = (d.livraison || "") === "Mondial Relay";
   const total = ((d["commande-details"] || "").match(/TOTAL:\s*(\d+)\s*€/) || [])[1] || "—";
+  const packMatchClient = (d["commande-details"] || "").match(/Pack complet -(\d+(?:[.,]\d+)?)/);
+  const packDiscountClient = packMatchClient ? parseFloat(packMatchClient[1].replace(',', '.')) : 0;
   const hasN8 = parseInt(d["qty-n8"] || "0", 10) > 0;
   // Note expédition mi-juin si N°8 commandé pendant la souscription
   const PROMO_DEADLINE = new Date('2026-05-25T22:00:00Z');
@@ -629,6 +637,10 @@ function buildClientEmailHtml(d, mrLabel) {
     <p style="margin:0 0 10px;font:11px Arial;letter-spacing:2px;text-transform:uppercase;color:#c8a060;font-weight:bold;">— Récapitulatif —</p>
     <table width="100%" cellpadding="0" cellspacing="0">
       ${rows}
+      ${packDiscountClient > 0 ? `
+      <tr><td style="padding:6px 0;font:italic 14px Georgia;color:#c8a060;">★ Pack complet — réduction</td>
+          <td style="padding:6px 0;font:italic 14px Georgia;color:#c8a060;text-align:right;">−${packDiscountClient} €</td></tr>
+      ` : ''}
       <tr><td colspan="2" style="padding:10px 0 0;border-top:2px solid #c8a060;"></td></tr>
       <tr><td style="padding:8px 0;font:bold 16px Georgia;color:#2d3461;">Total ${isMondialRelay ? "(livraison incluse)" : ""}</td>
           <td style="padding:8px 0;font:bold 18px Georgia;color:#2d3461;text-align:right;">${esc(total)} €</td></tr>
