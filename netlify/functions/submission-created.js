@@ -34,9 +34,11 @@ exports.handler = async function(event) {
 
     // ─── Idempotence : si Stripe webhook ET redirect navigateur firent tous deux,
     //     on ne re-envoie pas les mails. On reconnaît un duplicate via stripe_session_id.
+    //     Skip si _no_persist (renvoi manuel depuis l'admin -> on VEUT envoyer le mail).
+    const skipDedup = body._no_persist || d._no_persist;
     const sessId = d["paypal-order-id"] || "";
     const isStripeId = sessId.startsWith("cs_");
-    if (isStripeId && process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
+    if (!skipDedup && isStripeId && process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
       try {
         const checkUrl = `${process.env.SUPABASE_URL}/rest/v1/arca_orders?stripe_session_id=eq.${encodeURIComponent(sessId)}&select=id`;
         const ck = await fetch(checkUrl, {
