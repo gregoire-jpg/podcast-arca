@@ -794,11 +794,138 @@
       <button class="cmd-tab"    data-cmd="done">Clôturées</button>
       <button class="cmd-tab"    data-cmd="cancelled">Annulées</button>
       <button class="cmd-tab"    data-cmd="all">Toutes</button>
-      <button class="btn btn-gold" id="cmd-refresh" style="margin-left:12px">⟳ Actualiser</button>
+      <button class="btn btn-navy" id="cmd-new" style="margin-left:12px">+ Nouvelle commande</button>
+      <button class="btn btn-gold" id="cmd-refresh" style="margin-left:6px">⟳ Actualiser</button>
     </div>
   </div>
   <div id="cmd-list" style="margin-top:18px"><div class="empty">Chargement…</div></div>
 </div>
+
+<!-- ══ MODALE NOUVELLE COMMANDE ══ -->
+<div id="cmd-new-mask" class="cmd-modal-mask" style="display:none">
+  <div class="cmd-modal">
+    <div class="cmd-modal-head">
+      <h3 style="margin:0;color:#fff;font:bold 1.05em/1.3 Georgia">+ Nouvelle commande manuelle</h3>
+      <button type="button" class="cmd-modal-close" onclick="CMD.closeCreate()" aria-label="Fermer">×</button>
+    </div>
+    <form id="cmd-new-form" class="cmd-modal-body" onsubmit="event.preventDefault(); CMD.submitCreate();">
+      <div class="cmd-form-grid">
+        <!-- Client -->
+        <fieldset class="cmd-fs">
+          <legend>Client</legend>
+          <label>Nom complet <span class="req">*</span><input name="nom" required autocomplete="name"></label>
+          <label>E-mail <input name="email" type="email" autocomplete="email"></label>
+          <label>Téléphone <input name="telephone" autocomplete="tel"></label>
+        </fieldset>
+        <!-- Adresse -->
+        <fieldset class="cmd-fs">
+          <legend>Adresse de livraison</legend>
+          <label>Rue + numéro <input name="rue"></label>
+          <label>Complément <input name="complement"></label>
+          <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px">
+            <label>CP <input name="cp" inputmode="numeric" maxlength="5"></label>
+            <label>Ville <input name="ville"></label>
+          </div>
+          <label>Pays <select name="pays">
+            <option value="Belgique" selected>Belgique</option>
+            <option value="France">France</option>
+            <option value="Luxembourg">Luxembourg</option>
+            <option value="Pays-Bas">Pays-Bas</option>
+            <option value="Allemagne">Allemagne</option>
+            <option value="Autriche">Autriche</option>
+            <option value="Italie">Italie</option>
+            <option value="Espagne">Espagne</option>
+            <option value="Portugal">Portugal</option>
+            <option value="Pologne">Pologne</option>
+            <option value="Autres pays UE">Autres pays UE</option>
+            <option value="Royaume-Uni">Royaume-Uni</option>
+            <option value="Suisse">Suisse</option>
+            <option value="Canada">Canada</option>
+            <option value="DOM-TOM">DOM-TOM</option>
+            <option value="autre">Autre</option>
+          </select></label>
+        </fieldset>
+      </div>
+
+      <!-- Articles -->
+      <fieldset class="cmd-fs" style="margin-top:14px">
+        <legend>Articles commandés <span class="req">*</span></legend>
+        <div id="cmd-new-items" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px 14px"></div>
+      </fieldset>
+
+      <div class="cmd-form-grid" style="margin-top:14px">
+        <!-- Livraison -->
+        <fieldset class="cmd-fs">
+          <legend>Livraison</legend>
+          <label><select name="livraison" onchange="CMD.toggleMrFields()">
+            <option value="En main propre">En main propre</option>
+            <option value="Mondial Relay">Mondial Relay</option>
+            <option value="Poste avec suivi">Poste avec suivi (Bpost)</option>
+            <option value="Autre">Autre</option>
+          </select></label>
+          <div id="cmd-new-mr-fields" style="display:none">
+            <label>Code point relais <input name="mr_relay_code" placeholder="BE-040115"></label>
+            <label>Nom + adresse relais <input name="mr_relay_info" placeholder="STOCK ANTHISNES SRL — 7 RUE DU CTRE…"></label>
+          </div>
+          <label>Frais de port (€) <input name="port_eur" type="number" min="0" step="0.01" value="0"></label>
+        </fieldset>
+
+        <!-- Paiement -->
+        <fieldset class="cmd-fs">
+          <legend>Paiement</legend>
+          <label><select name="paiement">
+            <option value="Espèces">Espèces</option>
+            <option value="Virement">Virement</option>
+            <option value="PayPal">PayPal</option>
+            <option value="Stripe">Stripe (carte/Bancontact)</option>
+            <option value="Autre">Autre</option>
+          </select></label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:.92em">
+            <input type="checkbox" name="paye" id="cmd-new-paye"> Déjà payé
+          </label>
+        </fieldset>
+      </div>
+
+      <!-- Notes -->
+      <fieldset class="cmd-fs" style="margin-top:14px">
+        <legend>Notes internes (optionnel)</legend>
+        <textarea name="notes" rows="2" style="width:100%;resize:vertical"></textarea>
+      </fieldset>
+
+      <!-- Total + actions -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">
+        <div style="font:1.05em Georgia;color:var(--navy)">
+          Total estimé : <strong id="cmd-new-total" style="color:var(--gold);font-size:1.2em">0 €</strong>
+        </div>
+        <div>
+          <button type="button" class="btn" onclick="CMD.closeCreate()" style="background:#eee;color:#444;margin-right:8px">Annuler</button>
+          <button type="submit" class="btn btn-navy" id="cmd-new-submit">Créer la commande</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.cmd-modal-mask { position:fixed; inset:0; background:rgba(30,34,69,.7); z-index:9999; display:flex; justify-content:center; align-items:center; padding:20px; overflow-y:auto; }
+.cmd-modal { background:#fff; border-radius:8px; max-width:760px; width:100%; max-height:92vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 8px 40px rgba(0,0,0,.4); }
+.cmd-modal-head { background:var(--navy); padding:14px 20px; display:flex; justify-content:space-between; align-items:center; }
+.cmd-modal-close { background:rgba(255,255,255,.15); color:#fff; border:0; border-radius:50%; width:32px; height:32px; font:600 22px/1 Arial; cursor:pointer; }
+.cmd-modal-close:hover { background:rgba(255,255,255,.3); }
+.cmd-modal-body { padding:20px 24px; overflow-y:auto; }
+.cmd-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.cmd-fs { border:1px solid var(--border); border-radius:6px; padding:10px 14px 12px; min-width:0; }
+.cmd-fs legend { font:bold .72em/1 Arial; letter-spacing:1.5px; text-transform:uppercase; color:var(--navy); padding:0 6px; }
+.cmd-fs label { display:block; margin-top:8px; font:.82em/1.4 Arial; color:#555; }
+.cmd-fs input, .cmd-fs select, .cmd-fs textarea { width:100%; padding:7px 9px; border:1px solid var(--border); border-radius:4px; font:.95em Arial; margin-top:3px; box-sizing:border-box; }
+.cmd-fs .req { color:#c1272d; font-weight:bold; }
+.cmd-item-row { display:grid; grid-template-columns:1fr 60px; gap:6px; align-items:center; }
+.cmd-item-row label { font:.85em Arial; color:#444; margin:0; }
+.cmd-item-row input { width:100%; text-align:center; padding:5px 4px; }
+@media (max-width:680px) {
+  .cmd-form-grid, #cmd-new-items { grid-template-columns:1fr !important; }
+}
+</style>
 
 <style>
 .cmd-tab { padding:8px 14px; background:transparent; border:1px solid var(--border); border-radius:6px; font:.85em/1 Arial; cursor:pointer; color:var(--muted); margin-right:4px; }
@@ -3496,6 +3623,147 @@ CMD.toggleCancel = function(id) {
   .catch(function(e) { alert('Erreur : ' + e.message); });
 };
 
+// ═══════════════════ CRÉATION MANUELLE DE COMMANDE ═══════════════════
+CMD.CATALOG_FULL = {
+  1: { title: 'N°1',  price: 20, weight: 600 },
+  2: { title: 'N°2',  price: 20, weight: 600 },
+  3: { title: 'N°3',  price: 20, weight: 735 },
+  4: { title: 'N°4',  price: 20, weight: 565 },
+  5: { title: 'N°5',  price: 20, weight: 506 },
+  6: { title: 'N°6',  price: 20, weight: 600 },
+  7: { title: 'N°7',  price: 20, weight: 532 },
+  8: { title: 'N°8',  price: 15, weight: 600 },  // tarif souscription jusqu'au 25 mai 2026
+  9: { title: 'Recueil de prières', price: 20, weight: 350 }
+};
+CMD.PROMO_DEADLINE = new Date('2026-05-25T22:00:00Z');
+CMD.PACK_DISCOUNT  = 40;
+
+CMD.openCreate = function() {
+  // Reset form
+  var form = document.getElementById('cmd-new-form');
+  if (form) form.reset();
+  // Render article rows
+  var html = '';
+  var n8Price = new Date() < CMD.PROMO_DEADLINE ? 15 : 20;
+  for (var i = 1; i <= 9; i++) {
+    var c = CMD.CATALOG_FULL[i];
+    var price = (i === 8) ? n8Price : c.price;
+    var label = c.title + ' <span style="color:#888">· ' + price + ' €</span>';
+    html += '<div class="cmd-item-row">'
+      + '<label>' + label + '</label>'
+      + '<input type="number" min="0" max="50" value="0" data-num="' + i + '" data-price="' + price + '" oninput="CMD.computeTotal()">'
+      + '</div>';
+  }
+  document.getElementById('cmd-new-items').innerHTML = html;
+  CMD.computeTotal();
+  // Show modal
+  document.getElementById('cmd-new-mask').style.display = 'flex';
+};
+
+CMD.closeCreate = function() {
+  document.getElementById('cmd-new-mask').style.display = 'none';
+};
+
+CMD.toggleMrFields = function() {
+  var sel = document.querySelector('#cmd-new-form select[name="livraison"]');
+  var box = document.getElementById('cmd-new-mr-fields');
+  if (sel && box) box.style.display = (sel.value === 'Mondial Relay') ? 'block' : 'none';
+};
+
+CMD.computeTotal = function() {
+  var inputs = document.querySelectorAll('#cmd-new-items input[data-num]');
+  var total = 0, allCount = 0;
+  inputs.forEach(function(inp) {
+    var q = parseInt(inp.value || '0', 10);
+    var p = parseFloat(inp.dataset.price || '0');
+    if (q > 0) { total += q * p; allCount++; }
+  });
+  // Pack complet : tous les 9 numéros au moins une fois
+  if (allCount === 9) total -= CMD.PACK_DISCOUNT;
+  var portInput = document.querySelector('#cmd-new-form input[name="port_eur"]');
+  var port = portInput ? parseFloat(portInput.value || '0') : 0;
+  total += isNaN(port) ? 0 : port;
+  var el = document.getElementById('cmd-new-total');
+  if (el) el.textContent = (Math.round(total * 100) / 100) + ' €';
+};
+
+CMD.submitCreate = function() {
+  var form = document.getElementById('cmd-new-form');
+  if (!form) return;
+  var fd = new FormData(form);
+  var nom = (fd.get('nom') || '').trim();
+  if (!nom) { alert('Le nom du client est obligatoire.'); return; }
+
+  // Collecte items
+  var items = [];
+  var totalArticles = 0, allCount = 0;
+  document.querySelectorAll('#cmd-new-items input[data-num]').forEach(function(inp) {
+    var q = parseInt(inp.value || '0', 10);
+    if (q <= 0) return;
+    var n = parseInt(inp.dataset.num, 10);
+    var p = parseFloat(inp.dataset.price);
+    var c = CMD.CATALOG_FULL[n];
+    items.push({ num: n, title: c.title, qty: q, price: p });
+    totalArticles += q * p;
+    allCount++;
+  });
+  if (!items.length) { alert('Choisissez au moins un article.'); return; }
+
+  var packDiscount = (allCount === 9) ? CMD.PACK_DISCOUNT : 0;
+  var port = parseFloat(fd.get('port_eur') || '0') || 0;
+  var totalFinal = Math.round((totalArticles - packDiscount + port) * 100) / 100;
+
+  var paye = !!fd.get('paye');
+  var nowIso = new Date().toISOString();
+
+  var row = {
+    nom:        nom,
+    email:      (fd.get('email') || '').trim() || null,
+    telephone:  (fd.get('telephone') || '').trim() || null,
+    rue:        (fd.get('rue') || '').trim() || null,
+    complement: (fd.get('complement') || '').trim() || null,
+    cp:         (fd.get('cp') || '').trim() || null,
+    ville:      (fd.get('ville') || '').trim() || null,
+    pays:       fd.get('pays') || null,
+    items:      items,
+    total_eur:  totalFinal,
+    port_eur:   port,
+    pack_discount_eur: packDiscount,
+    livraison:  fd.get('livraison') || null,
+    mr_relay_code: (fd.get('mr_relay_code') || '').trim() || null,
+    mr_relay_info: (fd.get('mr_relay_info') || '').trim() || null,
+    paiement:   fd.get('paiement') || null,
+    paye:       paye,
+    paid_at:    paye ? nowIso : null,
+    cloturee:   false,
+    cancelled:  false,
+    notes:      (fd.get('notes') || '').trim() || null
+  };
+
+  var btn = document.getElementById('cmd-new-submit');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Création...'; }
+
+  fetch(CMD.url + '/rest/v1/arca_orders', {
+    method: 'POST',
+    headers: Object.assign({}, CMD.headers(), { 'Prefer': 'return=representation' }),
+    body: JSON.stringify(row)
+  })
+  .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.message || d.error || 'HTTP '+r.status); return d; }); })
+  .then(function(rows) {
+    var created = Array.isArray(rows) ? rows[0] : rows;
+    if (created && created.id) CMD.orders.unshift(created);
+    CMD.closeCreate();
+    CMD.render();
+    alert('✓ Commande créée (id #' + (created && created.id || '?') + ').');
+  })
+  .catch(function(e) {
+    alert('Erreur : ' + e.message);
+  })
+  .finally(function() {
+    if (btn) { btn.disabled = false; btn.textContent = 'Créer la commande'; }
+  });
+};
+
 // Activer les filtres
 document.addEventListener('click', function(e) {
   var tab = e.target.closest('.cmd-tab');
@@ -3508,6 +3776,26 @@ document.addEventListener('click', function(e) {
   if (e.target.id === 'cmd-refresh') {
     CMD.load();
   }
+  if (e.target.id === 'cmd-new') {
+    CMD.openCreate();
+  }
+  // Fermer la modale au clic en dehors
+  if (e.target.id === 'cmd-new-mask') {
+    CMD.closeCreate();
+  }
+});
+
+// Échap pour fermer
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    var m = document.getElementById('cmd-new-mask');
+    if (m && m.style.display === 'flex') CMD.closeCreate();
+  }
+});
+
+// Recalcule total quand on change le port
+document.addEventListener('input', function(e) {
+  if (e.target.name === 'port_eur') CMD.computeTotal();
 });
 
 // Auto-load au premier passage sur l'onglet
