@@ -33,7 +33,8 @@ exports.handler = async function(event) {
   const html = buildHtml(o, reason);
   const text = buildText(o, reason);
 
-  const payload = {
+  // 1. Mail au client
+  const clientPayload = {
     sender:  { name: 'ARCA Revue & Librairie', email: FROM_EMAIL },
     to:      [{ email: o.email, name: o.nom || '' }],
     replyTo: { email: 'antoine@arca-librairie.com', name: 'ARCA' },
@@ -44,16 +45,87 @@ exports.handler = async function(event) {
   const resp = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
     headers: { 'accept': 'application/json', 'api-key': BREVO_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(clientPayload)
   });
   if (!resp.ok) {
     const err = await resp.text();
-    console.error('[send-cancellation] Brevo error:', resp.status, err.substring(0, 300));
+    console.error('[send-cancellation] Brevo client error:', resp.status, err.substring(0, 300));
     return json(502, { error: 'Brevo HTTP ' + resp.status });
   }
-  console.log('[send-cancellation] Mail annulation envoyé à', o.email, '(commande #' + o.id + ')');
+  console.log('[send-cancellation] Mail client envoyé à', o.email, '(commande #' + o.id + ')');
+
+  // 2. Mail interne ARCA (notification annulation)
+  const TO_INTERNAL = (process.env.ORDER_EMAIL_TO || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (TO_INTERNAL.length > 0) {
+    const internalSubject = '✗ ANNULÉE · Commande ARCA #' + o.id + ' · ' + (o.nom || '');
+    const internalHtml = buildInternalHtml(o, reason);
+    const internalText = buildInternalText(o, reason);
+    const internalPayload = {
+      sender:  { name: 'ARCA Commandes', email: FROM_EMAIL },
+      to:      TO_INTERNAL.map(e => ({ email: e })),
+      replyTo: { email: o.email, name: o.nom || '' },
+      subject: internalSubject,
+      htmlContent: internalHtml,
+      textContent: internalText
+    };
+    const r2 = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: { 'accept': 'application/json', 'api-key': BREVO_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify(internalPayload)
+    });
+    if (!r2.ok) {
+      const err2 = await r2.text();
+      console.error('[send-cancellation] Brevo interne error:', r2.status, err2.substring(0, 300));
+      // On ne fail pas la réponse — le mail client est parti, l'interne est secondaire
+    } else {
+      console.log('[send-cancellation] Mail interne envoyé à', TO_INTERNAL.join(', '));
+    }
+  }
+
   return json(200, { success: true });
 };
+
+function buildInternalHtml(o, reason) {
+  const itemsRows = (o.items || []).map(it =>
+    `<tr><td style="padding:4px 8px;font:13px Arial;color:#444;">${esc(it.title)} × ${it.qty}</td><td style="padding:4px 8px;font:13px Arial;color:#444;text-align:right;">${it.qty * it.price} €</td></tr>`
+  ).join('');
+  return `<!DOCTYPE html><html lang="fr"><body style="font-family:Arial,sans-serif;background:#f5f5f5;margin:0;padding:20px;">
+<div style="max-width:560px;margin:0 auto;background:#fff;border-radius:6px;overflow:hidden;border-top:4px solid #9d1018;">
+  <div style="padding:18px 22px;background:#fde4e6;">
+    <p style="margin:0;font:bold 11px Arial;letter-spacing:1.5px;text-transform:uppercase;color:#9d1018;">✗ Commande annulée</p>
+    <p style="margin:4px 0 0;font:bold 17px Georgia;color:#2d3461;">#${o.id} · ${esc(o.nom || '')}</p>
+  </div>
+  <div style="padding:20px 22px;">
+    <p style="margin:0 0 14px;font:13px/1.5 Arial;color:#444;">
+      <strong>Email :</strong> <a href="mailto:${esc(o.email || '')}">${esc(o.email || '')}</a><br>
+      <strong>Téléphone :</strong> ${esc(o.telephone || '—')}<br>
+      <strong>Pays :</strong> ${esc(o.pays || '—')} · <strong>Livraison :</strong> ${esc(o.livraison || '—')}<br>
+      <strong>Paiement :</strong> ${esc(o.paiement || '—')} ${o.paye ? '<span style="color:#3a8a4a;font-weight:bold;">(payé)</span>' : '<span style="color:#8a5a10;font-weight:bold;">(non payé)</span>'}
+    </p>
+    ${reason ? `<p style="margin:0 0 14px;padding:10px 14px;background:#faf8f5;border-left:3px solid #c8a060;font:13px/1.5 Arial;color:#555;"><strong style="color:#2d3461;">Motif :</strong> ${esc(reason)}</p>` : ''}
+    <table width="100%" style="border-top:1px solid #eee;border-bottom:1px solid #eee;margin:12px 0;">${itemsRows}</table>
+    <p style="margin:10px 0 0;font:bold 14px Arial;color:#2d3461;text-align:right;">Total : ${o.total_eur || '—'} €</p>
+    ${o.paye ? `<p style="margin:14px 0 0;padding:10px;background:#fff8e1;font:13px Arial;color:#8a5a10;border-radius:4px;">⚠ La commande était <strong>payée</strong>. Pense au remboursement (Stripe Dashboard / PayPal / virement retour).</p>` : ''}
+  </div>
+</div></body></html>`;
+}
+
+function buildInternalText(o, reason) {
+  const items = (o.items || []).map(it => `  ${it.title} × ${it.qty} = ${it.qty * it.price} €`).join('\n');
+  return `✗ COMMANDE ANNULÉE
+Commande #${o.id} — ${o.nom || ''}
+
+Email : ${o.email || '—'}
+Téléphone : ${o.telephone || '—'}
+Pays : ${o.pays || '—'}
+Livraison : ${o.livraison || '—'}
+Paiement : ${o.paiement || '—'} ${o.paye ? '(payé)' : '(non payé)'}
+${reason ? '\nMotif : ' + reason + '\n' : ''}
+${items}
+
+Total : ${o.total_eur || '—'} €
+${o.paye ? '\n⚠ La commande était payée. Pense au remboursement.' : ''}`;
+}
 
 function esc(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
