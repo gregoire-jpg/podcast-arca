@@ -556,6 +556,8 @@ function buildClientEmailHtml(d, mrLabel) {
   const total = totMatchClient ? totMatchClient[1].replace(',', '.') : "—";
   const packMatchClient = (d["commande-details"] || "").match(/Pack complet -(\d+(?:[.,]\d+)?)/);
   const packDiscountClient = packMatchClient ? parseFloat(packMatchClient[1].replace(',', '.')) : 0;
+  const portMatchClient = (d["commande-details"] || "").match(/Port:\s*(\d+(?:[.,]\d+)?)\s*€/);
+  const portClient = portMatchClient ? parseFloat(portMatchClient[1].replace(',', '.')) : 0;
   const hasN8 = parseInt(d["qty-n8"] || "0", 10) > 0;
   // Note expédition mi-juin si N°8 commandé pendant la souscription
   const PROMO_DEADLINE = new Date('2026-05-25T22:00:00Z');
@@ -642,8 +644,15 @@ function buildClientEmailHtml(d, mrLabel) {
       <tr><td style="padding:6px 0;font:italic 14px Georgia;color:#c8a060;">★ Pack complet — réduction</td>
           <td style="padding:6px 0;font:italic 14px Georgia;color:#c8a060;text-align:right;">−${packDiscountClient} €</td></tr>
       ` : ''}
+      ${portClient > 0 ? `
+      <tr><td style="padding:6px 0;font:14px Georgia;color:#444;">Frais de port${d.livraison ? ' (' + esc(d.livraison) + ')' : ''}</td>
+          <td style="padding:6px 0;font:14px Georgia;color:#444;text-align:right;">${portClient} €</td></tr>
+      ` : (d.livraison === 'En main propre' ? `
+      <tr><td style="padding:6px 0;font:14px Georgia;color:#444;">Livraison en main propre</td>
+          <td style="padding:6px 0;font:14px Georgia;color:#444;text-align:right;">gratuite</td></tr>
+      ` : '')}
       <tr><td colspan="2" style="padding:10px 0 0;border-top:2px solid #c8a060;"></td></tr>
-      <tr><td style="padding:8px 0;font:bold 16px Georgia;color:#2d3461;">Total ${isMondialRelay ? "(livraison incluse)" : ""}</td>
+      <tr><td style="padding:8px 0;font:bold 16px Georgia;color:#2d3461;">Total</td>
           <td style="padding:8px 0;font:bold 18px Georgia;color:#2d3461;text-align:right;">${esc(total)} €</td></tr>
     </table>
     ${d["is-company"] === "1" ? `
