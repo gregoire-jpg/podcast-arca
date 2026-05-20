@@ -984,6 +984,10 @@
 .cmd-act.cancel:hover { background:#9d1018; color:#fff; }
 .cmd-act.mail { border-color:#3a8a4a; color:#3a8a4a; padding:6px 9px; }
 .cmd-act.mail:hover { background:#3a8a4a; color:#fff; }
+.cmd-act.paid { border-color:#3a8a4a; color:#3a8a4a; background:#e8f5ea; }
+.cmd-act.paid:hover { background:#3a8a4a; color:#fff; }
+.cmd-act.unpaid { border-color:#8a5a10; color:#8a5a10; background:#fff8e1; }
+.cmd-act.unpaid:hover { background:#8a5a10; color:#fff; }
 .cmd-detail { background:#faf8f3; border-left:3px solid var(--gold); padding:14px 18px; font:.85em/1.5 Georgia; }
 .cmd-detail strong { color:var(--navy); }
 .cmd-summary { background:#fff; border:1px solid var(--border); border-radius:6px; padding:14px 18px; margin-bottom:18px; box-shadow:0 1px 4px rgba(0,0,0,.05); }
@@ -3439,6 +3443,7 @@ CMD.render = function() {
             return '';
           })()
         + (o.cancelled || !o.email ? '' : '<button class="cmd-act mail" onclick="CMD.sendConfirmation(' + o.id + ')" title="Renvoyer la confirmation à ' + CMD.esc(o.email) + '">✉</button>')
+        + (o.cancelled || o.cloturee ? '' : '<button class="cmd-act ' + (o.paye ? 'unpaid' : 'paid') + '" onclick="CMD.togglePaye(' + o.id + ')" title="' + (o.paye ? 'Marquer comme non payée' : 'Marquer comme payée') + '">' + (o.paye ? '↶ Non payée' : '✓ Marquer payée') + '</button>')
         + (o.cancelled ? '' : '<button class="cmd-act ' + (o.cloturee ? 'reopen' : 'close') + '" onclick="CMD.toggleClose(' + o.id + ')">' + (o.cloturee ? 'Rouvrir' : 'Clôturer') + '</button>')
         + (o.cancelled || o.cloturee ? '' : '<button class="cmd-act cancel" onclick="CMD.toggleCancel(' + o.id + ')">✗ Annuler</button>')
       + '</td>'
@@ -3639,6 +3644,33 @@ CMD.sendConfirmation = function(id, silent) {
   .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
   .then(function() {
     alert('✉ Mail envoyé à ' + o.email);
+  })
+  .catch(function(e) { alert('Erreur : ' + e.message); });
+};
+
+// Marque/dé-marque une commande comme payée (utile pour virements bancaires, espèces, etc.)
+CMD.togglePaye = function(id) {
+  var o = CMD.orders.find(function(x){ return x.id === id; });
+  if (!o) return;
+  var newPaye = !o.paye;
+  var msg = newPaye
+    ? 'Marquer cette commande comme PAYÉE ?\n(date de paiement = aujourd\'hui)'
+    : 'Marquer cette commande comme NON PAYÉE ?\n(la date de paiement sera effacée)';
+  if (!confirm(msg)) return;
+  var nowIso = new Date().toISOString();
+  var body = {
+    paye: newPaye,
+    paid_at: newPaye ? nowIso : null
+  };
+  fetch(CMD.url + '/rest/v1/arca_orders?id=eq.' + id, {
+    method: 'PATCH',
+    headers: CMD.headers(),
+    body: JSON.stringify(body)
+  })
+  .then(function(r) {
+    if (!r.ok) return r.text().then(function(t){ throw new Error(t); });
+    o.paye = newPaye; o.paid_at = body.paid_at;
+    CMD.render();
   })
   .catch(function(e) { alert('Erreur : ' + e.message); });
 };
