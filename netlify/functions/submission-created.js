@@ -57,6 +57,26 @@ exports.handler = async function(event) {
       }
     }
 
+    // ─── Vérification PayPal côté serveur ───
+    // Le frontend envoie l'order_id + un statut "PAID" — un attaquant pourrait forger ces champs.
+    // On appelle l'API PayPal pour confirmer que l'order est bien APPROVED ou COMPLETED.
+    // Si invalide → on force le statut "non payé" et on flag pour alerter dans le mail interne.
+    let paypalVerifyWarning = null;
+    const ppOrderId = d["paypal-order-id"] || "";
+    const isPaypalOrder = ppOrderId && !ppOrderId.startsWith("cs_") && /paypal/i.test(d.paiement || "" + d["paypal-status"] || "");
+    const declaredPaid = (d["paypal-status"] || "").startsWith("PAID");
+    if (isPaypalOrder && declaredPaid) {
+      const verify = await verifyPayPalOrder(ppOrderId);
+      if (!verify.ok) {
+        console.error("[PayPal verify] ÉCHEC pour", ppOrderId, ":", verify.reason);
+        paypalVerifyWarning = "Vérification PayPal ÉCHOUÉE : " + verify.reason;
+        // Override le statut → la commande sera marquée non payée
+        d["paypal-status"] = "";
+      } else {
+        console.log("[PayPal verify] OK pour", ppOrderId, "· status=" + verify.status + " · amount=" + verify.amount + " " + verify.currency);
+      }
+    }
+
     // Génération étiquette Mondial Relay si applicable
     let mrLabel = null;
     if ((d.livraison || "") === "Mondial Relay" && d["mr-relay-code"]) {
@@ -69,7 +89,7 @@ exports.handler = async function(event) {
       }
     }
 
-    const html = buildEmailHtml(d, mrLabel);
+    const html = buildEmailHtml(d, mrLabel, paypalVerifyWarning);
     const text = buildEmailText(d, mrLabel);
     const totalLine = d["commande-details"] || "";
     const totalMatch = totalLine.match(/TOTAL:\s*(\d+(?:[.,]\d+)?)/);
@@ -168,6 +188,63 @@ exports.handler = async function(event) {
     return { statusCode: 500, body: "Error: " + err.message };
   }
 };
+
+// ─────────────────────────────────────────────────────────────
+// Vérification d'un order PayPal côté serveur (anti-forgery)
+// Retourne { ok, status, amount, currency, payerEmail, reason }
+// ─────────────────────────────────────────────────────────────
+async function verifyPayPalOrder(orderId) {
+  const CID = process.env.PAYPAL_CLIENT_ID;
+  const SEC = process.env.PAYPAL_CLIENT_SECRET;
+  if (!CID || !SEC) {
+    return { ok: false, reason: "PAYPAL_CLIENT_ID/SECRET non configurés" };
+  }
+  try {
+    // 1. Get OAuth2 access token
+    const auth = Buffer.from(CID + ":" + SEC).toString("base64");
+    const tokenResp = await fetch("https://api-m.paypal.com/v1/oauth2/token", {
+      method: "POST",
+      headers: {
+        "Authorization": "Basic " + auth,
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: "grant_type=client_credentials"
+    });
+    if (!tokenResp.ok) {
+      const t = await tokenResp.text();
+      return { ok: false, reason: "Token PayPal KO (" + tokenResp.status + "): " + t.substring(0, 200) };
+    }
+    const tokenData = await tokenResp.json();
+    const accessToken = tokenData.access_token;
+    if (!accessToken) return { ok: false, reason: "Pas d'access_token retourné" };
+
+    // 2. Get order details
+    const orderResp = await fetch("https://api-m.paypal.com/v2/checkout/orders/" + encodeURIComponent(orderId), {
+      headers: { "Authorization": "Bearer " + accessToken }
+    });
+    if (!orderResp.ok) {
+      const t = await orderResp.text();
+      if (orderResp.status === 404) {
+        return { ok: false, reason: "Order introuvable côté PayPal (sandbox-vs-live ? autre compte ?)" };
+      }
+      return { ok: false, reason: "PayPal GET order " + orderResp.status + ": " + t.substring(0, 200) };
+    }
+    const order = await orderResp.json();
+    const status = order.status || "?";
+    const purchase = (order.purchase_units || [])[0] || {};
+    const amount = purchase.amount && purchase.amount.value || "?";
+    const currency = purchase.amount && purchase.amount.currency_code || "?";
+    const payerEmail = order.payer && order.payer.email_address || null;
+
+    // 3. On accepte APPROVED (autorisé par le client) ou COMPLETED (capturé)
+    if (status !== "APPROVED" && status !== "COMPLETED") {
+      return { ok: false, status, amount, currency, payerEmail, reason: "Status PayPal '" + status + "' (attendu APPROVED ou COMPLETED)" };
+    }
+    return { ok: true, status, amount, currency, payerEmail };
+  } catch (e) {
+    return { ok: false, reason: "Exception : " + e.message };
+  }
+}
 
 // ─────────────────────────────────────────────────────────────
 // Persistance dans Supabase (schéma arca, table orders)
@@ -273,7 +350,7 @@ function esc(s) {
     .replace(/"/g, "&quot;");
 }
 
-function buildEmailHtml(d, mrLabel) {
+function buildEmailHtml(d, mrLabel, paypalVerifyWarning) {
   // Catalogue (titres + prix + badge) — doit rester aligné avec ISSUES dans commande.html
   const CATALOG = {
     1: { title: 'N°1', price: 20, badge: null },
@@ -408,6 +485,15 @@ function buildEmailHtml(d, mrLabel) {
     <div style="width:36px;height:2px;background:#c8a060;margin:0 auto 14px;"></div>
     ${statusBadge}
   </td></tr>
+
+  ${paypalVerifyWarning ? `
+  <!-- ALERTE PAYPAL -->
+  <tr><td style="background:#fde4e6;padding:14px 36px;border-bottom:2px solid #9d1018;">
+    <p style="margin:0;font:bold 13px Arial;color:#9d1018;">⚠ ALERTE PAYPAL — Vérification ÉCHOUÉE</p>
+    <p style="margin:6px 0 0;font:13px/1.5 Georgia;color:#444;">${esc(paypalVerifyWarning)}</p>
+    <p style="margin:6px 0 0;font:12px/1.4 Georgia;color:#666;font-style:italic;">La commande a été créée mais marquée NON PAYÉE. Vérifie manuellement sur dashboard PayPal avant d'expédier.</p>
+  </td></tr>
+  ` : ''}
 
   <!-- TOTAL -->
   <tr><td style="background:#faf8f5;padding:24px 36px;text-align:center;border-bottom:1px solid #e2ddd8;">
