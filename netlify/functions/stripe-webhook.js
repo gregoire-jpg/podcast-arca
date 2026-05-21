@@ -100,7 +100,9 @@ exports.handler = async function(event) {
 // (Payment Link Stripe Dashboard, donation externe, etc. — pas de metadata commande)
 async function notifyExternalStripePayment(session) {
   const BREVO_KEY = process.env.BREVO_API_KEY;
-  const TO_RAW = (process.env.ORDER_EMAIL_TO || '').split(',').map(s => s.trim()).filter(Boolean);
+  // Destinataire spécifique pour les paiements HORS tunnel (Antoine seul, pas toute la liste).
+  // Fallback sur ORDER_EMAIL_TO si EXTERNAL_PAYMENT_TO non défini.
+  const TO_RAW = (process.env.EXTERNAL_PAYMENT_TO || process.env.ORDER_EMAIL_TO || '').split(',').map(s => s.trim()).filter(Boolean);
   const FROM_EMAIL = process.env.ORDER_EMAIL_FROM;
   if (!BREVO_KEY || !TO_RAW.length || !FROM_EMAIL) {
     console.warn('[Stripe webhook external] Brevo non configuré, skip notification');
