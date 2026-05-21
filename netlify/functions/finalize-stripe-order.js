@@ -37,6 +37,14 @@ exports.handler = async function(event) {
 
     // 2. Reconstruction des données de commande depuis metadata
     const meta = session.metadata || {};
+
+    // Si pas de metadata 'nom' = paiement hors tunnel ARCA. On NE persiste PAS en BDD.
+    // (Le webhook Stripe envoie déjà une notif à Antoine pour ces cas.)
+    if (!meta.nom) {
+      console.log('[finalize-stripe-order] Paiement HORS tunnel, skip submission-created :', sessionId);
+      return redirectTo(MERCI_URL + '?paid=stripe&id=' + encodeURIComponent(sessionId));
+    }
+
     const orderData = Object.assign({}, meta, {
       'paypal-order-id': sessionId,
       'paypal-status': 'PAID — Stripe — ' + (session.customer_details && session.customer_details.email || '')
