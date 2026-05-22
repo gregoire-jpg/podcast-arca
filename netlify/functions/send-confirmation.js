@@ -77,7 +77,7 @@ function formDataFromOrder(o) {
     if (it && it.num) d['qty-n' + it.num] = String(it.qty || 0);
   });
 
-  // Reconstruit commande-details (parsé par submission-created pour TOTAL/Port/Pack)
+  // Reconstruit commande-details (parsé par submission-created pour TOTAL/Port/Pack/Remises)
   let parts = [];
   (o.items || []).forEach(function(it) {
     parts.push(`${it.title} × ${it.qty} = ${it.qty * it.price} €`);
@@ -85,9 +85,16 @@ function formDataFromOrder(o) {
   const sousTotal = (o.items || []).reduce(function(s, it){ return s + it.qty * it.price; }, 0);
   parts.push('Sous-total revues: ' + sousTotal + ' €');
   if (o.pack_discount_eur && o.pack_discount_eur > 0) parts.push('Pack complet -' + o.pack_discount_eur + ' €');
+  if (o.discount_eur && o.discount_eur > 0) parts.push('Remise panier -' + o.discount_eur + ' €');
+  if (o.shipping_discount_eur && o.shipping_discount_eur > 0) parts.push('Remise port -' + o.shipping_discount_eur + ' €');
+  if (o.discount_note) parts.push('Motif remise: ' + o.discount_note);
   parts.push('Port: ' + (o.port_eur || 0) + ' €');
   parts.push('TOTAL: ' + (o.total_eur || sousTotal) + ' €');
   d['commande-details'] = parts.join(' | ');
+  // Champs séparés pour faciliter le parsing
+  d['_discount_eur'] = o.discount_eur || 0;
+  d['_shipping_discount_eur'] = o.shipping_discount_eur || 0;
+  d['_discount_note'] = o.discount_note || '';
   return d;
 }
 

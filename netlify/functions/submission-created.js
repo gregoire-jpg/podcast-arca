@@ -556,6 +556,14 @@ function buildEmailHtml(d, mrLabel, paypalVerifyWarning) {
       <tr><td style="padding:4px 0;font:13.5px Georgia;color:#c8a060;font-style:italic;">★ Pack complet — réduction</td>
           <td style="padding:4px 0;font:13.5px Georgia;color:#c8a060;font-style:italic;text-align:right;">−${parseN(packMatch)} €</td></tr>
       ` : ''}
+      ${(parseFloat(d._discount_eur) > 0) ? `
+      <tr><td style="padding:4px 0;font:13.5px Georgia;color:#c8a060;font-style:italic;">⚑ Remise panier${d._discount_note ? ' <span style="color:#777;font-size:12px;font-style:normal;">(' + esc(d._discount_note) + ')</span>' : ''}</td>
+          <td style="padding:4px 0;font:13.5px Georgia;color:#c8a060;font-style:italic;text-align:right;">−${parseFloat(d._discount_eur)} €</td></tr>
+      ` : ''}
+      ${(parseFloat(d._shipping_discount_eur) > 0) ? `
+      <tr><td style="padding:4px 0;font:13.5px Georgia;color:#c8a060;font-style:italic;">⚑ Remise port</td>
+          <td style="padding:4px 0;font:13.5px Georgia;color:#c8a060;font-style:italic;text-align:right;">−${parseFloat(d._shipping_discount_eur)} €</td></tr>
+      ` : ''}
       <tr><td style="padding:4px 0;font:13.5px Georgia;color:#444;">Sous-total revues</td>
           <td style="padding:4px 0;font:13.5px Georgia;color:#444;text-align:right;">${esc(sousTotal)}</td></tr>
       <tr><td style="padding:4px 0;font:13.5px Georgia;color:#444;">Frais de port (${esc(d.livraison || "")})</td>
@@ -729,6 +737,14 @@ function buildClientEmailHtml(d, mrLabel) {
       ${packDiscountClient > 0 ? `
       <tr><td style="padding:6px 0;font:italic 14px Georgia;color:#c8a060;">★ Pack complet — réduction</td>
           <td style="padding:6px 0;font:italic 14px Georgia;color:#c8a060;text-align:right;">−${packDiscountClient} €</td></tr>
+      ` : ''}
+      ${(parseFloat(d._discount_eur) > 0) ? `
+      <tr><td style="padding:6px 0;font:italic 14px Georgia;color:#c8a060;">⚑ Remise</td>
+          <td style="padding:6px 0;font:italic 14px Georgia;color:#c8a060;text-align:right;">−${parseFloat(d._discount_eur)} €</td></tr>
+      ` : ''}
+      ${(parseFloat(d._shipping_discount_eur) > 0) ? `
+      <tr><td style="padding:6px 0;font:italic 14px Georgia;color:#c8a060;">⚑ Remise sur frais de port</td>
+          <td style="padding:6px 0;font:italic 14px Georgia;color:#c8a060;text-align:right;">−${parseFloat(d._shipping_discount_eur)} €</td></tr>
       ` : ''}
       ${portClient > 0 ? `
       <tr><td style="padding:6px 0;font:14px Georgia;color:#444;">Frais de port${d.livraison ? ' (' + esc(d.livraison) + ')' : ''}</td>
