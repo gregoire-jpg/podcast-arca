@@ -95,6 +95,8 @@ function formDataFromOrder(o) {
   d['_discount_eur'] = o.discount_eur || 0;
   d['_shipping_discount_eur'] = o.shipping_discount_eur || 0;
   d['_discount_note'] = o.discount_note || '';
+  // Articles libres (hors catalogue) — passés à submission-created pour affichage dans les mails
+  d['_custom_items'] = (o.items || []).filter(function(it){ return it && !it.num; });
   return d;
 }
 

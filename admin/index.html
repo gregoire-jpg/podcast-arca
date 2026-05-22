@@ -866,6 +866,13 @@
         <div id="cmd-new-items" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px 14px"></div>
       </fieldset>
 
+      <!-- Articles libres (livres anciens, autres produits hors catalogue) -->
+      <fieldset class="cmd-fs" style="margin-top:14px">
+        <legend>Articles libres (livres, hors catalogue ARCA)</legend>
+        <div id="cmd-new-custom-items"></div>
+        <button type="button" id="cmd-new-add-custom" style="margin-top:8px;padding:6px 12px;font:.78em Arial;border:1px dashed var(--gold);background:transparent;color:var(--gold);border-radius:4px;cursor:pointer">+ Ajouter une ligne libre</button>
+      </fieldset>
+
       <div class="cmd-form-grid" style="margin-top:14px">
         <!-- Livraison -->
         <fieldset class="cmd-fs">
@@ -3753,10 +3760,29 @@ CMD.CATALOG_FULL = {
 CMD.PROMO_DEADLINE = new Date('2026-05-25T22:00:00Z');
 CMD.PACK_DISCOUNT  = 40;
 
+// Ajoute une ligne d'article libre dans le formulaire
+CMD.addCustomLine = function(prefill) {
+  prefill = prefill || {};
+  var box = document.getElementById('cmd-new-custom-items');
+  if (!box) return;
+  var line = document.createElement('div');
+  line.className = 'cmd-custom-line';
+  line.style.cssText = 'display:grid;grid-template-columns:1fr 60px 80px 32px;gap:8px;align-items:center;margin-bottom:6px;';
+  line.innerHTML = ''
+    + '<input type="text" data-custom="title" placeholder="Titre du livre / article" value="' + CMD.esc(prefill.title || '') + '" style="padding:7px 9px;border:1px solid var(--border);border-radius:4px;font:.92em Arial">'
+    + '<input type="number" data-custom="qty" min="1" step="1" placeholder="Qté" value="' + (prefill.qty || 1) + '" style="padding:7px 9px;border:1px solid var(--border);border-radius:4px;text-align:center;font:.92em Arial" oninput="CMD.computeTotal()">'
+    + '<input type="number" data-custom="price" min="0" step="0.01" placeholder="Prix €" value="' + (prefill.price || 0) + '" style="padding:7px 9px;border:1px solid var(--border);border-radius:4px;text-align:right;font:.92em Arial" oninput="CMD.computeTotal()">'
+    + '<button type="button" onclick="this.parentElement.remove(); CMD.computeTotal()" title="Retirer" style="background:transparent;border:1px solid #c1272d;color:#c1272d;border-radius:4px;cursor:pointer;font:.9em/1 Arial;padding:6px 0">×</button>';
+  box.appendChild(line);
+};
+
 CMD.openCreate = function() {
   // Reset form
   var form = document.getElementById('cmd-new-form');
   if (form) form.reset();
+  // Reset articles libres
+  var customBox = document.getElementById('cmd-new-custom-items');
+  if (customBox) customBox.innerHTML = '';
   // Render article rows
   var html = '';
   var n8Price = new Date() < CMD.PROMO_DEADLINE ? 15 : 20;
@@ -3793,6 +3819,12 @@ CMD.computeTotal = function() {
     var p = parseFloat(inp.dataset.price || '0');
     if (q > 0) { totalArticles += q * p; allCount++; }
   });
+  // Articles libres (livres, hors catalogue)
+  document.querySelectorAll('.cmd-custom-line').forEach(function(line) {
+    var q = parseInt((line.querySelector('[data-custom="qty"]') || {}).value || '0', 10);
+    var p = parseFloat((line.querySelector('[data-custom="price"]') || {}).value || '0');
+    if (q > 0 && p > 0) totalArticles += q * p;
+  });
   // Pack complet : tous les 9 numéros au moins une fois
   var packDiscount = (allCount === 9) ? CMD.PACK_DISCOUNT : 0;
   var f = document.getElementById('cmd-new-form');
@@ -3812,7 +3844,7 @@ CMD.submitCreate = function() {
   var nom = (fd.get('nom') || '').trim();
   if (!nom) { alert('Le nom du client est obligatoire.'); return; }
 
-  // Collecte items
+  // Collecte items du catalogue
   var items = [];
   var totalArticles = 0, allCount = 0;
   document.querySelectorAll('#cmd-new-items input[data-num]').forEach(function(inp) {
@@ -3824,6 +3856,15 @@ CMD.submitCreate = function() {
     items.push({ num: n, title: c.title, qty: q, price: p });
     totalArticles += q * p;
     allCount++;
+  });
+  // Articles libres
+  document.querySelectorAll('.cmd-custom-line').forEach(function(line) {
+    var title = ((line.querySelector('[data-custom="title"]') || {}).value || '').trim();
+    var q = parseInt((line.querySelector('[data-custom="qty"]') || {}).value || '0', 10);
+    var p = parseFloat((line.querySelector('[data-custom="price"]') || {}).value || '0');
+    if (!title || q <= 0 || p <= 0) return;
+    items.push({ num: null, title: title, qty: q, price: p, custom: true });
+    totalArticles += q * p;
   });
   if (!items.length) { alert('Choisissez au moins un article.'); return; }
 
@@ -3908,6 +3949,9 @@ document.addEventListener('click', function(e) {
   }
   if (e.target.id === 'cmd-new') {
     CMD.openCreate();
+  }
+  if (e.target.id === 'cmd-new-add-custom') {
+    CMD.addCustomLine();
   }
   // Fermer la modale au clic en dehors
   if (e.target.id === 'cmd-new-mask') {

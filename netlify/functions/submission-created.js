@@ -549,7 +549,10 @@ function buildEmailHtml(d, mrLabel, paypalVerifyWarning) {
         <th style="padding:9px 10px;font:bold 10px Arial;letter-spacing:1px;text-transform:uppercase;color:#c8a060;text-align:right;">P.U.</th>
         <th style="padding:9px 10px;font:bold 10px Arial;letter-spacing:1px;text-transform:uppercase;color:#c8a060;text-align:right;">Sous-total</th>
       </tr></thead>
-      <tbody>${qtyRows.join("")}</tbody>
+      <tbody>${qtyRows.join("")}${(Array.isArray(d._custom_items) ? d._custom_items : []).map(function(it){
+        const sub = (it.qty || 0) * (it.price || 0);
+        return `<tr><td style="padding:8px 10px;border-top:1px solid #e2ddd8;font:14px Georgia;color:#2d3461;"><strong>${esc(it.title || '')}</strong> <span style="color:#c8a060;font-size:10px;letter-spacing:1px;text-transform:uppercase;">livre</span></td><td style="padding:8px 10px;border-top:1px solid #e2ddd8;font:14px Georgia;color:#444;text-align:center;">× ${it.qty || 0}</td><td style="padding:8px 10px;border-top:1px solid #e2ddd8;font:14px Georgia;color:#444;text-align:right;">${it.price || 0} €</td><td style="padding:8px 10px;border-top:1px solid #e2ddd8;font:bold 14px Georgia;color:#2d3461;text-align:right;">${sub} €</td></tr>`;
+      }).join('')}</tbody>
     </table>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px;">
       ${packMatch ? `
@@ -670,6 +673,11 @@ function buildClientEmailHtml(d, mrLabel) {
       rows += `<tr><td style="padding:6px 0;font:14px Georgia;color:#444;">${title} × ${q}</td><td style="padding:6px 0;font:14px Georgia;color:#2d3461;text-align:right;">${price * q} €</td></tr>`;
     }
   }
+  // Articles libres (livres hors catalogue, ajoutés en création manuelle)
+  (Array.isArray(d._custom_items) ? d._custom_items : []).forEach(function(it) {
+    const sub = (it.qty || 0) * (it.price || 0);
+    rows += `<tr><td style="padding:6px 0;font:14px Georgia;color:#444;">${esc(it.title || '')} × ${it.qty || 0}</td><td style="padding:6px 0;font:14px Georgia;color:#2d3461;text-align:right;">${sub} €</td></tr>`;
+  });
 
   // Bloc suivi Mondial Relay (si étiquette générée)
   let trackingBlock = "";
