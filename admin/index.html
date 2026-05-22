@@ -899,6 +899,16 @@
         </fieldset>
       </div>
 
+      <!-- Remises manuelles -->
+      <fieldset class="cmd-fs" style="margin-top:14px">
+        <legend>Remises manuelles (optionnel)</legend>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <label>Remise sur panier (€) <input name="discount_eur" type="number" min="0" step="0.01" value="0" oninput="CMD.computeTotal()"></label>
+          <label>Remise sur frais de port (€) <input name="shipping_discount_eur" type="number" min="0" step="0.01" value="0" oninput="CMD.computeTotal()"></label>
+        </div>
+        <label>Motif / note de la remise <input name="discount_note" placeholder="ex: client fidèle, geste commercial, livraison retardée…"></label>
+      </fieldset>
+
       <!-- Notes -->
       <fieldset class="cmd-fs" style="margin-top:14px">
         <legend>Notes internes (optionnel)</legend>
@@ -3462,6 +3472,16 @@ CMD.detailHtml = function(o) {
   }).join('');
   var packLine = (o.pack_discount_eur && o.pack_discount_eur > 0)
     ? '<p>★ <strong>Pack complet</strong> — réduction <strong>−' + o.pack_discount_eur + ' €</strong></p>' : '';
+  var manualDiscountLines = '';
+  if (o.discount_eur && o.discount_eur > 0) {
+    manualDiscountLines += '<p style="color:#c8a060">⚑ <strong>Remise panier</strong> : <strong>−' + o.discount_eur + ' €</strong></p>';
+  }
+  if (o.shipping_discount_eur && o.shipping_discount_eur > 0) {
+    manualDiscountLines += '<p style="color:#c8a060">⚑ <strong>Remise port</strong> : <strong>−' + o.shipping_discount_eur + ' €</strong></p>';
+  }
+  if (o.discount_note && (o.discount_eur > 0 || o.shipping_discount_eur > 0)) {
+    manualDiscountLines += '<p style="font-style:italic;color:#777;font-size:.9em;margin-left:18px">↳ ' + CMD.esc(o.discount_note) + '</p>';
+  }
   var relayLine = o.mr_relay_code
     ? '<p><strong>Point relais</strong> : ' + CMD.esc(o.mr_relay_code) + ' — ' + CMD.esc(o.mr_relay_info || '') + '</p>' : '';
   var companyBlock = o.is_company
@@ -3496,6 +3516,7 @@ CMD.detailHtml = function(o) {
         + '<p><strong>Articles</strong></p>'
         + '<ul style="margin:0 0 10px 18px">' + itemsList + '</ul>'
         + packLine
+        + manualDiscountLines
         + '<p>Port : <strong>' + (o.port_eur || 0) + ' €</strong> · Total : <strong style="color:var(--gold);font-size:1.1em">' + (o.total_eur || '—') + ' €</strong></p>'
         + '<p><strong>Paiement</strong> : ' + CMD.esc(o.paiement || '—') + (o.paye ? ' <span class="cmd-badge paid">PAYÉ</span>' : ' <span class="cmd-badge pending">EN ATTENTE</span>') + '</p>'
         + (paymentRef ? '<p style="font:.85em/1.3 Arial;color:var(--muted)">' + paymentRef + '</p>' : '')
@@ -3766,17 +3787,20 @@ CMD.toggleMrFields = function() {
 
 CMD.computeTotal = function() {
   var inputs = document.querySelectorAll('#cmd-new-items input[data-num]');
-  var total = 0, allCount = 0;
+  var totalArticles = 0, allCount = 0;
   inputs.forEach(function(inp) {
     var q = parseInt(inp.value || '0', 10);
     var p = parseFloat(inp.dataset.price || '0');
-    if (q > 0) { total += q * p; allCount++; }
+    if (q > 0) { totalArticles += q * p; allCount++; }
   });
   // Pack complet : tous les 9 numéros au moins une fois
-  if (allCount === 9) total -= CMD.PACK_DISCOUNT;
-  var portInput = document.querySelector('#cmd-new-form input[name="port_eur"]');
-  var port = portInput ? parseFloat(portInput.value || '0') : 0;
-  total += isNaN(port) ? 0 : port;
+  var packDiscount = (allCount === 9) ? CMD.PACK_DISCOUNT : 0;
+  var f = document.getElementById('cmd-new-form');
+  var port = parseFloat(f && f.elements['port_eur'] ? f.elements['port_eur'].value || '0' : '0') || 0;
+  var discount = parseFloat(f && f.elements['discount_eur'] ? f.elements['discount_eur'].value || '0' : '0') || 0;
+  var shipDiscount = parseFloat(f && f.elements['shipping_discount_eur'] ? f.elements['shipping_discount_eur'].value || '0' : '0') || 0;
+  var portEffectif = Math.max(0, port - shipDiscount);
+  var total = Math.max(0, totalArticles - packDiscount - discount + portEffectif);
   var el = document.getElementById('cmd-new-total');
   if (el) el.textContent = (Math.round(total * 100) / 100) + ' €';
 };
@@ -3805,7 +3829,10 @@ CMD.submitCreate = function() {
 
   var packDiscount = (allCount === 9) ? CMD.PACK_DISCOUNT : 0;
   var port = parseFloat(fd.get('port_eur') || '0') || 0;
-  var totalFinal = Math.round((totalArticles - packDiscount + port) * 100) / 100;
+  var discount = parseFloat(fd.get('discount_eur') || '0') || 0;
+  var shipDiscount = parseFloat(fd.get('shipping_discount_eur') || '0') || 0;
+  var portEffectif = Math.max(0, port - shipDiscount);
+  var totalFinal = Math.round(Math.max(0, totalArticles - packDiscount - discount + portEffectif) * 100) / 100;
 
   var paye = !!fd.get('paye');
   var nowIso = new Date().toISOString();
@@ -3823,6 +3850,9 @@ CMD.submitCreate = function() {
     total_eur:  totalFinal,
     port_eur:   port,
     pack_discount_eur: packDiscount,
+    discount_eur:          discount > 0 ? discount : 0,
+    shipping_discount_eur: shipDiscount > 0 ? shipDiscount : 0,
+    discount_note:         (discount > 0 || shipDiscount > 0) ? ((fd.get('discount_note') || '').trim() || null) : null,
     livraison:  fd.get('livraison') || null,
     mr_relay_code: (fd.get('mr_relay_code') || '').trim() || null,
     mr_relay_info: (fd.get('mr_relay_info') || '').trim() || null,
