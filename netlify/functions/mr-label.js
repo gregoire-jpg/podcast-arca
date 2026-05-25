@@ -33,7 +33,9 @@ function parseDest(orderData) {
     addressAdd1: cleanForMR(orderData.complement || '', 32),
     postCode: String(orderData.cp || '').replace(/\D/g, '').substring(0, 5),
     city: cleanForMR(orderData.ville || '', 32),
-    phoneNumber: cleanForMR((orderData.telephone || '').trim(), 15),
+    // Téléphone : on garde le format brut (le + et les chiffres),
+    // la normalisation au format international est faite par normalizePhoneIntl plus bas
+    phoneNumber: String(orderData.telephone || '').trim(),
     email: (orderData.email || '').trim()
   };
 }
