@@ -3531,23 +3531,35 @@ CMD.detailHtml = function(o) {
     + '</div>';
 };
 
-// Récapitulatif par numéro (à expédier vs déjà clôturées vs total)
+// Récapitulatif par numéro (à expédier vs déjà clôturées vs total + CA en €)
 CMD.summaryHtml = function() {
   var titles = { 1:'N°1', 2:'N°2', 3:'N°3', 4:'N°4', 5:'N°5', 6:'N°6', 7:'N°7', 8:'N°8', 9:'Recueil' };
-  var toShip = {}, shipped = {}, total = {};
-  for (var i = 1; i <= 9; i++) { toShip[i] = 0; shipped[i] = 0; total[i] = 0; }
+  var toShip = {}, shipped = {}, total = {}, revenue = {};
+  for (var i = 1; i <= 9; i++) { toShip[i] = 0; shipped[i] = 0; total[i] = 0; revenue[i] = 0; }
+  // Articles libres hors catalogue (it.num falsy) regroupés à part
+  var customRevenue = 0, customQty = 0;
+  // CA encaissé / à encaisser (port + remises inclus — hors annulées)
+  var cashIn = 0, cashOut = 0;
   CMD.orders.forEach(function(o) {
     if (o.cancelled) return;  // les commandes annulées ne comptent pas
     (o.items || []).forEach(function(it) {
-      var n = it.num, q = it.qty || 0;
-      if (!n || q <= 0) return;
+      var n = it.num, q = it.qty || 0, p = +it.price || 0;
+      if (q <= 0) return;
+      if (!n) { customRevenue += q * p; customQty += q; return; }
       total[n] += q;
+      revenue[n] += q * p;
       if (o.cloturee) shipped[n] += q;
       else toShip[n] += q;
     });
+    var t = +o.total_eur || 0;
+    if (o.paye) cashIn += t; else cashOut += t;
   });
-  var totalShip = 0, totalDone = 0, totalAll = 0;
-  for (var k = 1; k <= 9; k++) { totalShip += toShip[k]; totalDone += shipped[k]; totalAll += total[k]; }
+  var totalShip = 0, totalDone = 0, totalAll = 0, totalRevenue = 0;
+  for (var k = 1; k <= 9; k++) {
+    totalShip += toShip[k]; totalDone += shipped[k];
+    totalAll += total[k]; totalRevenue += revenue[k];
+  }
+  var grandRevenue = totalRevenue + customRevenue;
 
   var rows = '';
   for (var i = 1; i <= 9; i++) {
@@ -3557,21 +3569,37 @@ CMD.summaryHtml = function() {
       + '<td style="text-align:center;color:' + (toShip[i]>0?'#c8a060':'#999') + ';font-weight:' + (toShip[i]>0?'bold':'normal') + '">' + toShip[i] + '</td>'
       + '<td style="text-align:center;color:#999">' + shipped[i] + '</td>'
       + '<td style="text-align:center;color:var(--navy);font-weight:bold">' + total[i] + '</td>'
+      + '<td style="text-align:right;color:var(--navy);font-weight:bold">' + revenue[i].toFixed(0) + ' €</td>'
+      + '</tr>';
+  }
+  if (customQty > 0) {
+    rows += '<tr style="background:#f7f7f7;font-style:italic">'
+      + '<td>Articles hors catalogue</td>'
+      + '<td style="text-align:center;color:#999">—</td>'
+      + '<td style="text-align:center;color:#999">—</td>'
+      + '<td style="text-align:center;color:#666">' + customQty + '</td>'
+      + '<td style="text-align:right;color:#666">' + customRevenue.toFixed(0) + ' €</td>'
       + '</tr>';
   }
   return ''
     + '<div class="cmd-summary">'
       + '<div class="cmd-summary-title">📚 Récapitulatif par numéro</div>'
       + '<table class="cmd-summary-table">'
-        + '<thead><tr><th>Numéro</th><th>À expédier</th><th>Clôturées</th><th>Total commandé</th></tr></thead>'
+        + '<thead><tr><th>Numéro</th><th>À expédier</th><th>Clôturées</th><th>Total commandé</th><th style="text-align:right">CA livres</th></tr></thead>'
         + '<tbody>' + rows + '</tbody>'
         + '<tfoot><tr>'
-          + '<td><strong>TOTAL exemplaires</strong></td>'
+          + '<td><strong>TOTAL</strong></td>'
           + '<td style="text-align:center;color:#c8a060;font-weight:bold">' + totalShip + '</td>'
           + '<td style="text-align:center;color:#999">' + totalDone + '</td>'
-          + '<td style="text-align:center;color:var(--navy);font-weight:bold">' + totalAll + '</td>'
+          + '<td style="text-align:center;color:var(--navy);font-weight:bold">' + (totalAll + customQty) + '</td>'
+          + '<td style="text-align:right;color:var(--navy);font-weight:bold;font-size:1.05em">' + grandRevenue.toFixed(0) + ' €</td>'
         + '</tr></tfoot>'
       + '</table>'
+      + '<div style="margin-top:10px;display:flex;gap:16px;flex-wrap:wrap;font-size:0.95em">'
+        + '<div><span style="color:#666">Encaissé (port inclus) :</span> <strong style="color:#2a7a2a">' + cashIn.toFixed(2) + ' €</strong></div>'
+        + '<div><span style="color:#666">À encaisser :</span> <strong style="color:#c8a060">' + cashOut.toFixed(2) + ' €</strong></div>'
+        + '<div><span style="color:#666">Total commandes :</span> <strong style="color:var(--navy)">' + (cashIn + cashOut).toFixed(2) + ' €</strong></div>'
+      + '</div>'
     + '</div>';
 };
 
