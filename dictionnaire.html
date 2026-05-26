@@ -200,22 +200,13 @@ function render() {
           + '</tr></thead><tbody>';
 
     groups[lettre].forEach(function(e) {
+      // 1 ligne JSON = 1 row : alignement strict entre origine et explication
+      // (le PDF source aligne les deux colonnes ligne-par-ligne)
       var origLines = (e.origine||'').split('\n');
-      // Fusionner les lignes d'explication qui sont des continuations de wrapping
-      // (commence par minuscule ou '(' = continuation de la ligne précédente)
-      var rawExpl = (e.explication||'').split('\n');
-      var explLines = [];
-      for (var k = 0; k < rawExpl.length; k++) {
-        var ln = rawExpl[k].trim(); if (!ln) continue;
-        var fc = ln.charCodeAt(0);
-        var isCont = explLines.length > 0 && (
-          (fc >= 97 && fc <= 122) ||  // minuscule a-z
-          (fc >= 224 && fc <= 254) || // minuscule accentuée
-          ln[0] === '(' || ln[0] === ')' || ln[0] === ','
-        );
-        if (isCont) explLines[explLines.length-1] += ' ' + ln;
-        else explLines.push(ln);
-      }
+      var explLines = (e.explication||'').split('\n');
+      // Trim les lignes vides en fin pour éviter des rows fantômes
+      while (origLines.length && !origLines[origLines.length-1].trim()) origLines.pop();
+      while (explLines.length && !explLines[explLines.length-1].trim()) explLines.pop();
       var rows = Math.max(origLines.length, explLines.length, 1);
       for (var r = 0; r < rows; r++) {
         html += '<tr class="' + (r===0 ? 'erow-first' : 'erow-cont') + '">';
