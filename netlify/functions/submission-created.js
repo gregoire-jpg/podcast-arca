@@ -12,6 +12,10 @@
 
 const { createLabel } = require('./mr-label');
 
+// Fin de la souscription préférentielle N°8 : 25 mai 2026 minuit heure belge = 25 mai 22:00 UTC
+const PROMO_DEADLINE = new Date('2026-05-25T22:00:00Z');
+function getN8Price() { return new Date() < PROMO_DEADLINE ? 15 : 20; }
+
 exports.handler = async function(event) {
   // Note: les invocations event-triggered (Netlify Forms) n'ont pas de httpMethod.
   try {
@@ -262,7 +266,7 @@ async function persistOrder(d, mrLabel) {
     1: { title: 'N°1', price: 20 }, 2: { title: 'N°2', price: 20 },
     3: { title: 'N°3', price: 20 }, 4: { title: 'N°4', price: 20 },
     5: { title: 'N°5', price: 20 }, 6: { title: 'N°6', price: 20 },
-    7: { title: 'N°7', price: 20 }, 8: { title: 'N°8', price: 15 },
+    7: { title: 'N°7', price: 20 }, 8: { title: 'N°8', price: getN8Price() },
     9: { title: 'Recueil de prières', price: 20 }
   };
   const items = [];
@@ -360,7 +364,7 @@ function buildEmailHtml(d, mrLabel, paypalVerifyWarning) {
     5: { title: 'N°5', price: 20, badge: null },
     6: { title: 'N°6', price: 20, badge: null },
     7: { title: 'N°7', price: 20, badge: null },
-    8: { title: 'N°8', price: 15, badge: 'souscription' },
+    8: { title: 'N°8', price: getN8Price(), badge: (getN8Price() === 15 ? 'souscription' : 'dernier paru') },
     9: { title: 'Recueil de prières', price: 20, badge: 'hors collection' }
   };
   // Numéros commandés
@@ -608,7 +612,7 @@ function buildEmailText(d, mrLabel) {
   const CAT_TXT = {
     1: ['N°1', 20, null], 2: ['N°2', 20, null], 3: ['N°3', 20, null],
     4: ['N°4', 20, null], 5: ['N°5', 20, null], 6: ['N°6', 20, null],
-    7: ['N°7', 20, null], 8: ['N°8', 15, 'souscription'],
+    7: ['N°7', 20, null], 8: ['N°8', getN8Price(), (getN8Price() === 15 ? 'souscription' : 'dernier paru')],
     9: ['Recueil de prières', 20, 'hors collection']
   };
   for (let i = 1; i <= 9; i++) {
@@ -663,7 +667,7 @@ function buildClientEmailHtml(d, mrLabel) {
   // Lignes commande
   const CAT = {
     1:['N°1',20], 2:['N°2',20], 3:['N°3',20], 4:['N°4',20], 5:['N°5',20],
-    6:['N°6',20], 7:['N°7',20], 8:['N°8',15], 9:['Recueil de prières',20]
+    6:['N°6',20], 7:['N°7',20], 8:['N°8',getN8Price()], 9:['Recueil de prières',20]
   };
   let rows = "";
   for (let i = 1; i <= 9; i++) {
