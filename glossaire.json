@@ -189,6 +189,18 @@
     ]
   },
   {
+    "id": "adam-qadmon",
+    "terme": "ADAM QADMON",
+    "lettre": "A",
+    "entrees": [
+      {
+        "source": "VITAL, H., L’arbre de Vie, Beya, 2021, p. 37 et note 66",
+        "texte": "Nous expliquerons d’abord la partie qui inclut et comprend tout ce lieu vide, d’où se propagent tous les mondes, qui y sont suspendus et contenus, et d’où ils sortent en se manifestant à l’extérieur. Cette partie s’appelle « Adam Qadmon, antérieur à tous les anciens », c’est-à-dire antérieur (qodem) à tous les êtres.\n\nLes degrés de l’Adam Qadmon sont multiples, et sa nature élevée et cachée est prodigieuse. Le Zohar n’a entrepris de s’y intéresser qu’en partie, dans quelques passages, et même là, avec grande dissimulation. J’en citerai donc une partie d’après les Tiqounim. On lit à la fin du Tiqoun 19 : Il lui dit : S’il en est ainsi, on sait qu’il y a un Adam Qadmon, antérieur à tous les anciens, et qu’il y a aussi un autre Adam. [L’autre lui répondit : Mon fils, il en est ainsi, assurément ! L’Adam que le Degré des degrés créa à sa ressemblance, est caché et secret ; c’est lui qui provoqua l’éloignement du Degré des degrés. Le deuxième Adam pécha en pensée, et un troisième Adam pécha en acte. Ce sont là trois Adam : un Adam de Beriah (« Création »), un Adam de Ietsirah (« Formation »), et un Adam d’Asiah (« Action ») ; ils ne sont pas pécheurs à titre égal.]\n\nDe même, au début du Tiqoun 70 : Un artiste merveilleux façonna et forma (tsieïr) une image (tsioura) dans le palais d’Adam Qadmon, antérieur à tous les anciens. Car il y a Adam [et Adam ! Il y a un Adam qui n’est pas une sephirah ; on l’appelle, non « Adam », mais « Adam Qadmon », « le plus élevé de tous », « Couronne suprême » (Keter elion), « caché et secret », « mystère de tous les mystères », « Degré des degrés », « antérieur à tous les anciens »."
+      }
+    ],
+    "voir": []
+  },
+  {
     "id": "adamah",
     "terme": "ADAMAH",
     "lettre": "A",
@@ -200,18 +212,6 @@
       {
         "source": "Anonyme, Le Midrash Rabba sur la Genèse, Objectif Transmission, 2021, tome I, p. 186 (14.7)",
         "texte": "Alors Yahvé Dieu modela l’homme avec la glaise (‘afar) du sol. R. Yéhuda bar R. Simon a dit: ‘afar est à lire ‘ofer : jeune homme, Adam fut créé jeune homme en plénitude. R. Elé’azar bar Shim’on a dit: Eve aussi fut créée dans le force de l’âge. R. YoHanan a dit: Adam et Eve furent créés déjà âgés de vingt ans. R. Huna a dit: ‘afar est masculin, adama est féminin. Ainsi le potier (yotser) prend-il de la poussière mâle et de la terre femelle pour que ses vases soient solides."
-      }
-    ],
-    "voir": []
-  },
-  {
-    "id": "adam-qadmon",
-    "terme": "ADAM QADMON",
-    "lettre": "A",
-    "entrees": [
-      {
-        "source": "VITAL, H., L’arbre de Vie, Beya, 2021, p. 37 et note 66",
-        "texte": "Nous expliquerons d’abord la partie qui inclut et comprend tout ce lieu vide, d’où se propagent tous les mondes, qui y sont suspendus et contenus, et d’où ils sortent en se manifestant à l’extérieur. Cette partie s’appelle « Adam Qadmon, antérieur à tous les anciens », c’est-à-dire antérieur (qodem) à tous les êtres.\n\nLes degrés de l’Adam Qadmon sont multiples, et sa nature élevée et cachée est prodigieuse. Le Zohar n’a entrepris de s’y intéresser qu’en partie, dans quelques passages, et même là, avec grande dissimulation. J’en citerai donc une partie d’après les Tiqounim. On lit à la fin du Tiqoun 19 : Il lui dit : S’il en est ainsi, on sait qu’il y a un Adam Qadmon, antérieur à tous les anciens, et qu’il y a aussi un autre Adam. [L’autre lui répondit : Mon fils, il en est ainsi, assurément ! L’Adam que le Degré des degrés créa à sa ressemblance, est caché et secret ; c’est lui qui provoqua l’éloignement du Degré des degrés. Le deuxième Adam pécha en pensée, et un troisième Adam pécha en acte. Ce sont là trois Adam : un Adam de Beriah (« Création »), un Adam de Ietsirah (« Formation »), et un Adam d’Asiah (« Action ») ; ils ne sont pas pécheurs à titre égal.]\n\nDe même, au début du Tiqoun 70 : Un artiste merveilleux façonna et forma (tsieïr) une image (tsioura) dans le palais d’Adam Qadmon, antérieur à tous les anciens. Car il y a Adam [et Adam ! Il y a un Adam qui n’est pas une sephirah ; on l’appelle, non « Adam », mais « Adam Qadmon », « le plus élevé de tous », « Couronne suprême » (Keter elion), « caché et secret », « mystère de tous les mystères », « Degré des degrés », « antérieur à tous les anciens »."
       }
     ],
     "voir": []
@@ -299,29 +299,6 @@
     ],
     "voir": [
       "Achille 1"
-    ]
-  },
-  {
-    "id": "ge-de-fer",
-    "terme": "ÂGE DE FER",
-    "lettre": "Â",
-    "entrees": [],
-    "voir": [
-      "Âge d'or 1"
-    ]
-  },
-  {
-    "id": "ge-d-or",
-    "terme": "ÂGE D’OR",
-    "lettre": "Â",
-    "entrees": [
-      {
-        "source": "van Kasteel, H. (éd.), Oracles et Prophétie, Beya, 2011, p. 118",
-        "texte": "La divination vulgaire n’est plus que l’écorce vide de l’ancienne mantique ou prophétie dont le rôle n’est pas d’annoncer ce qui arrivera demain ou après-demain, mais de dire le monde à venir ou âge d’or, ce qui est très différent. C’est dans cette dernière perspective seulement qu’il conviendrait d’étudier les livres prophétiques. Il se produit généralement, dans l’annonce ou la description de cet âge d’or, que le prophète soit amené tout naturellement à décrire la dissolution de l’âge de fer, c’est-à-dire de ce monde-ci."
-      }
-    ],
-    "voir": [
-      "Prophète 1"
     ]
   },
   {
@@ -714,111 +691,6 @@
     ]
   },
   {
-    "id": "me",
-    "terme": "ÂME",
-    "lettre": "Â",
-    "entrees": [
-      {
-        "source": "Fabre du Bosquet, Concordance, Le Mercure Dauphinois, 2002, p. 26",
-        "texte": "« L’âme ô Tat, dit Hermès dans son Pimandre, est la propre substance, ou la propre essence de Dieu, car Dieu a une essence telle que lui seul peut se connaître. » L’âme n’est point une partie séparée de cette essence divine, comme on sépare une partie d’un tout matériel, mais elle est comme une effusion, à peu près comme la clarté du soleil n’est pas le soleil même. Cette âme est un Dieu dans les hommes ; parce que ce qui constitue proprement l’humanité confine avec la Divinité. C’est ce qui fait dire à David « Ego dixi dii estis et filii excelsi omnes ».\n\nL’âme s’entretient par la pensée et par la contemplation de la lumière divine à qui elle doit son origine."
-      },
-      {
-        "source": "Fabre du Bosquet, Concordance, Le Mercure Dauphinois, 2002, pp. 71-72",
-        "texte": "L’âme de l’homme est la pureté par excellence ; le corps est composé d’une pâte terrestre et très corruptible. L’une est une substance pensante dont les fonctions se bornent à la réflexion. L’autre est un corps pesant et machinal dont les fonctions sont limitées à la plus parfaite obéissance. Ces qualités opposées n’auraient jamais pu former un tout, si un intermédiaire ne les eut rapprochées ; c’est à la substance spirituelle à qui il était réservé d’être le lien de ces deux extrêmes ; sans ce corps spirituel qui est leur milieu et qui sert d’enveloppe à l’âme, celle-ci n’aurait jamais pu se joindre ni s’attacher au corps matériel à cause de leur éloignement et de la contrariété de leurs principes. Il fallait donc que pour servir de demeure à l’un et pour préserver l’autre de corruption, l’esprit tînt de la terrestréité de l’un et de la subtilité de l’autre. C’est pourquoi le corps spirituel de l’homme est composé d’une substance formée par les éléments simples et par les éléments grossiers mêlés ensemble ; par les premiers l’esprit se rapproche de l’âme, par les seconds il tient à la matière.\n\nL’âme est le principe des actions volontaires, réfléchies et raisonnées ; elle survit à la destruction du corps et à la dissipation de l’esprit dans la région spirituelle.\n\nL’esprit est une vapeur ignée, une étincelle, un feu qui donne la vie animale, le mouvement au corps, et semble se dissiper dans l’air quand les organes matériels se détruisent. La ténuité de cette vapeur est trop grande pour être aperçue des sens autrement que par ses effets, ministre de Dieu dans la nature, comme elle l’est de l’âme dans les hommes ; elle ne suit, uniquement dans les animaux que les impressions et les lois que le Créateur lui a imposées pour les animer, pour donner l’impulsion à leurs mouvements et les sensations analogues à leurs espèces particulières ; elle se spécifie dans l’homme et dans les animaux bruts, suivant leurs organes ; de là vient la conformité qui se trouve dans un grand nombre des actions des hommes et des bêtes. Dieu se sert de cette substance spirituelle comme d’un instrument au moyen duquel les animaux digèrent, voient, goûtent, flairent, entendent et touchent […].\n\nL’âme tient les rênes, elle guide l’esprit et le conduit dans toutes les actions réfléchies ; quelques fois la fougue et la prompte fermentation de l’esprit ne laissent point à l’âme le temps de donner ses ordres et d’exercer son empire ; l’esprit agit de lui-même, il met les ressorts du corps en mouvement et l’homme se livre alors à des actions purement animales : telles sont celles qu’on appelle premiers mouvements, où l’action précède toujours la réflexion…"
-      },
-      {
-        "source": "Paracelse, La grande astronomie, Dervy, 2000, p. 121",
-        "texte": "Il y a deux âmes en l’homme. L’une est éternelle, l’autre appartient à la nature et elle est mortelle. Ces deux âmes représentent deux modes de vie. Sur la première, la mort n’a point de prise, alors que la seconde lui est assujettie."
-      },
-      {
-        "source": "Paracelse, La grande astronomie, Dervy, 2000, p. 272",
-        "texte": "Le corps est la demeure de l’âme, et l’âme est la maison des esprits."
-      },
-      {
-        "source": "Paracelse, La grande astronomie, Dervy, 2000, p. 272",
-        "texte": "L’âme est ce souverain. Son conseil rassemble tous les esprits qui disent à l’homme ce qu’il doit faire ou ne pas faire. Il y a d’abord les esprits qui parlent au nom de la nature et de ses lois, puis l’esprit qui parle au nom de Dieu, enfin d’autres esprits dont je traiterai. Avec les esprits qu’elle rassemble, l’âme fait de l’être une personne unique. Comme lui, elle sera nouvelle au monde. Mais elle seule est éternelle."
-      },
-      {
-        "source": "Paracelse, La grande astronomie, Dervy, 2000, p. 273",
-        "texte": "L’âme est la réalité qui subsiste par elle-même. Le siège de l’âme est le cœur, centre de l’homme. Elle est la maison de tous les esprits et elle entend tous leurs avis, en bien et en mal. Elle est la source où jaillit la vie que la mort cherche à détruire. Elle est le cœur de l’homme dont parle l’Écriture : « Tu aimeras Dieu dans ton cœur »."
-      },
-      {
-        "source": "Agrippa, H.-C., La Philosophie occulte, t. 3, Éditions Traditionnelles, 1981, pp. 164-165",
-        "texte": "L'âme de l'Homme est une certaine lumière divine, créée à l'image du verbe cause des causes et premier exemplaire, la substance de dieu signée de son sceau dont le caractère est le verbe éternel. Encore l'âme de l'homme est une certaine substance divine indivisible, présente en sa totalité à chaque partie du corps, produite par un auteur incorporel de telle nature qu'elle tient tout de la puissance de l'agent et rien du fond de la matière. L'âme est un nombre substantiel, uniforme, retournant sur soi-même et rationnel, d'une condition élevée bien au-dessus de tous les corps matériels, qui ne se divise pas comme la matière, et ne provient pas de choses au-dessous d'elle et corporelles, mais d'une cause efficiente ; car elle n'est pas un nombre quantitatif, c'est un nombre indépendant de toutes les lois corporelles, c'est pourquoi elle n'est point sujette à division, ni à multiplication par parties. L'âme est donc une certaine substance divine, émanant des sources divines, et portant le nombre avec elle, non pas ce nombre suivant lequel l'architecte a disposé toutes choses, mais bien le nombre rationnel qui lui permet de tout comprendre par la proportion qu'elle a avec toutes choses. Une telle âme humaine, selon la doctrine des platoniciens, procédant immédiatement de dieu, se joint par des Milieux convenables à ce corps matériel; à cet effet, dès sa descente même, elle se trouve revêtue d'un petit corps céleste et aérien, qu'on appelle le véhicule éthéré de l'âme, ou encore le char de l'âme ; moyennant ce petit corps, par ordre de dieu qui est le centre du monde, elle est infusée d’abord au point médian du cœur qui est le centre du corps humain, et de là se répand par toutes les parties et tous les membres de son corps ; ce qu’elle fait en joignant son char à la chaleur naturelle par la chaleur de l’esprit qu’engendre le cœur, par celle-ci elle s’immerge dans les humeurs, par lesquelles elle s’attache aux membres, et s’avoisine également à tous, tout en se transfusant de l’un à l’autre, de même que la chaleur du feu s’unit à l’air et à l’eau, tout en se portant vers l’eau à travers l’air. C’est ainsi qu’on explique comment l’âme immortelle, par le moyen d’un petit corps immortel, qui est le véhicule éthéré, se trouve enfermée dans un corps grossier et mortel. Mais quand par maladie ou mal, ces milieux se détachent ou se détruisent, alors cette même âme fait un retour sur chacun d’eux et reflue au cœur qui avait été le premier réceptacle de l’âme, et l’esprit du cœur venant à manquer et sa chaleur à s’éteindre, elle l’abandonne, et l’homme meurt ; l’âme s’envole avec ce véhicule éthéré, et sortie du corps, les génies et les daïmons gardiens la suivent et la mènent devant son juge, où après la sentence prononcée, dieu conduit tranquillement les bonnes âmes à la gloire, et le violent daïmon entraîne les mauvaises au châtiment."
-      },
-      {
-        "source": "VAUGHAN, T., Œuvres complètes, Beya, 2024, p. 42",
-        "texte": "L’âme de l’homme consiste principalement en deux parties, רוח (ruah) et נפש (nefesh), l’une inférieure, l’autre supérieure, la supérieure étant masculine et éternelle, l’inférieure, féminine et mortelle. En elles deux consiste notre génération spirituelle."
-      },
-      {
-        "source": "Pythagore, Les vers d’or. Commentés par Hiéroclès (trad. M. Meunier), L’artisan du livre, 1925, p. 175 et n°1",
-        "texte": "Ce qui te fait ce que tu es en effet, c’est ton âme. Ton corps n’est pas toi ; il est seulement à toi, et les choses extérieures sont à ce qui est à toi, c’est-à-dire à ton corps. Grâce à cette distinction, tu ne confondras jamais ces diverses natures, tu sauras découvrir quelle est l’essence de l’homme ; et, ne considérant jamais comme toi-même ni ton corps ni les choses extérieures, ne t’en souciant pas comme de ta vraie personne, tu éviteras ainsi de choir dans un trop grand amour du corps et des richesses. Effectivement en ignorant ce que nous sommes, nous ignorerons aussi ce dont il faut nous soucier, nous aurons soin de tout plutôt que de nous-mêmes, oubliant que c’est à nous-mêmes qu’il faut donner notre première attention.",
-        "note": "Sur cette pensée que notre âme, c’est nous ; que notre corps est à nous, et que tout le reste n’est ni nous, ni à nous, mais ce qui est à nous, cf. Platon, Alcibiade, I, 131 ; Simplicius, Proemium in Epict. IV, 41 ; XII, 3 ; Porphyre, In protrep., 4. « Dans cette vie même, dit Platon dans ses Lois, XII, 959A, c’est notre âme seule qui constitue ce que nous sommes ; notre corps n’est qu’une image qui accompagne chacun de nous... Notre véritable personne est une substance, immortelle de sa nature, qu’on appelle âme ». L’homme est aussi défini par Plotin et par Proclus : une âme qui se sert d’un corps. Enn., I, I, III ; In Alcib. T. II, 337."
-      },
-      {
-        "source": "Cattiaux, L., Correspondances de Louis Cattiaux, éd. du Miroir d’Isis, 2016, pp. 20-21",
-        "texte": "Il faut posséder son corps en esprit et posséder son esprit en corps, l’âme étant comme le moyen et l’unificateur par excellence, c’est-à-dire l’amour au-dessus de l’intuition même de la science. […] Quand vous posséderez votre âme, vous aurez tout pour toujours."
-      },
-      {
-        "source": "Éliézer, Rabbi, Chapitres de Rabbi Éliézer, Verdier, 2018, p. 212",
-        "texte": "L’âme (néfèch) ressemble à son Créateur. De la même façon que le Saint, béni soit-Il, voit et n’est pas visible, ainsi l’âme voit mais n’est pas visible. De la même façon que le Saint, béni soit-Il, ne connaît pas le sommeil, ainsi l’âme ne dort pas. De la même façon que le Saint, béni soit-Il supporte le monde, ainsi l’âme supporte le corps."
-      },
-      {
-        "source": "Zohar (Le), Verdier, 1995, tome I, p. 548",
-        "texte": "Le premier homme était sage, il distinguait et reconnaissait les créatures qui avaient en elles un être animal et celles qui avaient une âme. Quand elles vinrent à lui, Adam sut toutes les distinguer. Aussi le texte dit-il qu’ « Adam a appelé être animal » (Gen. 2 :19) celles qui ne connaissaient ni ne percevaient le service de leur Créateur et il a appelé « âme », celles qui connaissaient et percevaient le service de leur Créateur. Il en est ainsi jusqu’à nos jours. Qui ne connait ni ne perçoit le service de son Créateur et ne s’adonne pas à la Torah a en lui un être animal et non une âme."
-      },
-      {
-        "source": "Zohar (Le), Verdier, 2018, tome IV, p. 28",
-        "texte": "L’âme est constituée de trois degrés, c’est ainsi qu’elle a trois noms, à la manière du mystère d’en haut : néfech, rouah, nechamah. Néfech, cela a été dit, est la plus basse. Rouah est une fondation qui domine néfech et c’est un degré supérieur à celle-ci qui la maintient partout comme il faut. Nechamah est une fondation supérieure qui domine tout, un degré saint au-dessus de tous les autres. Ces trois degrés sont présents dans les hommes qui ont mérité par le culte de leur maître, car au début l’homme possède la néfech, qui est une sainte préparation lui permettant de se parfaire. Quand l’homme prend l’initiative de se purifier en ce degré, il obtient d’être couronné par la rouah, qui est un saint degré résidant au-dessus de la néfech pour que l’homme, celui qui le mérite, s’en couronne. Lorsqu’il s’est élevé avec eux, avec néfech et rouah, s’est engagé et à progressé dans le culte de son Maître comme il sied, alors la nechamah s’établit sur lui, saint degré supérieur, qui domine tout, en sorte qu’il se couronne par un saint degré d’en haut, alors il est toute perfection, complet à tous égards, méritant le monde à venir il est l’aimé du SBSI, ainsi qu’il est dit : « Pour procurer des biens à ceux qui m’aiment et remplir leurs trésors » (Pro. 8 :21) ; il s’agit de ceux qui ont en eux une âme sainte."
-      },
-      {
-        "source": "Anonyme, Le Midrash Rabba sur la Genèse, Objectif Transmission, 2021, tome I, p. 188 (14.9)",
-        "texte": "L’âme a cinq noms : néfesh, ruaH, neshama, yeHida et Haya. Néfesh c’est le sang, comme il est dit: Car le sang c’est l’âme (néfesh) (Dt 12,23). RuaH, parce qu’elle monte et descend, comme il est dit: Qui connaît le souffle (ruaH) des fils d’Adam, qui monte, lui, vers le haut, et le souffle de la bête qui descend, lui, vers le bas, vers la terre ? (Qo 3,21). Neshama c’est le caractère, les gens parlent ainsi de bon caractère. Haya, parce que tous les organes meurent et qu’elle est seule à vivre (Haya) dans le corps. YeHida, parce que tous les membres vont par deux et qu’elle est unique (yeHida) dans le corps, comme il est dit : S’il n’appliquait sa pensée qu’à lui-même, s’il concentrait en lui son souffle et son haleine, toute chair expirerait […].\n\nL’âme emplit tout le corps, et lorsque l’homme dort, elle monte puiser la vie dans les sphères supérieures. R. Lévi a dit au nom de R. Hanina: L’homme doit louer le créateur pour chacune de ses respirations. D’où le savons-nous ? Du verset : « Que tout ce qui respire loue Yahvé ! » (Ps 150,6): pour chaque respiration (neshima) on loue Yahvé."
-      },
-      {
-        "source": "Agrippa, La philosophie occulte, Chacornac, 1910, p. 411",
-        "texte": "Il faut nécessairement que le Ciel et les Corps Célestes aient une Âme, vu qu’ils ont une force et une influence, et qu’ils opèrent manifestement sur les corps de ce bas monde, puisqu’une opération ne peut pas avoir pour cause un corps simplement."
-      }
-    ],
-    "voir": [
-      "Humide Radical 1",
-      "Illumination 1",
-      "Démon 1",
-      "Abel 1",
-      "Feu 12",
-      "Nephesh 1",
-      "Rouah 2"
-    ]
-  },
-  {
-    "id": "me-du-monde",
-    "terme": "ÂME DU MONDE",
-    "lettre": "Â",
-    "entrees": [
-      {
-        "source": "Agrippa, H.-C., La Philosophie occulte, t. 2, Éditions Traditionnelles, 1981, p. 208",
-        "texte": "L’âme du monde par conséquent est une certaine vie unique, qui remplit tout, qui nourrit tout, qui lie, et tient toutes choses ensemble, de manière qu’elle ne fait qu’une machine de tout le monde ; elle est comme un monocorde qui résonne par trois genres de créatures, savoir l’intellectuel, le céleste, et le corruptible, au moyen d’un seul souffle, et d’une seule vie."
-      },
-      {
-        "source": "VAUGHAN, T., Œuvres complètes, Beya, 2024, pp. 98 et 99",
-        "texte": "La matière étant d’elle-même tout à fait passive et dépourvue de faculté motrice, il nous faut nécessairement conclure qu’il y a quelque autre principe interne qui la meut et la règle en toutes ses diverses sortes de mouvements. Mais en vérité, il ne suffit pas d’appeler ce principe « forme », et d’ainsi enterrer les richesses de la nature dans cette étroite et très absurde « formalité ». Nous préférerions nous abstenir de noircir du papier ou d’étudier pour publier ce qui peut contribuer au crédit de l’auteur, mais cela contribue beaucoup plus encore au profit des lecteurs. En termes clairs donc, ce principe est l’âme du monde ou esprit universel de la nature. Cette âme est retenue dans la matière par certaines autres natures proportionnées, et, privée d’ouverture, elle organise la masse. Elle fait ce qu’elle peut pour retrouver sa liberté passée, se construit une habitation ici dans le centre, met sa prison en bon ordre, et se ramifie en tous les membres pour avoir plus de place et employer ses facultés. Mais vous observerez que dans toute construction, il y a trois principes directeurs. Le premier est cette âme dont nous avons déjà dit quelques mots. Le second est ce que nous avons appelé l’esprit du monde, et cet esprit est « le moyen par lequel l’âme se répand et meut son corps ». Le troisième est une certaine eau éthérée huileuse qui est le menstrue ou la matrice du monde, car en elle toutes choses sont construites et conservées."
-      },
-      {
-        "source": "d’Hooghvorst, E., Le Fil de Pénélope, t. 1, La Table d’émeraude, 1966, p. 133",
-        "texte": "Toute l’œuvre de la cabale, c’est ajuster aux lois de l’Amour cette âme du monde vagabonde, jalouse et toujours insatisfaite, pareille à la Junon de l’Antiquité, tant qu’elle n’a pas trouvé son lieu d’amour. Le « y a-t-il tant de colère dans les âmes divines ? » du beau Virgile dit fort bien la colère ressentie par cette âme universelle, insatisfaite et envieuse du héros Énée, fils de Vénus, la beauté du corps, ce que n’a justement pas cette âme incorporelle."
-      }
-    ],
-    "voir": [
-      "Esprit-Saint 2",
-      "Éther 1",
-      "Humide radical 1",
-      "Dissolvant 1",
-      "Hécate 1",
-      "Noûs 2",
-      "Éther 4"
-    ]
-  },
-  {
     "id": "amen",
     "terme": "AMEN",
     "lettre": "A",
@@ -921,25 +793,13 @@
     ]
   },
   {
-    "id": "ne",
-    "terme": "ÂNE",
-    "lettre": "Â",
+    "id": "ange-gardien",
+    "terme": "ANGE GARDIEN",
+    "lettre": "A",
     "entrees": [
       {
-        "source": "Apulée, Les métamorphoses, Gallimard, 2000, p. 11 (Préface)",
-        "texte": "L’âne représente les éléments instinctifs de l’homme. Ce qui le maintient sur le plan de la matière, l’enracine dans le domaine des sens et dans les choses de la terre. Ce qui risque de faire écran, fait écran à l’avènement de la vision intérieure. L’esprit doit chevaucher l’âne et le diriger, fût-ce à coups de bâton."
-      },
-      {
-        "source": "d’Hooghvorst, E., Le Fil de Pénélope, Beya, 2009, p. 352",
-        "texte": "L’âne, Set représente donc la nature de ce monde. On remarquera que, de nature, on peut tirer par anagramme, âne-rut, l’âne étant d’ailleurs connu pour la puissance de ses capacités génitales. Suivre cette nature-là, c’est s’acculer à la maison d’un ogre. Cependant cette matière obscure et chaotique d’ici-bas, toujours vouée à la corruption, n’en est pas moins nécessaire pour permettre la descente et la manifestation d’Osiris. On comprendra donc la mutilation de Set. Châtré, l’âne servira désormais de véhicule au trésor de ce monde, car il ira d’un pas lent mais assuré dans les sentiers caillouteux les plus difficiles et chemine là où le cheval ne peut aller."
-      },
-      {
-        "source": "d’Hooghvorst, E., Le Fil de Pénélope, Beya, 2009, p. 223",
-        "texte": "Les Philosophes ont enseigné que l’âne-Typhon était nécessaire à l’œuvre qu’il couve en secret. Sans lui, en effet, l’or vif ne pourrait loger ni se cuire en ce bas monde."
-      },
-      {
-        "source": "Zohar (Le), Le livre de Ruth, Verdier, 1999, p. 210",
-        "texte": "« J’ai des bœufs et des ânes, du petit bétail, des esclaves hommes et femmes », tous les démons de l’univers proviennent de leur puissance. La dimension du bœuf est chargée du jour, celle de l’âne est chargée de la nuit. Et parce que la bonté du SBSI conduit le monde durant le jour, ce bœuf ne peut pas accuser le monde, tandis que la nuit, l’âne a la possibilité d’accuser, et lorsqu’il braie lors de la première veille, les ânes entendent sa voix et braient à sa suite. A cet instant tous les démons entendent sa voix et ils surviennent tous avec cette dimension."
+        "source": "Dorn, G., L’artifice chymistique, Beya, 2015, p. 131",
+        "texte": "L’autre esprit, qui nous a été départi par le Très Haut, est sans contredit notre bon ange gardien, puisque nous ne sommes conservés dans ce monde que par cette seule émanation divine."
       }
     ],
     "voir": []
@@ -978,18 +838,6 @@
       "Vase 3",
       "Homme 5"
     ]
-  },
-  {
-    "id": "ange-gardien",
-    "terme": "ANGE GARDIEN",
-    "lettre": "A",
-    "entrees": [
-      {
-        "source": "Dorn, G., L’artifice chymistique, Beya, 2015, p. 131",
-        "texte": "L’autre esprit, qui nous a été départi par le Très Haut, est sans contredit notre bon ange gardien, puisque nous ne sommes conservés dans ce monde que par cette seule émanation divine."
-      }
-    ],
-    "voir": []
   },
   {
     "id": "anima",
@@ -1054,21 +902,21 @@
     ]
   },
   {
-    "id": "anneau",
-    "terme": "ANNEAU",
-    "lettre": "A",
-    "entrees": [],
-    "voir": [
-      "Saint 3"
-    ]
-  },
-  {
     "id": "anne",
     "terme": "ANNE",
     "lettre": "A",
     "entrees": [],
     "voir": [
       "Rose 1"
+    ]
+  },
+  {
+    "id": "anneau",
+    "terme": "ANNEAU",
+    "lettre": "A",
+    "entrees": [],
+    "voir": [
+      "Saint 3"
     ]
   },
   {
@@ -1410,6 +1258,18 @@
     "voir": []
   },
   {
+    "id": "ascese",
+    "terme": "ASCESE",
+    "lettre": "A",
+    "entrees": [
+      {
+        "source": "Cattiaux, L., Correspondances de Louis Cattiaux, éd. du Miroir d’Isis, 2016, p. 25",
+        "texte": "Vous connaissez les moyens de l’ascèse… Solitude, silence, relaxation, ralentissement des fonctions animales (rétention du souffle, jeûne, repos) et augmentation des fonctions spirituelles. Suppression aussi des fonctions mentales ou mieux extinction. Eveil de l’attention et affinement des sens jusqu’à leur sublimation dans l’extase qui fait expérimenter le sens premier et unique, le tact, qui est la substance primordiale, comme Dieu est l’essence unique, mais il faut l’expérimenter ici, car la réflexion, la raison ne suffisent plus."
+      }
+    ],
+    "voir": []
+  },
+  {
     "id": "ascl-pios",
     "terme": "ASCLÉPIOS",
     "lettre": "A",
@@ -1421,18 +1281,6 @@
       {
         "source": "Cornutus , « De la théologie grecque », dans van Kasteel, H., Questions Homériques, Beya, 2012, p. 74",
         "texte": "Par conséquent, ils ont fait d’Asclépios son [Apollon] fils, parce qu’il aurait enseigné la médecine aux hommes. Il fallait bien préposer une divinité à cet endroit-là aussi ! Le nom d’Asclépios (Ἀσκληπιός) s’explique par la douceur (ºπίως) de la guérison et la rémission du dessèchement (ἀπόσκλησις) qui caractérise la mort."
-      }
-    ],
-    "voir": []
-  },
-  {
-    "id": "ascese",
-    "terme": "ASCESE",
-    "lettre": "A",
-    "entrees": [
-      {
-        "source": "Cattiaux, L., Correspondances de Louis Cattiaux, éd. du Miroir d’Isis, 2016, p. 25",
-        "texte": "Vous connaissez les moyens de l’ascèse… Solitude, silence, relaxation, ralentissement des fonctions animales (rétention du souffle, jeûne, repos) et augmentation des fonctions spirituelles. Suppression aussi des fonctions mentales ou mieux extinction. Eveil de l’attention et affinement des sens jusqu’à leur sublimation dans l’extase qui fait expérimenter le sens premier et unique, le tact, qui est la substance primordiale, comme Dieu est l’essence unique, mais il faut l’expérimenter ici, car la réflexion, la raison ne suffisent plus."
       }
     ],
     "voir": []
@@ -1634,6 +1482,158 @@
       "Mercure 9",
       "Création 3"
     ]
+  },
+  {
+    "id": "ge-d-or",
+    "terme": "ÂGE D’OR",
+    "lettre": "Â",
+    "entrees": [
+      {
+        "source": "van Kasteel, H. (éd.), Oracles et Prophétie, Beya, 2011, p. 118",
+        "texte": "La divination vulgaire n’est plus que l’écorce vide de l’ancienne mantique ou prophétie dont le rôle n’est pas d’annoncer ce qui arrivera demain ou après-demain, mais de dire le monde à venir ou âge d’or, ce qui est très différent. C’est dans cette dernière perspective seulement qu’il conviendrait d’étudier les livres prophétiques. Il se produit généralement, dans l’annonce ou la description de cet âge d’or, que le prophète soit amené tout naturellement à décrire la dissolution de l’âge de fer, c’est-à-dire de ce monde-ci."
+      }
+    ],
+    "voir": [
+      "Prophète 1"
+    ]
+  },
+  {
+    "id": "ge-de-fer",
+    "terme": "ÂGE DE FER",
+    "lettre": "Â",
+    "entrees": [],
+    "voir": [
+      "Âge d'or 1"
+    ]
+  },
+  {
+    "id": "me",
+    "terme": "ÂME",
+    "lettre": "Â",
+    "entrees": [
+      {
+        "source": "Fabre du Bosquet, Concordance, Le Mercure Dauphinois, 2002, p. 26",
+        "texte": "« L’âme ô Tat, dit Hermès dans son Pimandre, est la propre substance, ou la propre essence de Dieu, car Dieu a une essence telle que lui seul peut se connaître. » L’âme n’est point une partie séparée de cette essence divine, comme on sépare une partie d’un tout matériel, mais elle est comme une effusion, à peu près comme la clarté du soleil n’est pas le soleil même. Cette âme est un Dieu dans les hommes ; parce que ce qui constitue proprement l’humanité confine avec la Divinité. C’est ce qui fait dire à David « Ego dixi dii estis et filii excelsi omnes ».\n\nL’âme s’entretient par la pensée et par la contemplation de la lumière divine à qui elle doit son origine."
+      },
+      {
+        "source": "Fabre du Bosquet, Concordance, Le Mercure Dauphinois, 2002, pp. 71-72",
+        "texte": "L’âme de l’homme est la pureté par excellence ; le corps est composé d’une pâte terrestre et très corruptible. L’une est une substance pensante dont les fonctions se bornent à la réflexion. L’autre est un corps pesant et machinal dont les fonctions sont limitées à la plus parfaite obéissance. Ces qualités opposées n’auraient jamais pu former un tout, si un intermédiaire ne les eut rapprochées ; c’est à la substance spirituelle à qui il était réservé d’être le lien de ces deux extrêmes ; sans ce corps spirituel qui est leur milieu et qui sert d’enveloppe à l’âme, celle-ci n’aurait jamais pu se joindre ni s’attacher au corps matériel à cause de leur éloignement et de la contrariété de leurs principes. Il fallait donc que pour servir de demeure à l’un et pour préserver l’autre de corruption, l’esprit tînt de la terrestréité de l’un et de la subtilité de l’autre. C’est pourquoi le corps spirituel de l’homme est composé d’une substance formée par les éléments simples et par les éléments grossiers mêlés ensemble ; par les premiers l’esprit se rapproche de l’âme, par les seconds il tient à la matière.\n\nL’âme est le principe des actions volontaires, réfléchies et raisonnées ; elle survit à la destruction du corps et à la dissipation de l’esprit dans la région spirituelle.\n\nL’esprit est une vapeur ignée, une étincelle, un feu qui donne la vie animale, le mouvement au corps, et semble se dissiper dans l’air quand les organes matériels se détruisent. La ténuité de cette vapeur est trop grande pour être aperçue des sens autrement que par ses effets, ministre de Dieu dans la nature, comme elle l’est de l’âme dans les hommes ; elle ne suit, uniquement dans les animaux que les impressions et les lois que le Créateur lui a imposées pour les animer, pour donner l’impulsion à leurs mouvements et les sensations analogues à leurs espèces particulières ; elle se spécifie dans l’homme et dans les animaux bruts, suivant leurs organes ; de là vient la conformité qui se trouve dans un grand nombre des actions des hommes et des bêtes. Dieu se sert de cette substance spirituelle comme d’un instrument au moyen duquel les animaux digèrent, voient, goûtent, flairent, entendent et touchent […].\n\nL’âme tient les rênes, elle guide l’esprit et le conduit dans toutes les actions réfléchies ; quelques fois la fougue et la prompte fermentation de l’esprit ne laissent point à l’âme le temps de donner ses ordres et d’exercer son empire ; l’esprit agit de lui-même, il met les ressorts du corps en mouvement et l’homme se livre alors à des actions purement animales : telles sont celles qu’on appelle premiers mouvements, où l’action précède toujours la réflexion…"
+      },
+      {
+        "source": "Paracelse, La grande astronomie, Dervy, 2000, p. 121",
+        "texte": "Il y a deux âmes en l’homme. L’une est éternelle, l’autre appartient à la nature et elle est mortelle. Ces deux âmes représentent deux modes de vie. Sur la première, la mort n’a point de prise, alors que la seconde lui est assujettie."
+      },
+      {
+        "source": "Paracelse, La grande astronomie, Dervy, 2000, p. 272",
+        "texte": "Le corps est la demeure de l’âme, et l’âme est la maison des esprits."
+      },
+      {
+        "source": "Paracelse, La grande astronomie, Dervy, 2000, p. 272",
+        "texte": "L’âme est ce souverain. Son conseil rassemble tous les esprits qui disent à l’homme ce qu’il doit faire ou ne pas faire. Il y a d’abord les esprits qui parlent au nom de la nature et de ses lois, puis l’esprit qui parle au nom de Dieu, enfin d’autres esprits dont je traiterai. Avec les esprits qu’elle rassemble, l’âme fait de l’être une personne unique. Comme lui, elle sera nouvelle au monde. Mais elle seule est éternelle."
+      },
+      {
+        "source": "Paracelse, La grande astronomie, Dervy, 2000, p. 273",
+        "texte": "L’âme est la réalité qui subsiste par elle-même. Le siège de l’âme est le cœur, centre de l’homme. Elle est la maison de tous les esprits et elle entend tous leurs avis, en bien et en mal. Elle est la source où jaillit la vie que la mort cherche à détruire. Elle est le cœur de l’homme dont parle l’Écriture : « Tu aimeras Dieu dans ton cœur »."
+      },
+      {
+        "source": "Agrippa, H.-C., La Philosophie occulte, t. 3, Éditions Traditionnelles, 1981, pp. 164-165",
+        "texte": "L'âme de l'Homme est une certaine lumière divine, créée à l'image du verbe cause des causes et premier exemplaire, la substance de dieu signée de son sceau dont le caractère est le verbe éternel. Encore l'âme de l'homme est une certaine substance divine indivisible, présente en sa totalité à chaque partie du corps, produite par un auteur incorporel de telle nature qu'elle tient tout de la puissance de l'agent et rien du fond de la matière. L'âme est un nombre substantiel, uniforme, retournant sur soi-même et rationnel, d'une condition élevée bien au-dessus de tous les corps matériels, qui ne se divise pas comme la matière, et ne provient pas de choses au-dessous d'elle et corporelles, mais d'une cause efficiente ; car elle n'est pas un nombre quantitatif, c'est un nombre indépendant de toutes les lois corporelles, c'est pourquoi elle n'est point sujette à division, ni à multiplication par parties. L'âme est donc une certaine substance divine, émanant des sources divines, et portant le nombre avec elle, non pas ce nombre suivant lequel l'architecte a disposé toutes choses, mais bien le nombre rationnel qui lui permet de tout comprendre par la proportion qu'elle a avec toutes choses. Une telle âme humaine, selon la doctrine des platoniciens, procédant immédiatement de dieu, se joint par des Milieux convenables à ce corps matériel; à cet effet, dès sa descente même, elle se trouve revêtue d'un petit corps céleste et aérien, qu'on appelle le véhicule éthéré de l'âme, ou encore le char de l'âme ; moyennant ce petit corps, par ordre de dieu qui est le centre du monde, elle est infusée d’abord au point médian du cœur qui est le centre du corps humain, et de là se répand par toutes les parties et tous les membres de son corps ; ce qu’elle fait en joignant son char à la chaleur naturelle par la chaleur de l’esprit qu’engendre le cœur, par celle-ci elle s’immerge dans les humeurs, par lesquelles elle s’attache aux membres, et s’avoisine également à tous, tout en se transfusant de l’un à l’autre, de même que la chaleur du feu s’unit à l’air et à l’eau, tout en se portant vers l’eau à travers l’air. C’est ainsi qu’on explique comment l’âme immortelle, par le moyen d’un petit corps immortel, qui est le véhicule éthéré, se trouve enfermée dans un corps grossier et mortel. Mais quand par maladie ou mal, ces milieux se détachent ou se détruisent, alors cette même âme fait un retour sur chacun d’eux et reflue au cœur qui avait été le premier réceptacle de l’âme, et l’esprit du cœur venant à manquer et sa chaleur à s’éteindre, elle l’abandonne, et l’homme meurt ; l’âme s’envole avec ce véhicule éthéré, et sortie du corps, les génies et les daïmons gardiens la suivent et la mènent devant son juge, où après la sentence prononcée, dieu conduit tranquillement les bonnes âmes à la gloire, et le violent daïmon entraîne les mauvaises au châtiment."
+      },
+      {
+        "source": "VAUGHAN, T., Œuvres complètes, Beya, 2024, p. 42",
+        "texte": "L’âme de l’homme consiste principalement en deux parties, רוח (ruah) et נפש (nefesh), l’une inférieure, l’autre supérieure, la supérieure étant masculine et éternelle, l’inférieure, féminine et mortelle. En elles deux consiste notre génération spirituelle."
+      },
+      {
+        "source": "Pythagore, Les vers d’or. Commentés par Hiéroclès (trad. M. Meunier), L’artisan du livre, 1925, p. 175 et n°1",
+        "texte": "Ce qui te fait ce que tu es en effet, c’est ton âme. Ton corps n’est pas toi ; il est seulement à toi, et les choses extérieures sont à ce qui est à toi, c’est-à-dire à ton corps. Grâce à cette distinction, tu ne confondras jamais ces diverses natures, tu sauras découvrir quelle est l’essence de l’homme ; et, ne considérant jamais comme toi-même ni ton corps ni les choses extérieures, ne t’en souciant pas comme de ta vraie personne, tu éviteras ainsi de choir dans un trop grand amour du corps et des richesses. Effectivement en ignorant ce que nous sommes, nous ignorerons aussi ce dont il faut nous soucier, nous aurons soin de tout plutôt que de nous-mêmes, oubliant que c’est à nous-mêmes qu’il faut donner notre première attention.",
+        "note": "Sur cette pensée que notre âme, c’est nous ; que notre corps est à nous, et que tout le reste n’est ni nous, ni à nous, mais ce qui est à nous, cf. Platon, Alcibiade, I, 131 ; Simplicius, Proemium in Epict. IV, 41 ; XII, 3 ; Porphyre, In protrep., 4. « Dans cette vie même, dit Platon dans ses Lois, XII, 959A, c’est notre âme seule qui constitue ce que nous sommes ; notre corps n’est qu’une image qui accompagne chacun de nous... Notre véritable personne est une substance, immortelle de sa nature, qu’on appelle âme ». L’homme est aussi défini par Plotin et par Proclus : une âme qui se sert d’un corps. Enn., I, I, III ; In Alcib. T. II, 337."
+      },
+      {
+        "source": "Cattiaux, L., Correspondances de Louis Cattiaux, éd. du Miroir d’Isis, 2016, pp. 20-21",
+        "texte": "Il faut posséder son corps en esprit et posséder son esprit en corps, l’âme étant comme le moyen et l’unificateur par excellence, c’est-à-dire l’amour au-dessus de l’intuition même de la science. […] Quand vous posséderez votre âme, vous aurez tout pour toujours."
+      },
+      {
+        "source": "Éliézer, Rabbi, Chapitres de Rabbi Éliézer, Verdier, 2018, p. 212",
+        "texte": "L’âme (néfèch) ressemble à son Créateur. De la même façon que le Saint, béni soit-Il, voit et n’est pas visible, ainsi l’âme voit mais n’est pas visible. De la même façon que le Saint, béni soit-Il, ne connaît pas le sommeil, ainsi l’âme ne dort pas. De la même façon que le Saint, béni soit-Il supporte le monde, ainsi l’âme supporte le corps."
+      },
+      {
+        "source": "Zohar (Le), Verdier, 1995, tome I, p. 548",
+        "texte": "Le premier homme était sage, il distinguait et reconnaissait les créatures qui avaient en elles un être animal et celles qui avaient une âme. Quand elles vinrent à lui, Adam sut toutes les distinguer. Aussi le texte dit-il qu’ « Adam a appelé être animal » (Gen. 2 :19) celles qui ne connaissaient ni ne percevaient le service de leur Créateur et il a appelé « âme », celles qui connaissaient et percevaient le service de leur Créateur. Il en est ainsi jusqu’à nos jours. Qui ne connait ni ne perçoit le service de son Créateur et ne s’adonne pas à la Torah a en lui un être animal et non une âme."
+      },
+      {
+        "source": "Zohar (Le), Verdier, 2018, tome IV, p. 28",
+        "texte": "L’âme est constituée de trois degrés, c’est ainsi qu’elle a trois noms, à la manière du mystère d’en haut : néfech, rouah, nechamah. Néfech, cela a été dit, est la plus basse. Rouah est une fondation qui domine néfech et c’est un degré supérieur à celle-ci qui la maintient partout comme il faut. Nechamah est une fondation supérieure qui domine tout, un degré saint au-dessus de tous les autres. Ces trois degrés sont présents dans les hommes qui ont mérité par le culte de leur maître, car au début l’homme possède la néfech, qui est une sainte préparation lui permettant de se parfaire. Quand l’homme prend l’initiative de se purifier en ce degré, il obtient d’être couronné par la rouah, qui est un saint degré résidant au-dessus de la néfech pour que l’homme, celui qui le mérite, s’en couronne. Lorsqu’il s’est élevé avec eux, avec néfech et rouah, s’est engagé et à progressé dans le culte de son Maître comme il sied, alors la nechamah s’établit sur lui, saint degré supérieur, qui domine tout, en sorte qu’il se couronne par un saint degré d’en haut, alors il est toute perfection, complet à tous égards, méritant le monde à venir il est l’aimé du SBSI, ainsi qu’il est dit : « Pour procurer des biens à ceux qui m’aiment et remplir leurs trésors » (Pro. 8 :21) ; il s’agit de ceux qui ont en eux une âme sainte."
+      },
+      {
+        "source": "Anonyme, Le Midrash Rabba sur la Genèse, Objectif Transmission, 2021, tome I, p. 188 (14.9)",
+        "texte": "L’âme a cinq noms : néfesh, ruaH, neshama, yeHida et Haya. Néfesh c’est le sang, comme il est dit: Car le sang c’est l’âme (néfesh) (Dt 12,23). RuaH, parce qu’elle monte et descend, comme il est dit: Qui connaît le souffle (ruaH) des fils d’Adam, qui monte, lui, vers le haut, et le souffle de la bête qui descend, lui, vers le bas, vers la terre ? (Qo 3,21). Neshama c’est le caractère, les gens parlent ainsi de bon caractère. Haya, parce que tous les organes meurent et qu’elle est seule à vivre (Haya) dans le corps. YeHida, parce que tous les membres vont par deux et qu’elle est unique (yeHida) dans le corps, comme il est dit : S’il n’appliquait sa pensée qu’à lui-même, s’il concentrait en lui son souffle et son haleine, toute chair expirerait […].\n\nL’âme emplit tout le corps, et lorsque l’homme dort, elle monte puiser la vie dans les sphères supérieures. R. Lévi a dit au nom de R. Hanina: L’homme doit louer le créateur pour chacune de ses respirations. D’où le savons-nous ? Du verset : « Que tout ce qui respire loue Yahvé ! » (Ps 150,6): pour chaque respiration (neshima) on loue Yahvé."
+      },
+      {
+        "source": "Agrippa, La philosophie occulte, Chacornac, 1910, p. 411",
+        "texte": "Il faut nécessairement que le Ciel et les Corps Célestes aient une Âme, vu qu’ils ont une force et une influence, et qu’ils opèrent manifestement sur les corps de ce bas monde, puisqu’une opération ne peut pas avoir pour cause un corps simplement."
+      }
+    ],
+    "voir": [
+      "Humide Radical 1",
+      "Illumination 1",
+      "Démon 1",
+      "Abel 1",
+      "Feu 12",
+      "Nephesh 1",
+      "Rouah 2"
+    ]
+  },
+  {
+    "id": "me-du-monde",
+    "terme": "ÂME DU MONDE",
+    "lettre": "Â",
+    "entrees": [
+      {
+        "source": "Agrippa, H.-C., La Philosophie occulte, t. 2, Éditions Traditionnelles, 1981, p. 208",
+        "texte": "L’âme du monde par conséquent est une certaine vie unique, qui remplit tout, qui nourrit tout, qui lie, et tient toutes choses ensemble, de manière qu’elle ne fait qu’une machine de tout le monde ; elle est comme un monocorde qui résonne par trois genres de créatures, savoir l’intellectuel, le céleste, et le corruptible, au moyen d’un seul souffle, et d’une seule vie."
+      },
+      {
+        "source": "VAUGHAN, T., Œuvres complètes, Beya, 2024, pp. 98 et 99",
+        "texte": "La matière étant d’elle-même tout à fait passive et dépourvue de faculté motrice, il nous faut nécessairement conclure qu’il y a quelque autre principe interne qui la meut et la règle en toutes ses diverses sortes de mouvements. Mais en vérité, il ne suffit pas d’appeler ce principe « forme », et d’ainsi enterrer les richesses de la nature dans cette étroite et très absurde « formalité ». Nous préférerions nous abstenir de noircir du papier ou d’étudier pour publier ce qui peut contribuer au crédit de l’auteur, mais cela contribue beaucoup plus encore au profit des lecteurs. En termes clairs donc, ce principe est l’âme du monde ou esprit universel de la nature. Cette âme est retenue dans la matière par certaines autres natures proportionnées, et, privée d’ouverture, elle organise la masse. Elle fait ce qu’elle peut pour retrouver sa liberté passée, se construit une habitation ici dans le centre, met sa prison en bon ordre, et se ramifie en tous les membres pour avoir plus de place et employer ses facultés. Mais vous observerez que dans toute construction, il y a trois principes directeurs. Le premier est cette âme dont nous avons déjà dit quelques mots. Le second est ce que nous avons appelé l’esprit du monde, et cet esprit est « le moyen par lequel l’âme se répand et meut son corps ». Le troisième est une certaine eau éthérée huileuse qui est le menstrue ou la matrice du monde, car en elle toutes choses sont construites et conservées."
+      },
+      {
+        "source": "d’Hooghvorst, E., Le Fil de Pénélope, t. 1, La Table d’émeraude, 1966, p. 133",
+        "texte": "Toute l’œuvre de la cabale, c’est ajuster aux lois de l’Amour cette âme du monde vagabonde, jalouse et toujours insatisfaite, pareille à la Junon de l’Antiquité, tant qu’elle n’a pas trouvé son lieu d’amour. Le « y a-t-il tant de colère dans les âmes divines ? » du beau Virgile dit fort bien la colère ressentie par cette âme universelle, insatisfaite et envieuse du héros Énée, fils de Vénus, la beauté du corps, ce que n’a justement pas cette âme incorporelle."
+      }
+    ],
+    "voir": [
+      "Esprit-Saint 2",
+      "Éther 1",
+      "Humide radical 1",
+      "Dissolvant 1",
+      "Hécate 1",
+      "Noûs 2",
+      "Éther 4"
+    ]
+  },
+  {
+    "id": "ne",
+    "terme": "ÂNE",
+    "lettre": "Â",
+    "entrees": [
+      {
+        "source": "Apulée, Les métamorphoses, Gallimard, 2000, p. 11 (Préface)",
+        "texte": "L’âne représente les éléments instinctifs de l’homme. Ce qui le maintient sur le plan de la matière, l’enracine dans le domaine des sens et dans les choses de la terre. Ce qui risque de faire écran, fait écran à l’avènement de la vision intérieure. L’esprit doit chevaucher l’âne et le diriger, fût-ce à coups de bâton."
+      },
+      {
+        "source": "d’Hooghvorst, E., Le Fil de Pénélope, Beya, 2009, p. 352",
+        "texte": "L’âne, Set représente donc la nature de ce monde. On remarquera que, de nature, on peut tirer par anagramme, âne-rut, l’âne étant d’ailleurs connu pour la puissance de ses capacités génitales. Suivre cette nature-là, c’est s’acculer à la maison d’un ogre. Cependant cette matière obscure et chaotique d’ici-bas, toujours vouée à la corruption, n’en est pas moins nécessaire pour permettre la descente et la manifestation d’Osiris. On comprendra donc la mutilation de Set. Châtré, l’âne servira désormais de véhicule au trésor de ce monde, car il ira d’un pas lent mais assuré dans les sentiers caillouteux les plus difficiles et chemine là où le cheval ne peut aller."
+      },
+      {
+        "source": "d’Hooghvorst, E., Le Fil de Pénélope, Beya, 2009, p. 223",
+        "texte": "Les Philosophes ont enseigné que l’âne-Typhon était nécessaire à l’œuvre qu’il couve en secret. Sans lui, en effet, l’or vif ne pourrait loger ni se cuire en ce bas monde."
+      },
+      {
+        "source": "Zohar (Le), Le livre de Ruth, Verdier, 1999, p. 210",
+        "texte": "« J’ai des bœufs et des ânes, du petit bétail, des esclaves hommes et femmes », tous les démons de l’univers proviennent de leur puissance. La dimension du bœuf est chargée du jour, celle de l’âne est chargée de la nuit. Et parce que la bonté du SBSI conduit le monde durant le jour, ce bœuf ne peut pas accuser le monde, tandis que la nuit, l’âne a la possibilité d’accuser, et lorsqu’il braie lors de la première veille, les ânes entendent sa voix et braient à sa suite. A cet instant tous les démons entendent sa voix et ils surviennent tous avec cette dimension."
+      }
+    ],
+    "voir": []
   },
   {
     "id": "babel",
@@ -2765,15 +2765,6 @@
     ]
   },
   {
-    "id": "chouette",
-    "terme": "CHOUETTE",
-    "lettre": "C",
-    "entrees": [],
-    "voir": [
-      "Athéna 3"
-    ]
-  },
-  {
     "id": "chofar",
     "terme": "CHOFAR",
     "lettre": "C",
@@ -2796,6 +2787,15 @@
       }
     ],
     "voir": []
+  },
+  {
+    "id": "chouette",
+    "terme": "CHOUETTE",
+    "lettre": "C",
+    "entrees": [],
+    "voir": [
+      "Athéna 3"
+    ]
   },
   {
     "id": "christ",
@@ -3086,15 +3086,6 @@
     ]
   },
   {
-    "id": "cl-mence",
-    "terme": "CLÉMENCE",
-    "lettre": "C",
-    "entrees": [],
-    "voir": [
-      "Tétragramme 8"
-    ]
-  },
-  {
     "id": "clef",
     "terme": "CLEF",
     "lettre": "C",
@@ -3113,6 +3104,15 @@
       }
     ],
     "voir": []
+  },
+  {
+    "id": "cl-mence",
+    "terme": "CLÉMENCE",
+    "lettre": "C",
+    "entrees": [],
+    "voir": [
+      "Tétragramme 8"
+    ]
   },
   {
     "id": "clio",
@@ -4820,6 +4820,487 @@
     ]
   },
   {
+    "id": "eden",
+    "terme": "EDEN",
+    "lettre": "E",
+    "entrees": [],
+    "voir": [
+      "Jardin 2",
+      "Guimel 1"
+    ]
+  },
+  {
+    "id": "ein-soph",
+    "terme": "EIN SOPH",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "d’Hooghvorst, C., Le Livre d’Adam, Beya, 2008, p. 76",
+        "texte": "Le rêve de Dieu. L’inconnaissable, origine de Tout, ne peut se définir. La tradition judaïque l’appelle ein soph   (אין סוף), le « sans limites » […]. On ne peut ni le connaître ni le limiter. Il n’est donc pas objet de révélation […]. L’ein soph se pense lui-même, ou plus exactement se rêve, et ce rêve est la première de toutes ses émanations (dont l’ensemble constitue les 10 sephirot). On l’appelle « la couronne céleste », en hébreu keter elion (כתר עליון). Cette première émanation de l’ein soph est décrite comme une matière très fluide, la plus subtile qui soit, appelée par les sages de vérité, semence. Mais cette pensée divine peut être atteinte par l’homme dans ce qui est précisément appelé le don de la Torah ou création. C’est dans cette création que la divinité s’exprime et se connaît en se définissant. Israël, en le contemplant, se révèle à lui-même également, comme dans un mystérieux miroir. Et tout cela est appelé alliance. Ainsi, la Torah et l’alliance ne sont qu’une seule et même chose donnée à Israël dans le mystère de la bénédiction. Ce rêve, cette première émanation de l’inconnaissable, cette pensée, se dit holem (חולם), le nom d’une voyelle longue en hébreu (ô), représentée par un point qui se place au-dessus de la consonne. Le mot holem procède du verbe halom (חלם), qui signifie « rêver » ; de là, le mot halom (חלום), rêve."
+      },
+      {
+        "source": "d’Hooghvorst, E., Le Fil de Pénélope, t. 1, La Table d’émeraude, 1966, p. 229",
+        "texte": "L’inconnaissable, origine de Tout, ne peut se définir. La tradition judaïque l’appelle l’Ein Soph, le Sans Limites, admirable négation excluant toute définition et qui convient parfaitement à ce dont il s’agit : on ne peut ni le connaître ni le limiter. Il n’est donc pas objet de révélation : « Sache […] que de l’Ein Soph […] on ne trouve aucune allusion ni dans la Torah, ni dans les Prophètes […] Il n’y a que les maîtres de l’adoration qui en aient fait une certaine allusion. » L’Ein Soph se pense lui-même, ou plus exactement, se rêve et ce rêve est la première de toutes ses émanations. On l’appelle la Couronne Céleste (כתר עליון)."
+      },
+      {
+        "source": "d’Hooghvorst, E., Le Fil de Pénélope, t. 1, La Table d’émeraude, 1966, p. 231",
+        "texte": "Le tétragramme (יהוה) est le lieu de l’existence de l’Ein Soph, le lieu de la vérité : « Puisque nous ne pouvons atteindre l’Ein Soph du Saint, béni soit-Il, il a fait un lieu (מקום) et celui-ci est appelé d’un nom qui invoque l’idée de limite et c’est là l’existence du Saint béni soit-Il »."
+      },
+      {
+        "source": "VITAL, H., L’arbre de Vie, Beya, 2021, p. 12",
+        "texte": "Sache qu’avant l’émanation des êtres émanés et la création des êtres créés, une simple lumière suprême remplissait toute la réalité, sans lieu vide, espace vacant ou cavité d’aucune sorte. Tout était rempli de cette simple lumière infinie (eïn soph), sans commencement ni fin. Tout n’était qu’une simple lumière, parfaitement égale à elle-même, qu’on appelle « lumière infinie (eïn soph) »."
+      }
+    ],
+    "voir": [
+      "Sephirot 1",
+      "Keter 2",
+      "Éther 1"
+    ]
+  },
+  {
+    "id": "el",
+    "terme": "EL",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "Zohar (Le), Verdier, 1995, tome I, pp. 61 et 62",
+        "texte": "« La gloire du divin » c’est la gloire de l’épousée dénommée « Divinité » (él) comme il est écrit : El (la divinité) gronde tous les jours (Ps.7 :12). Chaque jour de l’année elle est appelée « El », mais maintenant qu’elle entre sous le dais nuptial elle est appelée « Gloire ». Elle est aussi appelée à ce moment « El » (la divinité) telle une gloire sur une gloire, une lumière sur une lumière, un règne sur un règne."
+      }
+    ],
+    "voir": [
+      "Gabriel 3",
+      "Divinité 2"
+    ]
+  },
+  {
+    "id": "elohim",
+    "terme": "ELOHIM",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "d’Hooghvorst, C., Le Livre d’Adam, Beya, 2008, p. 33",
+        "texte": "Elohim représente toujours Dieu sous son aspect de rigueur, de jugement. On l’appelle le Dieu des nations. C’est le Dieu extérieur à l’homme, dont tout le monde parle et que personne ne connaît. Sans lui, il n’y a pas de vie possible dans l’univers. De même qu’il donne la vie, de même il la détruit et consume. C’est le Dieu de la nature, que l’homme doit connaître pour saisir son secret. Le mot se traduit par « Dieu ». En termes chrétiens, il pourrait correspondre au Père Céleste."
+      },
+      {
+        "source": "Zohar (Le), Verdier, 1995, tome I, pp. 507 et 508",
+        "texte": "« Celui qui fera un sacrifice pour YHVH » (Lev. 2 :1). Il est toujours écrit « pour YHVH », il n’est jamais dit « pour Elohim ». Quelle en est la raison ? Elohim, poursuivait rabbi Abahou, est un nom porté en commun : les anges sont appelés Elohim, et les juges sont appelés Elohim. Par conséquent nous ne saurions pas auquel d’entre eux est adressé le sacrifice. Voilà pourquoi il faut évoquer Son Nom propre [donc YHVH (ndlr)] à l’exclusion de tout autre […].\n\nQue soit béni et sublimé le nom du Roi des rois des rois, le SBSI. Il est le premier, Il est le dernier et, hormis Lui, il n’y a pas d’Elohim. Il a créé le monde par le secret de trois propos grandioses : la connaissance, la sagesse et le discernement."
+      },
+      {
+        "source": "VITAL, H., L’arbre de Vie, Beya, 2021, p. 79 et note 149",
+        "texte": "Binah, appelée מי (mi), se revêt de  אלה(eleh), ce qui donne  אלהים(Elohim) : ברא אלה מי (mi bara eleh) (Isaïe 40, 26).",
+        "note": "להא (eleh), « ces [choses] », vaut en guématrie (1 + 30 + 5 =) 36 ; מי (mi), « qui ? », vaut (40 + 10 =) 50 ; les lettres des deux mots réunis donnent םלהיא (Elohim), qui vaut (36 + 50 =) 86. Les mots להא אבר מי (« Qui a créé ces choses ? ») sont anagramme de םלהיא אבר (bara Elohim), « a créé Elohim » (Genèse 1, 1)."
+      },
+      {
+        "source": "Zohar (Le), Le Cantique des Cantiques, Verdier, 1999, p. 113 [66b] et note 425",
+        "texte": "Elohim : E est mâle, lohim est l’éveil du Juste, et c’est la circoncision avec la déchirure, sans aucun côté de Prépuce.",
+        "note": "Les quatre dernières lettres du nom Elohim sont en hébreu l’anagramme du mot milah, « circoncision ». Le « prépuce » est un symbole de l’Autre côté."
+      },
+      {
+        "source": "Zohar (Le), Le Cantique des Cantiques, Verdier, 1999, p. 114 [66b], note 425",
+        "texte": "Elohim est lu comme étant composé de deux mots, el et hayam (avec un changement de vocalisation), il signifie alors « vers la mer »."
+      }
+    ],
+    "voir": [
+      "Mi 2",
+      "Mer 6",
+      "Luminaires 2",
+      "Tardemah 5",
+      "Tétragramme 8"
+    ]
+  },
+  {
+    "id": "en-bas",
+    "terme": "EN-BAS",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "Zohar (Le), Verdier, 1995, tome I, p. 107",
+        "texte": "Le monde qui se manifeste c’est le monde de l’En-bas : « Je verrai YHVH » (Es. 6 :1)."
+      }
+    ],
+    "voir": []
+  },
+  {
+    "id": "encens",
+    "terme": "ENCENS",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "d’Hooghvorst, E., Le Fil de Pénélope, t. 1, La Table d’émeraude, 1966, pp. 216-217",
+        "texte": "Trois couleurs principales […]. L’azur indique l’esprit, l’or, le corps et le rouge, le sens. […] Ces trois couleurs désignent aussi les trois substances que les mages venus d’Orient offrirent à l’Enfant-Dieu dans sa crèche : l’or pour le corps, l’encens pour l’esprit et la myrrhe pour le sens qui unit l’esprit au corps."
+      },
+      {
+        "source": "Dechambre, R., Demandons TOUT ! revue ARCA n°3, p. 323",
+        "texte": "Ce symbole est également présent dans le rituel de la messe de funérailles. La matière de l'encens représenterait le mort, Osiris en nous, la pierre brute (située traditionnellement dans notre sacrum), et la fumée qui s'en élève serait alors l’esprit (ou la prière) qui s’élève de ce mort.\n\nLa fumée, noire au départ, telles les sombres vapeurs de Typhon, devient blanche en montant et se purifie totalement. Arrivée en haut, elle devient comme de la neige.\n\nVoilà pourquoi on dit que Maya a déposé son fils Mercure dans la neige sur le mont Cyllène.",
+        "note": "Dans la Genèse (2, 21), on retrouve cette même image lorsque Dieu plonge Adam dans un « songe », la tardemah, pour extraire Ève de sa côte."
+      },
+      {
+        "source": "Zohar (Le), Verdier, 1995, tome I, p. 424",
+        "texte": "Nulle puissance, quelle qu’elle soit ne régit la terre d’Israël, hormis le Saint, béni soit-Il, seul et quand Israël faillit en encensant des divinités étrangères à même le territoire d’Israël, ils chassèrent, si l’on peut dire, la Présence loin de sa place. Ils attirèrent et encensèrent les autres dieux pour qu’ils se joignent à la Présence, ce qui donna le pouvoir à ces derniers. L’encens possède en effet la vertu d’opérer des attachements. Désormais les autres peuples se mirent à gouverner, les prophètes cessèrent d’exister, et tous les échelons suprêmes n’eurent plus de pouvoir sur la terre."
+      },
+      {
+        "source": "Zohar (Le), Verdier, 2018, tome IV, p. 111",
+        "texte": "Et viens et vois : l’encens (qetoret) nous des liens (meqater qetarin) et rattache l’en haut et l’en bas et cela élimine la mort, l’accusateur et la colère qui ne peuvent s’imposer en ce monde."
+      }
+    ],
+    "voir": []
+  },
+  {
+    "id": "enee",
+    "terme": "ENEE",
+    "lettre": "E",
+    "entrees": [],
+    "voir": [
+      "Achille I",
+      "Troie I"
+    ]
+  },
+  {
+    "id": "enfants",
+    "terme": "ENFANTS",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "Feye, S., Fil d’Ariane, n°15 p. 53",
+        "texte": "« Enfant » se dit νήπιος en grec, de νη privatif et de œπος, parole. La même signification se retrouve dans le latin in-fans qui a donné EN-FANT. L’enfant est donc : « celui qui ne parle pas » ou : « celui qui ne comprend pas la parole »."
+      },
+      {
+        "source": "Zohar (Le), Verdier, 1991, tome III, p. 38, note 10",
+        "texte": "« Sans cesse c’est un enfant » car c’est comme s’il renaissait perpétuellement. Et il est « pauvre » parce qu’il n’a pas de lumière propre […]. « Et pourquoi est-il appelé « jeune homme » ? C’est parce qu’il a la nouveauté de la Lune qui se renouvelle sans cesse. » Si « l’enfant pauvre » est identifié au bon penchant dans l’exégèse rabbinique traditionnelle, il se rapporte, selon l’interprétation ésotérique, à sa source divine, qui est la Chekhina."
+      }
+    ],
+    "voir": [
+      "Éros 1"
+    ]
+  },
+  {
+    "id": "enfer-sch-ol",
+    "terme": "ENFER – SCHÉOL",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "Maïer, M., La Table d'or, Beya, 2015, p. 210",
+        "texte": "Comme nous l’avons montré ailleurs, par la descente aux enfers, consacrés à Pluton et Proserpine, les anciens poètes ne comprennent que l’examen des métaux, qu’on fait dans leurs mines cachées, comme il ressort du cas d’Orphée, d’Hercule, de Thésée, de Pirithoüs, etc."
+      }
+    ],
+    "voir": [
+      "Vitriol 1",
+      "Monde 3",
+      "Typhon 5"
+    ]
+  },
+  {
+    "id": "erato",
+    "terme": "ERATO",
+    "lettre": "E",
+    "entrees": [],
+    "voir": [
+      "Muse 4"
+    ]
+  },
+  {
+    "id": "esa",
+    "terme": "ESAÜ",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "d’Hooghvorst, E., Le Fil de Pénélope, Beya, 2009, p. 264",
+        "texte": "Et quelle est donc cette production ? Elle porte le nom biblique d’Ésaü. Ce nom est en hébreu le participe passé du verbe faire. Ésaü est donc un homme tout fait, un homme animal, un homme accompli pour ce monde. Il devient parfait quand il se couvre de poils. C’est là sa nature et son destin. Au-delà, il n’y a rien que la corruption et la mort."
+      }
+    ],
+    "voir": [
+      "Jean-Baptiste 2",
+      "Boue 1",
+      "Lune 11"
+    ]
+  },
+  {
+    "id": "escarboucle",
+    "terme": "ESCARBOUCLE",
+    "lettre": "E",
+    "entrees": [],
+    "voir": [
+      "Hostie 1"
+    ]
+  },
+  {
+    "id": "espace",
+    "terme": "ESPACE",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "Zohar (Le), Verdier, 1995, tome I, p. 64",
+        "texte": "En résumé, les mots : « L’espace raconte l’œuvre de ses mains » (Ps. 19 :2) font allusion aux compagnons qui se sont rassemblés autour de l’épousée et qui sont les gardiens de son alliance. L’espace les énonce et les inscrit tous un par un. De quel espace s’agit-il ? De l’espace qui comprend le soleil, la lune, les étoiles et les constellations et qui constitue le Livre du souvenir."
+      }
+    ],
+    "voir": []
+  },
+  {
+    "id": "esp-rance",
+    "terme": "ESPÉRANCE",
+    "lettre": "E",
+    "entrees": [],
+    "voir": [
+      "Vertu 2",
+      "Mesure(r) 3"
+    ]
+  },
+  {
+    "id": "esprit",
+    "terme": "ESPRIT",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "Paracelse, La grande astronomie, Dervy, 2000, p. 272",
+        "texte": "En nous, l’esprit que nous tenons de l’Esprit sidéral, régit la nature. Il est le principe de notre vie raisonnable, selon la nature. Quant à l’esprit que nous avons reçu de l’Esprit de Dieu, il nous donne l’intelligence des choses divines. Ces deux esprits nous quittent à notre décès, cependant, tandis que l’un meurt, l’autre reste vivant."
+      },
+      {
+        "source": "Paracelse, La grande astronomie, Dervy, 2000, p. 273",
+        "texte": "En fait, tout est esprit : l’âme insufflée par Dieu et l’esprit que nous recevons de la nature. L’âme est esprit, l’ange est esprit. C’est pourquoi nous pouvons donner à l’âme le nom d’esprit et dire que l’esprit donné par Dieu est l’ange qui demeure en l’homme. Tout est esprit, car tout vient de Dieu, de sa bouche ou de sa main."
+      },
+      {
+        "source": "Moureau, Sébastien, Le De anima alchimique du pseudo-Avicenne, Sismel - Edizioni del Galluzo, Florence, 2016, p. 71",
+        "texte": "Les esprits servent à ce que le corps soit marqué d’une empreinte pour qu’il puisse être uni à l’âme. Les esprits sont des corps mais ils diffèrent des autres corps en ce qu’ils se subliment ; ils sont appelés esprits parce qu’aucune chose ne peut être sublimée sans esprit. […] Les esprits se dissolvent facilement, font dissoudre les autres choses, brûlent, refroidissent, dessèchent et humidifient."
+      },
+      {
+        "source": "Bebescourt, La Vérité. Les Mystères du Christianisme approfondis radicalement, notes de H. van Kasteel, Beya, Grez-Doiceau, 2026, p. 67",
+        "texte": "Nos pères ont voulu renfermer sous le nom générique de\nl’ esprit : 1° le génie , qui a seul la faculté de tracer, au champ\ndes idées de l’homme, les différentes images que ses yeux ou\nsa réflexion peuvent lui rendre sensibles : celui-ci est proprement\nl’esprit d’ imagination ; 2° l ’intellect , qui nous sert à reconnaître,\navec une continuelle distinction, la multiplicité des idées, les\nunes vraies, les autres fausses, dont notre génie a pu nous\nfournir les images : celui-là est l’esprit de conception ; 3° le\nsentiment proprement dit, qui est comme un flair spirituel de\nnotre intellect, lorsqu’il veut extraire, de l’image peinte par le\ngénie d’un autre homme, le fond substantiel des idées qui lui\nsemblent avoir besoin d’être creusées pour être entendues plus\nparfaitement : nous le qualifions d’ordinaire l’esprit de pénétration ;\n4° le Jugement , qui s’annonce véridiquement comme une sentence\nque l’homme doit prononcer, en conséquence de sa pénétration\ndans les idées que son génie, ou le génie d’un tiers, aurait\nprésentées à son intellect ; nous appelons cette 4 me faculté\nspirituelle (par similitude avec la saveur de notre palais) l’esprit\nde sapience ; 5° le vouloir , qui doit être une suite naturelle du\njugement intérieurement porté soit pour soit contre ou la pensée\nou l’acte que nous statuons d’agréer ou de rejeter : ce dernier\nest l’esprit de résolution .\nVoilà les circonstances et dépendances de l’ esprit humain,\nlequel n’est en soi qu’une eau espritée dont nos sens intérieurs\ntirent toute la force de leurs impulsions, autant diverses que les\ntraits et que les caractères particuliers de chaque individu. Or\nil est bon de vérifier si le nom a b -el , que Moyse donne à cet\nesprit, le définit à la faveur de sa cabale, ou de sa décomposition\nsyllabique, par des significations dont tout philosophe doive être\nsatisfait.\nLa plus frappante pour tous ceux qui sauront la langue des\nChaldéens ou Babyloniens, c’est la réunion très simple du mot\nاب ,ab, exprimant le père et exprimant aussi l’ eau , avec le mot\nال , el, qui veut dire la main[note]. Si notre esprit réside nécessairement\ndans l’ eau de notre substance, il est une main aqueuse et\npaternelle qui doit agir incessamment pour notre conservation.\nMais il devient plus sensiblement encore la main du père et la\n\nmain de l ’eau lorsqu’il préside à l’effusion de notre eau séminale,\nsans laquelle aucune créature vivante sur la terre n’y aurait pu\nconnaître la paternité .\nJ’aperçois dans les deux syllabes du nom Abel de quoi\ncontenter aussi le cabaliste grec en deux façons, c’est-à-dire par\ndeux différentes séparations des syllabes. Il trouvera d’abord la\nprésidence naturelle de notre esprit à l’acte génératif, s’il observe\nque le Jet du principe se trouve expressément déclaré par Ἀ-βέλος,\nprincipii Jaculum. Par un second coup δ’ειλ qu’il doit porter\nsur Ἀβ-έλ, il découvrira certainement ἀββε ›lh, patris splendor ,\net il sentira que sous quelque face qu’on veuille envisager notre\nAdam père d’Abel , cet enfant doit toujours être reconnu pour la\nvraie splendeur de son père[note].\nEn effet, veut-on considérer le nom d’adam comme un pluriel\narabique, exprimant les hommes ? Assurément, ce fut et ce sera\ntoujours l’ esprit mis au jour par les hommes qui les fit et qui les\nfera tous plus ou moins briller dans le monde. D’autre part, si\nnous nous représentons le globe terrestre par Adam , ne sont-\nce pas ses productions en arbres et en plantes de toute espèce\nqui doivent former son unique splendeur ? Et n’est-ce pas son\nfils Abel , ou l’ eau espritée , qu’il engendre intérieurement, qui\nseule est capable de lui en procurer l’admirable décoration ?\nD’après cette reconnaissance des deux personnages, Caïn\net Abel , il n’est pas difficile de constater l’assassinat d’abel par\nCaïn . Car l’ eau espritée , qui commande souverainement à nos\nsens intérieurs, se trouvant ici figurée par Abel , comme cet esprit\naqueux est le frère naturel de l’ esprit terrestre qui régit nos\ncinq sens extérieurs, et comme il doit naturellement mourir dans\net avec le corps humain, lorsque l’ esprit terrestre (dont Caïn\nest la figure) en opère la destruction, il s’ensuit que ce malheureux\nfrère d’Abel était réellement destiné à commettre le cruel fratricide\nqui nous est raconté par Moyse au livre de la Genèse. Je ne vois\n\ndonc plus que la cause historique du meurtre d’Abel, et le sort\nsubséquent de son meurtrier, qui puisse mériter notre attention.\nMoyse feint « qu’Abel fut un pasteur et que Caïn cultiva la\nterre. De là Caïn ne pouvait offrir à Dieu que des fleurs ou des\nfruits , tandis qu’Abel lui présentait en holocauste ce qu’il y\navait de plus beau et de plus précieux parmi ses troupeaux .\nL’Éternel fut plus satisfait (nous dit l’historien) des sacrifices\nd’Abel que de ceux de son frère. Caïn en fut jaloux. Il entraîna\ndans la campagne Abel et lui ôta la vie. Dieu le condamna pour\ncette action à demeurer fugitif et vagabond sur la terre » 281.\nToute cette énigme devrait se deviner à sa seule lecture.\nCaïn , puisqu’il est le feu de l’esprit terrestre, ne peut cultiver\ngénéralement que le corps de la terre, en sorte que dans l’homme,\nc’est la chair, ce sont les os, les muscles et les nerfs, dont il est\nle créateur et l’animateur corporel. Ainsi, la beauté des traits,\nde la carnation, de la taille, les grâces du maintien, de la\ndémarche, des actions, la force et la prestance humaines, en\nun mot, tout ce qui organise extérieurement nos êtres, sont du\nressort de cet esprit . Mais ce ne sont là que des fleurs et des\nfruits de la terre qui, avec la plus belle apparence, peuvent être\nfort trompeurs. Telle était sans doute l’offrande de Caïn . émanée\ndes seuls sens extérieurs, pouvait-elle ne pas représenter une\ndémonstration vaine et fausse par elle-même ? En conséquence,\nl’Éternel devait la rejeter.\nAbel , comme étant le principe aqueux de notre substance,\na le bonheur de posséder, pendant que nous vivons, un esprit\ncéleste ou aérien qui est immortel de sa nature, parce que sa\nsubstance contient le pur feu de Dieu. C’est cet esprit céleste\nqui est l’animateur immédiat de notre eau , et qui, par cette raison,\nest appelé notre âme .\nPar la suite naturelle de ce que l’âme réside dans le corps\nspiritualisé de notre eau , cette eau seule peut distribuer dans\nles êtres certains esprits que nous nommons animaux . Or ce\nsont ces esprits animaux qui, parce qu’ils sont employés au\n\nsoutien de nos corps, et parce qu’on les qualifie animaux, nous\nsont représentés comme formant un troupeau dont Abel fut le\npasteur. À l’égard des offrandes ou des sacrifices que l’ esprit\npeut offrir à Dieu, on conviendra qu’ils renferment un caractère\nde certitude et de sincérité, qui seul doit être reconnu capable\nd’en faire agréer l’hommage par l’Éternel.\nEnfin, cet esprit aqueux , qui fait la splendeur actuelle de\nnotre être, soit qu’il fasse briller dans nous la vivacité ou la\nfécondité du génie, la netteté ou la promptitude de l’intellect, la\nforce ou la finesse du sentiment pénétratif, la profondeur ou la\nsolidité du jugement, l’étendue ou la maturité des projets que\nnous enfantons, cet esprit, dis-je, tel brillant qu’il puisse être,\nne doit-il pas s’évanouir et périr naturellement à la retraite de\nl’âme , je veux dire : lors de cette dissolution du composé humain,\nque nous appelons notre mort ?\nMoyse nous en dépeint l’instant fatal par le départ de Caïn ,\nou de notre feu terrestre , pour la campagne. Dès que son\nfrère Abel est notre esprit, on voit qu’il doit être entraîné avec\nlui, mais forcément, dans ce voyage. On distingue qu’alors caïn\nle tue véritablement, et qu’après l’avoir tué, il lui serait tout à\nfait impossible de dire en quel lieu est le corps de son frère. Voilà\npourquoi Moyse faisant ici apparaître l’Éternel qui veut lui\nreprocher son fratricide, et qui commence par lui demander où\nest Abel, Caïn répond : « Je ne sais. Suis-je donc, moi, le gardien\nde mon frère[note] ? »\nMais que devient Caïn , ou le feu de notre terre, lorsque son\nêtre ne sert plus d’organe à l’expression du sentiment spirituel ?\nIl est constant qu’alors le personnage de caïn ne représente plus\nqu’un principe igné purement terrestre, et un destructeur des\nouvrages de Dieu. Ne méritait-il pas à ce titre la malédiction de\nl’Éternel, dont le récit mosaïque fait mention ? À l’égard de sa\ncondamnation à être perpétuellement fugitif et vagabond sur la\n\nterre, c’est comme devant être l’animateur des vents , qui errent\nsans cesse fugitivement au-dessus de notre globe, et dans lesquels\nnous distinguons qu’il y a vraiment un feu terrestre incorporé.\nCar ce n’est que leur ardeur brûlante qui fait ressentir au jardin\nde la terre les ravages continuels qu’ils y font.\nComme il ne pouvait naître d’un principe destructeur que\ndes êtres nuisibles à l’humanité, notre histoire sainte ne lui\ndonne qu’une postérité maudite comme lui, laquelle employa\nson génie, soit à allumer partout des feux violents destinés à\nbrûler ou à fondre, soit à y forger des instruments de fer capables\nde percer, de fendre, de couper, en un mot, de détruire tous\nles corps existants sur la terre. Si d’autres enfants de Caïn\nsont annoncés comme inventeurs des sons de la musique et de\nplusieurs arts différents, ceux-là (qui sont toujours des ouvriers\nayant besoin du vent ) servent encore à symboliser toute\norganisation corporelle, qui doit être conduite universellement\npar l’esprit du feu terrestre , animant chaque corps.\nIl y en eut d’autres, nous dit Moyse, qui formèrent une race\nde géants. Ceux-ci, semblables à ceux de la fable, méritaient\nassurément d’être exterminés par les eaux de son Déluge . Mais\nil n’est pas temps que j’en dévoile à mon lecteur la superbe\nfigure ; je dois l’entretenir auparavant de la race patriarcale, de\nlaquelle est issu le grand Noé , au moyen de dix générations\nsuccessives. Je dois même, avant toute autre explication, le\nfaire pénétrer avec moi dans la chronologie véridique de notre\nGenèse.\n\nMoyse a voulu que son histoire du monde eût les mêmes\napparences d’une filiation graduelle qu’il avait observées dans\nl’histoire des dieux rois de l’Égypte. C’est pourquoi il imagina\nde faire naître d’Adam et d’ ève un 3me fils (autrement dit un fils\nterrestre ) duquel il formerait la tige de plusieurs autres\npersonnages humains, se succédant par des générations qui\nparaîtraient avoir peuplé d’hommes toute la terre, et d’exprimer,\ndans les noms qu’il donnerait à chacun d’eux, les divers états\nsuccessifs par lesquels doivent passer tous enfants d’adam , ou\ntoutes productions de notre globe , pour acquérir leur perfection\net leur terme naturels.\nJe sais qu’on peut objecter contre la probabilité de cette\nhistoire, les siècles de vie qu’il y attribue à nos patriarches du\npremier âge. Mais je ferai convenir mon lecteur : 1° que les degrés\nqui doivent constituer, sensiblement pour notre vue, une\ndifférence d’état corporel dans tous les êtres enfantés par la terre,\nne pouvaient pas être multipliés au gré de l’historien ; 2° que s’il\navait borné, au temps ordinaire de nos générations présentes,\ncelles de ses premiers hommes, l’image qu’il nous eût ainsi\ndonnée d’une population du globe terrestre, qui devait précéder\nson Déluge universel, se fût écartée beaucoup plus encore de\ntoute vraisemblance ; car enfin, il était plus naturel de nous faire\nconsentir « que le Créateur eût favorisé d’une vie très longue nos\npremiers pères, afin que leurs enfants parussent exister en plus\ngrand nombre au temps de Noé », que d’exiger qu’on supposât\nprobable une population d’hommes également étendue pendant\nle court laps de deux ou trois siècles , auquel dix générations\nhumaines se réduisent communément.",
+        "note": "278. Pour le double sens de اب ab), cf. supra, p. 49 et n. 59. 279. Le nom βέλος signifie « trait », « jet », projectile » (jaculum, d’où le verbe e-jaculor, « é-jecter ») ; la lettre A désigne le principe (principium).\n280. Selon le Etymologicon magnum, ›lh, ou εῖλη, signifie « splendeur (splendor) du soleil » ; le nom serait apparenté à ἡλιος, « soleil ». Dans la tradition chrétienne, Patris splendor, « splendeur du Père », est un des titres du Christ. Abel y est d’ailleurs considéré comme une préfiguration du Christ, notamment en raison de son sacrifice et de sa mort sanglante."
+      },
+      {
+        "source": "Anonyme, La Nature dévoilée ou La théorie de la Nature, Dervy, 1993, pp. 97 à 99",
+        "texte": "Après que Dieu eut créé la vapeur universelle, il lui implanta, de sa propre volonté, une essence active que nous nommons esprit. Cet esprit est dès le commencement un être mobile qui ne se repose jamais ; mais qui est toujours en mouvement, opérant et agissant continuellement et sans relâche. Qu’il soit fixe ou volatil, il est toujours en action, et il opère avec altération et successivement dans toutes les créatures : lorsqu’il cesse d’exister dans l’une, ou qu’il en sort, dans le même instant il recommence à travailler dans une autre, et ainsi ne se repose jamais un seul moment.\n\nCet esprit est l’agent, l’auteur et l’origine de tout changement, et il commence chaque changement par la putréfaction. Lorsqu’il l’a fomentée pendant quelques temps, il sépare le pur de l’impur, ensuite il conjoint, coagule et fixe jusqu’au terme absolu de chaque individu : après qu’il a poussé un corps coagulé jusqu’à son dernier terme, il recommence à le putréfier, à le résoudre, à le séparer, jusqu’à ce qu’il en ait achevé quelqu’autre chose. Cet esprit est le générateur, le conservateur, le destructeur et le régénérateur de toutes les choses du monde."
+      },
+      {
+        "source": "Paracelse, Les Fous, Beya, Grez-Doiceau, 2020, p. 23",
+        "texte": "Il faut soigneusement examiner l’esprit de l’homme, étant donné qu’il en a deux, et qu’ils lui sont congénitaux. Or, c’est selon l’esprit de la vie que l’homme doit être un humain et non vivre d’après l’esprit du limbus qui fait de lui une créature sans raison. Car s’il est vrai que l’homme est l’image de Dieu, il doit nécessairement contenir l’esprit divin, sans quoi il est une bête, et en tant que bête, il a un esprit animal. Ce sont bien deux opposés, mais l’un doit dominer l’autre. Pour être un humain et non un animal, l’homme doit donc vivre de la vie de l’esprit de l’homme en évacuant ainsi l’esprit bestial.",
+        "note": "Dans le texte allemand : limbi. Ce limbus (limbe) signifie frange, bord, mais aussi zodiaque. C’est, on le verra, dans ce dernier sens que l’entend l’auteur : l’esprit animal vient du zodiaque."
+      }
+    ],
+    "voir": [
+      "Âme 2"
+    ]
+  },
+  {
+    "id": "esprit-astral",
+    "terme": "ESPRIT ASTRAL",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "Paracelse, La grande astronomie, Dervy, 2000, p. 177",
+        "texte": "On s’est imaginé que l’esprit sidéral du défunt était son âme qui exhalait sa douleur et appelait au secours. Il fallait donc prier pour sa délivrance ou accomplir quelque rite. Or, à la différence de l’âme, l’esprit astral de l’homme meurt, car il est soumis au temps."
+      }
+    ],
+    "voir": [
+      "Daïmon 4"
+    ]
+  },
+  {
+    "id": "esprit-saint",
+    "terme": "ESPRIT SAINT",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "Fulcanelli, Les demeures philosophales, t. 1, Pauvert, 1964, p. 188",
+        "texte": "Dans la notation alchimique, toute barre ou trait, quelle que soit sa direction, est la signature graphique conventionnelle de l’esprit, ce qui mérite d’être retenu si l’on veut découvrir quel corps se dissimule sous l’épithète d’or philosophique, père du mercure et ‘soleil’ de l’œuvre. (Esprit = feu ou soufre incombustible)."
+      },
+      {
+        "source": "Fabre du Bosquet, Concordance, Le Mercure Dauphinois, 2002, p. 26",
+        "texte": "L’esprit se nourrit des principes analogues à lui-même qu’il trouve dans l’air que l’homme respire. C’est-à-dire que l’âme du monde, l’esprit universel sont sa nourriture spéciale et particulière… il est l’instrument dont Dieu se sert pour donner la forme à l’univers et l’être à tous les mixtes.\n\nLa conservation du corps est confiée à l’esprit. C’est lui qui travaille dans les laboratoires intérieurs, les aliments qui le nourrissent. C’est le véritable Archée dont les savants placent la plus grande force au cœur et à l’orifice de l’estomac. C’est le principe igné qui constitue l’âme agissante de l’homme, qui donne à son corps l’action et le mouvement sous les ordres de l’âme, comme l’Univers le reçoit par les Éléments simples sous les ordres de Dieu.\n\nla vie au corps, il la lui conserve autant que ses facultés le lui permettent, il le rendrait presque immortel si lui-même dans toutes les époques de la vie pouvait être substanté en qualité et en quantités suffisantes."
+      },
+      {
+        "source": "Khunrath, H., Amphithéâtre de l’éternelle sapience, Hanau, 1609, p. 158",
+        "texte": ",אלהי ρvה Ruach Elohim est l’Esprit, le souffle saint, la respiration de יהvה le saint : la Vapeur de la vertu de Dieu Omnipotent et sachant tout et une certaine émanation ou émission de fécondité vitale du premier et souverain moteur, vivifique et puissante, provenant du gouffre profondissime de sa Divinité, où sont les formes (ideae) c’est-à-dire les Exemplaires, les Espèces, les Raisons séminatrices primordiales et radicales, les volontés opératoires, et les causes effectrices de toutes les choses qui, conçues et préexistantes dans l’intelligence de l’archétype et artisan suprême (xכמה Hochmah la Sapience les produisant dans sa Bonté) doivent être ensuite produites et accomplies à l’avenir dans le Monde. Toutes ces choses (Elohim créateur et formateur, l’ayant ordonné et commandé par son Verbe, Genèse I), qu’il a voulu douer d’existence dans ce Théâtre mondain, ont été produites et faites dans ce globe sublunaire et revêtues de terre et d’eau, Þλη ou matière première commune et universelle, par l’intervention du Ciel.\n\nJ’ajoute : Ruach Elohim est μορφ¾ ou la forme de toutes choses, interne, οÙσιάδης, essentielle ; l’Âme universelle du Monde ; la Vertu substantielle subsistant per se, cause de toute créature de ce monde qui doit subsister ; l’Essence (parce qu’il est incréé), vraiment quinte ; et (pour me servir d’une expression très usitée) la nature ipsissime et substantifique des choses. C’est la Puissance (numen) de Dieu et la Divine Raison insérée dans tout le monde et ses parties, et auteur et artisan de toutes ces choses. C’est l’Esprit Un (par l’essence et le nombre) de Dieu : c’est l’Âme une de cette Université une, visible et corporelle ; âme catholique, mais cependant πολυποικίλος c’est-à-dire multiforme (Sapience VII, 22 ; S. Paul aux Ephes. III, 10) et dont les divers rayons et étincelles furent enfermés dans le môle de la première masse matérielle et de là dispersés et dissipés ; et ces étincelles de l’Âme universelle et une, disjonctivement et séparativement innombrables, habitent maintenant dans les parties du Monde qui furent disjointes ensuite et séparées de la masse du corps et même de sa circonférence."
+      }
+    ],
+    "voir": [
+      "Circoncision 1",
+      "Binah 2",
+      "Zot 2"
+    ]
+  },
+  {
+    "id": "esprit-corps",
+    "terme": "ESPRIT-CORPS",
+    "lettre": "E",
+    "entrees": [],
+    "voir": [
+      "Mars 3"
+    ]
+  },
+  {
+    "id": "essence",
+    "terme": "ESSENCE",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "Charpentier A., La Rose-Croix et le symbolisme du centre, revue ARCA, p. 4",
+        "texte": "Ces termes d'essence et de substance peuvent, dans une certaine mesure, être remplacés par ceux de forme et matière."
+      },
+      {
+        "source": "Charpentier A., De la Cause et des effets, S.l.n.d., p. 16 et note n°1",
+        "texte": "Il doit exister un élément commun entre l'Être et \"les êtres\", sans quoi aucune relation entre la Cause et ses effets ne serait possible, ce qui est absurde. Et cet élément commun est précisément l'essence de chaque \"créature\", c'est-à-dire la présence en elle de l'Être, source unique de sa subsistance.\n\nMaintenant, cette présence (ou \"immanence\") obligée, en chacun des êtres, de l'Être Transcendant n'implique aucunement que l'Être soit engagé dans l'existence. Rappelons que celle-ci est fondamentalement polarisée (\"à double face\", donc soumise à la quantité), alors que l'Être, étant pure qualité, peut seul être dit Un.",
+        "note": "Et qui est aussi son \"noyau d'immortalité\", ce Logos \"commun à tous\" qui est sa Personnalité (par opposition à son individualité) ou encore sa participation au Soi universel qui transcende infiniment chaque petit moi : toutes expressions équivalentes."
+      },
+      {
+        "source": "Moïse de Léon, Le sicle du sanctuaire, Verdier, 1996, p. 255 et note 888",
+        "texte": "C’est dans le Ciel que toutes les essences ont pris forme et elles ont procédé selon le secret de leur être […].",
+        "note": "Le mot metsiout, traduit par « réalité », désigne l’ensemble du monde de l’émanation."
+      }
+    ],
+    "voir": [
+      "Dieu 2"
+    ]
+  },
+  {
+    "id": "est",
+    "terme": "EST",
+    "lettre": "E",
+    "entrees": [],
+    "voir": [
+      "Hochmah 2"
+    ]
+  },
+  {
+    "id": "eth",
+    "terme": "ÊTH",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "Zohar (Le), Verdier, 1994, tome II, p. 121, note 408",
+        "texte": "Le particule êth désigne la sefira Malkhout, car comme cette dernière qui recueille tous les épanchements des sefirot, elle récapitule toutes les lettres de l’alphabet, du Aleph (â) jusqu’au Tav (th). Elle est la crainte, qui est la porte d’entrée, le premier accès au monde séfirotique."
+      }
+    ],
+    "voir": [
+      "Commencement 1"
+    ]
+  },
+  {
+    "id": "etoile",
+    "terme": "ETOILE",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "Bebescourt, La Vérité. Les Mystères du Christianisme approfondis radicalement, notes de H. van Kasteel, Beya, Grez-Doiceau, 2026, p. 55",
+        "texte": "Il en est de même de toutes les étoiles : leurs stillations plus\nvives ne sont produites que par leur éloignement, qui force notre\nειλ à rassembler, dans un très petit point de perspective, la\ntotalité de leur lumière, et qui, par leurs conformations plus ou\nmoins angulaires, ou par leurs diverses positions, doit aussi\ndiversifier pour notre vue ces mêmes effets.\nAucune d’elles ne se manifeste comme un Être vivifiant par\nson essence. Leur lumière, également blanche ou argentine au\nmilieu de leurs plus fortes stillations , également absorbée par\nle moindre rayon de l’astre du Jour , nous déclare qu’elles sont\ntoutes des corps éclairés et vivifiés par lui, comme notre terre ;\nen même temps que leur multitude vraiment innombrable nous\nfait connaître l’immensité de la création universelle.\nJ’ai dit que celle rapportée par Moyse sous le Jour 4 offrait\nune seconde beauté : c’est son rapport avec le principe général\naqueux que l’on a reconnu dans le dieu Océan , et que beaucoup\nde philosophes qualifient l’ eau première naturelle. Je sens qu’il\nme faut expliquer ce nom, ainsi que tous ceux du vrai langage\nphilosophal, car les physiciens de notre siècle, accoutumés à\nn’étudier la nature que dans sa superficie et à n’en parler que\nconfusément selon les principes des écoles, ne savent pas\ndiscerner la spiritualité qui est essentielle aux éléments .\nMon lecteur saura donc que l’ eau naturellement première\nn’est pas un corps pesant, palpable et destitué d’action, comme\nl’eau qui sert à nous désaltérer. Elle est au contraire une eau\nvivace , trop subtile par soi pour être ni vue ni pesée, et cependant\ntrop sensible à l’esprit pour qu’aucun vivant puisse la méconnaître.\nC’est l’ eau dont la terre et tous les êtres qu’elle renferme sont\nélémentés . C’est l’ esprit de leur humide radical, que chacun\nconviendra être une eau purement naturelle, et incontestablement\nl’ eau première de tout ce qui existe, puisque sans elle aucun\nde nous n’aurait commencé d’exister.\nCe détail semblera minutieux ; mais si je n’y étais pas entré,\nl’on aurait plus difficilement reconnu comment le soleil , la lune\net les étoiles ont dû servir à Moyse pour nous dépeindre le Jour\nou l’illumination de l’ eau élément . L’on n’eût envisagé dans ces\nglobes diversement lumineux qu’une lumière diverse ; et ne\ndistinguant dans cette lumière que son feu , sans faire attention\n\nà sa vive fluidité, l’on en aurait conclu que leur application à\nl’ esprit de l ’eau forme un contraste naturel.\nMais puisque j’ai instruit mon lecteur que le principe aqueux ,\nsoit qu’on l’appelle eau élément ou l’eau première, est d’une\nspiritualité impalpable, il comprend déjà que sa qualité spirituelle\nrend nécessairement son essence ignée. Le feu que cette eau\nrenferme doit lui paraître d’autant plus frappant, qu’il voit partout\nson humide , élémentant nos corps, contribuer radicalement à\nnotre vie. Son essence pourrait-elle coopérer à la vie , si elle\nn’était pas empreinte de ce feu fluide, vivifiant et non comburant,\nque le seul esprit du Dieu Créateur fut originairement capable\nde départir aux êtres créés ?\nC’est dans le moment où cette eau devient créatrice qu’il faut\nse la représenter à l’imagination, pour voir dans elle, avec Moyse,\nla création d’un soleil , d’une lune et des étoiles firmamentées.\nOr il faut convenir que c’est pour l’ eau élément le plus beau\nJour dans lequel on puisse l’exposer.\nHermès avait donné à son 4me jour hebdomadaire, consacré\nau dieu 4me Océan , le nom de Mercure, signifiant, comme je\nl’ai déjà dit, μερέων κύριος, le seigneur des parties. Pour que notre\nélément eau vivifie quelque nouveau corps, ne faut-il pas qu’il\ncaractérise d’abord sa puissance, en se faisant reconnaître pour\nseigneur par les parties que nous appelons génitales, et qui\ndoivent exécuter, sous ses ordres, toute humaine reproduction ?\nD’ailleurs, dans tout contrat civil, nous nommons ceux qui\ncontractent : les parties ; et il n’y a certainement point de contrat\nplus important dans le monde, point de lien social où le\nconsentement des parties soit plus nécessaire, point d’acte où\nla liberté et la volonté, conséquemment l’accord parfait des\nparties éclate davantage, que celui dont il résulte un nouvel être\nvivifié. Or quel est le seigneur reconnu par les parties qui se\nlient volontairement dans cet acte ? Qu’on y réfléchisse : on verra\nque c’est l’ eau élément , ou le principe aqueux , qui est et qui\ndoit être le seigneur des parties .\n\nJe n’ai pas besoin de faire observer que l’instant où cette\neau première de tous les êtres se montre en qualité de mercure ,\nest le moment de son exaltation à la déité. Elle est pour lors\nremplie des rayons vivifiants du dieu du feu ; elle acquiert un\npouvoir créateur ; elle a la faculté vraiment divine de distribuer\nla vie . Il est constant qu’Hermès ne pouvait mieux spécifier le\nJour de son 4me dieu Océan , qu’en le nommant Jour de Mercure .\nCe nom me fera joindre ici un mot d’instruction pour la secte\ninfortunée de certains chymistes, dont l’erreur singulière excite\nma pitié : on les nomme communément les chercheurs de la\npierre philosophale.\nLa terre produit un métal de soi fluide, d’une agilité et d’une\npénétration non moins surprenantes que sa facilité à s’échapper\nde tous corps sans nulle destruction du sien. Par là cette eau\nmétallique se trouvant avoir quelques qualités analogues à\ncelles du principe aqueux, elle fut autrefois appelée, comme lui,\nmercure .\nPlusieurs philosophes ont habilement profité de cette\nsimilitude pour écrire sur le grand ευvρε des hommes,\nc’est-à-dire sur λ’ευvρε de la génération, dans les termes d’une\nchymie postiche ; et leurs véridiques ouvrages n’ont point été\ncompris par nos chymistes, parce que versés dans leur art\nseulement, ils ne le sont point du tout dans les allégories. Tout\nest corporel pour eux : en conséquence, ayant bien observé les\nqualités corporelles de l’ eau métallique , ainsi que le nom de\nmercure qu’elle porte, ils se sont fortement persuadés qu’elle\ndevait être le vrai mercure , duquel on leur expliquait\nchymiquement tant de merveilles.\nTrompés par une idée abusive, on les voit exercer sur ce\nfluide métal mille travaux ridicules, dont l’issue fut et sera\ntoujours de consommer son bien, son industrie et ses veilles, à\nbrûler méthodiquement ou de l’huile ou du charbon. Car ce n’est\npoint là le mercure que Lulle, Synésius, le Trévisan, Flamel,\nPhilalèthe, le Cosmopolite, etc. ont si ingénieusement enseigné,\net avec lequel chacun peut réussir, comme eux, dans leur même\net unique grand ευvρε.\n\nLe mercure des philosophes est exactement celui que la\nfable déifie : c’est ce dieu ailé, fils et messager de Jupiter , qui\nformant l ’esprit de l ’eau , est rendu, par la volonté de l’Éternel,\nle seigneur des parties qui nous élémentent. En effet, nos yeux\nnous disent que la terre élément , ou l’esprit terrestre des êtres\ncréés, ne se porte jamais à la conformation d’aucun corps sans\nque l’ eau élément ne le lui commande. D’ailleurs, l’ esprit de\nl ’eau , comme étant radicalement fluide et actuellement spirituel,\ndoit nous paraître une essence semblable à la substance de l’air ;\nd’où il devient capable de conglober, de retenir en soi, et de\ncomporter avec soi, le pur feu de l’ esprit divin , qui seul vivifie\ntous les êtres.\nJe pense que l’on comprendra désormais Moyse, quand il\nfait reposer l’esprit du Créateur, d’abord au-dessus des eaux de\nsa création universelle, ensuite sur celles de son admirable\ndéluge. Déjà nous concevons que l’ esprit de Dieu est\nnécessairement incorporé dans nos eaux créatrices, puisqu’elles\nne peuvent vivifier aucunes reproductions que par lui ; et nous\nverrons ci-après que les eaux de notre déluge universel\ncomportèrent aussi indubitablement le même esprit de Dieu.\nMa commisération, pour tous ceux que des allégories\nchymiques peuvent abuser, ne se bornera point à leur avoir fait\nconnaître le seul mercure avec lequel on puisse projeter et\nmultiplier l’or de vie . Je les préviens qu’en dévoilant nos mystères\névangéliques, j’aurai occasion de leur faire mieux comprendre\nla chymie postiche des philosophes, et je m’assure qu’après cela,\npersonne ne sera plus tenté de chercher risiblement la pierre\ndu monde en des métaux dont le corps sans vie est incapable de\nla leur faire aucunement distinguer.\n\nJ’ai expliqué le chiffre 5, en parlant du dieu égyptien\nOsiris -Ammon dont il fut le caractère. L’on a vu que c’était un\nsymbole de l’ esprit universel de la nature. Voyons comment\ncet esprit est mis dans tout son Jour par notre historien sacré.\nIl nous annonce premièrement une infinité de poissons qui,\nformés des eaux , y manifestèrent leur vie par leurs mouvements,\net qui reçurent immédiatement du Dieu Créateur l’ordre de\ncroître , de multiplier et de terminer dans les mers . Ensuite\nparaissent des oiseaux de toute espèce, prenant leur vol de la\nterre pour s’élever dans la substance aérienne ; l’ordre du Créateur\npour ceux-ci est « QU’ILS SOIENT MULTIPLIÉS SUR LA TERRE » 210.\nPour parvenir à l’intelligence de ce tableau mystique, mon\nlecteur doit d’abord être instruit quelles sont les eaux dont\nl’essence est seule capable de former des poissons vifs ; et quelles\nsont les mers dans lesquelles il fut ordonné divinement, à ces\npoissons d’une vive essence, d’opérer en premier lieu la croissance\ndes êtres, qui enveloppe naturellement leur conservation vitale ;\nen second lieu leur multiplication , qui doit s’exécuter par des\ngénérations reproductives de chaque espèce ; en troisième lieu\nleur terme , ou leur complétion, qui est proprement leur mort,\npar suite naturelle de la maturité de tout fruit terrestre.\nCes trois ευvρεσ différents sont exactement ceux qui ont\nconstitué le monde et qui sont nécessaires à sa perpétuité. C’est\npourquoi, dès que j’aurai rappelé à mon lecteur que les philosophes\nfont de la substance aérienne (dans laquelle et par laquelle tous\nles êtres créés respirent) leurs mers , il imaginera d’abord que,\ncomme nous existons actuellement dans ces mers de Moyse,\nnous pourrions nous en réputer les poissons ayant vie ; mais ce\nn’est pas encore cela. Nous ne sommes que des êtres animés\n\nactuellement par ces poissons vifs qui, seuls, durent recevoir le\ndivin commandement des trois ευvρεσ de la vivification universelle.\nJe rendrai leur essence radicale plus sensible, en faisant bien\nconnaître les eaux dont Moyse les déclare émanés ou formés.\nLa très pure substance ou solaire ou divine qu’il a été naturel\nde qualifier pur feu , parce que la vie qu’elle distribue aux êtres\nterrestres donne à leur corps une chaleur qu’ils perdent en\nmourant, est encore qualifiée par les plus grands philosophes\neau vive . Ils ont reconnu que ce feu solaire (qui est d’abord vif\net fluide par sa nature) pouvait être assimilé aux eaux d’une\nsource vive , en ce que jamais il ne consume par combustion\naucun des corps qu’il atteint et pénètre, mais qu’au contraire,\ntous les êtres sont vivifiés, sustentés et corroborés par lui seul .\nDe là sa qualité essentielle leur a paru pouvoir être dépeinte\nsous l’expression d’ eau , comme sous celle de feu .\nIl ne reste qu’à lever nos yeux vers la source de ces eaux\nvives , qui sont si merveilleusement conglobées en un soleil\nétincelant, d’où nous vient toute vie et toute lumière. Chacun\ncomprendra que les globules de l’ eau vive ou les étincelles du\npur feu qui émanent de cet Être suprême appelé, à cause de sa\nprodigieuse élévation, le t rès -h aut , ne doivent arriver à la région\ninférieure des airs, ou aux mers philosophales qui environnent\nle globe où nous existons, qu’en plongeant, pour ainsi dire, dans\nces mers aériennes depuis le globe solaire jusqu’à nous.\nCette idée autorisa Moyse à figurer les parties essentiellement\ndivines, qui forment la vie du corps céleste, sous l’emblème de\npoissons vifs . En cela n’exposait-il pas au plus grand Jour ce\nqu’il y a de purement divin dans le principe tout spirituel dont les\nÉgyptiens avaient fait leur 5 me dieu principal ?",
+        "note": "122. La forme ε´ν (ou εᾶν) est plutôt l’infinitif de εάω, au sens de « permettre ». La signification « vêtant » remonte peut-être à quelque variante du participe aoriste (›san) du verbe ›nnumi, « vêtir » ; mais c’est une hypothèse. / 123. Littéralement : « esprit (νοῦς, animus) crachant (πτύων, spuans) des nouveautés (νέα, nova) »."
+      },
+      {
+        "source": "Vigenère, B., Traicté du Feu et du Sel, Jobert, 1976, p. 203",
+        "texte": "Les Hébrieux tiennent qu’il n’y a si petite & mallostruë herbe en la terre, ne rien quelconque des trois genres des composez minéraux, végétaux, animaux, qui n’ait là hault son estoille correspondante qui luy assiste, & dont elle reçoit son maintenement & conservation."
+      },
+      {
+        "source": "Zohar (Le), Le livre de Ruth, Verdier, 1999, p. 61",
+        "texte": "Rabbi Isaac dit : Regarde ces étoiles qui tremblent à cause de la crainte que leur inspire leur Maître, le moment pour elles est arrivé d’entonner un chant, parce que les fils de Dieu se tiennent au-dessus d’elles. Lorsque les autres puissances qui répandent des louanges la nuit ont terminé, ces fils de Dieu sonnent la trompette et l’ensemble des serviteurs qui règnent la nuit regagnent leur place. Aussitôt les étoiles qui règnent le jour, au petit matin, se mettent à trembler de terreur et elles élèvent un chant. A présent leur tour est arrivé de louer leur Maître en cet instant où la trompette est entendue."
+      }
+    ],
+    "voir": []
+  },
+  {
+    "id": "euph-misme",
+    "terme": "EUPHÉMISME",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "Cornutus, « De la théologie grecque », dans van Kasteel, H., Questions Homériques, Beya, 2012, p. 70 note 194",
+        "texte": "Le procédé, très répandu, qui explique le nom d’un dieu comme un euphémisme (εÙφημισμός, littéralement « bénédiction »), mérite d’être étudié. Citons par exemple, dans la tradition romaine, les Parques (Parcae), déesses du destin inexorable, qui n’épargnent personne : le nom qu’on leur donne les bénit, le verbe parcere signifiant « épargner ». Les Grecs invoquaient les cruelles Érinyes (ou Furies) sous le nom d’Euménides, c’est-à-dire « Bienveillantes ».\n\nRappelons aussi, dans la tradition hébraïque, la formule « le Saint, béni soit-il ! », fréquemment employée pour désigner un Dieu dont on n’ignore pas les capacités de colère et de vengeance. Enfin, la tradition chrétienne se sert souvent du nom Lucifer (« porte-lumière ») pour désigner Satan."
+      }
+    ],
+    "voir": []
+  },
+  {
+    "id": "euphrate",
+    "terme": "EUPHRATE",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "Rosereau C. dans Vaughan, T., Œuvres complètes, La Table d’Émeraude, 2000, p. 456",
+        "texte": "Il existe un Euphrate biblique, c’est le fleuve du Paradis (Gen. II, 10-14) : « Un fleuve sortait d’Eden pour arroser le jardin, et de là il se partageait en quatre bras… le quatrième fleuve est l’Euphrate ». L’Euphrate est aussi la limite orientale de la Terre Promise […]. C’est un fleuve dont les eaux ont des propriétés particulières, permettant une certaine opération, préparant la route des Rois du Levant […]. Il existe aussi un Euphrate mythologique, qui renvoie à un homme nommé Euphratès, qui tua son propre fils par erreur. Reconnaissant sa méprise, il se jeta par désespoir dans le fleuve Médos, qui prit alors le nom d’Euphrate. Il existe ensuite un Euphrate alchimique, selon Dom Pernety : « L’Euphrate est un des noms donnés par les chymistes Hermétiques à la matière du Grand Œuvre parvenue à la couleur blanche ».\n\nIL EXISTE ENFIN un Euphrate étymologique, riche en enseignements. Euphrate vient de la racine phrazdo qui veut dire « mettre dans l’esprit, faire comprendre, expliquer, indiquer par signe aussi bien que par la parole » […]. Le préfixe eu suggère l’idée de noblesse, de perfection, de bonheur. L’Euphrate pourrait donc signifier la bonne formulation, explication et compréhension de quelque chose, phrasis, qui a donné « phrase » étant l’action d’exprimer par la parole, l’élocution, le langage, le discours. Selon Chantraine, eu-phrades signifie « qui parle avec justesse, bien exprimé, avec éloquence »."
+      }
+    ],
+    "voir": []
+  },
+  {
+    "id": "eurydice",
+    "terme": "EURYDICE",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "Charpentier A., Les mystères du Panthéon romain. L’ésotérisme de Virgile, S.l.n.d., p. 107 et n°2",
+        "texte": "Or le nom même d'Eurydice désigne clairement la fonction même d'Astrée, puisqu'elle aussi incarne la Justice de l'âge d'or, désormais en exil. Son nom signifie en effet \" La Grande Justice\" (du grec Eureïa Dikè), dont la disparition a fait le malheur du monde. Il est d'ailleurs significatif que sa mort ait été due à la morsure d'un serpent!",
+        "note": "L'adjectif Eurus signifie littéralement \"large\" ou \"vaste\", car cette Justice s'étend à l'ensemble de l'Univers, et est donc comparable à la Thémis grecque ou au Dharma hindou ; on la rendrait peut-être mieux par \"Justesse\" [..]."
+      }
+    ],
+    "voir": []
+  },
+  {
+    "id": "euterpe",
+    "terme": "EUTERPE",
+    "lettre": "E",
+    "entrees": [],
+    "voir": [
+      "Muse 4"
+    ]
+  },
+  {
+    "id": "eve",
+    "terme": "EVE",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "d’Hooghvorst, E., Le Fil de Pénélope, t. 1, La Table d’émeraude, 1966, p. 281",
+        "texte": "« Une inimitié entre toi et ta femme » : car il ne pourra jamais la satisfaire ni ne se satisfera d’elle. La séduction ne fut pour Ève qu’un dol d’amour sans poids. Le mot araméen Hiviah, serpent, de la même racine que Havah, Ève, indique qu’il en devint le mâle sans en avoir les qualités ; ce mot est en effet du genre masculin bien que de consonance féminine, ce qui montre le caractère ambigu de ce mâle séducteur. L’iconographie le montre parfois avec une tête de femme. Quant à Havah, Ève, son nom signifie la vivante, et on l’appelle ‘la mère des vivants’."
+      },
+      {
+        "source": "Anonyme, Sept instructions aux Frères en saint Jean, Arma Artis, 2004, p. 13",
+        "texte": "L’Ève Première qui était la Sagesse de l’Homme Premier (d’où il est écrit qu’elle naquit de sa côte) en devenant son imagination devint son instigatrice et ce fut donc par elle que l’Homme Premier détourna son seul sens du Principe et, par le fait du binaire, se détacha de l’axe primordial imagé par l’Arbre de Vie. Or Ève n’était rien d’autre en l’Homme Premier que la forme spirituelle de la Vierge."
+      },
+      {
+        "source": "Anonyme, Sept instructions aux Frères en saint Jean, Arma Artis, 2004, p. 55",
+        "texte": "Ève était la sensibilité de l’Homme Premier et elle était la forme spirituelle de la Vierge en Adam. Par là il faut entendre qu’Adam et Ève ne formaient qu’un seul dans l’Eden. Et donc Ève était Sagesse, pareille en cela à la Vierge mais incarnée spirituellement en l’Adam spirituel. C’est donc par elle que le tentateur atteignit l’homme en lui montrant un reflet comme s’il se fut agi d’un autre, non du Même.\n\nAinsi Ève chutée demeure indispensable à l’homme chuté, mais non point selon les Lois de la chute, bien plutôt par la Sagesse dont elle fut garante et qui demeure en elle, cachée mais intacte, qu’il faut recouvrer par l’intercession de la Vierge et, naturellement par la Grâce du Christ."
+      },
+      {
+        "source": "Zohar (Le), Verdier, 1994, tome II, p. 177 et note 72",
+        "texte": "Viens et vois, il est marqué : « Je mettrai une inimitié (éva) entre toi et la femme » (Gen.3 :15). Que signifie le mot éva ? Un verset l’indique : « Ils glissent comme des barques de jonc (évé) » (Job. 9 :26). En effet, de très nombreuses barques voguent sur la mer immense mais il est des bateaux et des barques différentes les uns des autres, les barques du serpent qui naviguent parmi eux sont appelées « barques de jonc » (évé).\n\n« Entre toi et la femme » : c’est la « femme qui craint YHVH » (Pro.31 :36). « Et entre ta descendance… », les peuples idolâtres « … et sa descendance » qui est Israël. « Il t’écrasera la tête », c’est le SBSI, qui, dans l’avenir, l’extirpera du monde, selon la parole : « Il détruira la Mort pour toujours » (Es.25 :5) et celle-ci : « J’expulserai de la terre le souffle d’impureté » (Zac. 13 :2). La « tête » : c’est le temps à venir où les morts se réveilleront, le monde alors sera « tête », il existera de par la « tête », qui est le monde d’en-haut. « Toi tu la meurtriras au talon » : en ce monde-ci, tant qu’il reste « talon », et n’a pas de solidité, ledit serpent mord et assombrit le visage des créatures."
+      }
+    ],
+    "voir": [
+      "Mercure 1",
+      "Côte 1",
+      "Adam 4",
+      "Chute 4",
+      "Côte 6",
+      "Serpent 13"
+    ]
+  },
+  {
+    "id": "exhalaison",
+    "terme": "EXHALAISON",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "Anonyme, La Nature dévoilée ou La théorie de la Nature, Dervy, 1993, p. 23",
+        "texte": "L’esprit moteur, agissant sans cesse dans le sein de chaque élément, y excite un mouvement continuel qui produit la chaleur, et cette chaleur en fait sortir des vapeurs à peu près comme il s’en exhale de tous les corps par la transpiration. Ces vapeurs ou émanations se nomment ordinairement influences, lorsqu’elles viennent d’en haut, et exhalaisons, lorsqu’elles viennent d’en bas."
+      }
+    ],
+    "voir": []
+  },
+  {
+    "id": "extase",
+    "terme": "EXTASE",
+    "lettre": "E",
+    "entrees": [
+      {
+        "source": "Hermès Trismégiste., Corpus Hermeticum. Les Belles Lettres, 1972, vol. I, p. 108, notice 2a",
+        "texte": "Cette vision de Dieu n’aveugle pas comme la vision du soleil, mais elle remplit d’immortalité. On ne voit vraiment le Bien que quand on ne peut plus rien en dire : une telle connaissance est silence, suspension de toutes les facultés sensibles. Dès ici-bas on y peut atteindre lorsque l’âme, illuminée et tirée par le Bien, quitte le corps et s’unit à l’essence. Cette extase est la divinisation, qui consiste en la vue du Bien, et qui est impossible sans la séparation d’avec le corps."
+      }
+    ],
+    "voir": [
+      "Saint 1",
+      "Éros 1"
+    ]
+  },
+  {
     "id": "chelle",
     "terme": "ÉCHELLE",
     "lettre": "É",
@@ -4868,16 +5349,6 @@
     ]
   },
   {
-    "id": "eden",
-    "terme": "EDEN",
-    "lettre": "E",
-    "entrees": [],
-    "voir": [
-      "Jardin 2",
-      "Guimel 1"
-    ]
-  },
-  {
     "id": "gypte",
     "terme": "ÉGYPTE",
     "lettre": "É",
@@ -4893,49 +5364,6 @@
       }
     ],
     "voir": []
-  },
-  {
-    "id": "ein-soph",
-    "terme": "EIN SOPH",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "d’Hooghvorst, C., Le Livre d’Adam, Beya, 2008, p. 76",
-        "texte": "Le rêve de Dieu. L’inconnaissable, origine de Tout, ne peut se définir. La tradition judaïque l’appelle ein soph   (אין סוף), le « sans limites » […]. On ne peut ni le connaître ni le limiter. Il n’est donc pas objet de révélation […]. L’ein soph se pense lui-même, ou plus exactement se rêve, et ce rêve est la première de toutes ses émanations (dont l’ensemble constitue les 10 sephirot). On l’appelle « la couronne céleste », en hébreu keter elion (כתר עליון). Cette première émanation de l’ein soph est décrite comme une matière très fluide, la plus subtile qui soit, appelée par les sages de vérité, semence. Mais cette pensée divine peut être atteinte par l’homme dans ce qui est précisément appelé le don de la Torah ou création. C’est dans cette création que la divinité s’exprime et se connaît en se définissant. Israël, en le contemplant, se révèle à lui-même également, comme dans un mystérieux miroir. Et tout cela est appelé alliance. Ainsi, la Torah et l’alliance ne sont qu’une seule et même chose donnée à Israël dans le mystère de la bénédiction. Ce rêve, cette première émanation de l’inconnaissable, cette pensée, se dit holem (חולם), le nom d’une voyelle longue en hébreu (ô), représentée par un point qui se place au-dessus de la consonne. Le mot holem procède du verbe halom (חלם), qui signifie « rêver » ; de là, le mot halom (חלום), rêve."
-      },
-      {
-        "source": "d’Hooghvorst, E., Le Fil de Pénélope, t. 1, La Table d’émeraude, 1966, p. 229",
-        "texte": "L’inconnaissable, origine de Tout, ne peut se définir. La tradition judaïque l’appelle l’Ein Soph, le Sans Limites, admirable négation excluant toute définition et qui convient parfaitement à ce dont il s’agit : on ne peut ni le connaître ni le limiter. Il n’est donc pas objet de révélation : « Sache […] que de l’Ein Soph […] on ne trouve aucune allusion ni dans la Torah, ni dans les Prophètes […] Il n’y a que les maîtres de l’adoration qui en aient fait une certaine allusion. » L’Ein Soph se pense lui-même, ou plus exactement, se rêve et ce rêve est la première de toutes ses émanations. On l’appelle la Couronne Céleste (כתר עליון)."
-      },
-      {
-        "source": "d’Hooghvorst, E., Le Fil de Pénélope, t. 1, La Table d’émeraude, 1966, p. 231",
-        "texte": "Le tétragramme (יהוה) est le lieu de l’existence de l’Ein Soph, le lieu de la vérité : « Puisque nous ne pouvons atteindre l’Ein Soph du Saint, béni soit-Il, il a fait un lieu (מקום) et celui-ci est appelé d’un nom qui invoque l’idée de limite et c’est là l’existence du Saint béni soit-Il »."
-      },
-      {
-        "source": "VITAL, H., L’arbre de Vie, Beya, 2021, p. 12",
-        "texte": "Sache qu’avant l’émanation des êtres émanés et la création des êtres créés, une simple lumière suprême remplissait toute la réalité, sans lieu vide, espace vacant ou cavité d’aucune sorte. Tout était rempli de cette simple lumière infinie (eïn soph), sans commencement ni fin. Tout n’était qu’une simple lumière, parfaitement égale à elle-même, qu’on appelle « lumière infinie (eïn soph) »."
-      }
-    ],
-    "voir": [
-      "Sephirot 1",
-      "Keter 2",
-      "Éther 1"
-    ]
-  },
-  {
-    "id": "el",
-    "terme": "EL",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "Zohar (Le), Verdier, 1995, tome I, pp. 61 et 62",
-        "texte": "« La gloire du divin » c’est la gloire de l’épousée dénommée « Divinité » (él) comme il est écrit : El (la divinité) gronde tous les jours (Ps.7 :12). Chaque jour de l’année elle est appelée « El », mais maintenant qu’elle entre sous le dais nuptial elle est appelée « Gloire ». Elle est aussi appelée à ce moment « El » (la divinité) telle une gloire sur une gloire, une lumière sur une lumière, un règne sur un règne."
-      }
-    ],
-    "voir": [
-      "Gabriel 3",
-      "Divinité 2"
-    ]
   },
   {
     "id": "lectrum-hachmal",
@@ -5048,42 +5476,6 @@
     ]
   },
   {
-    "id": "elohim",
-    "terme": "ELOHIM",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "d’Hooghvorst, C., Le Livre d’Adam, Beya, 2008, p. 33",
-        "texte": "Elohim représente toujours Dieu sous son aspect de rigueur, de jugement. On l’appelle le Dieu des nations. C’est le Dieu extérieur à l’homme, dont tout le monde parle et que personne ne connaît. Sans lui, il n’y a pas de vie possible dans l’univers. De même qu’il donne la vie, de même il la détruit et consume. C’est le Dieu de la nature, que l’homme doit connaître pour saisir son secret. Le mot se traduit par « Dieu ». En termes chrétiens, il pourrait correspondre au Père Céleste."
-      },
-      {
-        "source": "Zohar (Le), Verdier, 1995, tome I, pp. 507 et 508",
-        "texte": "« Celui qui fera un sacrifice pour YHVH » (Lev. 2 :1). Il est toujours écrit « pour YHVH », il n’est jamais dit « pour Elohim ». Quelle en est la raison ? Elohim, poursuivait rabbi Abahou, est un nom porté en commun : les anges sont appelés Elohim, et les juges sont appelés Elohim. Par conséquent nous ne saurions pas auquel d’entre eux est adressé le sacrifice. Voilà pourquoi il faut évoquer Son Nom propre [donc YHVH (ndlr)] à l’exclusion de tout autre […].\n\nQue soit béni et sublimé le nom du Roi des rois des rois, le SBSI. Il est le premier, Il est le dernier et, hormis Lui, il n’y a pas d’Elohim. Il a créé le monde par le secret de trois propos grandioses : la connaissance, la sagesse et le discernement."
-      },
-      {
-        "source": "VITAL, H., L’arbre de Vie, Beya, 2021, p. 79 et note 149",
-        "texte": "Binah, appelée מי (mi), se revêt de  אלה(eleh), ce qui donne  אלהים(Elohim) : ברא אלה מי (mi bara eleh) (Isaïe 40, 26).",
-        "note": "להא (eleh), « ces [choses] », vaut en guématrie (1 + 30 + 5 =) 36 ; מי (mi), « qui ? », vaut (40 + 10 =) 50 ; les lettres des deux mots réunis donnent םלהיא (Elohim), qui vaut (36 + 50 =) 86. Les mots להא אבר מי (« Qui a créé ces choses ? ») sont anagramme de םלהיא אבר (bara Elohim), « a créé Elohim » (Genèse 1, 1)."
-      },
-      {
-        "source": "Zohar (Le), Le Cantique des Cantiques, Verdier, 1999, p. 113 [66b] et note 425",
-        "texte": "Elohim : E est mâle, lohim est l’éveil du Juste, et c’est la circoncision avec la déchirure, sans aucun côté de Prépuce.",
-        "note": "Les quatre dernières lettres du nom Elohim sont en hébreu l’anagramme du mot milah, « circoncision ». Le « prépuce » est un symbole de l’Autre côté."
-      },
-      {
-        "source": "Zohar (Le), Le Cantique des Cantiques, Verdier, 1999, p. 114 [66b], note 425",
-        "texte": "Elohim est lu comme étant composé de deux mots, el et hayam (avec un changement de vocalisation), il signifie alors « vers la mer »."
-      }
-    ],
-    "voir": [
-      "Mi 2",
-      "Mer 6",
-      "Luminaires 2",
-      "Tardemah 5",
-      "Tétragramme 8"
-    ]
-  },
-  {
     "id": "lys-e",
     "terme": "ÉLYSÉE",
     "lettre": "É",
@@ -5099,87 +5491,6 @@
     "entrees": [],
     "voir": [
       "Vénus 5"
-    ]
-  },
-  {
-    "id": "en-bas",
-    "terme": "EN-BAS",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "Zohar (Le), Verdier, 1995, tome I, p. 107",
-        "texte": "Le monde qui se manifeste c’est le monde de l’En-bas : « Je verrai YHVH » (Es. 6 :1)."
-      }
-    ],
-    "voir": []
-  },
-  {
-    "id": "encens",
-    "terme": "ENCENS",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "d’Hooghvorst, E., Le Fil de Pénélope, t. 1, La Table d’émeraude, 1966, pp. 216-217",
-        "texte": "Trois couleurs principales […]. L’azur indique l’esprit, l’or, le corps et le rouge, le sens. […] Ces trois couleurs désignent aussi les trois substances que les mages venus d’Orient offrirent à l’Enfant-Dieu dans sa crèche : l’or pour le corps, l’encens pour l’esprit et la myrrhe pour le sens qui unit l’esprit au corps."
-      },
-      {
-        "source": "Dechambre, R., Demandons TOUT ! revue ARCA n°3, p. 323",
-        "texte": "Ce symbole est également présent dans le rituel de la messe de funérailles. La matière de l'encens représenterait le mort, Osiris en nous, la pierre brute (située traditionnellement dans notre sacrum), et la fumée qui s'en élève serait alors l’esprit (ou la prière) qui s’élève de ce mort.\n\nLa fumée, noire au départ, telles les sombres vapeurs de Typhon, devient blanche en montant et se purifie totalement. Arrivée en haut, elle devient comme de la neige.\n\nVoilà pourquoi on dit que Maya a déposé son fils Mercure dans la neige sur le mont Cyllène.",
-        "note": "Dans la Genèse (2, 21), on retrouve cette même image lorsque Dieu plonge Adam dans un « songe », la tardemah, pour extraire Ève de sa côte."
-      },
-      {
-        "source": "Zohar (Le), Verdier, 1995, tome I, p. 424",
-        "texte": "Nulle puissance, quelle qu’elle soit ne régit la terre d’Israël, hormis le Saint, béni soit-Il, seul et quand Israël faillit en encensant des divinités étrangères à même le territoire d’Israël, ils chassèrent, si l’on peut dire, la Présence loin de sa place. Ils attirèrent et encensèrent les autres dieux pour qu’ils se joignent à la Présence, ce qui donna le pouvoir à ces derniers. L’encens possède en effet la vertu d’opérer des attachements. Désormais les autres peuples se mirent à gouverner, les prophètes cessèrent d’exister, et tous les échelons suprêmes n’eurent plus de pouvoir sur la terre."
-      },
-      {
-        "source": "Zohar (Le), Verdier, 2018, tome IV, p. 111",
-        "texte": "Et viens et vois : l’encens (qetoret) nous des liens (meqater qetarin) et rattache l’en haut et l’en bas et cela élimine la mort, l’accusateur et la colère qui ne peuvent s’imposer en ce monde."
-      }
-    ],
-    "voir": []
-  },
-  {
-    "id": "enee",
-    "terme": "ENEE",
-    "lettre": "E",
-    "entrees": [],
-    "voir": [
-      "Achille I",
-      "Troie I"
-    ]
-  },
-  {
-    "id": "enfants",
-    "terme": "ENFANTS",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "Feye, S., Fil d’Ariane, n°15 p. 53",
-        "texte": "« Enfant » se dit νήπιος en grec, de νη privatif et de œπος, parole. La même signification se retrouve dans le latin in-fans qui a donné EN-FANT. L’enfant est donc : « celui qui ne parle pas » ou : « celui qui ne comprend pas la parole »."
-      },
-      {
-        "source": "Zohar (Le), Verdier, 1991, tome III, p. 38, note 10",
-        "texte": "« Sans cesse c’est un enfant » car c’est comme s’il renaissait perpétuellement. Et il est « pauvre » parce qu’il n’a pas de lumière propre […]. « Et pourquoi est-il appelé « jeune homme » ? C’est parce qu’il a la nouveauté de la Lune qui se renouvelle sans cesse. » Si « l’enfant pauvre » est identifié au bon penchant dans l’exégèse rabbinique traditionnelle, il se rapporte, selon l’interprétation ésotérique, à sa source divine, qui est la Chekhina."
-      }
-    ],
-    "voir": [
-      "Éros 1"
-    ]
-  },
-  {
-    "id": "enfer-sch-ol",
-    "terme": "ENFER – SCHÉOL",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "Maïer, M., La Table d'or, Beya, 2015, p. 210",
-        "texte": "Comme nous l’avons montré ailleurs, par la descente aux enfers, consacrés à Pluton et Proserpine, les anciens poètes ne comprennent que l’examen des métaux, qu’on fait dans leurs mines cachées, comme il ressort du cas d’Orphée, d’Hercule, de Thésée, de Pirithoüs, etc."
-      }
-    ],
-    "voir": [
-      "Vitriol 1",
-      "Monde 3",
-      "Typhon 5"
     ]
   },
   {
@@ -5288,15 +5599,6 @@
     "voir": []
   },
   {
-    "id": "erato",
-    "terme": "ERATO",
-    "lettre": "E",
-    "entrees": [],
-    "voir": [
-      "Muse 4"
-    ]
-  },
-  {
     "id": "r-be",
     "terme": "ÉRÈBE",
     "lettre": "É",
@@ -5329,31 +5631,6 @@
     ]
   },
   {
-    "id": "esa",
-    "terme": "ESAÜ",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "d’Hooghvorst, E., Le Fil de Pénélope, Beya, 2009, p. 264",
-        "texte": "Et quelle est donc cette production ? Elle porte le nom biblique d’Ésaü. Ce nom est en hébreu le participe passé du verbe faire. Ésaü est donc un homme tout fait, un homme animal, un homme accompli pour ce monde. Il devient parfait quand il se couvre de poils. C’est là sa nature et son destin. Au-delà, il n’y a rien que la corruption et la mort."
-      }
-    ],
-    "voir": [
-      "Jean-Baptiste 2",
-      "Boue 1",
-      "Lune 11"
-    ]
-  },
-  {
-    "id": "escarboucle",
-    "terme": "ESCARBOUCLE",
-    "lettre": "E",
-    "entrees": [],
-    "voir": [
-      "Hostie 1"
-    ]
-  },
-  {
     "id": "sot-risme",
     "terme": "ÉSOTÉRISME",
     "lettre": "É",
@@ -5364,144 +5641,6 @@
       }
     ],
     "voir": []
-  },
-  {
-    "id": "espace",
-    "terme": "ESPACE",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "Zohar (Le), Verdier, 1995, tome I, p. 64",
-        "texte": "En résumé, les mots : « L’espace raconte l’œuvre de ses mains » (Ps. 19 :2) font allusion aux compagnons qui se sont rassemblés autour de l’épousée et qui sont les gardiens de son alliance. L’espace les énonce et les inscrit tous un par un. De quel espace s’agit-il ? De l’espace qui comprend le soleil, la lune, les étoiles et les constellations et qui constitue le Livre du souvenir."
-      }
-    ],
-    "voir": []
-  },
-  {
-    "id": "esp-rance",
-    "terme": "ESPÉRANCE",
-    "lettre": "E",
-    "entrees": [],
-    "voir": [
-      "Vertu 2",
-      "Mesure(r) 3"
-    ]
-  },
-  {
-    "id": "esprit",
-    "terme": "ESPRIT",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "Paracelse, La grande astronomie, Dervy, 2000, p. 272",
-        "texte": "En nous, l’esprit que nous tenons de l’Esprit sidéral, régit la nature. Il est le principe de notre vie raisonnable, selon la nature. Quant à l’esprit que nous avons reçu de l’Esprit de Dieu, il nous donne l’intelligence des choses divines. Ces deux esprits nous quittent à notre décès, cependant, tandis que l’un meurt, l’autre reste vivant."
-      },
-      {
-        "source": "Paracelse, La grande astronomie, Dervy, 2000, p. 273",
-        "texte": "En fait, tout est esprit : l’âme insufflée par Dieu et l’esprit que nous recevons de la nature. L’âme est esprit, l’ange est esprit. C’est pourquoi nous pouvons donner à l’âme le nom d’esprit et dire que l’esprit donné par Dieu est l’ange qui demeure en l’homme. Tout est esprit, car tout vient de Dieu, de sa bouche ou de sa main."
-      },
-      {
-        "source": "Moureau, Sébastien, Le De anima alchimique du pseudo-Avicenne, Sismel - Edizioni del Galluzo, Florence, 2016, p. 71",
-        "texte": "Les esprits servent à ce que le corps soit marqué d’une empreinte pour qu’il puisse être uni à l’âme. Les esprits sont des corps mais ils diffèrent des autres corps en ce qu’ils se subliment ; ils sont appelés esprits parce qu’aucune chose ne peut être sublimée sans esprit. […] Les esprits se dissolvent facilement, font dissoudre les autres choses, brûlent, refroidissent, dessèchent et humidifient."
-      },
-      {
-        "source": "Bebescourt, La Vérité. Les Mystères du Christianisme approfondis radicalement, notes de H. van Kasteel, Beya, Grez-Doiceau, 2026, p. 67",
-        "texte": "Nos pères ont voulu renfermer sous le nom générique de\nl’ esprit : 1° le génie , qui a seul la faculté de tracer, au champ\ndes idées de l’homme, les différentes images que ses yeux ou\nsa réflexion peuvent lui rendre sensibles : celui-ci est proprement\nl’esprit d’ imagination ; 2° l ’intellect , qui nous sert à reconnaître,\navec une continuelle distinction, la multiplicité des idées, les\nunes vraies, les autres fausses, dont notre génie a pu nous\nfournir les images : celui-là est l’esprit de conception ; 3° le\nsentiment proprement dit, qui est comme un flair spirituel de\nnotre intellect, lorsqu’il veut extraire, de l’image peinte par le\ngénie d’un autre homme, le fond substantiel des idées qui lui\nsemblent avoir besoin d’être creusées pour être entendues plus\nparfaitement : nous le qualifions d’ordinaire l’esprit de pénétration ;\n4° le Jugement , qui s’annonce véridiquement comme une sentence\nque l’homme doit prononcer, en conséquence de sa pénétration\ndans les idées que son génie, ou le génie d’un tiers, aurait\nprésentées à son intellect ; nous appelons cette 4 me faculté\nspirituelle (par similitude avec la saveur de notre palais) l’esprit\nde sapience ; 5° le vouloir , qui doit être une suite naturelle du\njugement intérieurement porté soit pour soit contre ou la pensée\nou l’acte que nous statuons d’agréer ou de rejeter : ce dernier\nest l’esprit de résolution .\nVoilà les circonstances et dépendances de l’ esprit humain,\nlequel n’est en soi qu’une eau espritée dont nos sens intérieurs\ntirent toute la force de leurs impulsions, autant diverses que les\ntraits et que les caractères particuliers de chaque individu. Or\nil est bon de vérifier si le nom a b -el , que Moyse donne à cet\nesprit, le définit à la faveur de sa cabale, ou de sa décomposition\nsyllabique, par des significations dont tout philosophe doive être\nsatisfait.\nLa plus frappante pour tous ceux qui sauront la langue des\nChaldéens ou Babyloniens, c’est la réunion très simple du mot\nاب ,ab, exprimant le père et exprimant aussi l’ eau , avec le mot\nال , el, qui veut dire la main[note]. Si notre esprit réside nécessairement\ndans l’ eau de notre substance, il est une main aqueuse et\npaternelle qui doit agir incessamment pour notre conservation.\nMais il devient plus sensiblement encore la main du père et la\n\nmain de l ’eau lorsqu’il préside à l’effusion de notre eau séminale,\nsans laquelle aucune créature vivante sur la terre n’y aurait pu\nconnaître la paternité .\nJ’aperçois dans les deux syllabes du nom Abel de quoi\ncontenter aussi le cabaliste grec en deux façons, c’est-à-dire par\ndeux différentes séparations des syllabes. Il trouvera d’abord la\nprésidence naturelle de notre esprit à l’acte génératif, s’il observe\nque le Jet du principe se trouve expressément déclaré par Ἀ-βέλος,\nprincipii Jaculum. Par un second coup δ’ειλ qu’il doit porter\nsur Ἀβ-έλ, il découvrira certainement ἀββε ›lh, patris splendor ,\net il sentira que sous quelque face qu’on veuille envisager notre\nAdam père d’Abel , cet enfant doit toujours être reconnu pour la\nvraie splendeur de son père[note].\nEn effet, veut-on considérer le nom d’adam comme un pluriel\narabique, exprimant les hommes ? Assurément, ce fut et ce sera\ntoujours l’ esprit mis au jour par les hommes qui les fit et qui les\nfera tous plus ou moins briller dans le monde. D’autre part, si\nnous nous représentons le globe terrestre par Adam , ne sont-\nce pas ses productions en arbres et en plantes de toute espèce\nqui doivent former son unique splendeur ? Et n’est-ce pas son\nfils Abel , ou l’ eau espritée , qu’il engendre intérieurement, qui\nseule est capable de lui en procurer l’admirable décoration ?\nD’après cette reconnaissance des deux personnages, Caïn\net Abel , il n’est pas difficile de constater l’assassinat d’abel par\nCaïn . Car l’ eau espritée , qui commande souverainement à nos\nsens intérieurs, se trouvant ici figurée par Abel , comme cet esprit\naqueux est le frère naturel de l’ esprit terrestre qui régit nos\ncinq sens extérieurs, et comme il doit naturellement mourir dans\net avec le corps humain, lorsque l’ esprit terrestre (dont Caïn\nest la figure) en opère la destruction, il s’ensuit que ce malheureux\nfrère d’Abel était réellement destiné à commettre le cruel fratricide\nqui nous est raconté par Moyse au livre de la Genèse. Je ne vois\n\ndonc plus que la cause historique du meurtre d’Abel, et le sort\nsubséquent de son meurtrier, qui puisse mériter notre attention.\nMoyse feint « qu’Abel fut un pasteur et que Caïn cultiva la\nterre. De là Caïn ne pouvait offrir à Dieu que des fleurs ou des\nfruits , tandis qu’Abel lui présentait en holocauste ce qu’il y\navait de plus beau et de plus précieux parmi ses troupeaux .\nL’Éternel fut plus satisfait (nous dit l’historien) des sacrifices\nd’Abel que de ceux de son frère. Caïn en fut jaloux. Il entraîna\ndans la campagne Abel et lui ôta la vie. Dieu le condamna pour\ncette action à demeurer fugitif et vagabond sur la terre » 281.\nToute cette énigme devrait se deviner à sa seule lecture.\nCaïn , puisqu’il est le feu de l’esprit terrestre, ne peut cultiver\ngénéralement que le corps de la terre, en sorte que dans l’homme,\nc’est la chair, ce sont les os, les muscles et les nerfs, dont il est\nle créateur et l’animateur corporel. Ainsi, la beauté des traits,\nde la carnation, de la taille, les grâces du maintien, de la\ndémarche, des actions, la force et la prestance humaines, en\nun mot, tout ce qui organise extérieurement nos êtres, sont du\nressort de cet esprit . Mais ce ne sont là que des fleurs et des\nfruits de la terre qui, avec la plus belle apparence, peuvent être\nfort trompeurs. Telle était sans doute l’offrande de Caïn . émanée\ndes seuls sens extérieurs, pouvait-elle ne pas représenter une\ndémonstration vaine et fausse par elle-même ? En conséquence,\nl’Éternel devait la rejeter.\nAbel , comme étant le principe aqueux de notre substance,\na le bonheur de posséder, pendant que nous vivons, un esprit\ncéleste ou aérien qui est immortel de sa nature, parce que sa\nsubstance contient le pur feu de Dieu. C’est cet esprit céleste\nqui est l’animateur immédiat de notre eau , et qui, par cette raison,\nest appelé notre âme .\nPar la suite naturelle de ce que l’âme réside dans le corps\nspiritualisé de notre eau , cette eau seule peut distribuer dans\nles êtres certains esprits que nous nommons animaux . Or ce\nsont ces esprits animaux qui, parce qu’ils sont employés au\n\nsoutien de nos corps, et parce qu’on les qualifie animaux, nous\nsont représentés comme formant un troupeau dont Abel fut le\npasteur. À l’égard des offrandes ou des sacrifices que l’ esprit\npeut offrir à Dieu, on conviendra qu’ils renferment un caractère\nde certitude et de sincérité, qui seul doit être reconnu capable\nd’en faire agréer l’hommage par l’Éternel.\nEnfin, cet esprit aqueux , qui fait la splendeur actuelle de\nnotre être, soit qu’il fasse briller dans nous la vivacité ou la\nfécondité du génie, la netteté ou la promptitude de l’intellect, la\nforce ou la finesse du sentiment pénétratif, la profondeur ou la\nsolidité du jugement, l’étendue ou la maturité des projets que\nnous enfantons, cet esprit, dis-je, tel brillant qu’il puisse être,\nne doit-il pas s’évanouir et périr naturellement à la retraite de\nl’âme , je veux dire : lors de cette dissolution du composé humain,\nque nous appelons notre mort ?\nMoyse nous en dépeint l’instant fatal par le départ de Caïn ,\nou de notre feu terrestre , pour la campagne. Dès que son\nfrère Abel est notre esprit, on voit qu’il doit être entraîné avec\nlui, mais forcément, dans ce voyage. On distingue qu’alors caïn\nle tue véritablement, et qu’après l’avoir tué, il lui serait tout à\nfait impossible de dire en quel lieu est le corps de son frère. Voilà\npourquoi Moyse faisant ici apparaître l’Éternel qui veut lui\nreprocher son fratricide, et qui commence par lui demander où\nest Abel, Caïn répond : « Je ne sais. Suis-je donc, moi, le gardien\nde mon frère[note] ? »\nMais que devient Caïn , ou le feu de notre terre, lorsque son\nêtre ne sert plus d’organe à l’expression du sentiment spirituel ?\nIl est constant qu’alors le personnage de caïn ne représente plus\nqu’un principe igné purement terrestre, et un destructeur des\nouvrages de Dieu. Ne méritait-il pas à ce titre la malédiction de\nl’Éternel, dont le récit mosaïque fait mention ? À l’égard de sa\ncondamnation à être perpétuellement fugitif et vagabond sur la\n\nterre, c’est comme devant être l’animateur des vents , qui errent\nsans cesse fugitivement au-dessus de notre globe, et dans lesquels\nnous distinguons qu’il y a vraiment un feu terrestre incorporé.\nCar ce n’est que leur ardeur brûlante qui fait ressentir au jardin\nde la terre les ravages continuels qu’ils y font.\nComme il ne pouvait naître d’un principe destructeur que\ndes êtres nuisibles à l’humanité, notre histoire sainte ne lui\ndonne qu’une postérité maudite comme lui, laquelle employa\nson génie, soit à allumer partout des feux violents destinés à\nbrûler ou à fondre, soit à y forger des instruments de fer capables\nde percer, de fendre, de couper, en un mot, de détruire tous\nles corps existants sur la terre. Si d’autres enfants de Caïn\nsont annoncés comme inventeurs des sons de la musique et de\nplusieurs arts différents, ceux-là (qui sont toujours des ouvriers\nayant besoin du vent ) servent encore à symboliser toute\norganisation corporelle, qui doit être conduite universellement\npar l’esprit du feu terrestre , animant chaque corps.\nIl y en eut d’autres, nous dit Moyse, qui formèrent une race\nde géants. Ceux-ci, semblables à ceux de la fable, méritaient\nassurément d’être exterminés par les eaux de son Déluge . Mais\nil n’est pas temps que j’en dévoile à mon lecteur la superbe\nfigure ; je dois l’entretenir auparavant de la race patriarcale, de\nlaquelle est issu le grand Noé , au moyen de dix générations\nsuccessives. Je dois même, avant toute autre explication, le\nfaire pénétrer avec moi dans la chronologie véridique de notre\nGenèse.\n\nMoyse a voulu que son histoire du monde eût les mêmes\napparences d’une filiation graduelle qu’il avait observées dans\nl’histoire des dieux rois de l’Égypte. C’est pourquoi il imagina\nde faire naître d’Adam et d’ ève un 3me fils (autrement dit un fils\nterrestre ) duquel il formerait la tige de plusieurs autres\npersonnages humains, se succédant par des générations qui\nparaîtraient avoir peuplé d’hommes toute la terre, et d’exprimer,\ndans les noms qu’il donnerait à chacun d’eux, les divers états\nsuccessifs par lesquels doivent passer tous enfants d’adam , ou\ntoutes productions de notre globe , pour acquérir leur perfection\net leur terme naturels.\nJe sais qu’on peut objecter contre la probabilité de cette\nhistoire, les siècles de vie qu’il y attribue à nos patriarches du\npremier âge. Mais je ferai convenir mon lecteur : 1° que les degrés\nqui doivent constituer, sensiblement pour notre vue, une\ndifférence d’état corporel dans tous les êtres enfantés par la terre,\nne pouvaient pas être multipliés au gré de l’historien ; 2° que s’il\navait borné, au temps ordinaire de nos générations présentes,\ncelles de ses premiers hommes, l’image qu’il nous eût ainsi\ndonnée d’une population du globe terrestre, qui devait précéder\nson Déluge universel, se fût écartée beaucoup plus encore de\ntoute vraisemblance ; car enfin, il était plus naturel de nous faire\nconsentir « que le Créateur eût favorisé d’une vie très longue nos\npremiers pères, afin que leurs enfants parussent exister en plus\ngrand nombre au temps de Noé », que d’exiger qu’on supposât\nprobable une population d’hommes également étendue pendant\nle court laps de deux ou trois siècles , auquel dix générations\nhumaines se réduisent communément.",
-        "note": "278. Pour le double sens de اب ab), cf. supra, p. 49 et n. 59. 279. Le nom βέλος signifie « trait », « jet », projectile » (jaculum, d’où le verbe e-jaculor, « é-jecter ») ; la lettre A désigne le principe (principium).\n280. Selon le Etymologicon magnum, ›lh, ou εῖλη, signifie « splendeur (splendor) du soleil » ; le nom serait apparenté à ἡλιος, « soleil ». Dans la tradition chrétienne, Patris splendor, « splendeur du Père », est un des titres du Christ. Abel y est d’ailleurs considéré comme une préfiguration du Christ, notamment en raison de son sacrifice et de sa mort sanglante."
-      },
-      {
-        "source": "Anonyme, La Nature dévoilée ou La théorie de la Nature, Dervy, 1993, pp. 97 à 99",
-        "texte": "Après que Dieu eut créé la vapeur universelle, il lui implanta, de sa propre volonté, une essence active que nous nommons esprit. Cet esprit est dès le commencement un être mobile qui ne se repose jamais ; mais qui est toujours en mouvement, opérant et agissant continuellement et sans relâche. Qu’il soit fixe ou volatil, il est toujours en action, et il opère avec altération et successivement dans toutes les créatures : lorsqu’il cesse d’exister dans l’une, ou qu’il en sort, dans le même instant il recommence à travailler dans une autre, et ainsi ne se repose jamais un seul moment.\n\nCet esprit est l’agent, l’auteur et l’origine de tout changement, et il commence chaque changement par la putréfaction. Lorsqu’il l’a fomentée pendant quelques temps, il sépare le pur de l’impur, ensuite il conjoint, coagule et fixe jusqu’au terme absolu de chaque individu : après qu’il a poussé un corps coagulé jusqu’à son dernier terme, il recommence à le putréfier, à le résoudre, à le séparer, jusqu’à ce qu’il en ait achevé quelqu’autre chose. Cet esprit est le générateur, le conservateur, le destructeur et le régénérateur de toutes les choses du monde."
-      },
-      {
-        "source": "Paracelse, Les Fous, Beya, Grez-Doiceau, 2020, p. 23",
-        "texte": "Il faut soigneusement examiner l’esprit de l’homme, étant donné qu’il en a deux, et qu’ils lui sont congénitaux. Or, c’est selon l’esprit de la vie que l’homme doit être un humain et non vivre d’après l’esprit du limbus qui fait de lui une créature sans raison. Car s’il est vrai que l’homme est l’image de Dieu, il doit nécessairement contenir l’esprit divin, sans quoi il est une bête, et en tant que bête, il a un esprit animal. Ce sont bien deux opposés, mais l’un doit dominer l’autre. Pour être un humain et non un animal, l’homme doit donc vivre de la vie de l’esprit de l’homme en évacuant ainsi l’esprit bestial.",
-        "note": "Dans le texte allemand : limbi. Ce limbus (limbe) signifie frange, bord, mais aussi zodiaque. C’est, on le verra, dans ce dernier sens que l’entend l’auteur : l’esprit animal vient du zodiaque."
-      }
-    ],
-    "voir": [
-      "Âme 2"
-    ]
-  },
-  {
-    "id": "esprit-astral",
-    "terme": "ESPRIT ASTRAL",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "Paracelse, La grande astronomie, Dervy, 2000, p. 177",
-        "texte": "On s’est imaginé que l’esprit sidéral du défunt était son âme qui exhalait sa douleur et appelait au secours. Il fallait donc prier pour sa délivrance ou accomplir quelque rite. Or, à la différence de l’âme, l’esprit astral de l’homme meurt, car il est soumis au temps."
-      }
-    ],
-    "voir": [
-      "Daïmon 4"
-    ]
-  },
-  {
-    "id": "esprit-corps",
-    "terme": "ESPRIT-CORPS",
-    "lettre": "E",
-    "entrees": [],
-    "voir": [
-      "Mars 3"
-    ]
-  },
-  {
-    "id": "esprit-saint",
-    "terme": "ESPRIT SAINT",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "Fulcanelli, Les demeures philosophales, t. 1, Pauvert, 1964, p. 188",
-        "texte": "Dans la notation alchimique, toute barre ou trait, quelle que soit sa direction, est la signature graphique conventionnelle de l’esprit, ce qui mérite d’être retenu si l’on veut découvrir quel corps se dissimule sous l’épithète d’or philosophique, père du mercure et ‘soleil’ de l’œuvre. (Esprit = feu ou soufre incombustible)."
-      },
-      {
-        "source": "Fabre du Bosquet, Concordance, Le Mercure Dauphinois, 2002, p. 26",
-        "texte": "L’esprit se nourrit des principes analogues à lui-même qu’il trouve dans l’air que l’homme respire. C’est-à-dire que l’âme du monde, l’esprit universel sont sa nourriture spéciale et particulière… il est l’instrument dont Dieu se sert pour donner la forme à l’univers et l’être à tous les mixtes.\n\nLa conservation du corps est confiée à l’esprit. C’est lui qui travaille dans les laboratoires intérieurs, les aliments qui le nourrissent. C’est le véritable Archée dont les savants placent la plus grande force au cœur et à l’orifice de l’estomac. C’est le principe igné qui constitue l’âme agissante de l’homme, qui donne à son corps l’action et le mouvement sous les ordres de l’âme, comme l’Univers le reçoit par les Éléments simples sous les ordres de Dieu.\n\nla vie au corps, il la lui conserve autant que ses facultés le lui permettent, il le rendrait presque immortel si lui-même dans toutes les époques de la vie pouvait être substanté en qualité et en quantités suffisantes."
-      },
-      {
-        "source": "Khunrath, H., Amphithéâtre de l’éternelle sapience, Hanau, 1609, p. 158",
-        "texte": ",אלהי ρvה Ruach Elohim est l’Esprit, le souffle saint, la respiration de יהvה le saint : la Vapeur de la vertu de Dieu Omnipotent et sachant tout et une certaine émanation ou émission de fécondité vitale du premier et souverain moteur, vivifique et puissante, provenant du gouffre profondissime de sa Divinité, où sont les formes (ideae) c’est-à-dire les Exemplaires, les Espèces, les Raisons séminatrices primordiales et radicales, les volontés opératoires, et les causes effectrices de toutes les choses qui, conçues et préexistantes dans l’intelligence de l’archétype et artisan suprême (xכמה Hochmah la Sapience les produisant dans sa Bonté) doivent être ensuite produites et accomplies à l’avenir dans le Monde. Toutes ces choses (Elohim créateur et formateur, l’ayant ordonné et commandé par son Verbe, Genèse I), qu’il a voulu douer d’existence dans ce Théâtre mondain, ont été produites et faites dans ce globe sublunaire et revêtues de terre et d’eau, Þλη ou matière première commune et universelle, par l’intervention du Ciel.\n\nJ’ajoute : Ruach Elohim est μορφ¾ ou la forme de toutes choses, interne, οÙσιάδης, essentielle ; l’Âme universelle du Monde ; la Vertu substantielle subsistant per se, cause de toute créature de ce monde qui doit subsister ; l’Essence (parce qu’il est incréé), vraiment quinte ; et (pour me servir d’une expression très usitée) la nature ipsissime et substantifique des choses. C’est la Puissance (numen) de Dieu et la Divine Raison insérée dans tout le monde et ses parties, et auteur et artisan de toutes ces choses. C’est l’Esprit Un (par l’essence et le nombre) de Dieu : c’est l’Âme une de cette Université une, visible et corporelle ; âme catholique, mais cependant πολυποικίλος c’est-à-dire multiforme (Sapience VII, 22 ; S. Paul aux Ephes. III, 10) et dont les divers rayons et étincelles furent enfermés dans le môle de la première masse matérielle et de là dispersés et dissipés ; et ces étincelles de l’Âme universelle et une, disjonctivement et séparativement innombrables, habitent maintenant dans les parties du Monde qui furent disjointes ensuite et séparées de la masse du corps et même de sa circonférence."
-      }
-    ],
-    "voir": [
-      "Circoncision 1",
-      "Binah 2",
-      "Zot 2"
-    ]
-  },
-  {
-    "id": "essence",
-    "terme": "ESSENCE",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "Charpentier A., La Rose-Croix et le symbolisme du centre, revue ARCA, p. 4",
-        "texte": "Ces termes d'essence et de substance peuvent, dans une certaine mesure, être remplacés par ceux de forme et matière."
-      },
-      {
-        "source": "Charpentier A., De la Cause et des effets, S.l.n.d., p. 16 et note n°1",
-        "texte": "Il doit exister un élément commun entre l'Être et \"les êtres\", sans quoi aucune relation entre la Cause et ses effets ne serait possible, ce qui est absurde. Et cet élément commun est précisément l'essence de chaque \"créature\", c'est-à-dire la présence en elle de l'Être, source unique de sa subsistance.\n\nMaintenant, cette présence (ou \"immanence\") obligée, en chacun des êtres, de l'Être Transcendant n'implique aucunement que l'Être soit engagé dans l'existence. Rappelons que celle-ci est fondamentalement polarisée (\"à double face\", donc soumise à la quantité), alors que l'Être, étant pure qualité, peut seul être dit Un.",
-        "note": "Et qui est aussi son \"noyau d'immortalité\", ce Logos \"commun à tous\" qui est sa Personnalité (par opposition à son individualité) ou encore sa participation au Soi universel qui transcende infiniment chaque petit moi : toutes expressions équivalentes."
-      },
-      {
-        "source": "Moïse de Léon, Le sicle du sanctuaire, Verdier, 1996, p. 255 et note 888",
-        "texte": "C’est dans le Ciel que toutes les essences ont pris forme et elles ont procédé selon le secret de leur être […].",
-        "note": "Le mot metsiout, traduit par « réalité », désigne l’ensemble du monde de l’émanation."
-      }
-    ],
-    "voir": [
-      "Dieu 2"
-    ]
-  },
-  {
-    "id": "est",
-    "terme": "EST",
-    "lettre": "E",
-    "entrees": [],
-    "voir": [
-      "Hochmah 2"
-    ]
   },
   {
     "id": "tain",
@@ -5576,27 +5715,6 @@
     "voir": []
   },
   {
-    "id": "etoile",
-    "terme": "ETOILE",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "Bebescourt, La Vérité. Les Mystères du Christianisme approfondis radicalement, notes de H. van Kasteel, Beya, Grez-Doiceau, 2026, p. 55",
-        "texte": "Il en est de même de toutes les étoiles : leurs stillations plus\nvives ne sont produites que par leur éloignement, qui force notre\nειλ à rassembler, dans un très petit point de perspective, la\ntotalité de leur lumière, et qui, par leurs conformations plus ou\nmoins angulaires, ou par leurs diverses positions, doit aussi\ndiversifier pour notre vue ces mêmes effets.\nAucune d’elles ne se manifeste comme un Être vivifiant par\nson essence. Leur lumière, également blanche ou argentine au\nmilieu de leurs plus fortes stillations , également absorbée par\nle moindre rayon de l’astre du Jour , nous déclare qu’elles sont\ntoutes des corps éclairés et vivifiés par lui, comme notre terre ;\nen même temps que leur multitude vraiment innombrable nous\nfait connaître l’immensité de la création universelle.\nJ’ai dit que celle rapportée par Moyse sous le Jour 4 offrait\nune seconde beauté : c’est son rapport avec le principe général\naqueux que l’on a reconnu dans le dieu Océan , et que beaucoup\nde philosophes qualifient l’ eau première naturelle. Je sens qu’il\nme faut expliquer ce nom, ainsi que tous ceux du vrai langage\nphilosophal, car les physiciens de notre siècle, accoutumés à\nn’étudier la nature que dans sa superficie et à n’en parler que\nconfusément selon les principes des écoles, ne savent pas\ndiscerner la spiritualité qui est essentielle aux éléments .\nMon lecteur saura donc que l’ eau naturellement première\nn’est pas un corps pesant, palpable et destitué d’action, comme\nl’eau qui sert à nous désaltérer. Elle est au contraire une eau\nvivace , trop subtile par soi pour être ni vue ni pesée, et cependant\ntrop sensible à l’esprit pour qu’aucun vivant puisse la méconnaître.\nC’est l’ eau dont la terre et tous les êtres qu’elle renferme sont\nélémentés . C’est l’ esprit de leur humide radical, que chacun\nconviendra être une eau purement naturelle, et incontestablement\nl’ eau première de tout ce qui existe, puisque sans elle aucun\nde nous n’aurait commencé d’exister.\nCe détail semblera minutieux ; mais si je n’y étais pas entré,\nl’on aurait plus difficilement reconnu comment le soleil , la lune\net les étoiles ont dû servir à Moyse pour nous dépeindre le Jour\nou l’illumination de l’ eau élément . L’on n’eût envisagé dans ces\nglobes diversement lumineux qu’une lumière diverse ; et ne\ndistinguant dans cette lumière que son feu , sans faire attention\n\nà sa vive fluidité, l’on en aurait conclu que leur application à\nl’ esprit de l ’eau forme un contraste naturel.\nMais puisque j’ai instruit mon lecteur que le principe aqueux ,\nsoit qu’on l’appelle eau élément ou l’eau première, est d’une\nspiritualité impalpable, il comprend déjà que sa qualité spirituelle\nrend nécessairement son essence ignée. Le feu que cette eau\nrenferme doit lui paraître d’autant plus frappant, qu’il voit partout\nson humide , élémentant nos corps, contribuer radicalement à\nnotre vie. Son essence pourrait-elle coopérer à la vie , si elle\nn’était pas empreinte de ce feu fluide, vivifiant et non comburant,\nque le seul esprit du Dieu Créateur fut originairement capable\nde départir aux êtres créés ?\nC’est dans le moment où cette eau devient créatrice qu’il faut\nse la représenter à l’imagination, pour voir dans elle, avec Moyse,\nla création d’un soleil , d’une lune et des étoiles firmamentées.\nOr il faut convenir que c’est pour l’ eau élément le plus beau\nJour dans lequel on puisse l’exposer.\nHermès avait donné à son 4me jour hebdomadaire, consacré\nau dieu 4me Océan , le nom de Mercure, signifiant, comme je\nl’ai déjà dit, μερέων κύριος, le seigneur des parties. Pour que notre\nélément eau vivifie quelque nouveau corps, ne faut-il pas qu’il\ncaractérise d’abord sa puissance, en se faisant reconnaître pour\nseigneur par les parties que nous appelons génitales, et qui\ndoivent exécuter, sous ses ordres, toute humaine reproduction ?\nD’ailleurs, dans tout contrat civil, nous nommons ceux qui\ncontractent : les parties ; et il n’y a certainement point de contrat\nplus important dans le monde, point de lien social où le\nconsentement des parties soit plus nécessaire, point d’acte où\nla liberté et la volonté, conséquemment l’accord parfait des\nparties éclate davantage, que celui dont il résulte un nouvel être\nvivifié. Or quel est le seigneur reconnu par les parties qui se\nlient volontairement dans cet acte ? Qu’on y réfléchisse : on verra\nque c’est l’ eau élément , ou le principe aqueux , qui est et qui\ndoit être le seigneur des parties .\n\nJe n’ai pas besoin de faire observer que l’instant où cette\neau première de tous les êtres se montre en qualité de mercure ,\nest le moment de son exaltation à la déité. Elle est pour lors\nremplie des rayons vivifiants du dieu du feu ; elle acquiert un\npouvoir créateur ; elle a la faculté vraiment divine de distribuer\nla vie . Il est constant qu’Hermès ne pouvait mieux spécifier le\nJour de son 4me dieu Océan , qu’en le nommant Jour de Mercure .\nCe nom me fera joindre ici un mot d’instruction pour la secte\ninfortunée de certains chymistes, dont l’erreur singulière excite\nma pitié : on les nomme communément les chercheurs de la\npierre philosophale.\nLa terre produit un métal de soi fluide, d’une agilité et d’une\npénétration non moins surprenantes que sa facilité à s’échapper\nde tous corps sans nulle destruction du sien. Par là cette eau\nmétallique se trouvant avoir quelques qualités analogues à\ncelles du principe aqueux, elle fut autrefois appelée, comme lui,\nmercure .\nPlusieurs philosophes ont habilement profité de cette\nsimilitude pour écrire sur le grand ευvρε des hommes,\nc’est-à-dire sur λ’ευvρε de la génération, dans les termes d’une\nchymie postiche ; et leurs véridiques ouvrages n’ont point été\ncompris par nos chymistes, parce que versés dans leur art\nseulement, ils ne le sont point du tout dans les allégories. Tout\nest corporel pour eux : en conséquence, ayant bien observé les\nqualités corporelles de l’ eau métallique , ainsi que le nom de\nmercure qu’elle porte, ils se sont fortement persuadés qu’elle\ndevait être le vrai mercure , duquel on leur expliquait\nchymiquement tant de merveilles.\nTrompés par une idée abusive, on les voit exercer sur ce\nfluide métal mille travaux ridicules, dont l’issue fut et sera\ntoujours de consommer son bien, son industrie et ses veilles, à\nbrûler méthodiquement ou de l’huile ou du charbon. Car ce n’est\npoint là le mercure que Lulle, Synésius, le Trévisan, Flamel,\nPhilalèthe, le Cosmopolite, etc. ont si ingénieusement enseigné,\net avec lequel chacun peut réussir, comme eux, dans leur même\net unique grand ευvρε.\n\nLe mercure des philosophes est exactement celui que la\nfable déifie : c’est ce dieu ailé, fils et messager de Jupiter , qui\nformant l ’esprit de l ’eau , est rendu, par la volonté de l’Éternel,\nle seigneur des parties qui nous élémentent. En effet, nos yeux\nnous disent que la terre élément , ou l’esprit terrestre des êtres\ncréés, ne se porte jamais à la conformation d’aucun corps sans\nque l’ eau élément ne le lui commande. D’ailleurs, l’ esprit de\nl ’eau , comme étant radicalement fluide et actuellement spirituel,\ndoit nous paraître une essence semblable à la substance de l’air ;\nd’où il devient capable de conglober, de retenir en soi, et de\ncomporter avec soi, le pur feu de l’ esprit divin , qui seul vivifie\ntous les êtres.\nJe pense que l’on comprendra désormais Moyse, quand il\nfait reposer l’esprit du Créateur, d’abord au-dessus des eaux de\nsa création universelle, ensuite sur celles de son admirable\ndéluge. Déjà nous concevons que l’ esprit de Dieu est\nnécessairement incorporé dans nos eaux créatrices, puisqu’elles\nne peuvent vivifier aucunes reproductions que par lui ; et nous\nverrons ci-après que les eaux de notre déluge universel\ncomportèrent aussi indubitablement le même esprit de Dieu.\nMa commisération, pour tous ceux que des allégories\nchymiques peuvent abuser, ne se bornera point à leur avoir fait\nconnaître le seul mercure avec lequel on puisse projeter et\nmultiplier l’or de vie . Je les préviens qu’en dévoilant nos mystères\névangéliques, j’aurai occasion de leur faire mieux comprendre\nla chymie postiche des philosophes, et je m’assure qu’après cela,\npersonne ne sera plus tenté de chercher risiblement la pierre\ndu monde en des métaux dont le corps sans vie est incapable de\nla leur faire aucunement distinguer.\n\nJ’ai expliqué le chiffre 5, en parlant du dieu égyptien\nOsiris -Ammon dont il fut le caractère. L’on a vu que c’était un\nsymbole de l’ esprit universel de la nature. Voyons comment\ncet esprit est mis dans tout son Jour par notre historien sacré.\nIl nous annonce premièrement une infinité de poissons qui,\nformés des eaux , y manifestèrent leur vie par leurs mouvements,\net qui reçurent immédiatement du Dieu Créateur l’ordre de\ncroître , de multiplier et de terminer dans les mers . Ensuite\nparaissent des oiseaux de toute espèce, prenant leur vol de la\nterre pour s’élever dans la substance aérienne ; l’ordre du Créateur\npour ceux-ci est « QU’ILS SOIENT MULTIPLIÉS SUR LA TERRE » 210.\nPour parvenir à l’intelligence de ce tableau mystique, mon\nlecteur doit d’abord être instruit quelles sont les eaux dont\nl’essence est seule capable de former des poissons vifs ; et quelles\nsont les mers dans lesquelles il fut ordonné divinement, à ces\npoissons d’une vive essence, d’opérer en premier lieu la croissance\ndes êtres, qui enveloppe naturellement leur conservation vitale ;\nen second lieu leur multiplication , qui doit s’exécuter par des\ngénérations reproductives de chaque espèce ; en troisième lieu\nleur terme , ou leur complétion, qui est proprement leur mort,\npar suite naturelle de la maturité de tout fruit terrestre.\nCes trois ευvρεσ différents sont exactement ceux qui ont\nconstitué le monde et qui sont nécessaires à sa perpétuité. C’est\npourquoi, dès que j’aurai rappelé à mon lecteur que les philosophes\nfont de la substance aérienne (dans laquelle et par laquelle tous\nles êtres créés respirent) leurs mers , il imaginera d’abord que,\ncomme nous existons actuellement dans ces mers de Moyse,\nnous pourrions nous en réputer les poissons ayant vie ; mais ce\nn’est pas encore cela. Nous ne sommes que des êtres animés\n\nactuellement par ces poissons vifs qui, seuls, durent recevoir le\ndivin commandement des trois ευvρεσ de la vivification universelle.\nJe rendrai leur essence radicale plus sensible, en faisant bien\nconnaître les eaux dont Moyse les déclare émanés ou formés.\nLa très pure substance ou solaire ou divine qu’il a été naturel\nde qualifier pur feu , parce que la vie qu’elle distribue aux êtres\nterrestres donne à leur corps une chaleur qu’ils perdent en\nmourant, est encore qualifiée par les plus grands philosophes\neau vive . Ils ont reconnu que ce feu solaire (qui est d’abord vif\net fluide par sa nature) pouvait être assimilé aux eaux d’une\nsource vive , en ce que jamais il ne consume par combustion\naucun des corps qu’il atteint et pénètre, mais qu’au contraire,\ntous les êtres sont vivifiés, sustentés et corroborés par lui seul .\nDe là sa qualité essentielle leur a paru pouvoir être dépeinte\nsous l’expression d’ eau , comme sous celle de feu .\nIl ne reste qu’à lever nos yeux vers la source de ces eaux\nvives , qui sont si merveilleusement conglobées en un soleil\nétincelant, d’où nous vient toute vie et toute lumière. Chacun\ncomprendra que les globules de l’ eau vive ou les étincelles du\npur feu qui émanent de cet Être suprême appelé, à cause de sa\nprodigieuse élévation, le t rès -h aut , ne doivent arriver à la région\ninférieure des airs, ou aux mers philosophales qui environnent\nle globe où nous existons, qu’en plongeant, pour ainsi dire, dans\nces mers aériennes depuis le globe solaire jusqu’à nous.\nCette idée autorisa Moyse à figurer les parties essentiellement\ndivines, qui forment la vie du corps céleste, sous l’emblème de\npoissons vifs . En cela n’exposait-il pas au plus grand Jour ce\nqu’il y a de purement divin dans le principe tout spirituel dont les\nÉgyptiens avaient fait leur 5 me dieu principal ?",
-        "note": "122. La forme ε´ν (ou εᾶν) est plutôt l’infinitif de εάω, au sens de « permettre ». La signification « vêtant » remonte peut-être à quelque variante du participe aoriste (›san) du verbe ›nnumi, « vêtir » ; mais c’est une hypothèse. / 123. Littéralement : « esprit (νοῦς, animus) crachant (πτύων, spuans) des nouveautés (νέα, nova) »."
-      },
-      {
-        "source": "Vigenère, B., Traicté du Feu et du Sel, Jobert, 1976, p. 203",
-        "texte": "Les Hébrieux tiennent qu’il n’y a si petite & mallostruë herbe en la terre, ne rien quelconque des trois genres des composez minéraux, végétaux, animaux, qui n’ait là hault son estoille correspondante qui luy assiste, & dont elle reçoit son maintenement & conservation."
-      },
-      {
-        "source": "Zohar (Le), Le livre de Ruth, Verdier, 1999, p. 61",
-        "texte": "Rabbi Isaac dit : Regarde ces étoiles qui tremblent à cause de la crainte que leur inspire leur Maître, le moment pour elles est arrivé d’entonner un chant, parce que les fils de Dieu se tiennent au-dessus d’elles. Lorsque les autres puissances qui répandent des louanges la nuit ont terminé, ces fils de Dieu sonnent la trompette et l’ensemble des serviteurs qui règnent la nuit regagnent leur place. Aussitôt les étoiles qui règnent le jour, au petit matin, se mettent à trembler de terreur et elles élèvent un chant. A présent leur tour est arrivé de louer leur Maître en cet instant où la trompette est entendue."
-      }
-    ],
-    "voir": []
-  },
-  {
     "id": "toile-de-la-mer",
     "terme": "ÉTOILE DE LA MER",
     "lettre": "É",
@@ -5616,21 +5734,6 @@
     "voir": []
   },
   {
-    "id": "tre",
-    "terme": "ÊTRE",
-    "lettre": "Ê",
-    "entrees": [
-      {
-        "source": "Psellos, M., « Petits traités d’exégèse… » dans van Kasteel, H., Questions Homériques, Beya, 2012, p. 838",
-        "texte": "Le savant doit avoir à l’esprit ces deux choses : ce qui relève de l’être et ce qui relève du naître. Si la première de ces choses est stable, la seconde est marquée par un mouvement progressif, qui ne retourne ni ne fléchit, mais qui s’écoule directement ; elle est donc sujette à une prompte mort et est, en elle-même, limitée. La substance de l’autre est immortelle, voire immuable ; elle ne s’épanouit pas, ne grandit pas, ne décline pas, mais elle est en elle-même stable, sans aucun changement ou mouvement."
-      }
-    ],
-    "voir": [
-      "Philosophie 1",
-      "Essence 2"
-    ]
-  },
-  {
     "id": "tymologie",
     "terme": "ÉTYMOLOGIE",
     "lettre": "É",
@@ -5641,83 +5744,6 @@
       }
     ],
     "voir": []
-  },
-  {
-    "id": "euph-misme",
-    "terme": "EUPHÉMISME",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "Cornutus, « De la théologie grecque », dans van Kasteel, H., Questions Homériques, Beya, 2012, p. 70 note 194",
-        "texte": "Le procédé, très répandu, qui explique le nom d’un dieu comme un euphémisme (εÙφημισμός, littéralement « bénédiction »), mérite d’être étudié. Citons par exemple, dans la tradition romaine, les Parques (Parcae), déesses du destin inexorable, qui n’épargnent personne : le nom qu’on leur donne les bénit, le verbe parcere signifiant « épargner ». Les Grecs invoquaient les cruelles Érinyes (ou Furies) sous le nom d’Euménides, c’est-à-dire « Bienveillantes ».\n\nRappelons aussi, dans la tradition hébraïque, la formule « le Saint, béni soit-il ! », fréquemment employée pour désigner un Dieu dont on n’ignore pas les capacités de colère et de vengeance. Enfin, la tradition chrétienne se sert souvent du nom Lucifer (« porte-lumière ») pour désigner Satan."
-      }
-    ],
-    "voir": []
-  },
-  {
-    "id": "euphrate",
-    "terme": "EUPHRATE",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "Rosereau C. dans Vaughan, T., Œuvres complètes, La Table d’Émeraude, 2000, p. 456",
-        "texte": "Il existe un Euphrate biblique, c’est le fleuve du Paradis (Gen. II, 10-14) : « Un fleuve sortait d’Eden pour arroser le jardin, et de là il se partageait en quatre bras… le quatrième fleuve est l’Euphrate ». L’Euphrate est aussi la limite orientale de la Terre Promise […]. C’est un fleuve dont les eaux ont des propriétés particulières, permettant une certaine opération, préparant la route des Rois du Levant […]. Il existe aussi un Euphrate mythologique, qui renvoie à un homme nommé Euphratès, qui tua son propre fils par erreur. Reconnaissant sa méprise, il se jeta par désespoir dans le fleuve Médos, qui prit alors le nom d’Euphrate. Il existe ensuite un Euphrate alchimique, selon Dom Pernety : « L’Euphrate est un des noms donnés par les chymistes Hermétiques à la matière du Grand Œuvre parvenue à la couleur blanche ».\n\nIL EXISTE ENFIN un Euphrate étymologique, riche en enseignements. Euphrate vient de la racine phrazdo qui veut dire « mettre dans l’esprit, faire comprendre, expliquer, indiquer par signe aussi bien que par la parole » […]. Le préfixe eu suggère l’idée de noblesse, de perfection, de bonheur. L’Euphrate pourrait donc signifier la bonne formulation, explication et compréhension de quelque chose, phrasis, qui a donné « phrase » étant l’action d’exprimer par la parole, l’élocution, le langage, le discours. Selon Chantraine, eu-phrades signifie « qui parle avec justesse, bien exprimé, avec éloquence »."
-      }
-    ],
-    "voir": []
-  },
-  {
-    "id": "eurydice",
-    "terme": "EURYDICE",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "Charpentier A., Les mystères du Panthéon romain. L’ésotérisme de Virgile, S.l.n.d., p. 107 et n°2",
-        "texte": "Or le nom même d'Eurydice désigne clairement la fonction même d'Astrée, puisqu'elle aussi incarne la Justice de l'âge d'or, désormais en exil. Son nom signifie en effet \" La Grande Justice\" (du grec Eureïa Dikè), dont la disparition a fait le malheur du monde. Il est d'ailleurs significatif que sa mort ait été due à la morsure d'un serpent!",
-        "note": "L'adjectif Eurus signifie littéralement \"large\" ou \"vaste\", car cette Justice s'étend à l'ensemble de l'Univers, et est donc comparable à la Thémis grecque ou au Dharma hindou ; on la rendrait peut-être mieux par \"Justesse\" [..]."
-      }
-    ],
-    "voir": []
-  },
-  {
-    "id": "euterpe",
-    "terme": "EUTERPE",
-    "lettre": "E",
-    "entrees": [],
-    "voir": [
-      "Muse 4"
-    ]
-  },
-  {
-    "id": "eve",
-    "terme": "EVE",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "d’Hooghvorst, E., Le Fil de Pénélope, t. 1, La Table d’émeraude, 1966, p. 281",
-        "texte": "« Une inimitié entre toi et ta femme » : car il ne pourra jamais la satisfaire ni ne se satisfera d’elle. La séduction ne fut pour Ève qu’un dol d’amour sans poids. Le mot araméen Hiviah, serpent, de la même racine que Havah, Ève, indique qu’il en devint le mâle sans en avoir les qualités ; ce mot est en effet du genre masculin bien que de consonance féminine, ce qui montre le caractère ambigu de ce mâle séducteur. L’iconographie le montre parfois avec une tête de femme. Quant à Havah, Ève, son nom signifie la vivante, et on l’appelle ‘la mère des vivants’."
-      },
-      {
-        "source": "Anonyme, Sept instructions aux Frères en saint Jean, Arma Artis, 2004, p. 13",
-        "texte": "L’Ève Première qui était la Sagesse de l’Homme Premier (d’où il est écrit qu’elle naquit de sa côte) en devenant son imagination devint son instigatrice et ce fut donc par elle que l’Homme Premier détourna son seul sens du Principe et, par le fait du binaire, se détacha de l’axe primordial imagé par l’Arbre de Vie. Or Ève n’était rien d’autre en l’Homme Premier que la forme spirituelle de la Vierge."
-      },
-      {
-        "source": "Anonyme, Sept instructions aux Frères en saint Jean, Arma Artis, 2004, p. 55",
-        "texte": "Ève était la sensibilité de l’Homme Premier et elle était la forme spirituelle de la Vierge en Adam. Par là il faut entendre qu’Adam et Ève ne formaient qu’un seul dans l’Eden. Et donc Ève était Sagesse, pareille en cela à la Vierge mais incarnée spirituellement en l’Adam spirituel. C’est donc par elle que le tentateur atteignit l’homme en lui montrant un reflet comme s’il se fut agi d’un autre, non du Même.\n\nAinsi Ève chutée demeure indispensable à l’homme chuté, mais non point selon les Lois de la chute, bien plutôt par la Sagesse dont elle fut garante et qui demeure en elle, cachée mais intacte, qu’il faut recouvrer par l’intercession de la Vierge et, naturellement par la Grâce du Christ."
-      },
-      {
-        "source": "Zohar (Le), Verdier, 1994, tome II, p. 177 et note 72",
-        "texte": "Viens et vois, il est marqué : « Je mettrai une inimitié (éva) entre toi et la femme » (Gen.3 :15). Que signifie le mot éva ? Un verset l’indique : « Ils glissent comme des barques de jonc (évé) » (Job. 9 :26). En effet, de très nombreuses barques voguent sur la mer immense mais il est des bateaux et des barques différentes les uns des autres, les barques du serpent qui naviguent parmi eux sont appelées « barques de jonc » (évé).\n\n« Entre toi et la femme » : c’est la « femme qui craint YHVH » (Pro.31 :36). « Et entre ta descendance… », les peuples idolâtres « … et sa descendance » qui est Israël. « Il t’écrasera la tête », c’est le SBSI, qui, dans l’avenir, l’extirpera du monde, selon la parole : « Il détruira la Mort pour toujours » (Es.25 :5) et celle-ci : « J’expulserai de la terre le souffle d’impureté » (Zac. 13 :2). La « tête » : c’est le temps à venir où les morts se réveilleront, le monde alors sera « tête », il existera de par la « tête », qui est le monde d’en-haut. « Toi tu la meurtriras au talon » : en ce monde-ci, tant qu’il reste « talon », et n’a pas de solidité, ledit serpent mord et assombrit le visage des créatures."
-      }
-    ],
-    "voir": [
-      "Mercure 1",
-      "Côte 1",
-      "Adam 4",
-      "Chute 4",
-      "Côte 6",
-      "Serpent 13"
-    ]
   },
   {
     "id": "v-que",
@@ -5733,30 +5759,18 @@
     "voir": []
   },
   {
-    "id": "exhalaison",
-    "terme": "EXHALAISON",
-    "lettre": "E",
+    "id": "tre",
+    "terme": "ÊTRE",
+    "lettre": "Ê",
     "entrees": [
       {
-        "source": "Anonyme, La Nature dévoilée ou La théorie de la Nature, Dervy, 1993, p. 23",
-        "texte": "L’esprit moteur, agissant sans cesse dans le sein de chaque élément, y excite un mouvement continuel qui produit la chaleur, et cette chaleur en fait sortir des vapeurs à peu près comme il s’en exhale de tous les corps par la transpiration. Ces vapeurs ou émanations se nomment ordinairement influences, lorsqu’elles viennent d’en haut, et exhalaisons, lorsqu’elles viennent d’en bas."
-      }
-    ],
-    "voir": []
-  },
-  {
-    "id": "extase",
-    "terme": "EXTASE",
-    "lettre": "E",
-    "entrees": [
-      {
-        "source": "Hermès Trismégiste., Corpus Hermeticum. Les Belles Lettres, 1972, vol. I, p. 108, notice 2a",
-        "texte": "Cette vision de Dieu n’aveugle pas comme la vision du soleil, mais elle remplit d’immortalité. On ne voit vraiment le Bien que quand on ne peut plus rien en dire : une telle connaissance est silence, suspension de toutes les facultés sensibles. Dès ici-bas on y peut atteindre lorsque l’âme, illuminée et tirée par le Bien, quitte le corps et s’unit à l’essence. Cette extase est la divinisation, qui consiste en la vue du Bien, et qui est impossible sans la séparation d’avec le corps."
+        "source": "Psellos, M., « Petits traités d’exégèse… » dans van Kasteel, H., Questions Homériques, Beya, 2012, p. 838",
+        "texte": "Le savant doit avoir à l’esprit ces deux choses : ce qui relève de l’être et ce qui relève du naître. Si la première de ces choses est stable, la seconde est marquée par un mouvement progressif, qui ne retourne ni ne fléchit, mais qui s’écoule directement ; elle est donc sujette à une prompte mort et est, en elle-même, limitée. La substance de l’autre est immortelle, voire immuable ; elle ne s’épanouit pas, ne grandit pas, ne décline pas, mais elle est en elle-même stable, sans aucun changement ou mouvement."
       }
     ],
     "voir": [
-      "Saint 1",
-      "Éros 1"
+      "Philosophie 1",
+      "Essence 2"
     ]
   },
   {
@@ -7738,20 +7752,6 @@
     ]
   },
   {
-    "id": "le",
-    "terme": "ÎLE",
-    "lettre": "Î",
-    "entrees": [
-      {
-        "source": "Pernety, Les Fables égyptiennes et grecques, Archè, 2004, tome 1, p. 464",
-        "texte": "Parce que la matière en se coagulant forme une île flottante, comme celle de Délos, où Latone accoucha de Diane."
-      }
-    ],
-    "voir": [
-      "Déluge 1"
-    ]
-  },
-  {
     "id": "illumination",
     "terme": "ILLUMINATION",
     "lettre": "I",
@@ -8043,6 +8043,20 @@
     ]
   },
   {
+    "id": "le",
+    "terme": "ÎLE",
+    "lettre": "Î",
+    "entrees": [
+      {
+        "source": "Pernety, Les Fables égyptiennes et grecques, Archè, 2004, tome 1, p. 464",
+        "texte": "Parce que la matière en se coagulant forme une île flottante, comme celle de Délos, où Latone accoucha de Diane."
+      }
+    ],
+    "voir": [
+      "Déluge 1"
+    ]
+  },
+  {
     "id": "jacob",
     "terme": "JACOB",
     "lettre": "J",
@@ -8082,6 +8096,20 @@
     ]
   },
   {
+    "id": "janus",
+    "terme": "JANUS",
+    "lettre": "J",
+    "entrees": [
+      {
+        "source": "Pernety, Les Fables égyptiennes et grecques, Archè, 2004, tome 1, pp. 569-570",
+        "texte": "Cette noirceur  étant aussi, comme ils le disent, l’entrée, la porte, et la clé de l’œuvre, elle représente Janus, qui règne par conséquent conjointement à Saturne. On a cherché et l’on cherchera longtemps encore la raison qui faisait ouvrir la porte du temple de Janus lorsqu’il s’agissait de déclarer la guerre ; et qu’on la fermait à la paix. Un philosophe hermétique la trouve plus simplement que tous ces mythologues. La voici. La noirceur est une suite de la dissolution ; la dissolution est la clé et la porte de l’œuvre. Elle ne peut se faire que par la guerre qui s’élève entre le fixe et le volatil, et par les combats qui se donnent entre eux. Janus étant cette porte, il était tout naturel qu’on ouvrit celle du temple qui lui était consacré, pour annoncer une guerre déclarée. Tant que la guerre durait, elle demeurait ouverte, et on la fermait à la paix, parce que cette guerre du fixe et du volatil dure jusqu’à ce que la matière soit absolument devenue toute fixe. La paix se fait alors."
+      }
+    ],
+    "voir": [
+      "Acide 1"
+    ]
+  },
+  {
     "id": "japhet",
     "terme": "JAPHET",
     "lettre": "J",
@@ -8094,20 +8122,6 @@
     ],
     "voir": [
       "Noé 5"
-    ]
-  },
-  {
-    "id": "janus",
-    "terme": "JANUS",
-    "lettre": "J",
-    "entrees": [
-      {
-        "source": "Pernety, Les Fables égyptiennes et grecques, Archè, 2004, tome 1, pp. 569-570",
-        "texte": "Cette noirceur  étant aussi, comme ils le disent, l’entrée, la porte, et la clé de l’œuvre, elle représente Janus, qui règne par conséquent conjointement à Saturne. On a cherché et l’on cherchera longtemps encore la raison qui faisait ouvrir la porte du temple de Janus lorsqu’il s’agissait de déclarer la guerre ; et qu’on la fermait à la paix. Un philosophe hermétique la trouve plus simplement que tous ces mythologues. La voici. La noirceur est une suite de la dissolution ; la dissolution est la clé et la porte de l’œuvre. Elle ne peut se faire que par la guerre qui s’élève entre le fixe et le volatil, et par les combats qui se donnent entre eux. Janus étant cette porte, il était tout naturel qu’on ouvrit celle du temple qui lui était consacré, pour annoncer une guerre déclarée. Tant que la guerre durait, elle demeurait ouverte, et on la fermait à la paix, parce que cette guerre du fixe et du volatil dure jusqu’à ce que la matière soit absolument devenue toute fixe. La paix se fait alors."
-      }
-    ],
-    "voir": [
-      "Acide 1"
     ]
   },
   {
@@ -8566,6 +8580,18 @@
     "voir": []
   },
   {
+    "id": "laine",
+    "terme": "LAINE",
+    "lettre": "L",
+    "entrees": [
+      {
+        "source": "Della Riviera, C., Le Monde magique des héros, Archè, 1977, p. 91",
+        "texte": "La laine est symbole d’impureté laquelle impureté est le propre de la matière."
+      }
+    ],
+    "voir": []
+  },
+  {
     "id": "lait",
     "terme": "LAIT",
     "lettre": "L",
@@ -8588,18 +8614,6 @@
     "voir": [
       "Latone 2"
     ]
-  },
-  {
-    "id": "laine",
-    "terme": "LAINE",
-    "lettre": "L",
-    "entrees": [
-      {
-        "source": "Della Riviera, C., Le Monde magique des héros, Archè, 1977, p. 91",
-        "texte": "La laine est symbole d’impureté laquelle impureté est le propre de la matière."
-      }
-    ],
-    "voir": []
   },
   {
     "id": "lance",
@@ -8716,6 +8730,18 @@
     ]
   },
   {
+    "id": "l-pre",
+    "terme": "LÈPRE",
+    "lettre": "L",
+    "entrees": [
+      {
+        "source": "Anonyme, La Bible des pauvres, Beya, 2023, p. 114",
+        "texte": "La tradition hébraïque, entre autres, associe la lèpre au péché. Le mot λέπρα, lepra, d’origine grecque, renvoie à une enveloppe, à des écailles, qui attendent d’être ôtées ou pelées. Le serpent lui-même, dit un Midrache, a été maudit et puni d’un manteau d’écailles pour avoir trompé Ève."
+      }
+    ],
+    "voir": []
+  },
+  {
     "id": "l-to",
     "terme": "LÉTO",
     "lettre": "L",
@@ -8728,18 +8754,6 @@
     "voir": [
       "Athéna 1"
     ]
-  },
-  {
-    "id": "l-pre",
-    "terme": "LÈPRE",
-    "lettre": "L",
-    "entrees": [
-      {
-        "source": "Anonyme, La Bible des pauvres, Beya, 2023, p. 114",
-        "texte": "La tradition hébraïque, entre autres, associe la lèpre au péché. Le mot λέπρα, lepra, d’origine grecque, renvoie à une enveloppe, à des écailles, qui attendent d’être ôtées ou pelées. Le serpent lui-même, dit un Midrache, a été maudit et puni d’un manteau d’écailles pour avoir trompé Ève."
-      }
-    ],
-    "voir": []
   },
   {
     "id": "leucoth-e",
@@ -10551,6 +10565,16 @@
     ]
   },
   {
+    "id": "mort-initiatique",
+    "terme": "MORT INITIATIQUE",
+    "lettre": "M",
+    "entrees": [],
+    "voir": [
+      "Maqom 2",
+      "Tardemah 1"
+    ]
+  },
+  {
     "id": "mortel",
     "terme": "MORTEL",
     "lettre": "M",
@@ -10562,16 +10586,6 @@
     ],
     "voir": [
       "Sang 2"
-    ]
-  },
-  {
-    "id": "mort-initiatique",
-    "terme": "MORT INITIATIQUE",
-    "lettre": "M",
-    "entrees": [],
-    "voir": [
-      "Maqom 2",
-      "Tardemah 1"
     ]
   },
   {
@@ -10791,6 +10805,18 @@
     ]
   },
   {
+    "id": "necromancie",
+    "terme": "NECROMANCIE",
+    "lettre": "N",
+    "entrees": [
+      {
+        "source": "Dorn, G., Fascicule de médecine paracelsique, Beya, Grez-Doiceau, 2019, p. 205",
+        "texte": "Art illicite qui se pratiquait autrefois avec des morts, comme lorsqu’on manifestait des astres auprès des morts. On appelle vraiment nécromancien celui qui fait apparaître des morts et les rend présents, qui peut leur extorquer des mots et des réponses, qui les force à circuler et à produire des choses étonnantes. Tout ce qu’on attrape ou accomplit avec des têtes de morts, des os, des aiguilles, des draps, des carquois, des sépulcres, etc., tombe dans [le domaine de] cet art impie qu’est la nécromancie toute superstitieuse, que tout chrétien doit avoir en horreur et fuir."
+      }
+    ],
+    "voir": []
+  },
+  {
     "id": "n-cromantie",
     "terme": "NÉCROMANTIE",
     "lettre": "N",
@@ -10810,18 +10836,6 @@
       {
         "source": "Eustathe, « Commentaires sur l’Iliade », dans van Kasteel, H., Questions Homériques, Beya, 2012, pp. 505-506 note 83 et 86",
         "texte": "Cf. Proclus, Commentaire sur le Parménide, V, 1037, l. 29, à 1038, l. 3 : « Être efficace tout en n’éprouvant aucune difficulté, voilà qui est proprement divin. En effet, la fatigue de l’effort n’existe pas chez ceux pour qui Hébé fait couler le nectar, et leur action providentielle, après qu’ils ont bu le nectar, est libre et sans entrave. » Voir aussi Hermias, Commentaire sur le Phèdre, op. cit., pp. 156 et 157 : « Le nectar (νέκταρ) correspond à une nourriture liquide. Il signifie la providence divine que les dieux exercent envers les êtres secondaires ».\n\nLe nom exprime la privation de funérailles (κτέρας) et de sépulture, le verbe κτερίσαι signifiant “ensevelir”. Donc, quand les dieux ne permettent pas que ce qu’il y a dans le monde, ou même l’esprit, y soit enseveli, on dit qu’ils le saluent en l’accueillant avec du nectar. De même, quand on veut enseigner l’action providentielle des dieux, on les décrit occupés à se servir du nectar :\n\n“Parmi eux, la puissante Hébé verse le nectar ; avec des coupes en or, ils se saluent entre eux, tout en regardant vers la ville des Troyens” [Iliade, IV, 2 à 4]. À ce moment-là, en effet, leur providence veillait sur les Troyens. »\n\nCf. Commentaires sur l’Iliade, t. I, p. 247, ll. 25 à 30 : « Le mot “nectar” (νέκταρ) s’explique étymologiquement par le verbe κτάω, “acquérir”, et la particule privative ne : le nectar est ce qui est non acquis, c’est-à-dire ce qu’aucun mortel ne peut acquérir. L’ambroisie (ἀμβροσία) vient du a privatif et de βροτός (“mortel”) : il s’agit de ce qu’aucun mortel ne possède [...]. On l’explique aussi comme un écoulement qui surmonte (Øπεραναβαίνειν ·οήν) ou surpasse la corruption. »"
-      }
-    ],
-    "voir": []
-  },
-  {
-    "id": "necromancie",
-    "terme": "NECROMANCIE",
-    "lettre": "N",
-    "entrees": [
-      {
-        "source": "Dorn, G., Fascicule de médecine paracelsique, Beya, Grez-Doiceau, 2019, p. 205",
-        "texte": "Art illicite qui se pratiquait autrefois avec des morts, comme lorsqu’on manifestait des astres auprès des morts. On appelle vraiment nécromancien celui qui fait apparaître des morts et les rend présents, qui peut leur extorquer des mots et des réponses, qui les force à circuler et à produire des choses étonnantes. Tout ce qu’on attrape ou accomplit avec des têtes de morts, des os, des aiguilles, des draps, des carquois, des sépulcres, etc., tombe dans [le domaine de] cet art impie qu’est la nécromancie toute superstitieuse, que tout chrétien doit avoir en horreur et fuir."
       }
     ],
     "voir": []
@@ -11058,6 +11072,20 @@
     ]
   },
   {
+    "id": "nombres",
+    "terme": "NOMBRES",
+    "lettre": "N",
+    "entrees": [
+      {
+        "source": "Pythagore, Les vers d’or, L’artisan du livre, 1974, p. 244",
+        "texte": "Le point correspond à la monade, la ligne au nombre 2, car en partant d’un point elle s’en va vers un autre ; la surface correspond au nombre 3, car le triangle est la surface la plus élémentaire que puissent former des lignes droites. Mais le solide est le propre du nombre 4. C’est dans le quaternaire, en effet, que se voit la première pyramide, sa base triangulaire suppose le nombre 3, et le sommet qui la termine l’unité."
+      }
+    ],
+    "voir": [
+      "Création XI"
+    ]
+  },
+  {
     "id": "noms-divins",
     "terme": "NOMS DIVINS",
     "lettre": "N",
@@ -11078,20 +11106,6 @@
     "voir": [
       "Tétragramme 1",
       "Pluie 8"
-    ]
-  },
-  {
-    "id": "nombres",
-    "terme": "NOMBRES",
-    "lettre": "N",
-    "entrees": [
-      {
-        "source": "Pythagore, Les vers d’or, L’artisan du livre, 1974, p. 244",
-        "texte": "Le point correspond à la monade, la ligne au nombre 2, car en partant d’un point elle s’en va vers un autre ; la surface correspond au nombre 3, car le triangle est la surface la plus élémentaire que puissent former des lignes droites. Mais le solide est le propre du nombre 4. C’est dans le quaternaire, en effet, que se voit la première pyramide, sa base triangulaire suppose le nombre 3, et le sommet qui la termine l’unité."
-      }
-    ],
-    "voir": [
-      "Création XI"
     ]
   },
   {
@@ -11343,33 +11357,6 @@
     ]
   },
   {
-    "id": "uf",
-    "terme": "ŒUF",
-    "lettre": "Œ",
-    "entrees": [
-      {
-        "source": "van Lennep, J., Alchimie, Crédit Communal, 1984, p. 37",
-        "texte": "Le rapport entre l’œuf et le cosmos fut clairement précisé dans la ‘Turba philosophorum’ puisqu’il y fut dit qu’il contenait ses quatre éléments, l’eau (son blanc), l’air et le feu (son jaune), la terre (sa coquille) ainsi qu’un cinquième correspondant à la quintessence (le germe). L’œuf était « la pierre qui n’est pas pierre », c’est-à-dire la pierre philosophale, la synthèse de l’univers."
-      },
-      {
-        "source": "Fulcanelli, Le Mystère des Cathédrales, Pauvert, 1964, p. 184",
-        "texte": "Par le terme d’œuf, les Sages entendent leur composé, disposé dans son vase propre, et prêt à subir les transformations que l’action du feu y provoquera. C’est, dans ce sens, positivement un œuf, puisque son enveloppe, ou sa coque, renferme le rebis philosophal, formé de blanc et de rouge dans une proportion analogue à celle de l’œuf des oiseaux."
-      }
-    ],
-    "voir": [
-      "Cercle 1"
-    ]
-  },
-  {
-    "id": "il",
-    "terme": "ŒIL",
-    "lettre": "Œ",
-    "entrees": [],
-    "voir": [
-      "Os 1"
-    ]
-  },
-  {
     "id": "oiseaux",
     "terme": "OISEAUX",
     "lettre": "O",
@@ -11497,6 +11484,18 @@
     ]
   },
   {
+    "id": "or-astral",
+    "terme": "OR ASTRAL",
+    "lettre": "O",
+    "entrees": [
+      {
+        "source": "d’Hooghvorst, E., Le Fil de Pénélope, Beya, 2009, p. 390",
+        "texte": "«Selon les Philosophes, il y a trois sortes d’or: le premier est un or astral dont le centre est dans le soleil qui, par ses rayons, le communique en même temps que sa lumière, à tous les astres qui lui sont inférieurs. C’est une substance ignée et une continuelle émanation de corpuscules solaires qui, par le mouvement du soleil et des astres, étant dans un perpétuel flux et reflux, remplissent tout l’univers; tout en est pénétré dans l’étendue des cieux, sur la terre et dans ses entrailles, nous respirons continuellement cet or astral, ses particules solaires pénètrent nos corps et s’en exhalent sans cesse». (Limojon de St Disdier, Le Triomphe Hermétique, éd. Archè, Milan, 1991, pp. 57 et 58.)"
+      }
+    ],
+    "voir": []
+  },
+  {
     "id": "oracle",
     "terme": "ORACLE",
     "lettre": "O",
@@ -11508,18 +11507,6 @@
       {
         "source": "van Kasteel, H. (éd.), Oracles et Prophétie, Beya, 2011, p. 118",
         "texte": "Car le mot ὄμφή, « oracle », signifie une annonce ou proclamation divine qui manifeste ce qui est (τώ ὑν φαίνουσα). (Theosophorum Græcorum fragmenta, Teubner, Stuttgart et Leipzig, 1995)"
-      }
-    ],
-    "voir": []
-  },
-  {
-    "id": "or-astral",
-    "terme": "OR ASTRAL",
-    "lettre": "O",
-    "entrees": [
-      {
-        "source": "d’Hooghvorst, E., Le Fil de Pénélope, Beya, 2009, p. 390",
-        "texte": "«Selon les Philosophes, il y a trois sortes d’or: le premier est un or astral dont le centre est dans le soleil qui, par ses rayons, le communique en même temps que sa lumière, à tous les astres qui lui sont inférieurs. C’est une substance ignée et une continuelle émanation de corpuscules solaires qui, par le mouvement du soleil et des astres, étant dans un perpétuel flux et reflux, remplissent tout l’univers; tout en est pénétré dans l’étendue des cieux, sur la terre et dans ses entrailles, nous respirons continuellement cet or astral, ses particules solaires pénètrent nos corps et s’en exhalent sans cesse». (Limojon de St Disdier, Le Triomphe Hermétique, éd. Archè, Milan, 1991, pp. 57 et 58.)"
       }
     ],
     "voir": []
@@ -11648,15 +11635,6 @@
     ]
   },
   {
-    "id": "tos",
-    "terme": "ÔTOS",
-    "lettre": "Ô",
-    "entrees": [],
-    "voir": [
-      "Parole 1"
-    ]
-  },
-  {
     "id": "ouest",
     "terme": "OUEST",
     "lettre": "O",
@@ -11682,6 +11660,18 @@
       {
         "source": "van Kasteel, H. (éd.), Oracles et Prophétie, Beya, 2011, p. 61, note 29",
         "texte": "Dans son commentaire sur Exode XXVIII, 30, Nachmanide explique que l’Ourim et le Toumim sont les saints Noms de Dieu. C’est par leur vertu que les lettres inscrites sur les pierres du pectoral brillaient devant les yeux du grand prêtre quand il demandait leur jugement. Ourim (אורים) signifie « lumière » et Toumim (תמים), « perfection », comme si l’on disait que le Toumim donnait la bonne ordonnance des lettres éclairées par l’Ourim."
+      }
+    ],
+    "voir": []
+  },
+  {
+    "id": "ourim-et-toumim",
+    "terme": "OURIM et TOUMIM",
+    "lettre": "O",
+    "entrees": [
+      {
+        "source": "van Kasteel, H. (éd.), Oracles et Prophétie, Beya, 2011, p. 61, note 29",
+        "texte": "Dans son commentaire sur Exode XXVIII, 30, Nachmanide explique que l’Ourim et le Toumim sont les saints Noms de Dieu. C’est par leur vertu que les lettres inscrites sur les pierres du pectoral brillaient devant les yeux du grand prêtre quand il demandait leur jugement. Ourim (,ירשא) signifie « lumière » et Toumim (,ימת), « perfection », comme si l’on disait que le Toumim donnait la bonne ordonnance des lettres éclairées par l’Ourim."
       }
     ],
     "voir": []
@@ -11716,6 +11706,42 @@
     "entrees": [],
     "voir": [
       "Vases 3"
+    ]
+  },
+  {
+    "id": "tos",
+    "terme": "ÔTOS",
+    "lettre": "Ô",
+    "entrees": [],
+    "voir": [
+      "Parole 1"
+    ]
+  },
+  {
+    "id": "il",
+    "terme": "ŒIL",
+    "lettre": "Œ",
+    "entrees": [],
+    "voir": [
+      "Os 1"
+    ]
+  },
+  {
+    "id": "uf",
+    "terme": "ŒUF",
+    "lettre": "Œ",
+    "entrees": [
+      {
+        "source": "van Lennep, J., Alchimie, Crédit Communal, 1984, p. 37",
+        "texte": "Le rapport entre l’œuf et le cosmos fut clairement précisé dans la ‘Turba philosophorum’ puisqu’il y fut dit qu’il contenait ses quatre éléments, l’eau (son blanc), l’air et le feu (son jaune), la terre (sa coquille) ainsi qu’un cinquième correspondant à la quintessence (le germe). L’œuf était « la pierre qui n’est pas pierre », c’est-à-dire la pierre philosophale, la synthèse de l’univers."
+      },
+      {
+        "source": "Fulcanelli, Le Mystère des Cathédrales, Pauvert, 1964, p. 184",
+        "texte": "Par le terme d’œuf, les Sages entendent leur composé, disposé dans son vase propre, et prêt à subir les transformations que l’action du feu y provoquera. C’est, dans ce sens, positivement un œuf, puisque son enveloppe, ou sa coque, renferme le rebis philosophal, formé de blanc et de rouge dans une proportion analogue à celle de l’œuf des oiseaux."
+      }
+    ],
+    "voir": [
+      "Cercle 1"
     ]
   },
   {
@@ -13693,18 +13719,6 @@
     ]
   },
   {
-    "id": "saint-b-ni-soit-il",
-    "terme": "SAINT-BÉNI-SOIT-IL",
-    "lettre": "S",
-    "entrees": [
-      {
-        "source": "d’Hooghvorst, E., Le Fil de Pénélope, Beya, 2009, p. 266",
-        "texte": "«Le Saint-béni-soit-Il», écrit Menahem de Recanati, «n’est pas un aspect séparé de la Torah, la Torah ne lui est pas extérieure, et il n’est pas une chose extérieure à la Torah. Aussi, les sages de la cabale ont-ils dit: Le Saint-béni-soit-Il, c’est la Torah.»"
-      }
-    ],
-    "voir": []
-  },
-  {
     "id": "saint-des-saints",
     "terme": "SAINT DES SAINTS",
     "lettre": "S",
@@ -13734,6 +13748,18 @@
     "voir": [
       "Trinité 2"
     ]
+  },
+  {
+    "id": "saint-b-ni-soit-il",
+    "terme": "SAINT-BÉNI-SOIT-IL",
+    "lettre": "S",
+    "entrees": [
+      {
+        "source": "d’Hooghvorst, E., Le Fil de Pénélope, Beya, 2009, p. 266",
+        "texte": "«Le Saint-béni-soit-Il», écrit Menahem de Recanati, «n’est pas un aspect séparé de la Torah, la Torah ne lui est pas extérieure, et il n’est pas une chose extérieure à la Torah. Aussi, les sages de la cabale ont-ils dit: Le Saint-béni-soit-Il, c’est la Torah.»"
+      }
+    ],
+    "voir": []
   },
   {
     "id": "salamandre",
@@ -15143,6 +15169,15 @@
     ]
   },
   {
+    "id": "t-filines",
+    "terme": "TÉFILINES",
+    "lettre": "T",
+    "entrees": [],
+    "voir": [
+      "Nu 3"
+    ]
+  },
+  {
     "id": "teinture",
     "terme": "TEINTURE",
     "lettre": "T",
@@ -15294,15 +15329,6 @@
       }
     ],
     "voir": []
-  },
-  {
-    "id": "t-filines",
-    "terme": "TÉFILINES",
-    "lettre": "T",
-    "entrees": [],
-    "voir": [
-      "Nu 3"
-    ]
   },
   {
     "id": "ternaire",
