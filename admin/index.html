@@ -3538,8 +3538,8 @@ CMD.summaryHtml = function() {
   for (var i = 1; i <= 9; i++) { toShip[i] = 0; shipped[i] = 0; total[i] = 0; revenue[i] = 0; }
   // Articles libres hors catalogue (it.num falsy) regroupés à part
   var customRevenue = 0, customQty = 0;
-  // CA encaissé / à encaisser (port + remises inclus — hors annulées)
-  var cashIn = 0, cashOut = 0;
+  // Encaissé / à encaisser, ventilé livres vs port (hors annulées)
+  var booksIn = 0, booksOut = 0, shipIn = 0, shipOut = 0;
   CMD.orders.forEach(function(o) {
     if (o.cancelled) return;  // les commandes annulées ne comptent pas
     (o.items || []).forEach(function(it) {
@@ -3551,9 +3551,14 @@ CMD.summaryHtml = function() {
       if (o.cloturee) shipped[n] += q;
       else toShip[n] += q;
     });
+    // Part livres = total_eur - port (couvre déjà les remises panier/pack)
     var t = +o.total_eur || 0;
-    if (o.paye) cashIn += t; else cashOut += t;
+    var port = +o.port_eur || 0;
+    var books = t - port;
+    if (o.paye) { booksIn += books; shipIn += port; }
+    else        { booksOut += books; shipOut += port; }
   });
+  var cashIn = booksIn + shipIn, cashOut = booksOut + shipOut;
   var totalShip = 0, totalDone = 0, totalAll = 0, totalRevenue = 0;
   for (var k = 1; k <= 9; k++) {
     totalShip += toShip[k]; totalDone += shipped[k];
@@ -3595,11 +3600,34 @@ CMD.summaryHtml = function() {
           + '<td style="text-align:right;color:var(--navy);font-weight:bold;font-size:1.05em">' + grandRevenue.toFixed(0) + ' €</td>'
         + '</tr></tfoot>'
       + '</table>'
-      + '<div style="margin-top:10px;display:flex;gap:16px;flex-wrap:wrap;font-size:0.95em">'
-        + '<div><span style="color:#666">Encaissé (port inclus) :</span> <strong style="color:#2a7a2a">' + cashIn.toFixed(2) + ' €</strong></div>'
-        + '<div><span style="color:#666">À encaisser :</span> <strong style="color:#c8a060">' + cashOut.toFixed(2) + ' €</strong></div>'
-        + '<div><span style="color:#666">Total commandes :</span> <strong style="color:var(--navy)">' + (cashIn + cashOut).toFixed(2) + ' €</strong></div>'
-      + '</div>'
+      + '<table class="cmd-summary-table" style="margin-top:10px">'
+        + '<thead><tr>'
+          + '<th></th>'
+          + '<th style="text-align:right">Livres</th>'
+          + '<th style="text-align:right">Frais de port</th>'
+          + '<th style="text-align:right">Total</th>'
+        + '</tr></thead>'
+        + '<tbody>'
+          + '<tr>'
+            + '<td><strong style="color:#2a7a2a">Encaissé</strong></td>'
+            + '<td style="text-align:right;color:#2a7a2a">' + booksIn.toFixed(2) + ' €</td>'
+            + '<td style="text-align:right;color:#2a7a2a">' + shipIn.toFixed(2) + ' €</td>'
+            + '<td style="text-align:right;color:#2a7a2a;font-weight:bold">' + cashIn.toFixed(2) + ' €</td>'
+          + '</tr>'
+          + '<tr>'
+            + '<td><strong style="color:#c8a060">À encaisser</strong></td>'
+            + '<td style="text-align:right;color:#c8a060">' + booksOut.toFixed(2) + ' €</td>'
+            + '<td style="text-align:right;color:#c8a060">' + shipOut.toFixed(2) + ' €</td>'
+            + '<td style="text-align:right;color:#c8a060;font-weight:bold">' + cashOut.toFixed(2) + ' €</td>'
+          + '</tr>'
+        + '</tbody>'
+        + '<tfoot><tr>'
+          + '<td><strong>TOTAL commandes</strong></td>'
+          + '<td style="text-align:right;color:var(--navy);font-weight:bold">' + (booksIn + booksOut).toFixed(2) + ' €</td>'
+          + '<td style="text-align:right;color:var(--navy);font-weight:bold">' + (shipIn + shipOut).toFixed(2) + ' €</td>'
+          + '<td style="text-align:right;color:var(--navy);font-weight:bold;font-size:1.05em">' + (cashIn + cashOut).toFixed(2) + ' €</td>'
+        + '</tr></tfoot>'
+      + '</table>'
     + '</div>';
 };
 
