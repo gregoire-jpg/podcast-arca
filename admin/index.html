@@ -1043,6 +1043,10 @@
         <label class="dico-lbl">Source (livre, recueil…)</label>
         <input type="text" id="cit-f-source" placeholder="ex: Le Message Retrouvé" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
       </div>
+      <div>
+        <label class="dico-lbl">Titre de l'ouvrage (interne — non visible dans l'app)</label>
+        <input type="text" id="cit-f-categorie" placeholder="ex: 1 Samuel, Imitation de Jésus-Christ, Ancien Testament…" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font:.9em/1 Arial;box-sizing:border-box">
+      </div>
       <div style="display:grid;grid-template-columns:120px 1fr 1fr;gap:12px;align-items:end">
         <div>
           <label class="dico-lbl">Poids admin</label>
@@ -2487,6 +2491,7 @@ function citRender() {
             '<span class="cit-auteur">' + esc((c.auteurs && c.auteurs.nom) || '—') + '</span>' +
             (c.reference ? '<span class="cit-ref">' + esc(c.reference) + '</span>' : '') +
             (c.source ? '<span>' + esc(c.source) + '</span>' : '') +
+            (c.categorie ? '<span style="background:rgba(45,52,97,.08);color:var(--navy);padding:1px 7px;border-radius:3px;font-size:.85em">📂 ' + esc(c.categorie) + '</span>' : '') +
             (c.mise_en_avant ? '<span class="cit-badge gold">★ En avant</span>' : '') +
             (!c.active ? '<span class="cit-badge gray">Inactive</span>' : '') +
           '</div>' +
@@ -2523,6 +2528,7 @@ function citOpen(id) {
   $('cit-f-complement').value = c.texte_complement || '';
   $('cit-f-reference').value = c.reference || '';
   $('cit-f-source').value = c.source || '';
+  $('cit-f-categorie').value = c.categorie || '';
   $('cit-f-poids').value = c.poids_admin != null ? c.poids_admin : 1;
   $('cit-f-avant').checked = !!c.mise_en_avant;
   $('cit-f-active').checked = c.active !== false;
@@ -2535,6 +2541,7 @@ $('cit-mask-save').addEventListener('click', function() {
     texte_complement: $('cit-f-complement').value.trim() || null,
     reference: $('cit-f-reference').value.trim() || null,
     source: $('cit-f-source').value.trim() || null,
+    categorie: $('cit-f-categorie').value.trim() || null,
     auteur_id: parseInt($('cit-f-auteur').value) || null,
     poids_admin: parseInt($('cit-f-poids').value) || 1,
     mise_en_avant: $('cit-f-avant').checked,
