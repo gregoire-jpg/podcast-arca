@@ -580,6 +580,8 @@ function buildEmailHtml(d, mrLabel, paypalVerifyWarning) {
       }).join('')}</tbody>
     </table>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px;">
+      <tr><td style="padding:4px 0;font:13.5px Georgia;color:#444;">Sous-total revues</td>
+          <td style="padding:4px 0;font:13.5px Georgia;color:#444;text-align:right;">${esc(sousTotal)}</td></tr>
       ${packMatch ? `
       <tr><td style="padding:4px 0;font:13.5px Georgia;color:#c8a060;font-style:italic;">★ Pack complet — réduction</td>
           <td style="padding:4px 0;font:13.5px Georgia;color:#c8a060;font-style:italic;text-align:right;">−${parseN(packMatch)} €</td></tr>
@@ -592,8 +594,6 @@ function buildEmailHtml(d, mrLabel, paypalVerifyWarning) {
       <tr><td style="padding:4px 0;font:13.5px Georgia;color:#c8a060;font-style:italic;">⚑ Remise port</td>
           <td style="padding:4px 0;font:13.5px Georgia;color:#c8a060;font-style:italic;text-align:right;">−${parseFloat(d._shipping_discount_eur)} €</td></tr>
       ` : ''}
-      <tr><td style="padding:4px 0;font:13.5px Georgia;color:#444;">Sous-total revues</td>
-          <td style="padding:4px 0;font:13.5px Georgia;color:#444;text-align:right;">${esc(sousTotal)}</td></tr>
       <tr><td style="padding:4px 0;font:13.5px Georgia;color:#444;">Frais de port (${esc(d.livraison || "")})</td>
           <td style="padding:4px 0;font:13.5px Georgia;color:#444;text-align:right;">${esc(port)}</td></tr>
       <tr><td style="padding:10px 0 4px;border-top:2px solid #c8a060;font:bold 16px Georgia;color:#2d3461;">TOTAL</td>
