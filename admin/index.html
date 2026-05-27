@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin — Revue ARCA Podcasts</title>
+  <!-- Widget Mondial Relay pour recherche visuelle de point relais (utilisé dans la modale Nouvelle commande) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://widget.mondialrelay.com/parcelshop-picker/jquery.plugin.mondialrelay.parcelshoppicker.min.js"></script>
   <style>
     /* ── Variables ── */
     :root {
@@ -884,8 +887,10 @@
             <option value="Autre">Autre</option>
           </select></label>
           <div id="cmd-new-mr-fields" style="display:none">
-            <label>Code point relais <input name="mr_relay_code" placeholder="BE-040115"></label>
-            <label>Nom + adresse relais <input name="mr_relay_info" placeholder="STOCK ANTHISNES SRL — 7 RUE DU CTRE…"></label>
+            <button type="button" onclick="CMD.openMrPicker()" style="background:#c8a060;color:#fff;padding:10px 16px;border:none;border-radius:4px;font:bold .85em Arial;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;margin:6px 0">🗺 Trouver un point relais sur la carte</button>
+            <label>Code point relais <input name="mr_relay_code" id="cmd-new-mr-code" placeholder="BE-040115"></label>
+            <label>Nom + adresse relais <input name="mr_relay_info" id="cmd-new-mr-info" placeholder="OOST STRAAT 72, …"></label>
+            <small style="color:#777;font-style:italic">Clique sur le bouton ci-dessus, choisis le pays (Belgique par défaut) et le code postal du client, puis sélectionne le point relais sur la carte. Les champs ci-dessous se remplissent automatiquement.</small>
           </div>
           <label>Frais de port (€) <input name="port_eur" type="number" min="0" step="0.01" value="0"></label>
         </fieldset>
@@ -3896,6 +3901,65 @@ CMD.toggleMrFields = function() {
   var sel = document.querySelector('#cmd-new-form select[name="livraison"]');
   var box = document.getElementById('cmd-new-mr-fields');
   if (sel && box) box.style.display = (sel.value === 'Mondial Relay') ? 'block' : 'none';
+};
+
+// Ouvre une modale avec le widget Mondial Relay pour chercher un point relais visuellement.
+// Au clic sur un point relais, remplit cmd-new-mr-code et cmd-new-mr-info, puis ferme la modale.
+CMD.openMrPicker = function() {
+  // Crée la modale si elle n'existe pas encore
+  var modal = document.getElementById('mr-picker-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'mr-picker-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+    modal.innerHTML =
+      '<div style="background:#fff;border-radius:8px;max-width:900px;width:100%;max-height:90vh;overflow:auto;padding:20px;position:relative">' +
+      '  <button type="button" onclick="document.getElementById(\'mr-picker-modal\').remove()" style="position:absolute;top:10px;right:14px;background:transparent;border:none;font-size:1.8em;color:#888;cursor:pointer">×</button>' +
+      '  <h3 style="margin:0 0 10px;font:normal 1.3em Georgia;color:#2d3461">Choisir un point relais Mondial Relay</h3>' +
+      '  <p style="margin:0 0 14px;font-size:.9em;color:#666">Sélectionne le pays et le code postal du destinataire, puis clique sur un point relais sur la carte.</p>' +
+      '  <div id="mr-picker-widget" style="min-height:400px"></div>' +
+      '</div>';
+    document.body.appendChild(modal);
+  }
+  // Init widget MR (jQuery + plugin chargés en head)
+  setTimeout(function() {
+    if (typeof jQuery === 'undefined' || !jQuery.fn.MR_ParcelShopPicker) {
+      document.getElementById('mr-picker-widget').innerHTML = '<p style="color:#c00">Widget Mondial Relay non chargé. Recharge la page et réessaye.</p>';
+      return;
+    }
+    // Récupère le pays du formulaire si déjà saisi pour pré-remplir
+    var paysVal = (document.querySelector('#cmd-new-form select[name="pays"]') || {}).value || 'Belgique';
+    var countryMap = {'Belgique':'BE','France':'FR','Italie':'IT','Espagne':'ES','Luxembourg':'LU','Pays-Bas':'NL'};
+    var country = countryMap[paysVal] || 'BE';
+    var cpVal = (document.querySelector('#cmd-new-form input[name="cp"]') || {}).value || '';
+
+    jQuery('#mr-picker-widget').MR_ParcelShopPicker({
+      Target: '',  // we handle the assignment ourselves in callback
+      Brand: 'CC23X55I',
+      Country: country,
+      AllowedCountries: 'FR,BE,LU,NL,ES,DE,AT,IT,PT',
+      PostCode: cpVal,
+      Weight: '1000',
+      NbResults: 7,
+      MapDisplay: true,
+      OnParcelShopSelected: function(data) {
+        var code = (data.Pays || country) + '-' + (data.ID || '');
+        var info = (data.Nom || '') + ' — ' +
+                   (data.Adresse1 || '') + ' ' + (data.Adresse2 || '') + ', ' +
+                   (data.CP || '') + ' ' + (data.Ville || '') +
+                   ' (' + (data.Pays || '') + ')';
+        document.getElementById('cmd-new-mr-code').value = code;
+        document.getElementById('cmd-new-mr-info').value = info;
+        // Pré-remplir le port aussi (selon les tarifs MR connus)
+        var portInput = document.querySelector('#cmd-new-form input[name="port_eur"]');
+        if (portInput && (!portInput.value || portInput.value === '0')) {
+          var portMR = { 'BE':6, 'FR':8, 'LU':9, 'NL':9, 'DE':10, 'ES':14, 'IT':14, 'PT':14 };
+          portInput.value = portMR[data.Pays] || 8;
+        }
+        document.getElementById('mr-picker-modal').remove();
+      }
+    });
+  }, 50);
 };
 
 CMD.computeTotal = function() {

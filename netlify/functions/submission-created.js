@@ -704,11 +704,15 @@ function buildClientEmailHtml(d, mrLabel) {
 
   // Message selon mode paiement
   const ref = `ARCA ${(d.nom || "").trim()}`.substring(0, 35);
-  const paymentMsg = isPaid
-    ? `<p style="margin:0;font:15px/1.7 Georgia;color:#444;">Votre paiement <strong style="color:#2d3461;">${providerLabel}</strong> a bien été enregistré. Nous préparons votre commande.</p>`
-    : `<p style="margin:0 0 18px;font:15px/1.7 Georgia;color:#444;">Voici les coordonnées pour effectuer votre <strong style="color:#2d3461;">virement bancaire</strong>. Dès réception, nous préparerons votre commande.</p>
-       <table width="100%" cellpadding="0" cellspacing="0" style="background:#faf8f5;border:1px solid #e2ddd8;border-radius:5px;">
+  const paiementChoisi = (d.paiement || "").toLowerCase();
+  const isPaypalChoice = /paypal/i.test(paiementChoisi);
+  const isStripeChoice = /stripe|carte|bancontact/i.test(paiementChoisi);
+
+  // Bloc IBAN (toujours proposé en option virement)
+  const ibanBlock = `
+       <table width="100%" cellpadding="0" cellspacing="0" style="background:#faf8f5;border:1px solid #e2ddd8;border-radius:5px;margin-bottom:14px">
          <tr><td style="padding:18px 22px;">
+           <p style="margin:0 0 10px;font:bold 12px Arial;letter-spacing:1.5px;text-transform:uppercase;color:#2d3461;">Virement bancaire</p>
            <table width="100%" cellpadding="0" cellspacing="0" style="font:14px/1.7 Georgia;color:#2d3461;">
              <tr><td style="color:#777;font-size:12px;letter-spacing:1px;text-transform:uppercase;width:140px;padding:3px 0;">Bénéficiaire</td><td style="padding:3px 0;">ARCA Societas SRL</td></tr>
              <tr><td style="color:#777;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:3px 0;">IBAN</td><td style="padding:3px 0;"><strong style="font-family:'Courier New',monospace;letter-spacing:.5px;">BE92 0017 7210 5023</strong></td></tr>
@@ -718,6 +722,26 @@ function buildClientEmailHtml(d, mrLabel) {
            </table>
          </td></tr>
        </table>`;
+
+  // Bloc PayPal (lien direct paypal.me — Antoine doit configurer paypal.me/ArcaLibrairie ou similaire)
+  const paypalBlock = `
+       <table width="100%" cellpadding="0" cellspacing="0" style="background:#fffbf2;border:1px solid #c8a060;border-radius:5px;margin-bottom:14px">
+         <tr><td style="padding:18px 22px;">
+           <p style="margin:0 0 10px;font:bold 12px Arial;letter-spacing:1.5px;text-transform:uppercase;color:#c8a060;">PayPal</p>
+           <p style="margin:0 0 12px;font:14px/1.6 Georgia;color:#444;">Envoyez <strong style="color:#2d3461;">${esc(total)} €</strong> à l'adresse PayPal&nbsp;: <strong style="color:#2d3461;font-family:'Courier New',monospace">antoine@arca-librairie.com</strong></p>
+           <p style="margin:0;font:12px Georgia;color:#777;font-style:italic">Mentionnez votre nom (${esc((d.nom || "").trim())}) dans le message du paiement.</p>
+         </td></tr>
+       </table>`;
+
+  let paymentMsg;
+  if (isPaid) {
+    paymentMsg = `<p style="margin:0;font:15px/1.7 Georgia;color:#444;">Votre paiement <strong style="color:#2d3461;">${providerLabel}</strong> a bien été enregistré. Nous préparons votre commande.</p>`;
+  } else if (isPaypalChoice) {
+    paymentMsg = `<p style="margin:0 0 14px;font:15px/1.7 Georgia;color:#444;">Voici les coordonnées pour effectuer votre paiement. Dès réception, nous préparerons votre commande.</p>${paypalBlock}<p style="margin:0 0 8px;font:13px Georgia;color:#666;font-style:italic">Vous préférez le virement bancaire ?</p>${ibanBlock}`;
+  } else {
+    // Default: virement (et autres modes)
+    paymentMsg = `<p style="margin:0 0 14px;font:15px/1.7 Georgia;color:#444;">Voici les coordonnées pour effectuer votre <strong style="color:#2d3461;">virement bancaire</strong>. Dès réception, nous préparerons votre commande.</p>${ibanBlock}<p style="margin:0 0 8px;font:13px Georgia;color:#666;font-style:italic">Vous préférez PayPal ?</p>${paypalBlock}`;
+  }
 
   return `<!DOCTYPE html>
 <html lang="fr"><head><meta charset="UTF-8"></head>
@@ -824,13 +848,24 @@ function buildClientEmailText(d, mrLabel) {
   if (isPaid) {
     txt += `Votre paiement ${providerLabel} a bien été enregistré. Nous préparons votre commande.\n\n`;
   } else {
-    txt += `COORDONNÉES BANCAIRES POUR LE VIREMENT\n`;
+    const isPaypalChoice = /paypal/i.test(d.paiement || "");
+    if (isPaypalChoice) {
+      txt += `PAYPAL\n`;
+      txt += `  Envoyez ${total} € à : antoine@arca-librairie.com\n`;
+      txt += `  Mentionnez votre nom (${(d.nom || "").trim()}) dans le message.\n\n`;
+      txt += `Vous préférez le virement bancaire ?\n`;
+    } else {
+      txt += `VIREMENT BANCAIRE\n`;
+    }
     txt += `  Bénéficiaire  : ARCA Societas SRL\n`;
     txt += `  IBAN          : BE92 0017 7210 5023\n`;
     txt += `  BIC           : GEBABEBB\n`;
     txt += `  Montant       : ${total} €\n`;
     txt += `  Communication : ${ref}\n\n`;
-    txt += `Dès réception de votre virement, nous préparerons votre commande.\n\n`;
+    if (!isPaypalChoice) {
+      txt += `Vous préférez PayPal ?\n  Envoyez ${total} € à : antoine@arca-librairie.com\n\n`;
+    }
+    txt += `Dès réception de votre paiement, nous préparerons votre commande.\n\n`;
   }
   if (isMondialRelay && mrLabel && mrLabel.success && mrLabel.expedition) {
     const cp = String(d.cp || "").replace(/\D/g, "");
