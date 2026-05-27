@@ -72,7 +72,10 @@ async function createPaypalOrder(amountEur, label, orderId) {
         brand_name: "Revue ARCA",
         landing_page: "LOGIN",
         user_action: "PAY_NOW",
-        return_url: "https://arca-revue.com/merci/?paid=paypal&id=" + encodeURIComponent(orderId),
+        // return_url pointe vers notre Function paypal-capture qui finalise (capture)
+        // l'ordre PayPal et marque la commande comme payée automatiquement avant de
+        // rediriger le client vers la page merci.
+        return_url: "https://podcast-arca.netlify.app/.netlify/functions/paypal-capture",
         cancel_url: "https://arca-revue.com/arca-revue/"
       }
     })
