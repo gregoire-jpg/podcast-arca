@@ -41,7 +41,7 @@ exports.handler = async function(event) {
     r = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ form_name: 'commande-arca', data: data, _no_persist: true })
+      body: JSON.stringify({ form_name: 'commande-arca', data: data, _no_persist: true, _order_id: orderId })
     });
   } catch (e) {
     return json(502, { error: 'Appel submission-created échoué: ' + e.message });

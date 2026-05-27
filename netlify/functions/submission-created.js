@@ -11,6 +11,7 @@
 //   - MR_PRIVATE_KEY    : clé privée Mondial Relay (pour génération auto étiquette)
 
 const { createLabel } = require('./mr-label');
+const { createStripePaymentLink, createPaypalOrder } = require('./create-payment-link');
 
 // Fin de la souscription préférentielle N°8 : 25 mai 2026 minuit heure belge = 25 mai 22:00 UTC
 const PROMO_DEADLINE = new Date('2026-05-25T22:00:00Z');
@@ -143,11 +144,31 @@ exports.handler = async function(event) {
       // On continue quand même pour tenter l'envoi au client
     }
 
+    // ─── Génération des liens de paiement en ligne (Stripe + PayPal) si commande non payée ───
+    // Permet au client de payer en 1 clic depuis le mail. Webhook Stripe marque comme payée auto.
+    let payLinks = { stripeUrl: null, paypalUrl: null };
+    const orderIdForPay = body._order_id || d._order_id;
+    if (!isPaid && orderIdForPay) {
+      const totMatch = (d["commande-details"] || "").match(/TOTAL:\s*(\d+(?:[.,]\d+)?)/);
+      const amountEur = totMatch ? parseFloat(totMatch[1].replace(',', '.')) : 0;
+      if (amountEur > 0) {
+        const label = "Commande ARCA #" + orderIdForPay + " — " + (d.nom || "").trim();
+        try {
+          payLinks.stripeUrl = await createStripePaymentLink(amountEur, label, orderIdForPay);
+          console.log("[Stripe link] OK", payLinks.stripeUrl);
+        } catch (e) { console.error("[Stripe link] échec:", e.message); }
+        try {
+          payLinks.paypalUrl = await createPaypalOrder(amountEur, label, orderIdForPay);
+          console.log("[PayPal order] OK", payLinks.paypalUrl);
+        } catch (e) { console.error("[PayPal order] échec:", e.message); }
+      }
+    }
+
     // ─── Email de confirmation au client (sans l'étiquette MR) ───
     if (clientEmailValid) {
       try {
-        const clientHtml = buildClientEmailHtml(d, mrLabel);
-        const clientText = buildClientEmailText(d, mrLabel);
+        const clientHtml = buildClientEmailHtml(d, mrLabel, payLinks);
+        const clientText = buildClientEmailText(d, mrLabel, payLinks);
         const clientSubject = isPaid
           ? `Votre commande ARCA · Paiement reçu`
           : `Votre commande ARCA · Bien reçue`;
@@ -647,7 +668,7 @@ function buildEmailText(d, mrLabel) {
 // ═══════════════════════════════════════════════════════════════
 // Email de confirmation au client (stylisé ARCA, sans l'étiquette MR)
 // ═══════════════════════════════════════════════════════════════
-function buildClientEmailHtml(d, mrLabel) {
+function buildClientEmailHtml(d, mrLabel, payLinks) {
   const paypalStatus = d["paypal-status"] || "";
   const isPaid = paypalStatus.startsWith("PAID");
   const isStripe = /stripe/i.test(paypalStatus) || /carte|bancontact/i.test(d.paiement || "");
@@ -733,13 +754,38 @@ function buildClientEmailHtml(d, mrLabel) {
          </td></tr>
        </table>`;
 
+  // Bloc "Payer en ligne en 1 clic" — boutons Stripe + PayPal si links générés
+  const links = payLinks || {};
+  let payNowBlock = "";
+  if (!isPaid && (links.stripeUrl || links.paypalUrl)) {
+    const stripeBtn = links.stripeUrl ? `
+      <table cellpadding="0" cellspacing="0" style="display:inline-block;margin:4px 6px"><tr><td style="background:#635bff;border-radius:5px">
+        <a href="${esc(links.stripeUrl)}" style="display:inline-block;padding:14px 26px;font:bold 13px Arial;letter-spacing:1px;text-transform:uppercase;color:#fff;text-decoration:none;">💳 Payer par carte / Bancontact</a>
+      </td></tr></table>` : "";
+    const paypalBtn = links.paypalUrl ? `
+      <table cellpadding="0" cellspacing="0" style="display:inline-block;margin:4px 6px"><tr><td style="background:#ffc439;border-radius:5px">
+        <a href="${esc(links.paypalUrl)}" style="display:inline-block;padding:14px 26px;font:bold 13px Arial;letter-spacing:1px;text-transform:uppercase;color:#003087;text-decoration:none;">PayPal</a>
+      </td></tr></table>` : "";
+    payNowBlock = `
+       <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#fdf8ea,#f7efd5);border:2px solid #c8a060;border-radius:6px;margin-bottom:18px">
+         <tr><td style="padding:22px 22px;text-align:center;">
+           <p style="margin:0 0 6px;font:bold 11px Arial;letter-spacing:2.5px;text-transform:uppercase;color:#6b5a2d;">⚡ Payer en ligne en 1 clic</p>
+           <p style="margin:0 0 14px;font:15px Georgia;color:#2d3461;">Montant à régler&nbsp;: <strong style="font-size:18px">${esc(total)} €</strong></p>
+           ${stripeBtn}${paypalBtn}
+           <p style="margin:14px 0 0;font:12px Georgia;color:#777;font-style:italic">Paiement sécurisé. Votre commande sera marquée payée automatiquement.</p>
+         </td></tr>
+       </table>`;
+  }
+
   let paymentMsg;
   if (isPaid) {
     paymentMsg = `<p style="margin:0;font:15px/1.7 Georgia;color:#444;">Votre paiement <strong style="color:#2d3461;">${providerLabel}</strong> a bien été enregistré. Nous préparons votre commande.</p>`;
+  } else if (payNowBlock) {
+    // Avec liens de paiement direct : pay-now en avant, IBAN en alternative
+    paymentMsg = `<p style="margin:0 0 14px;font:15px/1.7 Georgia;color:#444;">Pour finaliser votre commande, choisissez votre moyen de paiement préféré&nbsp;:</p>${payNowBlock}<p style="margin:0 0 8px;font:13px Georgia;color:#666;font-style:italic">Ou par virement bancaire&nbsp;:</p>${ibanBlock}`;
   } else if (isPaypalChoice) {
     paymentMsg = `<p style="margin:0 0 14px;font:15px/1.7 Georgia;color:#444;">Voici les coordonnées pour effectuer votre paiement. Dès réception, nous préparerons votre commande.</p>${paypalBlock}<p style="margin:0 0 8px;font:13px Georgia;color:#666;font-style:italic">Vous préférez le virement bancaire ?</p>${ibanBlock}`;
   } else {
-    // Default: virement (et autres modes)
     paymentMsg = `<p style="margin:0 0 14px;font:15px/1.7 Georgia;color:#444;">Voici les coordonnées pour effectuer votre <strong style="color:#2d3461;">virement bancaire</strong>. Dès réception, nous préparerons votre commande.</p>${ibanBlock}<p style="margin:0 0 8px;font:13px Georgia;color:#666;font-style:italic">Vous préférez PayPal ?</p>${paypalBlock}`;
   }
 
@@ -834,7 +880,7 @@ ${isSubscriptionPeriod ? `
 </body></html>`;
 }
 
-function buildClientEmailText(d, mrLabel) {
+function buildClientEmailText(d, mrLabel, payLinks) {
   const paypalStatus = d["paypal-status"] || "";
   const isPaid = paypalStatus.startsWith("PAID");
   const isStripe = /stripe/i.test(paypalStatus) || /carte|bancontact/i.test(d.paiement || "");
@@ -845,8 +891,20 @@ function buildClientEmailText(d, mrLabel) {
   const ref = `ARCA ${(d.nom || "").trim()}`.substring(0, 35);
   let txt = `MERCI POUR VOTRE COMMANDE — ARCA\n\n`;
   txt += `Bonjour ${(d.nom || "").split(' ')[0] || ""},\n\n`;
+  const links = payLinks || {};
   if (isPaid) {
     txt += `Votre paiement ${providerLabel} a bien été enregistré. Nous préparons votre commande.\n\n`;
+  } else if (links.stripeUrl || links.paypalUrl) {
+    txt += `PAYER EN LIGNE EN 1 CLIC\n  Montant : ${total} €\n`;
+    if (links.stripeUrl) txt += `  Carte bancaire / Bancontact : ${links.stripeUrl}\n`;
+    if (links.paypalUrl) txt += `  PayPal : ${links.paypalUrl}\n`;
+    txt += `  → Votre commande sera marquée payée automatiquement.\n\n`;
+    txt += `Ou par virement bancaire :\n`;
+    txt += `  Bénéficiaire  : ARCA Societas SRL\n`;
+    txt += `  IBAN          : BE92 0017 7210 5023\n`;
+    txt += `  BIC           : GEBABEBB\n`;
+    txt += `  Montant       : ${total} €\n`;
+    txt += `  Communication : ${ref}\n\n`;
   } else {
     const isPaypalChoice = /paypal/i.test(d.paiement || "");
     if (isPaypalChoice) {

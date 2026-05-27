@@ -59,10 +59,16 @@ exports.handler = async function(event) {
     'paypal-status': 'PAID — Stripe — ' + ((session.customer_details && session.customer_details.email) || '')
   });
 
-  // ─── Détection paiement HORS TUNNEL ARCA ───
-  // Si pas de metadata 'nom' (ou aucune metadata ARCA), c'est un paiement externe
-  // (Payment Link manuel depuis Stripe Dashboard, autre interface, etc.)
-  // → Ne PAS construire une commande ARCA vide. Juste notifier l'admin.
+  // ─── Cas Payment Link créé depuis l'admin (commande déjà en BDD) ───
+  // metadata = { order_id, source:"admin_manual" }
+  // → On marque la commande comme payée directement, pas besoin de rejouer submission-created
+  if (meta.order_id && (meta.source === 'admin_manual' || !meta.nom)) {
+    console.log('[Stripe webhook] Payment Link admin pour order_id=' + meta.order_id);
+    await markOrderPaid(meta.order_id, session);
+    return { statusCode: 200, body: 'Order marked as paid' };
+  }
+
+  // ─── Détection paiement HORS TUNNEL ARCA (pas notre PL admin) ───
   if (!meta.nom) {
     console.log('[Stripe webhook] paiement HORS tunnel ARCA :', session.id);
     await notifyExternalStripePayment(session);
@@ -95,6 +101,76 @@ exports.handler = async function(event) {
 
   return { statusCode: 200, body: 'OK' };
 };
+
+// Marque une commande existante comme payée (cas Payment Link admin)
+// + notifie l'équipe
+async function markOrderPaid(orderId, session) {
+  const SB_URL = process.env.SUPABASE_URL;
+  const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
+  if (!SB_URL || !SB_KEY) {
+    console.error('[markOrderPaid] SUPABASE_* manquant');
+    return;
+  }
+  const body = {
+    paye: true,
+    paid_at: new Date().toISOString(),
+    stripe_session_id: session.id,
+    paiement: 'Stripe (Payment Link admin)'
+  };
+  try {
+    const resp = await fetch(`${SB_URL}/rest/v1/arca_orders?id=eq.${encodeURIComponent(orderId)}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) {
+      const t = await resp.text();
+      console.error('[markOrderPaid] Supabase PATCH KO:', resp.status, t.substring(0, 300));
+      return;
+    }
+    const rows = await resp.json();
+    const order = Array.isArray(rows) ? rows[0] : rows;
+    console.log('[markOrderPaid] OK order #' + orderId + ' (' + (order && order.nom) + ')');
+    // Notification admin
+    await notifyOrderPaid(order, session);
+  } catch (e) {
+    console.error('[markOrderPaid] erreur:', e.message);
+  }
+}
+
+async function notifyOrderPaid(order, session) {
+  const BREVO_KEY = process.env.BREVO_API_KEY;
+  const TO_RAW = (process.env.ORDER_EMAIL_TO || '').split(',').map(s => s.trim()).filter(Boolean);
+  const FROM_EMAIL = process.env.ORDER_EMAIL_FROM;
+  if (!BREVO_KEY || !TO_RAW.length || !FROM_EMAIL || !order) return;
+  const amount = ((session.amount_total || 0) / 100).toFixed(2);
+  const subject = `✅ PAYÉ · Commande ARCA #${order.id} · ${amount} € · ${order.nom || ''}`;
+  const html = `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;background:#f5f5f5;padding:20px">
+<div style="max-width:560px;margin:0 auto;background:#fff;border-radius:6px;border-top:4px solid #2a7a2a;padding:22px">
+  <p style="margin:0 0 6px;font:bold 11px Arial;letter-spacing:1.5px;text-transform:uppercase;color:#2a7a2a">✅ Paiement Stripe reçu</p>
+  <p style="margin:0 0 14px;font:bold 18px Georgia;color:#2d3461">Commande #${order.id} marquée payée — ${amount} €</p>
+  <p style="margin:0 0 6px"><strong>Client</strong> : ${esc(order.nom || '')}</p>
+  <p style="margin:0 0 6px"><strong>Email</strong> : ${esc(order.email || '')}</p>
+  <p style="margin:0 0 6px"><strong>Livraison</strong> : ${esc(order.livraison || '')}</p>
+  <p style="margin:14px 0 0;font-size:11px;font-family:'Courier New',monospace;color:#888">Session : ${session.id}</p>
+</div></body></html>`;
+  await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: { 'accept': 'application/json', 'api-key': BREVO_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sender: { name: 'ARCA Commandes', email: FROM_EMAIL },
+      to: TO_RAW.map(e => ({ email: e })),
+      subject, htmlContent: html
+    })
+  }).catch(e => console.error('[notifyOrderPaid] Brevo error:', e.message));
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // Notifie l'admin d'un paiement Stripe reçu hors du tunnel ARCA
 // (Payment Link Stripe Dashboard, donation externe, etc. — pas de metadata commande)
