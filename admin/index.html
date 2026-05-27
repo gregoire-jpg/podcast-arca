@@ -2331,6 +2331,20 @@ $('btn-save-dico').addEventListener('click', function(){
   });
 });
 
+/* Convertit un Blob en chaîne base64 (sans préfixe data:) */
+function blobToBase64(blob) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onloadend = function() {
+      var result = reader.result || '';
+      var idx = result.indexOf(',');
+      resolve(idx >= 0 ? result.slice(idx + 1) : result);
+    };
+    reader.onerror = function() { reject(new Error('FileReader error')); };
+    reader.readAsDataURL(blob);
+  });
+}
+
 /* ═══════════════════════════════════════════════════════════════════
    CITATIONS DU JOUR — module isolé
    Backend : projet Supabase erp-editionsbeya (schéma "citations")
@@ -2339,17 +2353,16 @@ $('btn-save-dico').addEventListener('click', function(){
 var CIT = {
   url: 'https://fsbyoxotsmmzejefiaqg.supabase.co',
   anon: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYnlveG90c21temVqZWZpYXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNjM2NTMsImV4cCI6MjA5MjkzOTY1M30.WeggZAYy3N6hZp6vLQyQWoi_55KHPdhhFcA9P-MO3UA',
-  // Service role key — accès admin via le password Arca uniquement (pas de prompt supplémentaire)
-  service: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYnlveG90c21temVqZWZpYXFnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzM2MzY1MywiZXhwIjoyMDkyOTM5NjUzfQ.Z22_YLAT_jILvYzW82wEQOxp1_ttiAjLI7LTGDN5KOY',
+  // Le service_role key n'est plus jamais embarqué dans la page : toutes les
+  // écritures passent par /.netlify/functions/db-proxy (auth via S.pwd).
   loaded: false,
   citations: [], auteurs: [], inscrits: [],
   curEditId: null, curEditAuteurId: null,
 };
 
-function citHeaders(write) {
-  var key = (write && CIT.service) ? CIT.service : CIT.anon;
+function citHeaders() {
   return {
-    'apikey': key, 'Authorization': 'Bearer ' + key,
+    'apikey': CIT.anon, 'Authorization': 'Bearer ' + CIT.anon,
     'Content-Type': 'application/json',
     'Accept-Profile': 'citations', 'Content-Profile': 'citations',
   };
@@ -2357,16 +2370,43 @@ function citHeaders(write) {
 function citApi(path, opts) {
   opts = opts || {};
   var write = opts.write !== false;
-  return fetch(CIT.url + '/rest/v1' + path, {
-    method: opts.method || 'GET',
-    headers: Object.assign(citHeaders(write), opts.headers || {}),
-    body: opts.body,
+  var method = opts.method || 'GET';
+  // Lectures anon (RLS-friendly) : direct vers Supabase avec la clé anon publique
+  if (!write) {
+    return fetch(CIT.url + '/rest/v1' + path, {
+      method: method,
+      headers: Object.assign(citHeaders(), opts.headers || {}),
+      body: opts.body,
+    }).then(function(r) {
+      if (!r.ok) return r.text().then(function(t) { throw new Error(r.status + ' ' + t); });
+      return r.text().then(function(t) { return t ? JSON.parse(t) : null; });
+    });
+  }
+  // Écritures (et lectures privilégiées) : via proxy serveur, password requis
+  var preferHeader = (opts.headers && opts.headers.Prefer) || null;
+  return fetch('/.netlify/functions/db-proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      password: S.pwd,
+      schema: 'citations',
+      path: path,
+      method: method,
+      body: opts.body,
+      prefer: preferHeader,
+    }),
   }).then(function(r) {
-    if (!r.ok) return r.text().then(function(t) { throw new Error(r.status + ' ' + t); });
-    return r.text().then(function(t) { return t ? JSON.parse(t) : null; });
+    return r.text().then(function(t) {
+      if (!r.ok) {
+        var msg = t;
+        try { var j = JSON.parse(t); if (j && j.error) msg = j.error; } catch (_) {}
+        throw new Error(r.status + ' ' + msg);
+      }
+      return t ? JSON.parse(t) : null;
+    });
   });
 }
-function citEnsureService() { return true; }
+function citEnsureService() { return !!(S && S.pwd); }
 
 /* ── Chargement initial des données ── */
 function citLoad() {
@@ -3061,18 +3101,24 @@ function resBulkLancer(force) {
       canvas.toBlob(function(blob) {
         if (!blob) { ko++; i++; setTimeout(suivante, 100); return; }
         var path = 'pensee-' + c.id + '-' + Date.now() + '.png';
-        fetch(CIT.url + '/storage/v1/object/' + RES.bucket + '/' + path, {
-          method: 'POST',
-          headers: {
-            'apikey': CIT.service,
-            'Authorization': 'Bearer ' + CIT.service,
-            'Content-Type': 'image/png',
-            'x-upsert': 'true',
-          },
-          body: blob,
+        blobToBase64(blob).then(function(b64) {
+          return fetch('/.netlify/functions/storage-upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              password: S.pwd,
+              bucket: RES.bucket,
+              path: path,
+              contentType: 'image/png',
+              dataBase64: b64,
+            }),
+          });
         }).then(function(r) {
-          if (!r.ok) throw new Error('upload ' + r.status);
-          var url = CIT.url + '/storage/v1/object/public/' + RES.bucket + '/' + path;
+          return r.json().then(function(j) {
+            if (!r.ok) throw new Error('upload ' + r.status + ' ' + (j.error || ''));
+            return j.url;
+          });
+        }).then(function(url) {
           return citApi('/citations?id=eq.' + c.id, {
             method: 'PATCH',
             body: JSON.stringify({
@@ -3323,20 +3369,24 @@ function resSauvegarder() {
     if (!blob) { $('res-status').textContent = 'Erreur conversion'; return; }
     var path = 'pensee-' + RES.current.id + '-' + Date.now() + '.png';
     $('res-status').textContent = 'Upload Storage…';
-    fetch(CIT.url + '/storage/v1/object/' + RES.bucket + '/' + path, {
-      method: 'POST',
-      headers: {
-        'apikey': CIT.service,
-        'Authorization': 'Bearer ' + CIT.service,
-        'Content-Type': 'image/png',
-        'x-upsert': 'true',
-      },
-      body: blob,
+    blobToBase64(blob).then(function(b64) {
+      return fetch('/.netlify/functions/storage-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          password: S.pwd,
+          bucket: RES.bucket,
+          path: path,
+          contentType: 'image/png',
+          dataBase64: b64,
+        }),
+      });
     }).then(function(r) {
-      if (!r.ok) return r.text().then(function(t) { throw new Error(r.status + ' ' + t); });
-      return r.json();
-    }).then(function() {
-      var publicUrl = CIT.url + '/storage/v1/object/public/' + RES.bucket + '/' + path;
+      return r.json().then(function(j) {
+        if (!r.ok) throw new Error(r.status + ' ' + (j.error || ''));
+        return j.url;
+      });
+    }).then(function(publicUrl) {
       // Met à jour la citation
       return citApi('/citations?id=eq.' + RES.current.id, {
         method: 'PATCH',
@@ -3373,20 +3423,44 @@ function resSauvegarder() {
    Toutes les variables sous le namespace CMD pour ne rien casser ailleurs.
 ═══════════════════════════════════════════════════════════════════ */
 var CMD = {
-  url:     'https://fsbyoxotsmmzejefiaqg.supabase.co',
-  service: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYnlveG90c21temVqZWZpYXFnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzM2MzY1MywiZXhwIjoyMDkyOTM5NjUzfQ.Z22_YLAT_jILvYzW82wEQOxp1_ttiAjLI7LTGDN5KOY',
+  // Plus de service_role en clair : tous les appels passent par db-proxy.
   orders:  [],
   filter:  'todo',
   loaded:  false,
   expanded: {}  // { orderId: true } pour ligne dépliée
 };
 
-CMD.headers = function() {
-  return {
-    'apikey': CMD.service,
-    'Authorization': 'Bearer ' + CMD.service,
-    'Content-Type': 'application/json'
-  };
+// Helper d'appel via le proxy Netlify (auth par S.pwd).
+// path : ex. '/arca_orders?id=eq.123'
+CMD.api = function(path, opts) {
+  opts = opts || {};
+  var preferHeader = (opts.headers && opts.headers.Prefer) || (opts.prefer || null);
+  return fetch('/.netlify/functions/db-proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      password: S.pwd,
+      schema: 'public',
+      path: path,
+      method: opts.method || 'GET',
+      body: opts.body ? (typeof opts.body === 'string' ? JSON.parse(opts.body) : opts.body) : undefined,
+      prefer: preferHeader,
+    }),
+  }).then(function(r) {
+    return r.text().then(function(t) {
+      var data = null;
+      try { data = t ? JSON.parse(t) : null; } catch (_) { data = t; }
+      if (!r.ok) {
+        var msg = (data && data.error) ? data.error : (t || ('HTTP ' + r.status));
+        var err = new Error(msg);
+        err.status = r.status;
+        throw err;
+      }
+      // Mime la signature de fetch().json() pour le code appelant qui s'attend
+      // à pouvoir lire .ok/.text()/.json() sur la réponse. On encapsule.
+      return data;
+    });
+  });
 };
 
 CMD.esc = function(s) {
@@ -3396,9 +3470,8 @@ CMD.esc = function(s) {
 };
 
 CMD.load = function() {
-  fetch(CMD.url + '/rest/v1/arca_orders?select=*&order=created_at.desc&limit=500', { headers: CMD.headers() })
-    .then(function(r) { return r.ok ? r.json() : r.text().then(function(t){ throw new Error(t); }); })
-    .then(function(data) { CMD.orders = data; CMD.loaded = true; CMD.render(); })
+  CMD.api('/arca_orders?select=*&order=created_at.desc&limit=500')
+    .then(function(data) { CMD.orders = data || []; CMD.loaded = true; CMD.render(); })
     .catch(function(e) {
       document.getElementById('cmd-list').innerHTML = '<div class="empty" style="color:#c0392b">Erreur : ' + CMD.esc(e.message) + '</div>';
     });
@@ -3736,17 +3809,12 @@ CMD.toggleClose = function(id) {
   if (!o) return;
   var newState = !o.cloturee;
   var body = { cloturee: newState, cloturee_at: newState ? new Date().toISOString() : null };
-  fetch(CMD.url + '/rest/v1/arca_orders?id=eq.' + id, {
-    method: 'PATCH',
-    headers: CMD.headers(),
-    body: JSON.stringify(body)
-  })
-  .then(function(r) {
-    if (!r.ok) return r.text().then(function(t){ throw new Error(t); });
-    o.cloturee = newState; o.cloturee_at = body.cloturee_at;
-    CMD.render();
-  })
-  .catch(function(e) { alert('Erreur : ' + e.message); });
+  CMD.api('/arca_orders?id=eq.' + id, { method: 'PATCH', body: body })
+    .then(function() {
+      o.cloturee = newState; o.cloturee_at = body.cloturee_at;
+      CMD.render();
+    })
+    .catch(function(e) { alert('Erreur : ' + e.message); });
 };
 
 // Envoie (ou renvoie) le mail de confirmation au client pour une commande
@@ -3782,17 +3850,12 @@ CMD.togglePaye = function(id) {
     paye: newPaye,
     paid_at: newPaye ? nowIso : null
   };
-  fetch(CMD.url + '/rest/v1/arca_orders?id=eq.' + id, {
-    method: 'PATCH',
-    headers: CMD.headers(),
-    body: JSON.stringify(body)
-  })
-  .then(function(r) {
-    if (!r.ok) return r.text().then(function(t){ throw new Error(t); });
-    o.paye = newPaye; o.paid_at = body.paid_at;
-    CMD.render();
-  })
-  .catch(function(e) { alert('Erreur : ' + e.message); });
+  CMD.api('/arca_orders?id=eq.' + id, { method: 'PATCH', body: body })
+    .then(function() {
+      o.paye = newPaye; o.paid_at = body.paid_at;
+      CMD.render();
+    })
+    .catch(function(e) { alert('Erreur : ' + e.message); });
 };
 
 CMD.toggleCancel = function(id) {
@@ -3813,13 +3876,8 @@ CMD.toggleCancel = function(id) {
     cancelled_at: newState ? new Date().toISOString() : null,
     cancel_reason: reason
   };
-  fetch(CMD.url + '/rest/v1/arca_orders?id=eq.' + id, {
-    method: 'PATCH',
-    headers: CMD.headers(),
-    body: JSON.stringify(body)
-  })
-  .then(function(r) {
-    if (!r.ok) return r.text().then(function(t){ throw new Error(t); });
+  CMD.api('/arca_orders?id=eq.' + id, { method: 'PATCH', body: body })
+  .then(function() {
     o.cancelled = newState; o.cancelled_at = body.cancelled_at; o.cancel_reason = reason;
     CMD.render();
     if (notifyClient) {
@@ -4059,12 +4117,7 @@ CMD.submitCreate = function() {
   var btn = document.getElementById('cmd-new-submit');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Création...'; }
 
-  fetch(CMD.url + '/rest/v1/arca_orders', {
-    method: 'POST',
-    headers: Object.assign({}, CMD.headers(), { 'Prefer': 'return=representation' }),
-    body: JSON.stringify(row)
-  })
-  .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.message || d.error || 'HTTP '+r.status); return d; }); })
+  CMD.api('/arca_orders', { method: 'POST', body: row, prefer: 'return=representation' })
   .then(function(rows) {
     var created = Array.isArray(rows) ? rows[0] : rows;
     if (created && created.id) CMD.orders.unshift(created);
