@@ -1260,12 +1260,49 @@ function saveFile(filename, data, cb) {
 }
 
 /* ═══════════════════ AUTH ═══════════════════ */
+// Valide le password contre db-proxy avant d'ouvrir l'admin : évite que
+// les testeurs voient un admin "à moitié fonctionnel" si le password est faux.
 function tryLogin() {
   var pwd = $('login-pwd').value.trim();
   if (!pwd) return;
-  S.pwd = pwd;
-  sessionStorage.setItem('arca_pwd', pwd);
-  loadData();
+  var btn = $('login-btn');
+  var err = $('login-err');
+  err.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Vérification…';
+  fetch('/.netlify/functions/db-proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      password: pwd,
+      schema: 'public',
+      path: '/arca_orders?select=id&limit=1',
+      method: 'GET',
+    }),
+  }).then(function(r) {
+    if (r.status === 401) {
+      err.textContent = 'Mot de passe incorrect';
+      err.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Se connecter';
+      return;
+    }
+    if (!r.ok) {
+      err.textContent = 'Erreur serveur (' + r.status + '). Réessayez.';
+      err.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Se connecter';
+      return;
+    }
+    S.pwd = pwd;
+    sessionStorage.setItem('arca_pwd', pwd);
+    loadData();
+  }).catch(function(e) {
+    err.textContent = 'Connexion impossible : ' + e.message;
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Se connecter';
+  });
 }
 
 $('login-btn').addEventListener('click', tryLogin);
