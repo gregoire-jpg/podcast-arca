@@ -27,7 +27,15 @@ jobs:
           python-version: "3.11"
 
       - name: Installer ffmpeg
-        run: sudo apt-get install -y ffmpeg
+        # ubuntu-latest a déjà ffmpeg pré-installé ; ce step sert de filet.
+        # apt-get update est obligatoire sinon le cache stale demande des
+        # versions de paquets (ex: libcaca0) qui ont été retirées du miroir
+        # Azure → 404, exit 100. --no-install-recommends évite les deps
+        # optionnelles cassées (libcaca, etc.) dont on n'a pas besoin ici.
+        run: |
+          which ffmpeg && ffmpeg -version | head -1 && exit 0 || true
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
 
       - name: Installer dépendances Python
         run: pip install yt-dlp dropbox
