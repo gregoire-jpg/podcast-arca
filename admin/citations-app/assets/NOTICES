@@ -2036,7 +2036,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --------------------------------------------------------------------------------
 cross_file
-google_fonts
 path_provider_android
 path_provider_foundation
 shared_preferences
