@@ -1009,6 +1009,8 @@
 .cmd-act.cancel:hover { background:#9d1018; color:#fff; }
 .cmd-act.mail { border-color:#3a8a4a; color:#3a8a4a; padding:6px 9px; }
 .cmd-act.mail:hover { background:#3a8a4a; color:#fff; }
+.cmd-act.remind { border-color:#c8a060; color:#c8a060; }
+.cmd-act.remind:hover { background:#c8a060; color:#fff; }
 .cmd-act.paid { border-color:#3a8a4a; color:#3a8a4a; background:#e8f5ea; }
 .cmd-act.paid:hover { background:#3a8a4a; color:#fff; }
 .cmd-act.unpaid { border-color:#8a5a10; color:#8a5a10; background:#fff8e1; }
@@ -3585,6 +3587,7 @@ CMD.render = function() {
             return '';
           })()
         + (o.cancelled || !o.email ? '' : '<button class="cmd-act mail" onclick="CMD.sendConfirmation(' + o.id + ')" title="Renvoyer la confirmation à ' + CMD.esc(o.email) + '">✉</button>')
+        + (o.cancelled || o.paye || !o.email ? '' : '<button class="cmd-act remind" onclick="CMD.sendReminder(' + o.id + ')" title="Envoyer un rappel chaleureux à ' + CMD.esc(o.email) + ' avec récap complet + liens de paiement à jour">⏰ Rappel</button>')
         + (o.cancelled || o.cloturee ? '' : '<button class="cmd-act ' + (o.paye ? 'unpaid' : 'paid') + '" onclick="CMD.togglePaye(' + o.id + ')" title="' + (o.paye ? 'Marquer comme non payée' : 'Marquer comme payée') + '">' + (o.paye ? '↶ Non payée' : '✓ Marquer payée') + '</button>')
         + (o.cancelled ? '' : '<button class="cmd-act ' + (o.cloturee ? 'reopen' : 'close') + '" onclick="CMD.toggleClose(' + o.id + ')">' + (o.cloturee ? 'Rouvrir' : 'Clôturer') + '</button>')
         + (o.cancelled || o.cloturee ? '' : '<button class="cmd-act cancel" onclick="CMD.toggleCancel(' + o.id + ')">✗ Annuler</button>')
@@ -3855,6 +3858,31 @@ CMD.toggleClose = function(id) {
       CMD.render();
     })
     .catch(function(e) { alert('Erreur : ' + e.message); });
+};
+
+// Envoie un mail de RAPPEL chaleureux au client pour une commande non payée.
+// Le mail contient le récap complet (items, remises, port, adresse, point
+// relais MR si applicable) + des liens Stripe/PayPal régénérés à jour
+// + les coordonnées de virement. Aucune copie interne — c'est entre
+// le client et Antoine.
+CMD.sendReminder = function(id) {
+  var o = CMD.orders.find(function(x){ return x.id === id; });
+  if (!o) return;
+  if (!o.email) { alert('Pas d\'email renseigné sur cette commande.'); return; }
+  if (o.paye)   { alert('Cette commande est déjà marquée payée.'); return; }
+  if (!confirm('Envoyer un rappel à ' + o.email + ' ?\n(récap complet + 3 modes de paiement)')) return;
+  fetch('/.netlify/functions/send-reminder', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ order_id: id })
+  })
+  .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
+  .then(function(d) {
+    alert('⏰ Rappel envoyé à ' + o.email +
+          (d.payment_links && d.payment_links.stripe ? '\n\nStripe : ' + d.payment_links.stripe : '') +
+          (d.payment_links && d.payment_links.paypal ? '\nPayPal : ' + d.payment_links.paypal : ''));
+  })
+  .catch(function(e) { alert('Erreur : ' + e.message); });
 };
 
 // Envoie (ou renvoie) le mail de confirmation au client pour une commande
