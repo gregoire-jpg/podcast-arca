@@ -3885,8 +3885,9 @@ CMD.alertsHtml = function() {
       + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
         + '<strong>' + CMD.esc(labels[num] || ('N°' + num)) + '</strong> '
         + '<span style="color:#c1272d;font-weight:bold">' + emails.length + ' en attente</span>'
+        + '<button class="cmd-act mail" onclick="CMD.notifyRestock(' + num + ')" title="Envoie l\'e-mail « de nouveau disponible » à tous puis les marque prévenus">✉ Prévenir tout le monde</button>'
         + '<button class="cmd-act" onclick="CMD.copyAlerts(' + num + ')">Copier les e-mails</button>'
-        + '<button class="cmd-act paid" onclick="CMD.markNotified(' + num + ')" title="Marque ces inscrits comme prévenus">✓ Marquer prévenus</button>'
+        + '<button class="cmd-act paid" onclick="CMD.markNotified(' + num + ')" title="Marque comme prévenus SANS envoyer d\'e-mail">✓ Marquer (sans mail)</button>'
       + '</div>'
       + '<div style="margin-top:6px;font:.85em/1.5 Arial;color:#444;word-break:break-all">'
         + emails.map(function(a) { return CMD.esc(a.email); }).join(' · ')
@@ -3907,9 +3908,26 @@ CMD.copyAlerts = function(num) {
   else { window.prompt('Copie les e-mails :', txt); }
 };
 
+CMD.notifyRestock = function(num) {
+  var n = (CMD.alerts || []).filter(function(a) { return a.num === num; }).length;
+  if (!n) { alert('Personne en attente pour ce numéro.'); return; }
+  if (!confirm('Envoyer l\'e-mail « de nouveau disponible » à ' + n + ' inscrit(s) du N°' + num + ' ?\nIls seront ensuite marqués comme prévenus.')) return;
+  fetch('/.netlify/functions/arca-restock-notify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: S.pwd, num: num })
+  })
+    .then(function(r) { return r.json().then(function(j) { if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status)); return j; }); })
+    .then(function(j) {
+      alert((j.sent || 0) + ' e-mail(s) envoyé(s)' + (j.failed ? ' · ' + j.failed + ' échec(s)' : '') + '.');
+      CMD.loadStock();
+    })
+    .catch(function(e) { alert('Erreur : ' + e.message); });
+};
+
 CMD.markNotified = function(num) {
   var n = (CMD.alerts || []).filter(function(a) { return a.num === num; }).length;
-  if (!confirm('Marquer ' + n + ' inscrit(s) du N°' + num + ' comme prévenus ? Ils disparaîtront de la liste.')) return;
+  if (!confirm('Marquer ' + n + ' inscrit(s) du N°' + num + ' comme prévenus SANS envoyer d\'e-mail ?')) return;
   CMD.api('/arca_restock_alerts?num=eq.' + num + '&notified=eq.false',
     { method: 'PATCH', body: { notified: true, notified_at: new Date().toISOString() }, prefer: 'return=minimal' })
     .then(function() { CMD.loadStock(); })
