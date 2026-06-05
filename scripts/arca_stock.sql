@@ -65,3 +65,12 @@ from (values
  (9,20,'reassort','Réassort imprimeur — Recueil de prières définitif')
 ) as v(num,qty,kind,note)
 where not exists (select 1 from public.arca_stock_moves);
+
+-- ── Prix d'achat HT unitaire (« coût rendu ») ───────────────────
+-- Méthode : (Prix_TTC facture ÷ 1,055) × 0,60 (remise 40 % au prorata) + 0,42 € (port 100 € / 238 livres).
+-- Bénéfice calculé HT contre HT (TVA achat 5,5 % récupérable, TVA vente 6 % reversée → neutre).
+-- N°5 absent de la facture réassort → laissé NULL (à renseigner dans l'admin).
+alter table public.arca_stock add column if not exists cost_eur numeric;
+update public.arca_stock as s set cost_eur = v.c
+from (values (1,10.51),(2,10.97),(3,11.22),(4,11.56),(6,9.70),(7,11.23),(8,11.44),(9,9.63)) as v(num,c)
+where s.num = v.num and s.cost_eur is null;

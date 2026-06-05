@@ -3864,7 +3864,7 @@ CMD.renderStock = function() {
   var el = document.getElementById('cmd-stock');
   if (!el) return;
   if (!CMD.stockLoaded) { el.innerHTML = ''; return; }
-  el.innerHTML = CMD.stockHtml();
+  el.innerHTML = CMD.stockHtml() + CMD.profitHtml();
 };
 
 CMD.stockHtml = function() {
@@ -3972,6 +3972,134 @@ CMD.submitStockMove = function() {
     })
     .catch(function(e) { alert('Erreur : ' + e.message); })
     .then(function() { if (btn) { btn.disabled = false; btn.textContent = 'Enregistrer'; } });
+};
+
+/* ── Prix d'achat & bénéfice ───────────────────────────────────── */
+CMD.VAT_SALE = 1.06;  // TVA vente ARCA = 6 %
+
+// Ventes par numéro : { num: { qty, rev } } (rev = CA brut TTC, prix réels)
+CMD.salesByNum = function() {
+  var m = {};
+  CMD.orders.forEach(function(o) {
+    if (o.cancelled) return;
+    (o.items || []).forEach(function(it) {
+      var q = it.qty || 0, p = +it.price || 0;
+      if (!it.num || q <= 0) return;
+      if (!m[it.num]) m[it.num] = { qty: 0, rev: 0 };
+      m[it.num].qty += q;
+      m[it.num].rev += q * p;
+    });
+  });
+  return m;
+};
+
+// Remises niveau commande (pack + panier) — réduisent le bénéfice réel. TTC.
+CMD.productDiscounts = function() {
+  var d = 0;
+  CMD.orders.forEach(function(o) {
+    if (o.cancelled) return;
+    d += (+o.pack_discount_eur || 0) + (+o.discount_eur || 0);
+  });
+  return d;
+};
+
+// Prix de vente catalogue actuel (TTC) pour un ouvrage
+CMD.salePriceTtc = function(num) {
+  var c = CMD.CATALOG_FULL[num];
+  if (!c) return 20;
+  if (num === 8) return (new Date() < CMD.PROMO_DEADLINE) ? 15 : 20;
+  return c.price;
+};
+
+CMD.reassortFor = function(num) {
+  var r = 0;
+  CMD.stockMoves.forEach(function(mv) { if (mv.received !== false && mv.num === num) r += (+mv.qty || 0); });
+  return r;
+};
+
+CMD.profitHtml = function() {
+  var sales = CMD.salesByNum();
+  var rows = '', tRealGross = 0, tPotential = 0, tStockCost = 0, missing = false;
+  CMD.stockItems.forEach(function(s) {
+    if (s.active === false) return;
+    var cost    = (s.cost_eur == null ? null : +s.cost_eur);
+    var saleHt  = CMD.salePriceTtc(s.num) / CMD.VAT_SALE;
+    var sold    = sales[s.num] ? sales[s.num].qty : 0;
+    var revHt   = sales[s.num] ? sales[s.num].rev / CMD.VAT_SALE : 0;
+    var stock   = (+s.initial_qty || 0) + CMD.reassortFor(s.num) - sold;
+    var margin  = (cost == null) ? null : (saleHt - cost);
+    var realG   = (cost == null) ? null : (revHt - cost * sold);
+    var poten   = (margin == null) ? null : (margin * stock);
+    if (cost == null) { missing = true; }
+    else { tRealGross += realG; tPotential += poten; tStockCost += cost * stock; }
+    var mCol = margin == null ? '#999' : (margin < 0 ? '#c1272d' : '#2a7a2a');
+    rows += '<tr>'
+      + '<td><strong>' + CMD.esc(s.label) + '</strong></td>'
+      + '<td style="text-align:right;white-space:nowrap">' + (cost == null ? '<span style="color:#c1272d">à renseigner</span>' : cost.toFixed(2) + ' €')
+        + ' <button class="cmd-act" onclick="CMD.editCost(' + s.num + ')" title="Modifier le prix d\'achat HT">✎</button></td>'
+      + '<td style="text-align:right;color:#888">' + saleHt.toFixed(2) + ' €</td>'
+      + '<td style="text-align:right;font-weight:bold;color:' + mCol + '">' + (margin == null ? '—' : margin.toFixed(2) + ' €') + '</td>'
+      + '<td style="text-align:center;color:#666">' + sold + '</td>'
+      + '<td style="text-align:right;font-weight:bold;color:' + (realG == null ? '#999' : 'var(--navy)') + '">' + (realG == null ? '—' : Math.round(realG) + ' €') + '</td>'
+      + '<td style="text-align:center;color:#666">' + stock + '</td>'
+      + '<td style="text-align:right;color:#777">' + (poten == null ? '—' : Math.round(poten) + ' €') + '</td>'
+      + '</tr>';
+  });
+  var discTtc = CMD.productDiscounts();
+  var discHt  = discTtc / CMD.VAT_SALE;
+  var realNet = tRealGross - discHt;
+  var note = missing ? '<div style="margin:8px 0 0;font-size:.82em;color:#c1272d">⚠️ Un coût d\'achat manque (N°5, hors facture réassort) — non compté dans les totaux. Clique sur ✎ pour le renseigner.</div>' : '';
+  return ''
+    + '<div class="cmd-summary" style="margin-top:18px">'
+      + '<div class="cmd-summary-title">💰 Prix d\'achat &amp; bénéfice</div>'
+      + '<table class="cmd-summary-table">'
+        + '<thead><tr>'
+          + '<th>Ouvrage</th><th style="text-align:right">Achat HT</th><th style="text-align:right">Vente HT</th>'
+          + '<th style="text-align:right">Marge/livre</th><th>Vendu</th><th style="text-align:right">Bénéf. réalisé</th>'
+          + '<th>Stock</th><th style="text-align:right">Bénéf. potentiel</th>'
+        + '</tr></thead>'
+        + '<tbody>' + rows + '</tbody>'
+        + '<tfoot>'
+          + '<tr><td colspan="5"><strong>Bénéfice réalisé brut (ventes, HT)</strong></td>'
+            + '<td style="text-align:right;font-weight:bold;color:var(--navy)">' + Math.round(tRealGross) + ' €</td>'
+            + '<td></td><td style="text-align:right;font-weight:bold;color:#777">' + Math.round(tPotential) + ' €</td></tr>'
+          + '<tr><td colspan="5" style="color:#c00">− Remises commandes (pack / panier), HT</td>'
+            + '<td style="text-align:right;color:#c00">−' + Math.round(discHt) + ' €</td><td colspan="2"></td></tr>'
+          + '<tr><td colspan="5"><strong>BÉNÉFICE NET RÉALISÉ</strong></td>'
+            + '<td style="text-align:right;font-weight:bold;font-size:1.1em;color:#2a7a2a">' + Math.round(realNet) + ' €</td>'
+            + '<td></td><td style="text-align:right;color:#777;font-size:.85em">stock à venir</td></tr>'
+        + '</tfoot>'
+      + '</table>'
+      + '<div style="margin-top:10px;display:flex;gap:12px;flex-wrap:wrap">'
+        + '<div style="flex:1;min-width:180px;padding:12px 16px;background:#f0f7f0;border:1px solid #2a7a2a;border-radius:8px">'
+          + '<div style="font-size:.78em;color:#1f5a1f;text-transform:uppercase;letter-spacing:.5px">Bénéfice net réalisé</div>'
+          + '<div style="font-size:1.6em;font-weight:bold;color:#2a7a2a">' + Math.round(realNet) + ' €</div></div>'
+        + '<div style="flex:1;min-width:180px;padding:12px 16px;background:#fdf8ea;border:1px solid #c8a060;border-radius:8px">'
+          + '<div style="font-size:.78em;color:#6b5a2d;text-transform:uppercase;letter-spacing:.5px">Bénéfice potentiel (stock restant)</div>'
+          + '<div style="font-size:1.6em;font-weight:bold;color:#a88440">' + Math.round(tPotential) + ' €</div></div>'
+        + '<div style="flex:1;min-width:180px;padding:12px 16px;background:#f5f5f7;border:1px solid #aaa;border-radius:8px">'
+          + '<div style="font-size:.78em;color:#555;text-transform:uppercase;letter-spacing:.5px">Valeur du stock (au coût HT)</div>'
+          + '<div style="font-size:1.6em;font-weight:bold;color:#444">' + Math.round(tStockCost) + ' €</div></div>'
+      + '</div>'
+      + note
+      + '<div style="margin-top:8px;font-size:.8em;color:#888;font-style:italic">'
+        + 'Achat HT = facture imprimeur ÷ 1,055, remise 40 % au prorata, + port 0,42 €/livre. Bénéfice HT vs HT (TVA neutre). '
+        + 'Réalisé = CA réel des ventes (prix réellement pratiqués, ex. souscription N°8) − coût. Potentiel = marge au prix actuel × stock restant.'
+      + '</div>'
+    + '</div>';
+};
+
+CMD.editCost = function(num) {
+  var s = CMD.stockItems.filter(function(x) { return x.num === num; })[0];
+  if (!s) return;
+  var cur = s.cost_eur == null ? '' : s.cost_eur;
+  var v = prompt('Prix d\'achat HT unitaire de « ' + s.label + ' » (€) :', cur);
+  if (v == null) return;
+  var n = parseFloat(String(v).replace(',', '.'));
+  if (isNaN(n)) { alert('Valeur invalide.'); return; }
+  CMD.api('/arca_stock?num=eq.' + num, { method: 'PATCH', body: { cost_eur: n }, prefer: 'return=minimal' })
+    .then(function() { CMD.loadStock(); })
+    .catch(function(e) { alert('Erreur : ' + e.message); });
 };
 
 // Modifier le stock initial (avant 1re vente) d'un ouvrage — rare, donc prompt simple.
