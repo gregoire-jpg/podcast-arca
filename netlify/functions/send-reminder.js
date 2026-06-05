@@ -84,7 +84,8 @@ exports.handler = async function (event) {
     totalEur,
     orderId,
     stripeUrl, paypalUrl,
-    iban:        'BE85 7320 6963 8767',
+    iban:        'BE92 0017 7210 5023',
+    bic:         'GEBABEBB',
     iban_holder: 'Arca Societas',
     communication: 'ARCA' + String(orderId).padStart(4, '0'),
     discount_note: o.discount_note || '',
@@ -272,7 +273,8 @@ function buildReminderHtml(d) {
           <div style="font:11px Arial;letter-spacing:2px;text-transform:uppercase;color:#777;margin-bottom:8px">Ou par virement bancaire</div>
           <div style="font:14px/1.7 Georgia;color:#2d3461">
             Bénéficiaire : <strong>${esc(d.iban_holder)}</strong><br>
-            IBAN : <strong>${esc(d.iban)}</strong><br>
+            IBAN : <strong style="font-family:'Courier New',monospace;letter-spacing:.5px">${esc(d.iban)}</strong><br>
+            BIC : <strong style="font-family:'Courier New',monospace;letter-spacing:.5px">${esc(d.bic)}</strong><br>
             Communication : <strong style="color:#c8a060">${esc(d.communication)}</strong><br>
             Montant : <strong>${fmt(d.totalEur)}</strong>
           </div>
@@ -328,7 +330,9 @@ function buildReminderText(d) {
   if (d.paypalUrl) lines.push(`  PayPal : ${d.paypalUrl}`);
   lines.push('');
   lines.push('OU PAR VIREMENT');
-  lines.push(`  IBAN : BE85 7320 6963 8767 (Arca Societas)`);
+  lines.push(`  Bénéficiaire : Arca Societas`);
+  lines.push(`  IBAN : BE92 0017 7210 5023`);
+  lines.push(`  BIC : GEBABEBB`);
   lines.push(`  Communication : ARCA${String(d.orderId).padStart(4, '0')}`);
   lines.push(`  Montant : ${fmt(d.totalEur)}`);
   lines.push('');
