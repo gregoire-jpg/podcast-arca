@@ -50,8 +50,8 @@ insert into public.arca_stock (num, label, initial_qty, sort_order) values
 on conflict (num) do update set label = excluded.label, sort_order = excluded.sort_order;
 
 -- ── Seed : réassort imprimeur (déjà reçu) ───────────────────────
--- N.B. : « Numéro spécial – réédition de textes oubliés » = Arca V (N°5).
---        N°6 n'a PAS été réassorti → reste à -3 (survendu).
+-- N.B. : « Numéro spécial – réédition de textes oubliés » = Arca VI (N°6).
+--        N°5 n'a PAS été réassorti (stock suffisant).
 insert into public.arca_stock_moves (num, qty, kind, note, received)
 select v.num, v.qty, v.kind, v.note, true
 from (values
@@ -59,7 +59,7 @@ from (values
  (2,10,'reassort','Réassort imprimeur — Arca II réédition 2021'),
  (3, 9,'reassort','Réassort imprimeur — Arca III réédition 2021'),
  (4, 5,'reassort','Réassort imprimeur — Arca IV réédition 2021'),
- (5,11,'reassort','Réassort imprimeur — Numéro spécial réédition de textes oubliés (= Arca V)'),
+ (6,11,'reassort','Réassort imprimeur — Numéro spécial réédition de textes oubliés (= Arca VI)'),
  (7,11,'reassort','Réassort imprimeur — Arca VII 2025'),
  (8,151,'tirage','Tirage initial — Arca VIII 2026'),
  (9,20,'reassort','Réassort imprimeur — Recueil de prières définitif')
