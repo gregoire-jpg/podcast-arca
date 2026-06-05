@@ -437,7 +437,7 @@
           <input type="url" id="new-doc-url" placeholder="https://dl.dropboxusercontent.com/…" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:.88em">
         </div>
         <div>
-          <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">— OU — Fichier PDF (max ~5 MB)</label>
+          <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">— OU — Fichier PDF (max 4 MB · au-delà : upload manuel Dropbox)</label>
           <input type="file" id="new-doc-file" accept=".pdf" style="font-size:.88em">
           <div id="upload-progress" style="margin-top:6px;font:.75em/1 Arial;color:var(--muted);display:none">Upload en cours…</div>
         </div>
@@ -1824,6 +1824,12 @@ function updateDocStatus(){ $('doc-save-status').textContent = D.dirty.size?D.di
 /* ── Modale : Ajouter un document ── */
 $('add-doc-cancel').addEventListener('click', function(){ $('add-doc-mask').style.display='none'; });
 
+// Limite Netlify Functions = 6 MB de payload (incluant JSON + base64).
+// base64 ajoute ~33% au PDF brut → un fichier de 4.4 MB devient ~5.9 MB en
+// base64. On reste prudent à 4.2 MB pour avoir une marge avec la surcharge
+// JSON (champs title, category, etc.) et éviter les rejets HTTP 413 silencieux.
+var MAX_DIRECT_UPLOAD_MB = 4.2;
+
 $('add-doc-ok').addEventListener('click', function(){
   var title   = $('new-doc-title').value.trim();
   var type    = $('new-doc-type').value;
@@ -1837,6 +1843,19 @@ $('add-doc-ok').addEventListener('click', function(){
 
   if (!title||!type||!category) { toast('Titre, type et catégorie sont requis','err'); return; }
 
+  var btn = $('add-doc-ok');
+  var prog = $('upload-progress');
+  function setBusy(busy, msg) {
+    btn.disabled = busy;
+    btn.textContent = busy ? (msg || 'Upload en cours…') : 'Ajouter';
+    btn.style.opacity = busy ? '.55' : '1';
+    btn.style.cursor = busy ? 'wait' : 'pointer';
+    if (prog) {
+      prog.style.display = busy ? 'block' : 'none';
+      if (busy && msg) prog.textContent = msg;
+    }
+  }
+
   function finalize(dropbox_url) {
     var id = title.toLowerCase().replace(/[^a-z0-9]+/g,'-').substring(0,60)+'-'+Date.now();
     var doc = {
@@ -1848,22 +1867,40 @@ $('add-doc-ok').addEventListener('click', function(){
     D.docs.push(doc);
     populateDocSelects(); renderDocsPanel(); updateDocStatus();
     toast('Document ajouté — Sauvegarder pour confirmer');
+    setBusy(false);
     $('add-doc-mask').style.display='none';
     ['new-doc-title','new-doc-category','new-doc-author','new-doc-subject','new-doc-pub','new-doc-year','new-doc-url'].forEach(function(id){$(id).value='';});
     $('new-doc-file').value='';
   }
 
+  function failHard(msg) {
+    setBusy(false);
+    // arcaAlert si dispo (popup propre), sinon toast + alert (filet de secours
+    // car un toast court ne suffit pas quand l'upload échoue après 30s).
+    if (typeof arcaAlert === 'function') {
+      arcaAlert(msg);
+    } else {
+      toast(msg, 'err');
+      setTimeout(function(){ alert(msg); }, 50);
+    }
+  }
+
   if (url) { finalize(url); return; }
 
   if (file) {
-    // Vérification taille côté client (max 7 MB avant base64)
-    if (file.size > 7 * 1024 * 1024) {
-      toast('Fichier trop volumineux (' + Math.round(file.size/1024/1024) + ' MB, max 7 MB).\nUploadez-le directement sur Dropbox puis collez l\'URL ci-dessus.', 'err');
+    // Vérification taille côté client AVANT lecture (≈4.2 MB raw → ~5.9 MB base64)
+    var sizeMB = file.size / 1024 / 1024;
+    if (sizeMB > MAX_DIRECT_UPLOAD_MB) {
+      failHard(
+        'Fichier trop volumineux : ' + sizeMB.toFixed(1) + ' MB (max ' + MAX_DIRECT_UPLOAD_MB + ' MB en upload direct, limite serveur).\n\n' +
+        'Solution : uploadez le PDF sur Dropbox manuellement, puis collez l\'URL de partage dans le champ « URL Dropbox » ci-dessus.'
+      );
       return;
     }
 
-    var prog=$('upload-progress'); prog.style.display='block'; prog.textContent='Lecture du fichier…';
+    setBusy(true, 'Lecture du fichier…');
     var reader=new FileReader();
+    reader.onerror = function(){ failHard('Erreur lecture du fichier'); };
     reader.onload=function(e){
       var b64=e.target.result.split(',')[1];
       // Mapping corrigé (articles/livres au pluriel)
@@ -1879,21 +1916,26 @@ $('add-doc-ok').addEventListener('click', function(){
         (needsCat?'/'+category:'')+'/'+
         title.toLowerCase().replace(/[^a-z0-9]+/g,'-').substring(0,60)+'.pdf';
 
-      prog.textContent='Upload sur Dropbox…';
+      setBusy(true, 'Upload sur Dropbox…');
       fetch('/.netlify/functions/upload-doc',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({password:S.pwd,filename:file.name,content:b64,remotePath:remotePath})
       }).then(function(r){
-        if (!r.ok && r.status !== 200) {
-          return r.text().then(function(t){ throw new Error('HTTP '+r.status+' — '+(t||'réponse vide')); });
+        if (!r.ok) {
+          return r.text().then(function(t){
+            // HTTP 413 = Payload Too Large (limite Netlify Functions 6 MB)
+            if (r.status === 413) {
+              throw new Error('Le fichier dépasse la limite serveur. Uploadez-le manuellement sur Dropbox puis collez l\'URL.');
+            }
+            throw new Error('HTTP '+r.status+' — '+(t.substring(0,200)||'réponse vide'));
+          });
         }
         return r.json();
       }).then(function(res){
-        prog.style.display='none';
-        if (res.success) { finalize(res.dropbox_url); }
-        else { toast('Erreur upload : '+(res.error||'inconnue'),'err'); }
-      }).catch(function(err){ prog.style.display='none'; toast('Erreur upload : '+err.message,'err'); });
+        if (res && res.success) { finalize(res.dropbox_url); }
+        else { failHard('Erreur upload : '+(res && res.error || 'réponse inconnue')); }
+      }).catch(function(err){ failHard('Erreur upload : '+err.message); });
     };
     reader.readAsDataURL(file);
     return;
