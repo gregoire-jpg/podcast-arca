@@ -328,9 +328,13 @@
   }
 
   function init() {
+    // Cache-buster Date.now() : empêche le navigateur ET les CDN intermédiaires
+    // de servir un JSON obsolète. L'admin pousse via GitHub → Netlify rebuild
+    // mais sans le ?v= un cache CDN pourrait survivre quelques minutes.
+    var bust = '?v=' + Date.now();
     Promise.all([
-      fetch("https://podcast-arca.netlify.app/episodes.json").then(function (r) { return r.json(); }),
-      fetch("https://podcast-arca.netlify.app/config.json").then(function (r)   { return r.json(); })
+      fetch("https://podcast-arca.netlify.app/episodes.json" + bust).then(function (r) { return r.json(); }),
+      fetch("https://podcast-arca.netlify.app/config.json" + bust).then(function (r)   { return r.json(); })
     ]).then(function (res) {
       S.episodes = res[0];
       S.config   = res[1];

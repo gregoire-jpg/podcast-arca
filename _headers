@@ -1,0 +1,35 @@
+# Empêche le CDN Netlify de cacher les fichiers JSON dynamiques.
+# Quand l'admin sauvegarde (commit GitHub → rebuild Netlify), le nouveau
+# JSON doit être immédiatement servi à tous les visiteurs / iframes.
+#
+# Cache-Control: no-cache, must-revalidate = le navigateur peut garder en
+# cache LOCAL mais doit revalider à chaque requête (ETag). CDN Netlify
+# respecte ce header et sert toujours la version fraîche.
+
+/episodes.json
+  Cache-Control: no-cache, must-revalidate
+  Netlify-CDN-Cache-Control: public, max-age=0, must-revalidate
+
+/config.json
+  Cache-Control: no-cache, must-revalidate
+  Netlify-CDN-Cache-Control: public, max-age=0, must-revalidate
+
+/documents.json
+  Cache-Control: no-cache, must-revalidate
+  Netlify-CDN-Cache-Control: public, max-age=0, must-revalidate
+
+/docs-images.json
+  Cache-Control: no-cache, must-revalidate
+  Netlify-CDN-Cache-Control: public, max-age=0, must-revalidate
+
+/glossaire.json
+  Cache-Control: no-cache, must-revalidate
+  Netlify-CDN-Cache-Control: public, max-age=0, must-revalidate
+
+/dictionnaire.json
+  Cache-Control: no-cache, must-revalidate
+  Netlify-CDN-Cache-Control: public, max-age=0, must-revalidate
+
+/counts.json
+  Cache-Control: no-cache, must-revalidate
+  Netlify-CDN-Cache-Control: public, max-age=0, must-revalidate
