@@ -74,3 +74,16 @@ alter table public.arca_stock add column if not exists cost_eur numeric;
 update public.arca_stock as s set cost_eur = v.c
 from (values (1,10.51),(2,10.97),(3,11.22),(4,11.56),(5,11.56),(6,9.70),(7,11.23),(8,11.44),(9,9.63)) as v(num,c)
 where s.num = v.num and s.cost_eur is null;
+
+-- ── Alertes réassort (capture e-mail tunnel quand un livre est épuisé) ──
+create table if not exists public.arca_restock_alerts (
+  id          bigint generated always as identity primary key,
+  email       text not null,
+  num         int  not null,
+  notified    boolean not null default false,
+  notified_at timestamptz,
+  created_at  timestamptz not null default now(),
+  unique (email, num)
+);
+alter table public.arca_restock_alerts enable row level security;
+create index if not exists arca_restock_alerts_num_idx on public.arca_restock_alerts(num);

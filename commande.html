@@ -131,6 +131,20 @@ button, input, select, textarea { font-family: inherit; }
 .pack-btn.added { background: var(--green); }
 .pack-btn.added::before { content: "✓ "; }
 
+/* Livre épuisé + capture e-mail réassort */
+.soldout { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; width: 100%; }
+.soldout-badge { display: inline-block; background: #c1272d; color: #fff; font: bold 11px/1 Arial; letter-spacing: 1px; text-transform: uppercase; padding: 5px 10px; border-radius: 3px; }
+.issue.is-soldout .issue-title { color: #999; }
+.issue.is-soldout .issue-price { color: #bbb; text-decoration: line-through; }
+.restock-form { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.restock-note { font: italic 11px/1.4 Georgia; color: #777; }
+.restock-email { padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px; font: 13px Georgia; width: 100%; box-sizing: border-box; }
+.restock-btn { background: var(--navy); color: #fff; border: none; border-radius: 4px; padding: 9px 10px; font: bold 11px/1.2 Arial; letter-spacing: .5px; text-transform: uppercase; cursor: pointer; }
+.restock-btn:hover { background: var(--navy-dk); }
+.restock-btn:disabled { opacity: .6; cursor: default; }
+.restock-ok { color: #2a7a2a; font: 13px/1.4 Georgia; }
+.rs-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
 /* Subtitle "Anciens numéros" */
 .sub-section {
   font: 600 12px/1 Arial;
@@ -1038,11 +1052,7 @@ function renderFeatured() {
         shipNote +
         tocLink +
       '</div>' +
-      '<div class="feat-right">' +
-        '<button type="button" class="qty-btn" data-act="minus" data-num="8">−</button>' +
-        '<input type="number" class="qty-input" min="0" max="50" value="0" data-num="8">' +
-        '<button type="button" class="qty-btn" data-act="plus" data-num="8">+</button>' +
-      '</div>' +
+      '<div class="feat-right">' + (isAvailable(8) ? qtyControlsHtml(8) : soldOutHtml(8)) + '</div>' +
     '</div>';
   attachQtyListeners(box);
 }
@@ -1057,15 +1067,14 @@ function renderOldIssues() {
     var tocLink = SOMMAIRES[iss.num]
       ? '<button type="button" class="issue-toc" onclick="openSommaire(' + iss.num + ')">Table des matières →</button>'
       : '';
-    html += '<div class="issue" data-num="' + iss.num + '">' +
+    var ctl = isAvailable(iss.num)
+      ? '<div class="qty-row">' + qtyControlsHtml(iss.num) + '</div>'
+      : soldOutHtml(iss.num);
+    html += '<div class="issue' + (isAvailable(iss.num) ? '' : ' is-soldout') + '" data-num="' + iss.num + '">' +
       '<div class="issue-title">N° ' + iss.num + '</div>' +
       '<div class="issue-price">' + iss.price + ' €</div>' +
       tocLink +
-      '<div class="qty-row">' +
-        '<button type="button" class="qty-btn" data-act="minus" data-num="' + iss.num + '">−</button>' +
-        '<input type="number" class="qty-input" min="0" max="50" value="0" data-num="' + iss.num + '">' +
-        '<button type="button" class="qty-btn" data-act="plus" data-num="' + iss.num + '">+</button>' +
-      '</div>' +
+      ctl +
     '</div>';
   });
   grid.innerHTML = html;
@@ -1081,15 +1090,14 @@ function renderHorsCollection() {
     var tocLink = SOMMAIRES[iss.num]
       ? '<button type="button" class="issue-toc" onclick="openSommaire(' + iss.num + ')">Table des matières →</button>'
       : '';
-    html += '<div class="issue" data-num="' + iss.num + '">' +
+    var ctl = isAvailable(iss.num)
+      ? '<div class="qty-row">' + qtyControlsHtml(iss.num) + '</div>'
+      : soldOutHtml(iss.num);
+    html += '<div class="issue' + (isAvailable(iss.num) ? '' : ' is-soldout') + '" data-num="' + iss.num + '">' +
       '<div class="issue-title">' + iss.title + '</div>' +
       '<div class="issue-price">' + iss.price + ' €</div>' +
       tocLink +
-      '<div class="qty-row">' +
-        '<button type="button" class="qty-btn" data-act="minus" data-num="' + iss.num + '">−</button>' +
-        '<input type="number" class="qty-input" min="0" max="50" value="0" data-num="' + iss.num + '">' +
-        '<button type="button" class="qty-btn" data-act="plus" data-num="' + iss.num + '">+</button>' +
-      '</div>' +
+      ctl +
     '</div>';
   });
   grid.innerHTML = html;
@@ -1202,6 +1210,81 @@ function updatePackButton() {
     btn.classList.remove('added');
     btn.textContent = 'Ajouter le pack';
   }
+}
+
+// ── Disponibilité / rupture de stock ──────────────────────────────
+var AVAILABILITY = {};        // { num: bool } — vide tant que non chargé = tout commandable
+var PACK_AVAILABLE = true;    // pack masqué dès qu'un des 9 livres est à 0
+function isAvailable(num) { return AVAILABILITY[num] !== false; }
+
+function qtyControlsHtml(num) {
+  return '<button type="button" class="qty-btn" data-act="minus" data-num="' + num + '">−</button>' +
+         '<input type="number" class="qty-input" min="0" max="50" value="' + (quantities[num] || 0) + '" data-num="' + num + '">' +
+         '<button type="button" class="qty-btn" data-act="plus" data-num="' + num + '">+</button>';
+}
+
+function soldOutHtml(num) {
+  return '<div class="soldout">' +
+      '<span class="soldout-badge">Épuisé</span>' +
+      '<form class="restock-form" onsubmit="return submitRestock(event,' + num + ')">' +
+        '<span class="restock-note">Prévenez-moi du réassort :</span>' +
+        '<input type="text" class="rs-hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">' +
+        '<input type="email" class="restock-email" required placeholder="Votre e-mail">' +
+        '<button type="submit" class="restock-btn">Me prévenir</button>' +
+      '</form>' +
+      '<div class="restock-ok" hidden>✓ Merci, nous vous écrivons dès le retour en stock.</div>' +
+    '</div>';
+}
+
+function updatePackVisibility() {
+  var pack = document.querySelector('.issue-pack');
+  if (pack) pack.style.display = PACK_AVAILABLE ? '' : 'none';
+}
+
+function loadAvailability() {
+  fetch('/.netlify/functions/arca-stock', { cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      AVAILABILITY = (d && d.available) ? d.available : {};
+      PACK_AVAILABLE = !(d && d.packAvailable === false);
+      // Sécurité : vider le panier d'un éventuel exemplaire devenu indisponible
+      Object.keys(AVAILABILITY).forEach(function (k) {
+        if (AVAILABILITY[k] === false) {
+          var n = parseInt(k, 10);
+          if (quantities[n]) onQtyChange(n, 0);
+        }
+      });
+      renderIssues();
+      updatePackVisibility();
+      updatePackButton();
+    })
+    .catch(function () { /* en cas d'erreur réseau, on laisse tout commandable */ });
+}
+
+function submitRestock(e, num) {
+  e.preventDefault();
+  var form = e.currentTarget;
+  var emailInput = form.querySelector('.restock-email');
+  var email = (emailInput.value || '').trim();
+  if (!email) return false;
+  var hp = form.querySelector('.rs-hp');
+  var btn = form.querySelector('.restock-btn');
+  btn.disabled = true; btn.textContent = 'Envoi…';
+  fetch('/.netlify/functions/arca-restock-subscribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, num: num, website: hp ? hp.value : '' })
+  })
+    .then(function (r) { return r.json().catch(function () { return {}; }); })
+    .then(function (res) {
+      if (res && res.error) { btn.disabled = false; btn.textContent = 'Me prévenir'; alert(res.error); return; }
+      var wrap = form.parentElement;
+      form.hidden = true;
+      var ok = wrap.querySelector('.restock-ok');
+      if (ok) ok.hidden = false;
+    })
+    .catch(function () { btn.disabled = false; btn.textContent = 'Me prévenir'; alert('Erreur, réessayez.'); });
+  return false;
 }
 
 // ── Frais de port (dynamique selon poids panier) ──
@@ -1933,6 +2016,7 @@ renderIssues();
 updateCartStrip();
 updatePackPriceDisplay();
 updateN8Reminder();
+loadAvailability();   // vérifie le stock réel → masque/épuise ce qui est à 0
 
 // ═══════════════════ EMBED (iframe auto-resize) ═══════════════════
 // Mesure le contenu visible (header + container) et envoie la hauteur au parent.

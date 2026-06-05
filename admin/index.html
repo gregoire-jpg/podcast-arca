@@ -3514,6 +3514,7 @@ var CMD = {
   expanded: {},  // { orderId: true } pour ligne dépliée
   stockItems:  [],   // lignes de public.arca_stock
   stockMoves:  [],   // lignes de public.arca_stock_moves
+  alerts:      [],   // lignes de public.arca_restock_alerts (en attente)
   stockLoaded: false
 };
 
@@ -3834,10 +3835,12 @@ CMD.summaryHtml = function() {
 CMD.loadStock = function() {
   Promise.all([
     CMD.api('/arca_stock?select=*&order=sort_order.asc'),
-    CMD.api('/arca_stock_moves?select=num,qty,received')
+    CMD.api('/arca_stock_moves?select=num,qty,received'),
+    CMD.api('/arca_restock_alerts?select=*&notified=eq.false&order=created_at.asc')
   ]).then(function(res) {
     CMD.stockItems  = res[0] || [];
     CMD.stockMoves  = res[1] || [];
+    CMD.alerts      = res[2] || [];
     CMD.stockLoaded = true;
     CMD.renderStock();
   }).catch(function(e) {
@@ -3864,7 +3867,53 @@ CMD.renderStock = function() {
   var el = document.getElementById('cmd-stock');
   if (!el) return;
   if (!CMD.stockLoaded) { el.innerHTML = ''; return; }
-  el.innerHTML = CMD.stockHtml() + CMD.profitHtml();
+  el.innerHTML = CMD.stockHtml() + CMD.alertsHtml() + CMD.profitHtml();
+};
+
+// Alertes réassort en attente (e-mails captés sur le tunnel pour les livres épuisés)
+CMD.alertsHtml = function() {
+  var list = CMD.alerts || [];
+  if (!list.length) return '';
+  var labels = {};
+  CMD.stockItems.forEach(function(s) { labels[s.num] = s.label; });
+  var byNum = {};
+  list.forEach(function(a) { (byNum[a.num] = byNum[a.num] || []).push(a); });
+  var blocks = '';
+  Object.keys(byNum).sort(function(a, b) { return a - b; }).forEach(function(num) {
+    var emails = byNum[num];
+    blocks += '<div style="margin-top:8px;padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:6px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'
+        + '<strong>' + CMD.esc(labels[num] || ('N°' + num)) + '</strong> '
+        + '<span style="color:#c1272d;font-weight:bold">' + emails.length + ' en attente</span>'
+        + '<button class="cmd-act" onclick="CMD.copyAlerts(' + num + ')">Copier les e-mails</button>'
+        + '<button class="cmd-act paid" onclick="CMD.markNotified(' + num + ')" title="Marque ces inscrits comme prévenus">✓ Marquer prévenus</button>'
+      + '</div>'
+      + '<div style="margin-top:6px;font:.85em/1.5 Arial;color:#444;word-break:break-all">'
+        + emails.map(function(a) { return CMD.esc(a.email); }).join(' · ')
+      + '</div>'
+    + '</div>';
+  });
+  return '<div class="cmd-summary" style="margin-top:18px">'
+    + '<div class="cmd-summary-title">📧 Alertes réassort en attente (' + list.length + ')</div>'
+    + '<div style="font-size:.82em;color:#888;font-style:italic;margin-bottom:4px">Personnes à prévenir dès qu\'un livre épuisé revient en stock.</div>'
+    + blocks
+    + '</div>';
+};
+
+CMD.copyAlerts = function(num) {
+  var emails = (CMD.alerts || []).filter(function(a) { return a.num === num; }).map(function(a) { return a.email; });
+  var txt = emails.join('; ');
+  if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function() { alert(emails.length + ' e-mail(s) copié(s).'); });
+  else { window.prompt('Copie les e-mails :', txt); }
+};
+
+CMD.markNotified = function(num) {
+  var n = (CMD.alerts || []).filter(function(a) { return a.num === num; }).length;
+  if (!confirm('Marquer ' + n + ' inscrit(s) du N°' + num + ' comme prévenus ? Ils disparaîtront de la liste.')) return;
+  CMD.api('/arca_restock_alerts?num=eq.' + num + '&notified=eq.false',
+    { method: 'PATCH', body: { notified: true, notified_at: new Date().toISOString() }, prefer: 'return=minimal' })
+    .then(function() { CMD.loadStock(); })
+    .catch(function(e) { alert('Erreur : ' + e.message); });
 };
 
 CMD.stockHtml = function() {
