@@ -814,7 +814,49 @@
       <button class="btn btn-gold" id="cmd-refresh" style="margin-left:6px">⟳ Actualiser</button>
     </div>
   </div>
+  <div id="cmd-stock" style="margin-top:18px"></div>
   <div id="cmd-list" style="margin-top:18px"><div class="empty">Chargement…</div></div>
+</div>
+
+<!-- ══ MODALE MOUVEMENT DE STOCK ══ -->
+<div id="cmd-stock-mask" class="cmd-modal-mask" style="display:none">
+  <div class="cmd-modal" style="max-width:480px">
+    <div class="cmd-modal-head">
+      <h3 style="margin:0;color:#fff;font:bold 1.05em/1.3 Georgia">📦 Mouvement de stock</h3>
+      <button type="button" class="cmd-modal-close" onclick="CMD.closeStockMove()" aria-label="Fermer">×</button>
+    </div>
+    <form id="cmd-stock-form" class="cmd-modal-body" onsubmit="event.preventDefault(); CMD.submitStockMove();">
+      <label style="display:block;margin-bottom:12px">Ouvrage
+        <select name="num" required style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:4px;font:.95em Arial;margin-top:4px"></select>
+      </label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <label>Quantité <span class="req">*</span>
+          <input name="qty" type="number" step="1" required placeholder="+ entrée / − sortie" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:4px;font:.95em Arial;margin-top:4px">
+        </label>
+        <label>Type
+          <select name="kind" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:4px;font:.95em Arial;margin-top:4px">
+            <option value="reassort">Réassort</option>
+            <option value="tirage">Tirage</option>
+            <option value="ajustement">Ajustement</option>
+            <option value="retour">Retour</option>
+            <option value="don">Don / service presse</option>
+            <option value="perte">Perte / casse</option>
+          </select>
+        </label>
+      </div>
+      <label style="display:block;margin-top:12px">Note
+        <input name="note" type="text" placeholder="ex : réassort imprimeur juin 2026" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:4px;font:.95em Arial;margin-top:4px">
+      </label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;align-items:center">
+        <label>Date <input name="moved_at" type="date" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:4px;font:.95em Arial;margin-top:4px"></label>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:18px"><input name="received" type="checkbox" checked> Déjà reçu (compté dans le stock)</label>
+      </div>
+      <div style="margin-top:20px;text-align:right">
+        <button type="button" class="btn" onclick="CMD.closeStockMove()" style="background:#eee;color:#444;margin-right:8px">Annuler</button>
+        <button type="submit" class="btn btn-navy">Enregistrer</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- ══ MODALE NOUVELLE COMMANDE ══ -->
@@ -3469,7 +3511,10 @@ var CMD = {
   orders:  [],
   filter:  'todo',
   loaded:  false,
-  expanded: {}  // { orderId: true } pour ligne dépliée
+  expanded: {},  // { orderId: true } pour ligne dépliée
+  stockItems:  [],   // lignes de public.arca_stock
+  stockMoves:  [],   // lignes de public.arca_stock_moves
+  stockLoaded: false
 };
 
 // Helper d'appel via le proxy Netlify (auth par S.pwd).
@@ -3517,9 +3562,11 @@ CMD.load = function() {
     .catch(function(e) {
       document.getElementById('cmd-list').innerHTML = '<div class="empty" style="color:#c0392b">Erreur : ' + CMD.esc(e.message) + '</div>';
     });
+  CMD.loadStock();
 };
 
 CMD.render = function() {
+  CMD.renderStock();
   if (!CMD.loaded) return;
   var list = CMD.orders.filter(function(o) {
     if (CMD.filter === 'todo')      return !o.cloturee && !o.cancelled;
@@ -3781,6 +3828,163 @@ CMD.summaryHtml = function() {
         + 'Livres (brut) = Σ (qté × prix) → doit égaler la colonne CA livres ci-dessus. Remises = pack −40 € + remise panier + remise port. Total à payer = Livres − Remises + Port.'
       + '</div>'
     + '</div>';
+};
+
+/* ═════════════════ MODULE STOCK ═════════════════ */
+CMD.loadStock = function() {
+  Promise.all([
+    CMD.api('/arca_stock?select=*&order=sort_order.asc'),
+    CMD.api('/arca_stock_moves?select=num,qty,received')
+  ]).then(function(res) {
+    CMD.stockItems  = res[0] || [];
+    CMD.stockMoves  = res[1] || [];
+    CMD.stockLoaded = true;
+    CMD.renderStock();
+  }).catch(function(e) {
+    var el = document.getElementById('cmd-stock');
+    if (el) el.innerHTML = '<div class="cmd-summary"><div class="empty" style="color:#c0392b">📦 Stock — erreur : ' + CMD.esc(e.message) + '</div></div>';
+  });
+};
+
+// Quantités vendues par numéro (commandes non annulées) — base du calcul de stock.
+CMD.soldByNum = function() {
+  var m = {};
+  CMD.orders.forEach(function(o) {
+    if (o.cancelled) return;
+    (o.items || []).forEach(function(it) {
+      var q = it.qty || 0;
+      if (!it.num || q <= 0) return;
+      m[it.num] = (m[it.num] || 0) + q;
+    });
+  });
+  return m;
+};
+
+CMD.renderStock = function() {
+  var el = document.getElementById('cmd-stock');
+  if (!el) return;
+  if (!CMD.stockLoaded) { el.innerHTML = ''; return; }
+  el.innerHTML = CMD.stockHtml();
+};
+
+CMD.stockHtml = function() {
+  var sold = CMD.soldByNum();
+  var reassort = {};
+  CMD.stockMoves.forEach(function(mv) {
+    if (mv.received === false) return;
+    reassort[mv.num] = (reassort[mv.num] || 0) + (+mv.qty || 0);
+  });
+  var rows = '', tInit = 0, tRe = 0, tSold = 0, tStock = 0, alerts = [];
+  CMD.stockItems.forEach(function(s) {
+    if (s.active === false) return;
+    var init = +s.initial_qty || 0;
+    var re   = reassort[s.num] || 0;
+    var so   = sold[s.num] || 0;
+    var st   = init + re - so;
+    var thr  = (s.low_threshold == null ? 3 : s.low_threshold);
+    tInit += init; tRe += re; tSold += so; tStock += st;
+    var color = st <= 0 ? '#c1272d' : (st <= thr ? '#c8a060' : 'var(--navy)');
+    var bg    = st <= 0 ? 'background:#fdecea' : (st <= thr ? 'background:#fffbf2' : '');
+    var flag  = st <= 0 ? ' 🔴' : (st <= thr ? ' ⚠️' : '');
+    if (st <= thr) alerts.push(CMD.esc(s.label) + ' (' + st + ')');
+    rows += '<tr style="' + bg + '">'
+      + '<td><strong>' + CMD.esc(s.label) + '</strong></td>'
+      + '<td style="text-align:center;color:#999">' + init + '</td>'
+      + '<td style="text-align:center;color:' + (re > 0 ? '#2a7a2a' : '#999') + '">' + (re > 0 ? '+' + re : '—') + '</td>'
+      + '<td style="text-align:center;color:#666">' + so + '</td>'
+      + '<td style="text-align:center;font-weight:bold;color:' + color + ';font-size:1.05em">' + st + flag + '</td>'
+      + '<td style="text-align:right;white-space:nowrap">'
+        + '<button class="cmd-act" onclick="CMD.openStockMove(' + s.num + ')">+ entrée</button>'
+        + '<button class="cmd-act" onclick="CMD.editInitial(' + s.num + ')" title="Modifier le stock initial">✎</button>'
+      + '</td>'
+      + '</tr>';
+  });
+  var alertBanner = '';
+  if (alerts.length) {
+    alertBanner = '<div style="margin:0 0 12px;padding:10px 14px;background:#fdecea;border:1px solid #c1272d;border-radius:6px;color:#7a1812;font:.85em/1.4 Arial">'
+      + '⚠️ <strong>Stock bas / rupture :</strong> ' + alerts.join(' · ')
+      + '</div>';
+  }
+  return ''
+    + '<div class="cmd-summary">'
+      + '<div class="cmd-summary-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px">'
+        + '<span>📦 Stock revue ARCA</span>'
+        + '<button class="btn btn-navy" style="font:bold .72em/1 Arial;letter-spacing:.5px;text-transform:uppercase;padding:6px 12px" onclick="CMD.openStockMove()">+ Mouvement de stock</button>'
+      + '</div>'
+      + alertBanner
+      + '<table class="cmd-summary-table">'
+        + '<thead><tr><th>Ouvrage</th><th>Initial</th><th>Entrées</th><th>Vendu</th><th>Stock</th><th></th></tr></thead>'
+        + '<tbody>' + rows + '</tbody>'
+        + '<tfoot><tr>'
+          + '<td><strong>TOTAL</strong></td>'
+          + '<td style="text-align:center;color:#999">' + tInit + '</td>'
+          + '<td style="text-align:center;color:#2a7a2a;font-weight:bold">+' + tRe + '</td>'
+          + '<td style="text-align:center;color:#666">' + tSold + '</td>'
+          + '<td style="text-align:center;color:var(--navy);font-weight:bold;font-size:1.05em">' + tStock + '</td>'
+          + '<td></td>'
+        + '</tr></tfoot>'
+      + '</table>'
+      + '<div style="margin-top:6px;font-size:.82em;color:#888;font-style:italic">'
+        + 'Stock = Initial + Entrées (réassort / tirage) − Vendu. Le vendu est recalculé en direct depuis les commandes non annulées.'
+      + '</div>'
+    + '</div>';
+};
+
+CMD.openStockMove = function(num) {
+  var form = document.getElementById('cmd-stock-form');
+  if (!form) return;
+  form.reset();
+  // (re)peuple la liste des ouvrages
+  var sel = form.elements['num'];
+  sel.innerHTML = CMD.stockItems
+    .filter(function(s) { return s.active !== false; })
+    .map(function(s) { return '<option value="' + s.num + '">' + CMD.esc(s.label) + '</option>'; })
+    .join('');
+  if (num != null) sel.value = String(num);
+  form.elements['received'].checked = true;
+  document.getElementById('cmd-stock-mask').style.display = 'flex';
+  setTimeout(function() { form.elements['qty'].focus(); }, 50);
+};
+
+CMD.closeStockMove = function() {
+  var m = document.getElementById('cmd-stock-mask');
+  if (m) m.style.display = 'none';
+};
+
+CMD.submitStockMove = function() {
+  var form = document.getElementById('cmd-stock-form');
+  var btn  = form.querySelector('button[type="submit"]');
+  var qty  = parseInt(form.elements['qty'].value, 10);
+  if (!qty || isNaN(qty)) { alert('Quantité invalide (utilise un nombre, négatif pour une sortie).'); return; }
+  var payload = {
+    num:      parseInt(form.elements['num'].value, 10),
+    qty:      qty,
+    kind:     form.elements['kind'].value,
+    note:     form.elements['note'].value || null,
+    received: form.elements['received'].checked,
+    moved_at: form.elements['moved_at'].value || null
+  };
+  if (btn) { btn.disabled = true; btn.textContent = 'Enregistrement…'; }
+  CMD.api('/arca_stock_moves', { method: 'POST', body: payload, prefer: 'return=minimal' })
+    .then(function() {
+      CMD.closeStockMove();
+      CMD.loadStock();
+    })
+    .catch(function(e) { alert('Erreur : ' + e.message); })
+    .then(function() { if (btn) { btn.disabled = false; btn.textContent = 'Enregistrer'; } });
+};
+
+// Modifier le stock initial (avant 1re vente) d'un ouvrage — rare, donc prompt simple.
+CMD.editInitial = function(num) {
+  var s = CMD.stockItems.filter(function(x) { return x.num === num; })[0];
+  if (!s) return;
+  var v = prompt('Stock initial de « ' + s.label +' » (avant la 1re vente) :', s.initial_qty);
+  if (v == null) return;
+  var n = parseInt(v, 10);
+  if (isNaN(n)) { alert('Valeur invalide.'); return; }
+  CMD.api('/arca_stock?num=eq.' + num, { method: 'PATCH', body: { initial_qty: n }, prefer: 'return=minimal' })
+    .then(function() { CMD.loadStock(); })
+    .catch(function(e) { alert('Erreur : ' + e.message); });
 };
 
 CMD.toggleDetail = function(id) {
@@ -4245,6 +4449,9 @@ document.addEventListener('click', function(e) {
   if (e.target.id === 'cmd-new-mask') {
     CMD.closeCreate();
   }
+  if (e.target.id === 'cmd-stock-mask') {
+    CMD.closeStockMove();
+  }
 });
 
 // Échap pour fermer
@@ -4252,6 +4459,8 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     var m = document.getElementById('cmd-new-mask');
     if (m && m.style.display === 'flex') CMD.closeCreate();
+    var ms = document.getElementById('cmd-stock-mask');
+    if (ms && ms.style.display === 'flex') CMD.closeStockMove();
   }
 });
 

@@ -4,7 +4,7 @@
 
 // Whitelist stricte : schéma -> tables/vues autorisées
 const ALLOWED = {
-  public: new Set(["arca_orders"]),
+  public: new Set(["arca_orders", "arca_stock", "arca_stock_moves"]),
   citations: new Set([
     "citations",
     "auteurs",
