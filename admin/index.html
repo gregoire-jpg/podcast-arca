@@ -437,7 +437,7 @@
           <input type="url" id="new-doc-url" placeholder="https://dl.dropboxusercontent.com/…" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:.88em">
         </div>
         <div>
-          <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">— OU — Fichier PDF (max 4 MB · au-delà : upload manuel Dropbox)</label>
+          <label style="font:.7em/1 Arial;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">— OU — Fichier PDF (max 100 MB · upload direct vers Dropbox)</label>
           <input type="file" id="new-doc-file" accept=".pdf" style="font-size:.88em">
           <div id="upload-progress" style="margin-top:6px;font:.75em/1 Arial;color:var(--muted);display:none">Upload en cours…</div>
         </div>
@@ -1824,11 +1824,81 @@ function updateDocStatus(){ $('doc-save-status').textContent = D.dirty.size?D.di
 /* ── Modale : Ajouter un document ── */
 $('add-doc-cancel').addEventListener('click', function(){ $('add-doc-mask').style.display='none'; });
 
-// Limite Netlify Functions = 6 MB de payload (incluant JSON + base64).
-// base64 ajoute ~33% au PDF brut → un fichier de 4.4 MB devient ~5.9 MB en
-// base64. On reste prudent à 4.2 MB pour avoir une marge avec la surcharge
-// JSON (champs title, category, etc.) et éviter les rejets HTTP 413 silencieux.
-var MAX_DIRECT_UPLOAD_MB = 4.2;
+// Limite Dropbox single-shot upload = 150 MB. On reste prudent à 100 MB
+// pour avoir une marge avec les timeouts navigateur (un upload de 100 MB
+// sur une connexion 2 MB/s prend ~7 min). Au-delà il faudrait passer en
+// upload session chunked, mais c'est rare pour des PDF documentaires.
+var MAX_DIRECT_UPLOAD_MB = 100;
+
+// Upload direct navigateur → Dropbox (bypass Netlify Functions et leur
+// limite 6 MB payload). Le token court (4h max) est obtenu via
+// dropbox-token.js, gated par ADMIN_PASSWORD.
+function uploadDirectToDropbox(file, remotePath, onProgress) {
+  return fetch('/.netlify/functions/dropbox-token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: S.pwd }),
+  })
+  .then(function(r){
+    if (!r.ok) return r.text().then(function(t){ throw new Error('Token HTTP ' + r.status + ' — ' + t.substring(0,200)); });
+    return r.json();
+  })
+  .then(function(tokRes){
+    if (!tokRes.access_token) throw new Error('Token absent');
+    var token = tokRes.access_token;
+
+    onProgress && onProgress('Upload Dropbox (' + (file.size/1024/1024).toFixed(1) + ' MB)…');
+
+    // 1. Upload binaire direct
+    return fetch('https://content.dropboxapi.com/2/files/upload', {
+      method: 'POST',
+      headers: {
+        'Authorization':   'Bearer ' + token,
+        'Dropbox-API-Arg': JSON.stringify({ path: remotePath, mode: 'overwrite', autorename: false, mute: true }),
+        'Content-Type':    'application/octet-stream',
+      },
+      body: file,  // File / Blob, lecture native par le browser, pas de base64
+    })
+    .then(function(r){
+      if (!r.ok) return r.text().then(function(t){ throw new Error('Upload Dropbox HTTP ' + r.status + ' — ' + t.substring(0,300)); });
+      return r.json();
+    })
+    .then(function(upload){
+      onProgress && onProgress('Création du lien de partage…');
+
+      // 2. Créer le lien de partage public
+      return fetch('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: remotePath, settings: { requested_visibility: 'public' } }),
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(link){
+        if (link.url) return cleanDropboxUrl(link.url);
+        // Lien existe déjà : list_shared_links pour récupérer l'URL
+        if (link.error && link.error['.tag'] === 'shared_link_already_exists') {
+          return fetch('https://api.dropboxapi.com/2/sharing/list_shared_links', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: remotePath }),
+          })
+          .then(function(r){ return r.json(); })
+          .then(function(list){
+            var first = (list.links || [])[0];
+            if (!first || !first.url) throw new Error('Lien partagé introuvable');
+            return cleanDropboxUrl(first.url);
+          });
+        }
+        throw new Error('Création lien : ' + JSON.stringify(link).substring(0,200));
+      });
+    });
+  });
+}
+
+// Normalise l'URL Dropbox : ?dl=0 → ?dl=1 pour téléchargement direct
+function cleanDropboxUrl(u) {
+  return String(u || '').replace(/[?&]dl=0/, function(m){ return m.replace('dl=0','dl=1'); });
+}
 
 $('add-doc-ok').addEventListener('click', function(){
   var title   = $('new-doc-title').value.trim();
@@ -1888,56 +1958,32 @@ $('add-doc-ok').addEventListener('click', function(){
   if (url) { finalize(url); return; }
 
   if (file) {
-    // Vérification taille côté client AVANT lecture (≈4.2 MB raw → ~5.9 MB base64)
     var sizeMB = file.size / 1024 / 1024;
     if (sizeMB > MAX_DIRECT_UPLOAD_MB) {
       failHard(
-        'Fichier trop volumineux : ' + sizeMB.toFixed(1) + ' MB (max ' + MAX_DIRECT_UPLOAD_MB + ' MB en upload direct, limite serveur).\n\n' +
-        'Solution : uploadez le PDF sur Dropbox manuellement, puis collez l\'URL de partage dans le champ « URL Dropbox » ci-dessus.'
+        'Fichier trop volumineux : ' + sizeMB.toFixed(1) + ' MB (max ' + MAX_DIRECT_UPLOAD_MB + ' MB).\n\n' +
+        'Au-delà, uploadez le PDF sur Dropbox manuellement puis collez l\'URL de partage dans le champ « URL Dropbox ».'
       );
       return;
     }
 
-    setBusy(true, 'Lecture du fichier…');
-    var reader=new FileReader();
-    reader.onerror = function(){ failHard('Erreur lecture du fichier'); };
-    reader.onload=function(e){
-      var b64=e.target.result.split(',')[1];
-      // Mapping corrigé (articles/livres au pluriel)
-      var folderMap = {
-        articles:'Articles', article:'Articles',
-        livres:'Livres', livre:'Livres',
-        revue:'Revue ARCA',
-        'lus-pour-vous':'Lus pour vous'
-      };
-      var folder = folderMap[type] || type;
-      var needsCat = (type==='articles'||type==='article'||type==='lus-pour-vous');
-      var remotePath='/Documentation ARCA/'+folder+
-        (needsCat?'/'+category:'')+'/'+
-        title.toLowerCase().replace(/[^a-z0-9]+/g,'-').substring(0,60)+'.pdf';
-
-      setBusy(true, 'Upload sur Dropbox…');
-      fetch('/.netlify/functions/upload-doc',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({password:S.pwd,filename:file.name,content:b64,remotePath:remotePath})
-      }).then(function(r){
-        if (!r.ok) {
-          return r.text().then(function(t){
-            // HTTP 413 = Payload Too Large (limite Netlify Functions 6 MB)
-            if (r.status === 413) {
-              throw new Error('Le fichier dépasse la limite serveur. Uploadez-le manuellement sur Dropbox puis collez l\'URL.');
-            }
-            throw new Error('HTTP '+r.status+' — '+(t.substring(0,200)||'réponse vide'));
-          });
-        }
-        return r.json();
-      }).then(function(res){
-        if (res && res.success) { finalize(res.dropbox_url); }
-        else { failHard('Erreur upload : '+(res && res.error || 'réponse inconnue')); }
-      }).catch(function(err){ failHard('Erreur upload : '+err.message); });
+    // Chemin Dropbox : /Documentation ARCA/<folder>/[category]/<slug>.pdf
+    var folderMap = {
+      articles:'Articles', article:'Articles',
+      livres:'Livres', livre:'Livres',
+      revue:'Revue ARCA',
+      'lus-pour-vous':'Lus pour vous'
     };
-    reader.readAsDataURL(file);
+    var folder = folderMap[type] || type;
+    var needsCat = (type==='articles'||type==='article'||type==='lus-pour-vous');
+    var remotePath='/Documentation ARCA/'+folder+
+      (needsCat?'/'+category:'')+'/'+
+      title.toLowerCase().replace(/[^a-z0-9]+/g,'-').substring(0,60)+'.pdf';
+
+    setBusy(true, 'Préparation upload…');
+    uploadDirectToDropbox(file, remotePath, function(msg){ setBusy(true, msg); })
+      .then(function(url){ finalize(url); })
+      .catch(function(err){ failHard('Erreur upload : ' + err.message); });
     return;
   }
 
