@@ -3687,11 +3687,18 @@ CMD.printMainPropre = function() {
   });
 
   var blocs = list.map(function(o, idx){
-    // Items en ligne, juste titre × qty (pas de montants)
+    // Items en ligne, avec sous-total ligne UNIQUEMENT si commande non payée
+    // (Antoine doit voir le détail à encaisser). Si payé : juste titre × qty.
     var items = (o.items || [])
       .filter(function(it){ return it && it.qty > 0; })
       .map(function(it){
-        return CMD.esc(it.title || ('Article n°' + (it.num || '?'))) + ' × ' + (parseInt(it.qty) || 0);
+        var qty = parseInt(it.qty) || 0;
+        var label = CMD.esc(it.title || ('Article n°' + (it.num || '?'))) + ' × ' + qty;
+        if (!o.paye) {
+          var sub = qty * (parseFloat(it.price) || 0);
+          label += ' = ' + fmt(sub);
+        }
+        return label;
       }).join(' · ');
 
     var contact = [];
@@ -3700,8 +3707,18 @@ CMD.printMainPropre = function() {
 
     var commStruct = 'ARCA' + String(o.id || 0).padStart(4, '0');
 
+    // Bloc montant : visible UNIQUEMENT pour les commandes non payées.
+    // Si payé, on n'affiche rien (visuellement clair : "rien à dire, doc remis").
+    var toCollect = '';
+    if (!o.paye) {
+      var total = parseFloat(o.total_eur || 0);
+      toCollect = '<div class="mp-amount">À encaisser : <strong>' + fmt(total) + '</strong>'
+                + ' &middot; <span class="mp-amount-method">' + CMD.esc(o.paiement || 'mode à confirmer') + '</span>'
+                + '</div>';
+    }
+
     return ''
-      + '<article class="mp-bloc">'
+      + '<article class="mp-bloc' + (o.paye ? '' : ' mp-bloc-unpaid') + '">'
       +   '<div class="mp-check" aria-hidden="true"></div>'
       +   '<div class="mp-body">'
       +     '<div class="mp-row1">'
@@ -3710,6 +3727,7 @@ CMD.printMainPropre = function() {
       +     '</div>'
       +     (contact.length ? '<div class="mp-contact">' + contact.join(' &nbsp;·&nbsp; ') + '</div>' : '')
       +     (items ? '<div class="mp-items">' + items + '</div>' : '')
+      +     toCollect
       +     '<div class="mp-foot">'
       +       '<span class="mp-comm">' + commStruct + '</span>'
       +       '<span class="mp-date">' + date(o.created_at || o.date) + '</span>'
@@ -3736,6 +3754,10 @@ CMD.printMainPropre = function() {
     + '  .mp-num { font:bold 9px Arial; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); white-space:nowrap; }'
     + '  .mp-contact { font:italic 10.5px Georgia; color:#555; margin-top:1px; }'
     + '  .mp-items { font:11.5px Georgia; color:#333; margin-top:2px; }'
+    + '  .mp-amount { font:11.5px Georgia; color:#c0392b; margin-top:3px; padding:3px 6px; background:#fff5f1; border-left:2px solid #c0392b; display:inline-block; }'
+    + '  .mp-amount strong { font:bold 12.5px Georgia; color:#a02716; }'
+    + '  .mp-amount-method { font-style:italic; color:#777; }'
+    + '  .mp-bloc-unpaid { background:#fffbf8; }'
     + '  .mp-foot { display:flex; justify-content:space-between; gap:12px; margin-top:3px; font:9.5px Arial; color:var(--muted); flex-wrap:wrap; }'
     + '  .mp-comm { font:bold 10px Arial; letter-spacing:.5px; color:var(--gold); }'
     + '  @media print {'
