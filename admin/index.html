@@ -811,6 +811,7 @@
       <button class="cmd-tab"    data-cmd="cancelled">Annulées</button>
       <button class="cmd-tab"    data-cmd="all">Toutes</button>
       <button class="btn btn-navy" id="cmd-new" style="margin-left:12px">+ Nouvelle commande</button>
+      <button class="btn btn-gold" id="cmd-print-mainpropre" style="margin-left:6px" title="PDF imprimable des commandes en main propre (non clôturées)">📋 PDF main propre</button>
       <button class="btn btn-gold" id="cmd-refresh" style="margin-left:6px">⟳ Actualiser</button>
     </div>
   </div>
@@ -3645,6 +3646,177 @@ CMD.esc = function(s) {
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 };
 
+// Ouvre une fenêtre print-ready avec la liste des commandes en main propre
+// (non clôturées + non annulées). Auto-lance window.print() : l'utilisateur
+// choisit "Enregistrer au format PDF" dans le dialog navigateur.
+//
+// Une commande par bloc (pas une table dense) pour Antoine puisse cocher
+// "remis" à la main lors d'un événement. Comm. structurée + paiement
+// affichés pour qu'il puisse confirmer / encaisser au moment de la remise.
+CMD.printMainPropre = function() {
+  if (!CMD.loaded) {
+    alert('Les commandes ne sont pas encore chargées. Attends quelques secondes et réessaie.');
+    return;
+  }
+
+  var list = CMD.orders.filter(function(o){
+    return (o.livraison === 'En main propre') && !o.cloturee && !o.cancelled;
+  });
+  // Ordre alpha sur le nom — pratique au moment de la remise
+  list.sort(function(a, b){
+    return (a.nom || '').localeCompare(b.nom || '', 'fr', { sensitivity: 'base' });
+  });
+
+  if (!list.length) {
+    alert('Aucune commande en main propre à traiter actuellement.');
+    return;
+  }
+
+  var fmt = function(n){
+    var v = parseFloat(n) || 0;
+    return v.toFixed(2).replace('.', ',') + ' €';
+  };
+  var date = function(s){
+    if (!s) return '—';
+    var d = new Date(s);
+    if (isNaN(d.getTime())) return CMD.esc(s);
+    return d.toLocaleDateString('fr-BE', { day: '2-digit', month: 'long', year: 'numeric' });
+  };
+  var today = new Date().toLocaleDateString('fr-BE', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  var totalRevue = 0;
+  var totalAEncaisser = 0;
+  var nonPayes = 0;
+
+  var blocs = list.map(function(o, idx){
+    var items = (o.items || [])
+      .filter(function(it){ return it && it.qty > 0; })
+      .map(function(it){
+        return '<li>' + CMD.esc(it.title || ('Article n°' + (it.num || '?')))
+          + ' &times; ' + (parseInt(it.qty) || 0)
+          + ' &nbsp;<span class="mp-muted">' + fmt((parseInt(it.qty)||0) * (parseFloat(it.price)||0)) + '</span></li>';
+      }).join('');
+
+    var total = parseFloat(o.total_eur || 0);
+    totalRevue += total;
+    if (!o.paye) {
+      totalAEncaisser += total;
+      nonPayes++;
+    }
+
+    var paid = o.paye
+      ? '<span class="mp-paid">✓ PAYÉ</span><span class="mp-muted"> · ' + CMD.esc(o.paiement || '') + '</span>'
+      : '<span class="mp-unpaid">⏳ À ENCAISSER</span><span class="mp-muted"> · ' + CMD.esc(o.paiement || '—') + '</span>';
+
+    var contact = [];
+    if (o.email)     contact.push(CMD.esc(o.email));
+    if (o.telephone) contact.push(CMD.esc(o.telephone));
+
+    var commStruct = 'ARCA' + String(o.id || 0).padStart(4, '0');
+
+    return ''
+      + '<article class="mp-bloc">'
+      +   '<div class="mp-check" aria-hidden="true"></div>'
+      +   '<div class="mp-body">'
+      +     '<header class="mp-head">'
+      +       '<div>'
+      +         '<div class="mp-num">#' + (idx + 1) + ' &middot; n°commande ' + CMD.esc(o.id) + '</div>'
+      +         '<h2 class="mp-nom">' + CMD.esc(o.nom || '— sans nom —') + '</h2>'
+      +         (contact.length ? '<div class="mp-contact">' + contact.join(' &nbsp;·&nbsp; ') + '</div>' : '')
+      +       '</div>'
+      +       '<div class="mp-total">'
+      +         '<div class="mp-total-val">' + fmt(total) + '</div>'
+      +         '<div class="mp-paystatus">' + paid + '</div>'
+      +       '</div>'
+      +     '</header>'
+      +     '<ul class="mp-items">' + items + '</ul>'
+      +     '<footer class="mp-foot">'
+      +       '<span class="mp-comm">Comm. : <strong>' + commStruct + '</strong></span>'
+      +       '<span class="mp-date">Commande du ' + date(o.created_at || o.date) + '</span>'
+      +     '</footer>'
+      +   '</div>'
+      + '</article>';
+  }).join('');
+
+  var html = ''
+    + '<!doctype html><html lang="fr"><head><meta charset="utf-8">'
+    + '<title>Commandes ARCA · à remettre en main propre · ' + CMD.esc(today) + '</title>'
+    + '<style>'
+    + '  :root { --navy:#2d3461; --gold:#c8a060; --muted:#777; --border:#e2ddd8; --green:#3a8a4a; --red:#c0392b; }'
+    + '  * { box-sizing:border-box; margin:0; padding:0; }'
+    + '  body { font:13px/1.4 Georgia,serif; color:#222; padding:24px 32px; background:#fff; }'
+    + '  header.mp-page-head { border-bottom:3px double var(--gold); padding-bottom:14px; margin-bottom:20px; }'
+    + '  header.mp-page-head .eyebrow { font:11px Arial; letter-spacing:4px; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }'
+    + '  header.mp-page-head h1 { font:300 28px/1 Georgia; color:var(--navy); letter-spacing:1px; margin-bottom:6px; }'
+    + '  header.mp-page-head .meta { font:italic 12px Georgia; color:var(--muted); display:flex; gap:24px; flex-wrap:wrap; }'
+    + '  .mp-bloc { display:grid; grid-template-columns:32px 1fr; gap:14px; padding:14px 0; border-bottom:1px solid var(--border); page-break-inside:avoid; }'
+    + '  .mp-check { width:22px; height:22px; border:2px solid #999; border-radius:3px; margin-top:6px; }'
+    + '  .mp-head { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; margin-bottom:8px; }'
+    + '  .mp-num { font:bold 10px Arial; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }'
+    + '  .mp-nom { font:600 18px/1.2 Georgia; color:var(--navy); margin-bottom:4px; }'
+    + '  .mp-contact { font:italic 12px Georgia; color:#555; }'
+    + '  .mp-total { text-align:right; }'
+    + '  .mp-total-val { font:bold 22px Georgia; color:var(--navy); margin-bottom:4px; }'
+    + '  .mp-paystatus { font:bold 10px Arial; letter-spacing:1px; text-transform:uppercase; }'
+    + '  .mp-paid { color:var(--green); }'
+    + '  .mp-unpaid { color:var(--red); }'
+    + '  .mp-muted { color:var(--muted); font-weight:normal; }'
+    + '  .mp-items { list-style:none; margin:8px 0; padding-left:0; }'
+    + '  .mp-items li { padding:3px 0; font:13px/1.4 Georgia; color:#333; }'
+    + '  .mp-foot { display:flex; justify-content:space-between; gap:18px; margin-top:10px; padding-top:6px; border-top:1px dotted #ccc; font:11px Arial; color:var(--muted); flex-wrap:wrap; }'
+    + '  .mp-comm strong { color:var(--gold); font:bold 12px Arial; letter-spacing:.5px; }'
+    + '  .mp-summary { margin-top:24px; padding:14px 18px; background:#faf8f5; border:1px solid var(--border); page-break-inside:avoid; }'
+    + '  .mp-summary-row { display:flex; justify-content:space-between; padding:4px 0; font:13px Georgia; }'
+    + '  .mp-summary-row.total { border-top:2px solid var(--navy); margin-top:8px; padding-top:10px; font:bold 14px Georgia; color:var(--navy); }'
+    + '  @media print {'
+    + '    body { padding:12mm 14mm; }'
+    + '    .no-print { display:none !important; }'
+    + '    a { color:inherit; text-decoration:none; }'
+    + '  }'
+    + '  .actions { position:fixed; top:12px; right:12px; display:flex; gap:8px; }'
+    + '  .actions button { padding:8px 16px; font:600 12px Arial; background:var(--navy); color:#fff; border:none; border-radius:4px; cursor:pointer; }'
+    + '  .actions button.close { background:#666; }'
+    + '</style></head><body>'
+    + '<div class="actions no-print">'
+    +   '<button onclick="window.print()">🖨 Imprimer / PDF</button>'
+    +   '<button class="close" onclick="window.close()">Fermer</button>'
+    + '</div>'
+    + '<header class="mp-page-head">'
+    +   '<div class="eyebrow">Revue ARCA · Commandes à remettre</div>'
+    +   '<h1>En main propre</h1>'
+    +   '<div class="meta">'
+    +     '<span>Édité le ' + CMD.esc(today) + '</span>'
+    +     '<span>' + list.length + ' commande' + (list.length>1?'s':'') + ' à remettre</span>'
+    +     '<span>' + nonPayes + ' à encaisser</span>'
+    +   '</div>'
+    + '</header>'
+    + blocs
+    + '<section class="mp-summary">'
+    +   '<div class="mp-summary-row"><span>Nombre de remises</span><span>' + list.length + '</span></div>'
+    +   '<div class="mp-summary-row"><span>Encaissements attendus</span><span>' + nonPayes + ' à ' + fmt(totalAEncaisser) + '</span></div>'
+    +   '<div class="mp-summary-row total"><span>TOTAL valeur des commandes</span><span>' + fmt(totalRevue) + '</span></div>'
+    + '</section>'
+    + '<script>setTimeout(function(){window.print();}, 250);<\/script>'
+    + '</body></html>';
+
+  // Ouvre la vue via un Blob URL plutôt que document.write : sûr (pas de
+  // surface XSS, tout le contenu est déjà escapé via CMD.esc), pas de
+  // problème de concurrence open/write/close, et le navigateur parse le
+  // <!doctype> correctement.
+  var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  var url  = URL.createObjectURL(blob);
+  var w = window.open(url, '_blank');
+  if (!w) {
+    URL.revokeObjectURL(url);
+    alert('Le navigateur a bloqué la fenêtre. Autorise les pop-ups pour cet onglet.');
+    return;
+  }
+  // Libère le blob URL après chargement (peu de mémoire mais propre)
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 30000);
+};
+
 CMD.load = function() {
   CMD.api('/arca_orders?select=*&order=created_at.desc&limit=500')
     .then(function(data) { CMD.orders = data || []; CMD.loaded = true; CMD.render(); })
@@ -4724,6 +4896,9 @@ document.addEventListener('click', function(e) {
   }
   if (e.target.id === 'cmd-new') {
     CMD.openCreate();
+  }
+  if (e.target.id === 'cmd-print-mainpropre') {
+    CMD.printMainPropre();
   }
   if (e.target.id === 'cmd-new-add-custom') {
     CMD.addCustomLine();
