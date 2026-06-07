@@ -3686,29 +3686,13 @@ CMD.printMainPropre = function() {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   });
 
-  var totalRevue = 0;
-  var totalAEncaisser = 0;
-  var nonPayes = 0;
-
   var blocs = list.map(function(o, idx){
+    // Items en ligne, juste titre × qty (pas de montants)
     var items = (o.items || [])
       .filter(function(it){ return it && it.qty > 0; })
       .map(function(it){
-        return '<li>' + CMD.esc(it.title || ('Article n°' + (it.num || '?')))
-          + ' &times; ' + (parseInt(it.qty) || 0)
-          + ' &nbsp;<span class="mp-muted">' + fmt((parseInt(it.qty)||0) * (parseFloat(it.price)||0)) + '</span></li>';
-      }).join('');
-
-    var total = parseFloat(o.total_eur || 0);
-    totalRevue += total;
-    if (!o.paye) {
-      totalAEncaisser += total;
-      nonPayes++;
-    }
-
-    var paid = o.paye
-      ? '<span class="mp-paid">✓ PAYÉ</span><span class="mp-muted"> · ' + CMD.esc(o.paiement || '') + '</span>'
-      : '<span class="mp-unpaid">⏳ À ENCAISSER</span><span class="mp-muted"> · ' + CMD.esc(o.paiement || '—') + '</span>';
+        return CMD.esc(it.title || ('Article n°' + (it.num || '?'))) + ' × ' + (parseInt(it.qty) || 0);
+      }).join(' · ');
 
     var contact = [];
     if (o.email)     contact.push(CMD.esc(o.email));
@@ -3720,22 +3704,16 @@ CMD.printMainPropre = function() {
       + '<article class="mp-bloc">'
       +   '<div class="mp-check" aria-hidden="true"></div>'
       +   '<div class="mp-body">'
-      +     '<header class="mp-head">'
-      +       '<div>'
-      +         '<div class="mp-num">#' + (idx + 1) + ' &middot; n°commande ' + CMD.esc(o.id) + '</div>'
-      +         '<h2 class="mp-nom">' + CMD.esc(o.nom || '— sans nom —') + '</h2>'
-      +         (contact.length ? '<div class="mp-contact">' + contact.join(' &nbsp;·&nbsp; ') + '</div>' : '')
-      +       '</div>'
-      +       '<div class="mp-total">'
-      +         '<div class="mp-total-val">' + fmt(total) + '</div>'
-      +         '<div class="mp-paystatus">' + paid + '</div>'
-      +       '</div>'
-      +     '</header>'
-      +     '<ul class="mp-items">' + items + '</ul>'
-      +     '<footer class="mp-foot">'
-      +       '<span class="mp-comm">Comm. : <strong>' + commStruct + '</strong></span>'
-      +       '<span class="mp-date">Commande du ' + date(o.created_at || o.date) + '</span>'
-      +     '</footer>'
+      +     '<div class="mp-row1">'
+      +       '<h2 class="mp-nom">' + CMD.esc(o.nom || '— sans nom —') + '</h2>'
+      +       '<span class="mp-num">#' + (idx + 1) + ' &middot; n°' + CMD.esc(o.id) + '</span>'
+      +     '</div>'
+      +     (contact.length ? '<div class="mp-contact">' + contact.join(' &nbsp;·&nbsp; ') + '</div>' : '')
+      +     (items ? '<div class="mp-items">' + items + '</div>' : '')
+      +     '<div class="mp-foot">'
+      +       '<span class="mp-comm">' + commStruct + '</span>'
+      +       '<span class="mp-date">' + date(o.created_at || o.date) + '</span>'
+      +     '</div>'
       +   '</div>'
       + '</article>';
   }).join('');
@@ -3744,34 +3722,24 @@ CMD.printMainPropre = function() {
     + '<!doctype html><html lang="fr"><head><meta charset="utf-8">'
     + '<title>Commandes ARCA · à remettre en main propre · ' + CMD.esc(today) + '</title>'
     + '<style>'
-    + '  :root { --navy:#2d3461; --gold:#c8a060; --muted:#777; --border:#e2ddd8; --green:#3a8a4a; --red:#c0392b; }'
+    + '  :root { --navy:#2d3461; --gold:#c8a060; --muted:#777; --border:#e2ddd8; }'
     + '  * { box-sizing:border-box; margin:0; padding:0; }'
-    + '  body { font:13px/1.4 Georgia,serif; color:#222; padding:24px 32px; background:#fff; }'
-    + '  header.mp-page-head { border-bottom:3px double var(--gold); padding-bottom:14px; margin-bottom:20px; }'
-    + '  header.mp-page-head .eyebrow { font:11px Arial; letter-spacing:4px; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }'
-    + '  header.mp-page-head h1 { font:300 28px/1 Georgia; color:var(--navy); letter-spacing:1px; margin-bottom:6px; }'
-    + '  header.mp-page-head .meta { font:italic 12px Georgia; color:var(--muted); display:flex; gap:24px; flex-wrap:wrap; }'
-    + '  .mp-bloc { display:grid; grid-template-columns:32px 1fr; gap:14px; padding:14px 0; border-bottom:1px solid var(--border); page-break-inside:avoid; }'
-    + '  .mp-check { width:22px; height:22px; border:2px solid #999; border-radius:3px; margin-top:6px; }'
-    + '  .mp-head { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; margin-bottom:8px; }'
-    + '  .mp-num { font:bold 10px Arial; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }'
-    + '  .mp-nom { font:600 18px/1.2 Georgia; color:var(--navy); margin-bottom:4px; }'
-    + '  .mp-contact { font:italic 12px Georgia; color:#555; }'
-    + '  .mp-total { text-align:right; }'
-    + '  .mp-total-val { font:bold 22px Georgia; color:var(--navy); margin-bottom:4px; }'
-    + '  .mp-paystatus { font:bold 10px Arial; letter-spacing:1px; text-transform:uppercase; }'
-    + '  .mp-paid { color:var(--green); }'
-    + '  .mp-unpaid { color:var(--red); }'
-    + '  .mp-muted { color:var(--muted); font-weight:normal; }'
-    + '  .mp-items { list-style:none; margin:8px 0; padding-left:0; }'
-    + '  .mp-items li { padding:3px 0; font:13px/1.4 Georgia; color:#333; }'
-    + '  .mp-foot { display:flex; justify-content:space-between; gap:18px; margin-top:10px; padding-top:6px; border-top:1px dotted #ccc; font:11px Arial; color:var(--muted); flex-wrap:wrap; }'
-    + '  .mp-comm strong { color:var(--gold); font:bold 12px Arial; letter-spacing:.5px; }'
-    + '  .mp-summary { margin-top:24px; padding:14px 18px; background:#faf8f5; border:1px solid var(--border); page-break-inside:avoid; }'
-    + '  .mp-summary-row { display:flex; justify-content:space-between; padding:4px 0; font:13px Georgia; }'
-    + '  .mp-summary-row.total { border-top:2px solid var(--navy); margin-top:8px; padding-top:10px; font:bold 14px Georgia; color:var(--navy); }'
+    + '  body { font:11.5px/1.35 Georgia,serif; color:#222; padding:18px 24px; background:#fff; }'
+    + '  header.mp-page-head { border-bottom:2px double var(--gold); padding-bottom:10px; margin-bottom:14px; }'
+    + '  header.mp-page-head .eyebrow { font:9px Arial; letter-spacing:3px; text-transform:uppercase; color:var(--gold); margin-bottom:4px; }'
+    + '  header.mp-page-head h1 { font:300 22px/1 Georgia; color:var(--navy); letter-spacing:.5px; margin-bottom:4px; }'
+    + '  header.mp-page-head .meta { font:italic 10.5px Georgia; color:var(--muted); display:flex; gap:18px; flex-wrap:wrap; }'
+    + '  .mp-bloc { display:grid; grid-template-columns:22px 1fr; gap:10px; padding:8px 0 7px; border-bottom:1px solid var(--border); page-break-inside:avoid; }'
+    + '  .mp-check { width:16px; height:16px; border:1.5px solid #888; border-radius:2px; margin-top:3px; }'
+    + '  .mp-row1 { display:flex; justify-content:space-between; align-items:baseline; gap:12px; }'
+    + '  .mp-nom { font:600 14px/1.2 Georgia; color:var(--navy); }'
+    + '  .mp-num { font:bold 9px Arial; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); white-space:nowrap; }'
+    + '  .mp-contact { font:italic 10.5px Georgia; color:#555; margin-top:1px; }'
+    + '  .mp-items { font:11.5px Georgia; color:#333; margin-top:2px; }'
+    + '  .mp-foot { display:flex; justify-content:space-between; gap:12px; margin-top:3px; font:9.5px Arial; color:var(--muted); flex-wrap:wrap; }'
+    + '  .mp-comm { font:bold 10px Arial; letter-spacing:.5px; color:var(--gold); }'
     + '  @media print {'
-    + '    body { padding:12mm 14mm; }'
+    + '    body { padding:10mm 12mm; }'
     + '    .no-print { display:none !important; }'
     + '    a { color:inherit; text-decoration:none; }'
     + '  }'
@@ -3789,15 +3757,9 @@ CMD.printMainPropre = function() {
     +   '<div class="meta">'
     +     '<span>Édité le ' + CMD.esc(today) + '</span>'
     +     '<span>' + list.length + ' commande' + (list.length>1?'s':'') + ' à remettre</span>'
-    +     '<span>' + nonPayes + ' à encaisser</span>'
     +   '</div>'
     + '</header>'
     + blocs
-    + '<section class="mp-summary">'
-    +   '<div class="mp-summary-row"><span>Nombre de remises</span><span>' + list.length + '</span></div>'
-    +   '<div class="mp-summary-row"><span>Encaissements attendus</span><span>' + nonPayes + ' à ' + fmt(totalAEncaisser) + '</span></div>'
-    +   '<div class="mp-summary-row total"><span>TOTAL valeur des commandes</span><span>' + fmt(totalRevue) + '</span></div>'
-    + '</section>'
     + '<script>setTimeout(function(){window.print();}, 250);<\/script>'
     + '</body></html>';
 
