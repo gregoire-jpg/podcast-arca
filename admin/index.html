@@ -3877,7 +3877,7 @@ CMD.render = function() {
                 return '<button class="cmd-act print" onclick="CMD.printLabel(' + JSON.stringify(o.bpost_label_url) + ')">🖨️ Imprimer étiquette</button>';
               }
               // Pas encore poussée : bouton "Envoyer à Bpost"
-              var label = o.bpost_pushed_at ? '🔄 Réessayer Bpost' : '📦 Préparer dans SM web';
+              var label = o.bpost_pushed_at ? '🔄 Réessayer Bpost' : '📦 Envoyer à Bpost';
               return ''
                 + '<button class="cmd-act bpost" onclick="CMD.pushBpost(' + o.id + ')">' + label + '</button>'
                 + '<button class="cmd-act done" onclick="CMD.markBpostManual(' + o.id + ')" title="Marquer comme traitée hors API">✓ Traitée manuellement</button>'
@@ -4559,9 +4559,9 @@ CMD.markBpostManual = function(id) {
 };
 
 CMD.pushBpost = function(id) {
-  if (!confirm('Préparer cette commande pour impression dans Shipping Manager web ?\n\nLes infos de livraison seront copiées dans le presse-papier et SM web s\'ouvrira dans un nouvel onglet.')) return;
+  if (!confirm('Envoyer cette commande à Bpost Shipping Manager ?')) return;
   var btn = event.target;
-  btn.disabled = true; btn.textContent = '⏳ Préparation...';
+  btn.disabled = true; btn.textContent = '⏳ Envoi...';
   fetch('/.netlify/functions/bpost-push-shipment', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -4570,37 +4570,31 @@ CMD.pushBpost = function(id) {
   .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
   .then(function(d) {
     CMD.load();
-    // Copie les infos de livraison dans le presse-papier
-    if (d.clipboard_text) {
-      try { navigator.clipboard.writeText(d.clipboard_text); } catch(e) {}
-    }
-    // Ouvre Shipping Manager web direct
-    var smUrl = d.sm_url || 'https://shippingmanager.bpost.be/';
-    var w = window.open(smUrl, '_blank');
-    if (!w) {
-      alert('Pop-up bloqué — autorise les pop-ups pour podcast-arca.netlify.app puis réessaye.\n\nInfos copiées dans le presse-papier :\n\n' + (d.clipboard_text || ''));
+    // Label dispo via token signé → on lance direct l'impression
+    if (d.bpost_label_url && String(d.bpost_label_url).startsWith('bpost-fetch:')) {
+      var cref = d.bpost_label_url.replace(/^bpost-fetch:/, '');
+      if (d.label_ready) {
+        CMD.printBpostLabel(cref);
+      } else if (d.pending) {
+        alert('✓ Shipment ' + d.bpost_reference + ' créé chez Bpost.\nPDF en cours de génération — clique "Imprimer étiquette" dans 30s.');
+      } else {
+        CMD.printBpostLabel(cref);
+      }
       return;
     }
-    // Toast non-bloquant — construit en DOM safe (pas d'innerHTML)
-    var toast = document.createElement('div');
-    toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#1f5b3a;color:#fff;padding:14px 20px;border-radius:6px;font:.95em Arial;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.2);max-width:380px;white-space:pre-line';
-    var refStrong = document.createElement('b');
-    refStrong.textContent = String(d.bpost_reference || '');
-    toast.append(
-      '✓ Infos ', refStrong, ' copiées dans le presse-papier.\n\n',
-      'Dans SM web :\n',
-      '1. New shipment\n',
-      '2. Colle (Ctrl+V) dans les champs\n',
-      '3. Imprime\n',
-      '4. Reviens cocher "✓ Imprimée"'
-    );
-    document.body.appendChild(toast);
-    setTimeout(function(){ toast.style.transition = 'opacity .5s'; toast.style.opacity = '0'; }, 7000);
-    setTimeout(function(){ toast.remove(); }, 7700);
+    if (d.bpost_label_url && !String(d.bpost_label_url).startsWith('pending:')) {
+      CMD.printLabel(d.bpost_label_url);
+      return;
+    }
+    alert('✓ Commande envoyée à Bpost\nRéf: ' + d.bpost_reference);
   })
   .catch(function(e) {
-    alert('Erreur Bpost : ' + e.message);
-    btn.disabled = false; btn.textContent = '📦 Préparer dans SM web';
+    var msg = 'Erreur Bpost : ' + e.message;
+    if (/ghost/i.test(e.message)) {
+      msg += '\n\nLa BDD a été nettoyée. Réclique "Envoyer à Bpost" pour réessayer.';
+    }
+    alert(msg);
+    btn.disabled = false; btn.textContent = '📦 Envoyer à Bpost';
   });
 };
 

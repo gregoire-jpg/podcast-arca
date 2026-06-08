@@ -1,32 +1,49 @@
-// Bpost — préparation côté admin pour saisie manuelle dans SM web.
+// Push une commande arca_orders vers Bpost via Plug-in API v3 sur le
+// VRAI domaine plugins.bpost.be (confirmé 2026-06-08 par le screenshot
+// SM web → Key management → "Orders are sent to: https://plugins.bpost.be").
 //
-// HISTORIQUE 2026-06-05 → 2026-06-08 : tentative d'intégration via
-// Plug-in API v3 (pluginsapi.bpost.be) abandonnée. POST /v3/shipments
-// retourne 200 mais le shipment n'est jamais matérialisé côté SM web
-// d'Antoine (compteur "Imprimé(s) aujourd'hui" jamais incrémenté par
-// nos pushes), et POST /v3/labels renvoie systématiquement
-// "Invalid service level code: 1" quelle que soit la config (Product
-// 302/303 explicite ou laissé aux Shipping rules, ShopItemId hex ou
-// non, Carrier 68 seul ou avec OptionList). Probablement un manque
-// de contrat backend Bpost côté ARCA — pas un bug code.
-//
-// WORKFLOW ACTUEL : on ne pousse plus rien à Bpost via API. Le bouton
-// admin marque la commande comme "à préparer dans SM web", l'admin
-// ouvre shippingmanager.bpost.be dans un onglet (avec les infos de
-// livraison dans le presse-papier pour copier-coller rapide). Une
-// fois l'étiquette imprimée dans SM web, l'admin clique
-// "Traitée manuellement".
-//
-// MIGRATION future possible : API XML deep integration
-// (api-parcel.bpost.be/services/shm/) — nécessite accountId + passphrase
-// à demander à esolutions@bpost.be. Cf. project_tunnel_arca.md.
+// Workflow :
+//   1. GET /carriers/allowed/ — vérifie carrier 68 actif
+//   2. POST /shipments/ avec :
+//      - Carrier.Id = 68 (bpost shm)
+//      - Carrier.OptionList = [{Id:126, Value:"302"|"303"}] (Product BE|intl)
+//      - ShopItemId hex md5 (spec exige 0-9a-f)
+//      - HouseNumber string
+//      - Country ISO2 majuscule
+//   3. Lecture Shipment[0].ShipmentId — vide = ghost = abort SANS BDD
+//   4. POST /labels/ → CallbackURL → polling jusqu'à PDF base64
+//   5. Stocke bpost-fetch:<cref> dans la BDD, l'admin lit via token HMAC.
+
+const crypto = require('crypto');
+const utils = require('./_bpost-utils.js');
+
+const ISO2 = {
+  'Belgique': 'BE', 'France': 'FR', 'Luxembourg': 'LU', 'Pays-Bas': 'NL',
+  'Allemagne': 'DE', 'Autriche': 'AT', 'Italie': 'IT', 'Espagne': 'ES',
+  'Portugal': 'PT', 'Royaume-Uni': 'GB', 'Suisse': 'CH', 'Canada': 'CA',
+  'DOM-TOM': 'FR', 'Autres pays UE': 'BE'
+};
+
+const WEIGHTS = { 1:600, 2:600, 3:735, 4:565, 5:506, 6:600, 7:532, 8:600, 9:350 };
+function computeWeightG(items) {
+  let g = 0;
+  (items || []).forEach(i => { g += (i.qty || 0) * (WEIGHTS[i.num] || 600); });
+  return Math.max(g, 100);
+}
+
+function parseStreet(rue) {
+  if (!rue) return { street: '', number: '' };
+  const cleaned = String(rue).trim();
+  let m = cleaned.match(/^(.+?)[,\s]+(\d+\s*\w?)$/);
+  if (m) return { street: m[1].trim(), number: m[2].replace(/\s+/g, '') };
+  m = cleaned.match(/^(\d+\s*\w?)\s+(.+)$/);
+  if (m) return { street: m[2].trim(), number: m[1].replace(/\s+/g, '') };
+  return { street: cleaned, number: '' };
+}
 
 async function loadOrder(orderId) {
-  const r = await fetch(process.env.SUPABASE_URL + '/rest/v1/arca_orders?id=eq.' + orderId + '&select=*', {
-    headers: {
-      apikey: process.env.SUPABASE_SERVICE_KEY,
-      Authorization: 'Bearer ' + process.env.SUPABASE_SERVICE_KEY
-    }
+  const r = await fetch(utils.supaUrl() + '/rest/v1/arca_orders?id=eq.' + orderId + '&select=*', {
+    headers: { apikey: utils.supaKey(), Authorization: 'Bearer ' + utils.supaKey() }
   });
   const rows = await r.json();
   if (!rows || !rows[0]) throw new Error('Order ' + orderId + ' not found');
@@ -34,61 +51,303 @@ async function loadOrder(orderId) {
 }
 
 async function updateOrder(orderId, fields) {
-  await fetch(process.env.SUPABASE_URL + '/rest/v1/arca_orders?id=eq.' + orderId, {
+  await fetch(utils.supaUrl() + '/rest/v1/arca_orders?id=eq.' + orderId, {
     method: 'PATCH',
     headers: {
-      apikey: process.env.SUPABASE_SERVICE_KEY,
-      Authorization: 'Bearer ' + process.env.SUPABASE_SERVICE_KEY,
+      apikey: utils.supaKey(), Authorization: 'Bearer ' + utils.supaKey(),
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(fields)
   });
 }
 
+function shopItemHex(cref) {
+  return crypto.createHash('md5').update(cref).digest('hex').substring(0, 32);
+}
+
+function buildCref(orderId, attempt) {
+  if (attempt === 0) return 'ARCA-' + orderId;
+  const rnd = crypto.randomBytes(4).toString('hex');
+  return 'ARCA-' + orderId + '-' + rnd;
+}
+
+function buildShipment(order, attempt) {
+  const addr = parseStreet(order.rue);
+  let houseNumber = '1';
+  let numberExt = order.complement || '';
+  if (addr.number) {
+    const n = parseInt(addr.number, 10);
+    if (Number.isFinite(n) && n > 0) {
+      houseNumber = String(n);
+      const ext = String(addr.number).replace(/^\d+/, '').trim();
+      if (ext) numberExt = (numberExt ? numberExt + ' ' : '') + ext;
+    }
+  }
+  const country = ISO2[order.pays] || 'BE';
+  const cref = buildCref(order.id, attempt);
+  // Product Bpost selon pays (cf. Shipping rules Antoine confirmées) :
+  //   BE → 302 bpack 24h Pro
+  //   !BE → 303 bpack World Business
+  const productId = country === 'BE' ? '302' : '303';
+
+  return {
+    ShopItemId: shopItemHex(cref),
+    ClientReferenceCode: cref,
+    Address: {
+      Name: order.nom || '—',
+      CompanyName: '',
+      Streetname1: addr.street || (order.rue || '').slice(0, 40) || 'Adresse',
+      HouseNumber: houseNumber,
+      NumberExtension: numberExt,
+      PostalCode: order.cp || '',
+      City: order.ville || '',
+      Country: country,
+      Phone: order.telephone || '',
+      Email: order.email || ''
+    },
+    Weight: computeWeightG(order.items),
+    Carrier: {
+      Id: 68,
+      OptionList: [{ Id: 126, Value: productId }]
+    }
+  };
+}
+
+function extractErrors(resp) {
+  const errs = [];
+  const shipments = Array.isArray(resp && resp.Shipment) ? resp.Shipment : [];
+  shipments.forEach(s => {
+    if (Array.isArray(s.ErrorList)) {
+      s.ErrorList.forEach(e => errs.push((e.Tekst || e.Info || 'erreur').trim()));
+    }
+    if (s && s.Error && s.Error.Id && s.Error.Id !== 0) {
+      errs.push((s.Error.Info || ('Error ' + s.Error.Id)).trim());
+    }
+  });
+  if (Array.isArray(resp && resp.ErrorList)) {
+    resp.ErrorList.forEach(e => errs.push((e.Tekst || e.Info || 'erreur').trim()));
+  }
+  if (resp && resp.Error && resp.Error.Id && resp.Error.Id !== 0) {
+    errs.push((resp.Error.Info || ('Error ' + resp.Error.Id)).trim());
+  }
+  return errs;
+}
+
+function extractShipmentId(resp) {
+  if (!resp) return null;
+  const arr = Array.isArray(resp.Shipment) ? resp.Shipment : [resp.Shipment].filter(Boolean);
+  for (const s of arr) {
+    if (!s) continue;
+    const id = s.ShipmentId || s.Id;
+    if (id && String(id).length > 0) return String(id);
+  }
+  return null;
+}
+
+async function tryFetchLabel(token, cref) {
+  const payload = {
+    ClientReferenceCodeList: [cref],
+    LabelType: 0,
+    LabelStart: 1
+  };
+  let resp;
+  try {
+    resp = await utils.bpostCall('POST', '/v3/labels/', payload, token);
+  } catch (e) {
+    return { ready: false, errors: ['exception: ' + e.message] };
+  }
+  if (resp && resp.__binary) {
+    return { ready: true, mode: 'binary' };
+  }
+  const errs = extractErrors(resp);
+  if (errs.length > 0) {
+    return { ready: false, errors: errs };
+  }
+  if (resp && resp.LabelUrl) {
+    return { ready: true, mode: 'url', labelUrl: resp.LabelUrl };
+  }
+  const cbUrl = resp && (resp.CallbackURL || resp.CallbackUrl);
+  if (!cbUrl) {
+    return { ready: false, errors: ['Aucun CallbackURL retourné'] };
+  }
+  // Polling court (4×1.3s = 5.2s, < timeout Netlify 10s)
+  for (let i = 0; i < 4; i++) {
+    await new Promise(r => setTimeout(r, 1300));
+    let poll;
+    try {
+      poll = await utils.bpostCall('GET', new URL(cbUrl).pathname, null, token);
+    } catch (e) {
+      continue;
+    }
+    if (poll && poll.__binary) {
+      return { ready: true, mode: 'binary' };
+    }
+    const pollErrs = extractErrors(poll);
+    if (pollErrs.length > 0) {
+      return { ready: false, errors: pollErrs, ghost: true };
+    }
+    if (poll && poll.Finished === 100) {
+      if (poll.LabelPDF) return { ready: true, mode: 'binary' };
+      if (poll.LabelUrl) return { ready: true, mode: 'url', labelUrl: poll.LabelUrl };
+      return { ready: false, errors: ['Finished=100 sans LabelPDF ni LabelUrl'] };
+    }
+  }
+  return { ready: false, pending: true, cbUrl };
+}
+
 exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method not allowed' };
 
   try {
-    const { order_id } = JSON.parse(event.body || '{}');
+    const { order_id, force } = JSON.parse(event.body || '{}');
     if (!order_id) return { statusCode: 400, body: 'order_id manquant' };
 
     const order = await loadOrder(order_id);
-    const cref = 'ARCA-' + order.id;
+    const host = event.headers.host || 'podcast-arca.netlify.app';
+    const fallbackShopUrl = 'https://' + host + '/.netlify/functions/bpost-callback';
+    const shopUrl = process.env.BPOST_SHOP_URL || fallbackShopUrl;
+    const token = await utils.getValidToken(shopUrl);
 
-    // Marque la commande comme "à préparer dans SM web". L'admin va
-    // ensuite ouvrir SM web avec ces infos pour saisie manuelle.
+    // ── Skip create si déjà poussée : fetch label seul
+    if (order.bpost_reference && !force) {
+      console.log('[Bpost] cref existant=' + order.bpost_reference + ', fetch label seul');
+      const labelRes = await tryFetchLabel(token, order.bpost_reference);
+      if (labelRes.ready) {
+        const storedUrl = labelRes.mode === 'binary'
+          ? 'bpost-fetch:' + order.bpost_reference
+          : labelRes.labelUrl;
+        await updateOrder(order_id, { bpost_label_url: storedUrl });
+        return {
+          statusCode: 200,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ok: true, bpost_reference: order.bpost_reference, bpost_label_url: storedUrl, label_ready: true })
+        };
+      }
+      if (labelRes.ghost) {
+        await updateOrder(order_id, {
+          bpost_reference: null, bpost_shipment_id: null,
+          bpost_label_url: null, bpost_status: null, bpost_pushed_at: null
+        });
+        return {
+          statusCode: 422,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ok: false, ghost: true,
+            error: 'Shipment fantôme (' + (labelRes.errors || []).join(' · ') + '). BDD nettoyée — réessaie.'
+          })
+        };
+      }
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ok: true,
+          bpost_reference: order.bpost_reference,
+          bpost_label_url: 'bpost-fetch:' + order.bpost_reference,
+          pending: true,
+          message: 'PDF en cours de génération côté Bpost — réessaie dans 30s.'
+        })
+      };
+    }
+
+    // ── Créer le shipment (retry random hex sur "already exists")
+    let chosenCref = null;
+    let shipmentId = null;
+    let shipErrs = [];
+    const maxAttempts = 5;
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const shipment = buildShipment(order, attempt);
+      console.log('[Bpost] POST /shipments cref=' + shipment.ClientReferenceCode);
+
+      const shipResp = await utils.bpostCall('POST', '/v3/shipments/', { Shipment: [shipment] }, token);
+      console.log('[Bpost] response →', JSON.stringify(shipResp).substring(0, 400));
+
+      shipErrs = extractErrors(shipResp);
+      if (shipErrs.length === 0) {
+        shipmentId = extractShipmentId(shipResp);
+        if (shipmentId) {
+          chosenCref = shipment.ClientReferenceCode;
+          console.log('[Bpost] OK — ShipmentId=' + shipmentId + ' cref=' + chosenCref);
+          break;
+        }
+        // Si pas de ShipmentId mais pas d'erreur → on accepte quand
+        // même et on tente le label (Bpost peut renvoyer juste le cref)
+        chosenCref = shipment.ClientReferenceCode;
+        shipmentId = chosenCref;
+        console.log('[Bpost] pas de ShipmentId explicite, on assume OK avec cref=' + chosenCref);
+        break;
+      }
+
+      if (shipErrs.some(e => /already exists/i.test(e))) {
+        continue;  // random hex au prochain tour
+      }
+
+      return {
+        statusCode: 422,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ok: false,
+          error: 'Bpost a refusé : ' + shipErrs.join(' · '),
+          api_errors: shipErrs
+        })
+      };
+    }
+
+    if (!chosenCref) {
+      return {
+        statusCode: 422,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ok: false,
+          error: 'Bpost refuse après ' + maxAttempts + ' essais. Dernière : ' + shipErrs.join(' · ')
+        })
+      };
+    }
+
+    // ── Récupérer le label
+    const labelRes = await tryFetchLabel(token, chosenCref);
+
+    if (labelRes.ghost) {
+      return {
+        statusCode: 422,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ok: false, ghost: true,
+          error: 'Shipment créé mais label révèle ghost : ' + (labelRes.errors || []).join(' · '),
+          bpost_reference: chosenCref
+        })
+      };
+    }
+
+    const storedUrl = labelRes.ready && labelRes.mode === 'url'
+      ? labelRes.labelUrl
+      : 'bpost-fetch:' + chosenCref;
+
     await updateOrder(order_id, {
-      bpost_reference: cref,
-      bpost_label_url: 'manual:shipping-manager:' + cref,
-      bpost_status:    'to-print-in-sm',
-      bpost_pushed_at: new Date().toISOString()
+      bpost_shipment_id: shipmentId,
+      bpost_reference:   chosenCref,
+      bpost_label_url:   storedUrl,
+      bpost_status:      'pushed',
+      bpost_pushed_at:   new Date().toISOString()
     });
-
-    // Récap des infos pour copier-coller dans SM web
-    const lines = [
-      'Nom: ' + (order.nom || ''),
-      'Adresse: ' + (order.rue || '') + (order.complement ? ' (' + order.complement + ')' : ''),
-      'CP / Ville: ' + (order.cp || '') + ' ' + (order.ville || ''),
-      'Pays: ' + (order.pays || ''),
-      'Email: ' + (order.email || ''),
-      'Téléphone: ' + (order.telephone || ''),
-      'Référence: ' + cref
-    ];
 
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ok: true,
-        bpost_reference: cref,
-        bpost_label_url: 'manual:shipping-manager:' + cref,
-        clipboard_text: lines.join('\n'),
-        sm_url: 'https://shippingmanager.bpost.be/',
-        message: 'Infos copiées. Ouvre Shipping Manager web → New shipment → colle les infos → imprime.'
+        bpost_reference: chosenCref,
+        bpost_shipment_id: shipmentId,
+        bpost_label_url: storedUrl,
+        label_ready: !!labelRes.ready,
+        message: labelRes.ready
+          ? 'Shipment ' + chosenCref + ' OK. Clique "Imprimer étiquette".'
+          : 'Shipment ' + chosenCref + ' OK. PDF en génération — clique "Imprimer étiquette" dans 30s.'
       })
     };
   } catch (e) {
-    console.error('[Bpost] erreur:', e.message);
+    console.error('[Bpost push] erreur:', e.message);
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json' },

@@ -10,7 +10,12 @@
 
 const crypto = require('crypto');
 
-const BPOST_BASE   = 'https://pluginsapi.bpost.be';
+// VRAI domaine confirmé 2026-06-08 par le screenshot du SM web :
+// "Orders are sent to: https://plugins.bpost.be" (Plug-ins → Key
+// management → Show details). pluginsapi.bpost.be (avec "api") = doc
+// publique, retourne 401 sur tout shipment réel — c'est ce qu'on a
+// utilisé pendant 4 jours par erreur.
+const BPOST_BASE   = 'https://plugins.bpost.be';
 const BPOST_APPID  = 'C6D32390-F48C-3D20-81F8-91932E7E4DE1';   // APPID Woo plugin officiel
 const PLUGIN_VER   = '3.2.3';
 const PLATFORM_VER = '6.5';
