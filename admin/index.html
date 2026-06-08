@@ -1081,9 +1081,10 @@
 .cmd-canal-header:hover { background:#f3efe4; }
 .cmd-canal-icon { font-size:1.3em; }
 .cmd-canal-label { font:bold .95em/1 Georgia; color:var(--navy); flex:1; }
-.cmd-canal-count { font:.78em/1 Arial; color:var(--muted); padding:3px 10px; background:#fff; border-radius:12px; border:1px solid var(--border); }
-.cmd-canal-total { font:bold .95em/1 Arial; color:var(--navy); font-variant-numeric:tabular-nums; margin-left:8px; }
-.cmd-canal-toggle { font:.9em/1 Arial; color:var(--muted); margin-left:6px; width:18px; text-align:center; }
+.cmd-canal-count { font:.78em/1 Arial; color:var(--muted); padding:4px 12px; background:#fff; border-radius:12px; border:1px solid var(--border); text-align:center; min-width:110px; box-sizing:border-box; }
+.cmd-canal-total { font:bold .95em/1 Arial; color:var(--navy); font-variant-numeric:tabular-nums; margin-left:14px; min-width:88px; text-align:right; }
+.cmd-canal-action { display:inline-flex; align-items:center; justify-content:flex-end; min-width:78px; margin-left:14px; }
+.cmd-canal-toggle { font:.9em/1 Arial; color:var(--muted); margin-left:14px; width:18px; text-align:center; flex-shrink:0; }
 .cmd-canal-body { padding:0; }
 .cmd-canal-body .cmd-table { border-radius:0; box-shadow:none; }
 .cmd-canal-body .cmd-table th { background:#fff; color:var(--navy); border-bottom:2px solid var(--border); }
@@ -4027,12 +4028,12 @@ CMD.render = function() {
           + 'style="padding:5px 12px;background:#c8a060;color:#fff;border:0;border-radius:4px;font:.78em/1 Arial;cursor:pointer;letter-spacing:.5px;margin-right:8px">📋 PDF</button>';
       }
       html += '<div class="cmd-canal-section" style="border-left:4px solid ' + info.color + '">'
-        +   '<div class="cmd-canal-header" onclick="CMD.toggleCanal(' + JSON.stringify(canal) + ')">'
+        +   '<div class="cmd-canal-header" data-canal="' + canal + '">'
         +     '<span class="cmd-canal-icon">' + info.icon + '</span>'
         +     '<span class="cmd-canal-label">' + info.label + '</span>'
         +     '<span class="cmd-canal-count">' + orders.length + ' commande' + (orders.length > 1 ? 's' : '') + '</span>'
         +     '<span class="cmd-canal-total">' + total.toFixed(2) + ' €</span>'
-        +     canalAction
+        +     '<span class="cmd-canal-action">' + canalAction + '</span>'
         +     '<span class="cmd-canal-toggle">' + (collapsed ? '▸' : '▾') + '</span>'
         +   '</div>'
         +   (collapsed ? '' : '<div class="cmd-canal-body">' + CMD.tableHtml(orders) + '</div>')
@@ -5306,6 +5307,16 @@ document.addEventListener('click', function(e) {
   if (e.target.closest('.cmd-act-menu-wrap')) return;  // dans le menu / sur le bouton
   CMD.openActionMenu = null;
   if (CMD.loaded) CMD.render();
+});
+
+// Délégation : header section canal (data-canal) → toggle collapse
+// (raison du data-attribute au lieu d'onclick inline : JSON.stringify
+// dans un attribut HTML cassait le parsing avec les guillemets doubles).
+document.addEventListener('click', function(e) {
+  var canalHeader = e.target.closest('.cmd-canal-header');
+  if (canalHeader && canalHeader.dataset.canal) {
+    CMD.toggleCanal(canalHeader.dataset.canal);
+  }
 });
 
 // Activer les filtres + sous-onglets
