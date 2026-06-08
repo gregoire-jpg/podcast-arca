@@ -212,14 +212,26 @@ exports.handler = async function (event) {
         usedCarrier = { id: null, name: 'auto-select' };
       } else {
         lastErrors = errs;
-        const onlyCarrierIssue = errs.every(e => /carrier not available/i.test(e));
-        if (!onlyCarrierIssue) {
-          console.error('[Bpost] erreur non-carrier dès auto-select, arrêt:', errs.join(' | '));
-          return {
-            statusCode: 422,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ok: false, error: 'Bpost a refusé la commande : ' + errs.join(' · '), api_errors: errs })
-          };
+        // Cas spécial "Shipment already exists" : le shipment existe déjà chez
+        // Bpost (créé par un push précédent qui a planté côté labels). On ne
+        // recrée PAS — on bascule direct sur la récupération du PDF, et on
+        // marque l'order comme déjà poussée pour les UI suivantes.
+        const alreadyExists = errs.some(e => /already exists/i.test(e));
+        if (alreadyExists) {
+          console.log('[Bpost] shipment ARCA-' + order.id + ' existe déjà, on récupère juste le label');
+          shipResp = resp;
+          usedCarrier = { id: null, name: 'existing' };
+          // Skip vers la phase labels directement (l'algorithme ci-dessous)
+        } else {
+          const onlyCarrierIssue = errs.every(e => /carrier not available/i.test(e));
+          if (!onlyCarrierIssue) {
+            console.error('[Bpost] erreur non-carrier dès auto-select, arrêt:', errs.join(' | '));
+            return {
+              statusCode: 422,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ok: false, error: 'Bpost a refusé la commande : ' + errs.join(' · '), api_errors: errs })
+            };
+          }
         }
       }
     }
