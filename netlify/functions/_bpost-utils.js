@@ -134,6 +134,16 @@ async function bpostCall(method, path, body, token) {
     },
     body: method === 'GET' ? undefined : bodyStr
   });
+  const ctype = (r.headers.get('content-type') || '').toLowerCase();
+  // Bpost peut renvoyer un PDF binaire directement (Content-Type:
+  // application/pdf) sur POST /v3/labels — le PDF EST le résultat.
+  if (ctype.includes('application/pdf') || ctype.includes('octet-stream')) {
+    const buf = Buffer.from(await r.arrayBuffer());
+    if (!r.ok) {
+      throw new Error('Bpost ' + method + ' ' + path + ' → HTTP ' + r.status + ' (binaire ' + buf.length + 'B)');
+    }
+    return { __binary: true, contentType: ctype, buffer: buf };
+  }
   const text = await r.text();
   let data;
   try { data = JSON.parse(text); } catch { data = text; }

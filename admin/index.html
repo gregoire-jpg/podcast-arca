@@ -3880,7 +3880,8 @@ CMD.render = function() {
               }
               return ''
                 + '<button class="cmd-act bpost" onclick="CMD.pushBpost(' + o.id + ')">' + label + '</button>'
-                + '<button class="cmd-act done" onclick="CMD.markBpostManual(' + o.id + ')" title="Si tu as téléchargé l\'étiquette depuis le Shipping Manager Bpost web et imprimée, marque la commande comme traitée manuellement">✓ Traitée manuellement</button>';
+                + '<button class="cmd-act done" onclick="CMD.markBpostManual(' + o.id + ')" title="Si tu as téléchargé l\'étiquette depuis le Shipping Manager Bpost web et imprimée, marque la commande comme traitée manuellement">✓ Traitée manuellement</button>'
+                + '<button class="cmd-act" style="background:#888;color:#fff" onclick="CMD.debugBpostOrder(' + o.id + ')" title="Diagnostic Bpost de cette commande (dump JSON)">🔧</button>';
             }
             // Mondial Relay : on régénère toujours pour éviter les URLs expirées (24-48h)
             if (o.livraison === 'Mondial Relay') {
@@ -4533,6 +4534,27 @@ CMD.pushBpost = function(id) {
     alert('Erreur : ' + e.message);
     btn.disabled = false; btn.textContent = '📦 Envoyer à Bpost';
   });
+};
+
+// Diagnostic profond d'UNE commande : dump shipments récents, GET
+// shipment, POST labels et tracking pour tous les crefs candidats.
+// À utiliser quand le PDF ne sort pas après un push apparemment réussi.
+CMD.debugBpostOrder = function(orderId) {
+  var pwd = sessionStorage.getItem('admin_pwd') || prompt('Mot de passe admin');
+  if (!pwd) return;
+  fetch('/.netlify/functions/bpost-debug-order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pwd, order_id: orderId })
+  })
+  .then(function(r) { return r.text().then(function(t) { return { ok: r.ok, status: r.status, text: t }; }); })
+  .then(function(res) {
+    var w = window.open('', '_blank');
+    if (!w) { alert('Pop-up bloqué.'); return; }
+    w.document.write('<html><head><title>Bpost order ' + orderId + '</title><style>body{font:13px monospace;padding:1em;background:#1e1e1e;color:#dcdcdc}pre{white-space:pre-wrap;word-break:break-all}h1{color:#9cdcfe}</style></head><body><h1>Bpost order #' + orderId + ' (HTTP ' + res.status + ')</h1><pre>' + res.text.replace(/[&<>]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}) + '</pre></body></html>');
+    w.document.close();
+  })
+  .catch(function(e) { alert('Erreur debug : ' + e.message); });
 };
 
 // Diagnostic Bpost : dump le scope du token et la liste des carriers

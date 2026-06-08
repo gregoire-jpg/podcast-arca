@@ -186,20 +186,21 @@ function extractErrors(resp) {
   return errs;
 }
 
-// Récupère LabelUrl. Plugin API attend LabelType en INTEGER, pas string.
-// Une seule tentative + polling court pour rester sous le timeout Netlify (10s).
-// Override possible via env BPOST_LABEL_TYPE si jamais 0 ne marche pas.
+// Vérifie que le label est récupérable. POST /v3/labels peut renvoyer :
+//   - un PDF binaire direct (Content-Type: application/pdf)
+//     → on a la preuve qu'il est dispo, on retourne {ready: true}
+//   - un JSON avec LabelUrl  → idem ready, on remonte l'URL Bpost
+//   - un JSON avec CallbackURL → label en attente, retourne {pending, cbUrl}
+//
+// On ne stream PAS le PDF ici (la function bpost-push-shipment doit
+// rester sous 10s de timeout Netlify). Le binaire sera récupéré à la
+// demande via /bpost-fetch-label?ref=<cref>.
 async function tryFetchLabel(orderId, token, cref) {
   cref = cref || ('ARCA-' + orderId);
-  const envOverride = process.env.BPOST_LABEL_TYPE;
-  const labelType = envOverride != null && envOverride !== ''
-    ? parseInt(envOverride, 10)
-    : 0;  // 0 = default Bpost (Bpost choisit le format)
-
   const payload = {
     ClientReferenceCodeList: [cref],
     LabelStart: 1,
-    LabelType: labelType
+    LabelType: 0
   };
 
   let resp;
@@ -207,28 +208,40 @@ async function tryFetchLabel(orderId, token, cref) {
     resp = await utils.bpostCall('POST', '/v3/labels/', payload, token);
   } catch (e) {
     console.warn('[Bpost] /labels exception:', e.message);
-    return { url: null, errors: ['exception: ' + e.message], labelTypeUsed: labelType };
+    return { ready: false, errors: ['exception: ' + e.message] };
   }
-  console.log('[Bpost] /labels (LabelType=' + labelType + ') →', JSON.stringify(resp).substring(0, 400));
+
+  if (resp && resp.__binary) {
+    console.log('[Bpost] /labels → PDF binaire ' + resp.buffer.length + 'B, prêt');
+    return { ready: true, mode: 'binary' };
+  }
+
+  console.log('[Bpost] /labels →', JSON.stringify(resp).substring(0, 400));
 
   if (resp && resp.LabelUrl) {
-    return { url: resp.LabelUrl, labelTypeUsed: labelType };
+    return { ready: true, mode: 'url', labelUrl: resp.LabelUrl };
   }
 
-  // Polling : 3 essais × 1.2s = 3.6s max. Total fonction <8s.
   const cbUrl = resp && (resp.CallbackURL || resp.CallbackUrl);
   if (cbUrl) {
-    for (let i = 0; i < 3; i++) {
-      await new Promise(r => setTimeout(r, 1200));
-      try {
-        const poll = await utils.bpostCall('GET', new URL(cbUrl).pathname, null, token);
-        if (poll && poll.LabelUrl) return { url: poll.LabelUrl, labelTypeUsed: labelType };
-      } catch (e) {
-        console.warn('[Bpost] poll', i, 'err:', e.message);
+    // Un poll rapide pour voir si le PDF est déjà prêt (souvent oui)
+    await new Promise(r => setTimeout(r, 1200));
+    try {
+      const poll = await utils.bpostCall('GET', new URL(cbUrl).pathname, null, token);
+      if (poll && poll.__binary) {
+        console.log('[Bpost] callback → PDF binaire ' + poll.buffer.length + 'B');
+        return { ready: true, mode: 'binary' };
       }
+      if (poll && poll.LabelUrl) {
+        return { ready: true, mode: 'url', labelUrl: poll.LabelUrl };
+      }
+    } catch (e) {
+      console.warn('[Bpost] poll cb err:', e.message);
     }
+    return { ready: false, pending: true, cbUrl };
   }
-  return { url: null, errors: extractErrors(resp), labelTypeUsed: labelType, cbUrl };
+
+  return { ready: false, errors: extractErrors(resp) };
 }
 
 exports.handler = async function (event) {
@@ -275,6 +288,40 @@ exports.handler = async function (event) {
       } catch (e) {
         console.warn('[Bpost] callback stocké KO:', e.message, '— on relance le flux');
       }
+    }
+
+    // ── 0ter) Si la commande a déjà un cref Bpost en BDD, on saute
+    //          la création (pas de double facturation) et on va direct
+    //          chercher l'étiquette avec ce cref.
+    if (order.bpost_reference && /^ARCA-\d+/.test(order.bpost_reference)) {
+      console.log('[Bpost] commande déjà poussée cref=' + order.bpost_reference + ', skip create, fetch label only');
+      const labelRes = await tryFetchLabel(order_id, token, order.bpost_reference);
+      let storedUrl;
+      if (labelRes.ready && labelRes.mode === 'binary') {
+        storedUrl = '/.netlify/functions/bpost-fetch-label?ref=' + encodeURIComponent(order.bpost_reference);
+      } else if (labelRes.ready && labelRes.mode === 'url') {
+        storedUrl = labelRes.labelUrl;
+      } else if (labelRes.pending && labelRes.cbUrl) {
+        storedUrl = 'pending:' + labelRes.cbUrl;
+      } else {
+        // Même sans confirmation, le PDF se débloque souvent au prochain
+        // appel via /bpost-fetch-label. On stocke cette URL.
+        storedUrl = '/.netlify/functions/bpost-fetch-label?ref=' + encodeURIComponent(order.bpost_reference);
+      }
+      await updateOrder(order_id, { bpost_label_url: storedUrl });
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ok: true,
+          bpost_reference: order.bpost_reference,
+          bpost_label_url: storedUrl,
+          label_mode: labelRes.mode || 'fetch-on-demand',
+          message: labelRes.ready
+            ? 'Étiquette prête. Clique sur "Imprimer étiquette".'
+            : 'Shipment déjà chez Bpost. Le PDF est en cours de génération — clique sur "Imprimer étiquette" dans 30s.'
+        })
+      };
     }
 
     // ── 0bis) Lister les carriers autorisés et choisir Carrier+Product ──
@@ -379,13 +426,27 @@ exports.handler = async function (event) {
     }
 
     // ── 2) Récupérer l'étiquette PDF ────────────────────────────────
-    const { url: labelUrl, errors: labelErrs, labelTypeUsed, cbUrl } = await tryFetchLabel(order_id, token, chosenCref);
+    const labelRes = await tryFetchLabel(order_id, token, chosenCref);
 
-    // ── 3) Mettre à jour la BDD ────────────────────────────────────
-    // Si le PDF est dispo on le stocke. Sinon si Bpost nous a donné un
-    // CallbackURL, on le mémorise avec un préfixe "pending:" pour que le
-    // prochain clic puisse aller chercher le PDF directement sans recréer.
-    const storedUrl = labelUrl || (cbUrl ? 'pending:' + cbUrl : null);
+    // ── 3) Stocker l'URL utilisable par l'admin ─────────────────────
+    // Si Bpost a renvoyé le PDF en binaire, on stocke une URL Netlify
+    // (/bpost-fetch-label?ref=<cref>) qui rejouera POST /labels à la
+    // demande et streamera le PDF au browser.
+    // Si Bpost a renvoyé une LabelUrl directe, on la stocke telle quelle.
+    // Si le PDF est en attente (callback), on stocke "pending:<cbUrl>".
+    let storedUrl;
+    if (labelRes.ready && labelRes.mode === 'binary') {
+      storedUrl = '/.netlify/functions/bpost-fetch-label?ref=' + encodeURIComponent(chosenCref);
+    } else if (labelRes.ready && labelRes.mode === 'url') {
+      storedUrl = labelRes.labelUrl;
+    } else if (labelRes.pending && labelRes.cbUrl) {
+      storedUrl = 'pending:' + labelRes.cbUrl;
+    } else {
+      // Même sans callback, le PDF sera probablement dispo plus tard via
+      // POST /labels. On stocke une URL fetch-label : le 2e clic tentera.
+      storedUrl = '/.netlify/functions/bpost-fetch-label?ref=' + encodeURIComponent(chosenCref);
+    }
+
     await updateOrder(order_id, {
       bpost_shipment_id: chosenCref,
       bpost_reference:   chosenCref,
@@ -394,20 +455,19 @@ exports.handler = async function (event) {
       bpost_pushed_at:   new Date().toISOString()
     });
 
-    if (!labelUrl) {
-      const stillPending = !!cbUrl;
+    if (!labelRes.ready) {
       return {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ok: true,
-          bpost_reference: 'ARCA-' + order_id,
-          bpost_label_url: null,
-          label_pending: stillPending,
-          label_errors: labelErrs || [],
-          message: stillPending
-            ? 'Shipment créé chez Bpost (réf ARCA-' + order_id + '). Bpost génère le PDF — réclique le bouton dans 30s pour le récupérer.'
-            : 'Shipment créé mais Bpost n\'a pas retourné de URL. Va le chercher dans le Shipping Manager ou marque comme traitée manuellement.'
+          bpost_reference: chosenCref,
+          bpost_label_url: storedUrl,
+          label_pending: !!labelRes.pending,
+          label_errors: labelRes.errors || [],
+          message: labelRes.pending
+            ? 'Shipment créé chez Bpost (réf ' + chosenCref + '). Le PDF est en cours de génération — clique sur "Imprimer étiquette" dans 30s.'
+            : 'Shipment créé. Le PDF s\'ouvrira via le bouton "Imprimer étiquette".'
         })
       };
     }
@@ -417,9 +477,9 @@ exports.handler = async function (event) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ok: true,
-        bpost_reference: 'ARCA-' + order_id,
-        bpost_label_url: labelUrl,
-        label_type_used: labelTypeUsed
+        bpost_reference: chosenCref,
+        bpost_label_url: storedUrl,
+        label_mode: labelRes.mode
       })
     };
   } catch (e) {
