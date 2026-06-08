@@ -3860,29 +3860,27 @@ CMD.render = function() {
             // Bpost (Poste avec suivi) — un seul bouton qui gère tous les cas
             // grâce au flux refactor 2026-06-08.
             if (o.livraison === 'Poste avec suivi') {
-              // Déjà marquée traitée manuellement (legacy ou cliquée)
+              // Traitée manuellement (legacy ou clic explicite)
               if (o.bpost_label_url === 'manual:shipping-manager') {
-                return '<span class="cmd-badge paid" title="Étiquette téléchargée et imprimée depuis le Shipping Manager Bpost web">✓ Bpost (traitée manuellement)</span>';
+                return '<span class="cmd-badge paid" title="Étiquette imprimée hors API (saisie SM web)">✓ Bpost (traitée manuellement)</span>';
               }
-              // Shipment poussé chez Bpost — à imprimer dans SM web
-              // (le Carrier 68 / bpost shm ne génère pas de PDF via Plug-in API).
-              if (o.bpost_label_url && String(o.bpost_label_url).startsWith('manual:shipping-manager:')) {
-                var smCref = o.bpost_label_url.replace(/^manual:shipping-manager:/, '');
+              // Marqueur bpost-fetch:ARCA-XX → PDF récupérable via token signé
+              if (o.bpost_label_url && String(o.bpost_label_url).startsWith('bpost-fetch:')) {
+                var bfCref = o.bpost_label_url.replace(/^bpost-fetch:/, '');
                 return ''
-                  + '<button class="cmd-act print" onclick="CMD.openBpostSmWeb(' + JSON.stringify(smCref) + ')" title="Ouvre Shipping Manager web — cherche la référence ' + smCref + '">🖨️ Imprimer dans SM web (réf ' + smCref + ')</button>'
-                  + '<button class="cmd-act done" onclick="CMD.markBpostManual(' + o.id + ')" title="Marquer comme imprimée">✓ Imprimée</button>'
+                  + '<button class="cmd-act print" onclick="CMD.printBpostLabel(' + JSON.stringify(bfCref) + ')">🖨️ Imprimer étiquette</button>'
                   + '<button class="cmd-act" style="background:#888;color:#fff" onclick="CMD.debugBpostOrder(' + o.id + ')" title="Diagnostic Bpost">🔧</button>';
               }
-              // URL Bpost directe (cas rare où une LabelUrl est retournée)
-              if (o.bpost_label_url && !String(o.bpost_label_url).startsWith('pending:') && !String(o.bpost_label_url).startsWith('bpost-fetch:')) {
+              // URL Bpost directe (rare : LabelUrl renvoyée)
+              if (o.bpost_label_url && !String(o.bpost_label_url).startsWith('pending:')) {
                 return '<button class="cmd-act print" onclick="CMD.printLabel(' + JSON.stringify(o.bpost_label_url) + ')">🖨️ Imprimer étiquette</button>';
               }
               // Pas encore poussée : bouton "Envoyer à Bpost"
               var label = o.bpost_pushed_at ? '🔄 Réessayer Bpost' : '📦 Envoyer à Bpost';
               return ''
                 + '<button class="cmd-act bpost" onclick="CMD.pushBpost(' + o.id + ')">' + label + '</button>'
-                + '<button class="cmd-act done" onclick="CMD.markBpostManual(' + o.id + ')" title="Si tu as téléchargé l\'étiquette depuis le Shipping Manager Bpost web et imprimée, marque la commande comme traitée manuellement">✓ Traitée manuellement</button>'
-                + '<button class="cmd-act" style="background:#888;color:#fff" onclick="CMD.debugBpostOrder(' + o.id + ')" title="Diagnostic Bpost de cette commande (dump JSON)">🔧</button>';
+                + '<button class="cmd-act done" onclick="CMD.markBpostManual(' + o.id + ')" title="Marquer comme traitée hors API">✓ Traitée manuellement</button>'
+                + '<button class="cmd-act" style="background:#888;color:#fff" onclick="CMD.debugBpostOrder(' + o.id + ')" title="Diagnostic Bpost">🔧</button>';
             }
             // Mondial Relay : on régénère toujours pour éviter les URLs expirées (24-48h)
             if (o.livraison === 'Mondial Relay') {
@@ -4570,25 +4568,33 @@ CMD.pushBpost = function(id) {
   })
   .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
   .then(function(d) {
-    // Cas normal : Carrier 68 ne fournit pas de PDF via Plug-in API.
-    // Le shipment est dans le SM web, à imprimer là-bas.
-    if (d.bpost_label_url && String(d.bpost_label_url).startsWith('manual:shipping-manager:')) {
-      var cref = d.bpost_label_url.replace(/^manual:shipping-manager:/, '');
-      CMD.load();
-      // Ouvre direct le SM web pour imprimer
-      CMD.openBpostSmWeb(cref);
+    CMD.load();
+    // Label dispo via token signé → on lance direct l'impression
+    if (d.bpost_label_url && String(d.bpost_label_url).startsWith('bpost-fetch:')) {
+      var cref = d.bpost_label_url.replace(/^bpost-fetch:/, '');
+      if (d.label_ready) {
+        CMD.printBpostLabel(cref);
+      } else if (d.pending) {
+        alert('✓ Shipment ' + d.bpost_reference + ' créé chez Bpost.\nPDF en cours de génération — clique "Imprimer étiquette" dans 30s.');
+      } else {
+        CMD.printBpostLabel(cref);  // on tente quand même
+      }
       return;
     }
-    // Cas rare : URL directe (legacy Bpost ou autre)
-    if (d.bpost_label_url && !String(d.bpost_label_url).startsWith('pending:') && !String(d.bpost_label_url).startsWith('bpost-fetch:')) {
+    // URL directe (rare)
+    if (d.bpost_label_url && !String(d.bpost_label_url).startsWith('pending:')) {
       CMD.printLabel(d.bpost_label_url);
-    } else {
-      alert('✓ Commande envoyée à Bpost\nRéf: ' + d.bpost_reference + '\n\nVa l\'imprimer dans Shipping Manager web → onglet Commandes.');
+      return;
     }
-    CMD.load();
+    alert('✓ Commande envoyée à Bpost\nRéf: ' + d.bpost_reference);
   })
   .catch(function(e) {
-    alert('Erreur : ' + e.message);
+    var msg = 'Erreur Bpost : ' + e.message;
+    // Si ghost détecté, la BDD a été nettoyée automatiquement
+    if (/ghost/i.test(e.message)) {
+      msg += '\n\nLa BDD a été nettoyée. Réclique "Envoyer à Bpost" pour réessayer.';
+    }
+    alert(msg);
     btn.disabled = false; btn.textContent = '📦 Envoyer à Bpost';
   });
 };
