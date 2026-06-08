@@ -4829,10 +4829,20 @@ CMD.renderStats = function() {
   });
   var byLivrSorted = Object.keys(byLivr).map(function(k){ return [k, byLivr[k]]; }).sort(function(a,b){ return b[1]-a[1]; });
 
-  // Modes de paiement (uniquement payées)
+  // Modes de paiement (uniquement payées) — normalisation pour fusionner
+  // les variantes : 'Stripe (Payment Link admin)' → 'Stripe',
+  // 'Virement bancaire' / 'Virement' → 'Virement bancaire'.
+  var normalizePay = function(p) {
+    if (!p) return '—';
+    var s = String(p).toLowerCase();
+    if (s.indexOf('stripe') !== -1)    return 'Stripe';
+    if (s.indexOf('paypal') !== -1)    return 'PayPal';
+    if (s.indexOf('virement') !== -1)  return 'Virement bancaire';
+    return p;  // garde le libellé d'origine si pas reconnu
+  };
   var byPay = {};
   active.filter(function(o){ return o.paye; }).forEach(function(o) {
-    var p = o.paiement || '—';
+    var p = normalizePay(o.paiement);
     byPay[p] = (byPay[p] || 0) + 1;
   });
   var byPaySorted = Object.keys(byPay).map(function(k){ return [k, byPay[k]]; }).sort(function(a,b){ return b[1]-a[1]; });
