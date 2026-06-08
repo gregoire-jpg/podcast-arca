@@ -76,7 +76,7 @@ function carrierIdForCountry(iso2) {
   return iso2 === 'BE' ? 301 : 303;
 }
 
-function buildShipment(order) {
+function buildShipment(order, refSuffix) {
   const addr = parseStreet(order.rue);
   // Bpost refuse HouseNumber == 0. Si rien d'extractible, on met 1.
   let houseNumber = 1;
@@ -91,9 +91,10 @@ function buildShipment(order) {
   }
   const country = ISO2[order.pays] || 'BE';
   const carrierId = carrierIdForCountry(country);
+  const cref = 'ARCA-' + order.id + (refSuffix ? '-' + refSuffix : '');
   return {
-    ShopItemId: 'ARCA-' + order.id,
-    ClientReferenceCode: 'ARCA-' + order.id,
+    ShopItemId: cref,
+    ClientReferenceCode: cref,
     Address: {
       Name: order.nom || '—',
       CompanyName: '',
@@ -131,14 +132,15 @@ function extractErrors(resp) {
 // Récupère LabelUrl. Plugin API attend LabelType en INTEGER, pas string.
 // Une seule tentative + polling court pour rester sous le timeout Netlify (10s).
 // Override possible via env BPOST_LABEL_TYPE si jamais 0 ne marche pas.
-async function tryFetchLabel(orderId, token) {
+async function tryFetchLabel(orderId, token, cref) {
+  cref = cref || ('ARCA-' + orderId);
   const envOverride = process.env.BPOST_LABEL_TYPE;
   const labelType = envOverride != null && envOverride !== ''
     ? parseInt(envOverride, 10)
     : 0;  // 0 = default Bpost (Bpost choisit le format)
 
   const payload = {
-    ClientReferenceCodeList: ['ARCA-' + orderId],
+    ClientReferenceCodeList: [cref],
     LabelStart: 1,
     LabelType: labelType
   };
@@ -218,24 +220,33 @@ exports.handler = async function (event) {
       }
     }
 
-    // ── 1) Créer le shipment (ou détecter qu'il existe déjà) ────────
-    const shipment = buildShipment(order);
-    console.log('[Bpost] shipment payload:', JSON.stringify(shipment));
+    // ── 1) Créer le shipment, avec suffixe -r1, -r2… si "already exists" ──
+    // Les premiers pushs (avant qu'on force un Carrier ID) ont créé des
+    // ghosts côté Bpost. On veut un cref propre pour le shipment réellement
+    // matérialisé. À chaque "already exists", on incrémente un suffixe.
+    let chosenCref = null;
+    let shipErrs = [];
+    const maxRetries = 5;
+    for (let i = 0; i < maxRetries; i++) {
+      const suffix = i === 0 ? null : ('r' + i);
+      const shipment = buildShipment(order, suffix);
+      console.log('[Bpost] try shipment cref=' + shipment.ClientReferenceCode);
 
-    const shipResp = await utils.bpostCall('POST', '/v3/shipments/', { Shipment: [shipment] }, token);
-    console.log('[Bpost] /shipments →', JSON.stringify(shipResp).substring(0, 400));
+      const shipResp = await utils.bpostCall('POST', '/v3/shipments/', { Shipment: [shipment] }, token);
+      console.log('[Bpost] /shipments →', JSON.stringify(shipResp).substring(0, 300));
 
-    const shipErrs = extractErrors(shipResp);
-    let shipmentReady = false;
-    if (shipErrs.length === 0) {
-      shipmentReady = true;
-    } else if (shipErrs.some(e => /already exists/i.test(e))) {
-      // Le shipment existe déjà côté Bpost : on continue vers labels SANS
-      // recréer (pas de double facturation).
-      console.log('[Bpost] shipment ARCA-' + order_id + ' existait déjà, on poursuit vers labels');
-      shipmentReady = true;
-    } else {
-      // Vraie erreur (adresse invalide, pays, contrat, etc.)
+      shipErrs = extractErrors(shipResp);
+      if (shipErrs.length === 0) {
+        chosenCref = shipment.ClientReferenceCode;
+        console.log('[Bpost] shipment matérialisé avec cref=' + chosenCref);
+        break;
+      }
+      // "already exists" → on tente le suffixe suivant
+      if (shipErrs.some(e => /already exists/i.test(e))) {
+        console.log('[Bpost] ' + shipment.ClientReferenceCode + ' déjà pris (ghost), retry avec suffixe');
+        continue;
+      }
+      // Toute autre erreur → on arrête
       return {
         statusCode: 422,
         headers: { 'Content-Type': 'application/json' },
@@ -247,8 +258,20 @@ exports.handler = async function (event) {
       };
     }
 
+    if (!chosenCref) {
+      return {
+        statusCode: 422,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ok: false,
+          error: 'Bpost a refusé après ' + maxRetries + ' tentatives (tous les crefs en collision). Dernière erreur : ' + shipErrs.join(' · '),
+          api_errors: shipErrs
+        })
+      };
+    }
+
     // ── 2) Récupérer l'étiquette PDF ────────────────────────────────
-    const { url: labelUrl, errors: labelErrs, labelTypeUsed, cbUrl } = await tryFetchLabel(order_id, token);
+    const { url: labelUrl, errors: labelErrs, labelTypeUsed, cbUrl } = await tryFetchLabel(order_id, token, chosenCref);
 
     // ── 3) Mettre à jour la BDD ────────────────────────────────────
     // Si le PDF est dispo on le stocke. Sinon si Bpost nous a donné un
@@ -256,8 +279,8 @@ exports.handler = async function (event) {
     // prochain clic puisse aller chercher le PDF directement sans recréer.
     const storedUrl = labelUrl || (cbUrl ? 'pending:' + cbUrl : null);
     await updateOrder(order_id, {
-      bpost_shipment_id: 'ARCA-' + order_id,
-      bpost_reference:   'ARCA-' + order_id,
+      bpost_shipment_id: chosenCref,
+      bpost_reference:   chosenCref,
       bpost_label_url:   storedUrl,
       bpost_status:      'pushed',
       bpost_pushed_at:   new Date().toISOString()
