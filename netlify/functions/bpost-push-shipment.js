@@ -167,13 +167,19 @@ exports.handler = async function (event) {
     if (!order_id) return { statusCode: 400, body: 'order_id manquant' };
 
     const order = await loadOrder(order_id);
-    // ShopUrl envoyée à Bpost /v3/keys : c'est ce qui détermine le SCOPE
-    // dans lequel les shipments apparaissent côté Shipping Manager web.
-    // Le plugin Woo officiel envoie get_home_url() = URL canonique du
-    // site marchand. Pour ARCA c'est arca-revue.com (compte SM d'Antoine).
-    // Override possible via env BPOST_SHOP_URL si on découvre une autre
-    // URL associée au compte (cf. SM admin → settings).
-    const shopUrl = process.env.BPOST_SHOP_URL || 'https://arca-revue.com';
+    // ShopUrl envoyée à Bpost /v3/keys : DOIT correspondre exactement à ce
+    // qu'Antoine a déclaré à Bpost lors de l'install initiale du SM (Bpost
+    // mappe strictement PUBLIC_KEY ↔ ShopUrl autorisée, sinon HTTP 401 sur
+    // /v3/keys).
+    //
+    // L'URL callback Netlify a passé l'auth 401 mais nos shipments tombent
+    // dans un shop fantôme invisible dans "New Shop". L'idéal serait
+    // d'utiliser la vraie URL canonique d'Antoine (à demander au SM admin
+    // → Settings → Shop URL). En attendant que BPOST_SHOP_URL soit posée
+    // en env var, on retombe sur l'URL legacy pour ne pas tout casser.
+    const host = event.headers.host || 'podcast-arca.netlify.app';
+    const fallbackShopUrl = 'https://' + host + '/.netlify/functions/bpost-callback';
+    const shopUrl = process.env.BPOST_SHOP_URL || fallbackShopUrl;
     const token = await utils.getValidToken(shopUrl);
 
     // ── 0) Shortcut : si on a déjà un CallbackURL Bpost en attente (préfixe
