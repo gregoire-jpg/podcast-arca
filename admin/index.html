@@ -3864,14 +3864,14 @@ CMD.render = function() {
               if (o.bpost_label_url) {
                 return '<button class="cmd-act print" onclick="CMD.printLabel(' + JSON.stringify(o.bpost_label_url) + ')">🖨️ Imprimer étiquette</button>';
               }
-              // pushed_at posé mais pas d'URL : génération en cours côté Bpost OU
-              // push de jadis qui a échoué silencieusement (cas ARTERO du 2026-06-08
-              // avec HouseNumber=0 et LabelType A6 invalides). Si pushed_at > 5 min,
-              // l'utilisateur peut relancer manuellement.
+              // pushed_at posé mais pas d'URL : shipment créé côté Bpost mais
+              // PDF pas encore rapatrié. On propose "Récupérer étiquette" qui
+              // appelle bpost-fetch-label (POST /v3/labels SEUL, pas /v3/shipments)
+              // → AUCUNE double facturation, on ne recrée pas le shipment.
               var pushedAt = new Date(o.bpost_pushed_at);
               var ageMin = (Date.now() - pushedAt.getTime()) / 60000;
-              if (ageMin > 5) {
-                return '<button class="cmd-act bpost" onclick="CMD.pushBpost(' + o.id + ')" title="Le push initial a probablement échoué — relancer">🔄 Réessayer Bpost</button>';
+              if (ageMin > 2) {
+                return '<button class="cmd-act print" onclick="CMD.fetchBpostLabel(' + o.id + ')" title="Récupère le PDF du shipment déjà créé côté Bpost (gratuit, pas de duplication)">🔄 Récupérer étiquette</button>';
               }
               return '<span class="cmd-badge paid">✓ Bpost (PDF en cours)</span>';
             }
@@ -4480,6 +4480,29 @@ CMD.printLabel = function(url) {
   if (!w) { alert('Pop-up bloqué — autorise les pop-ups pour podcast-arca.netlify.app puis réessaye.'); return; }
   // Tentative d'auto-print après chargement (peut être bloqué pour PDF cross-origin — le viewer PDF natif a son propre bouton Imprimer)
   try { w.addEventListener('load', function(){ try { w.print(); } catch(e){} }); } catch(e){}
+};
+
+// Récupère le PDF d'étiquette pour un shipment Bpost DÉJÀ créé.
+// N'appelle PAS POST /v3/shipments (pas de re-facturation), juste POST
+// /v3/labels avec le ClientReferenceCode existant.
+CMD.fetchBpostLabel = function(id) {
+  var o = CMD.orders.find(function(x){ return x.id === id; });
+  if (!o) return;
+  fetch('/.netlify/functions/bpost-fetch-label', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ order_id: id })
+  })
+  .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
+  .then(function(d) {
+    if (d.bpost_label_url) {
+      CMD.printLabel(d.bpost_label_url);
+    } else {
+      alert('Pas de PDF retourné. Va le télécharger manuellement depuis ton Shipping Manager Bpost.');
+    }
+    CMD.load();
+  })
+  .catch(function(e) { alert('Erreur : ' + e.message); });
 };
 
 CMD.pushBpost = function(id) {
