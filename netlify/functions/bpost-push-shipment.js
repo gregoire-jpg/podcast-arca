@@ -264,18 +264,19 @@ exports.handler = async function (event) {
     console.log('[Bpost] shipment accepté avec', usedCarrier.name, '(id=' + carrierId + ')');
 
     // 2) POST /v3/labels — démarre génération PDF
-    // LabelType : A4 par défaut (format universel, accepté partout). Surchargeable
-    // via env BPOST_LABEL_TYPE pour s'aligner sur une étiqueteuse thermique. Le
-    // format A6 a été retiré de l'API Bpost en juin 2026 (cf. erreur HTTP du
-    // 2026-06-08 "Data error LabelType (A6)").
+    // Bpost v3 refuse "A4" et "A6" en LabelType ("Illegal format in field").
+    // Le payload minimal SANS LabelType laisse Bpost choisir son format par
+    // défaut, qui est utilisable via l'étiqueteuse (driver fit-to-page).
+    // BPOST_LABEL_TYPE peut être posé si Bpost réintroduit un jour des formats
+    // explicites — sinon on omet le champ.
     let labelUrl = null;
-    const labelType = process.env.BPOST_LABEL_TYPE || 'A4';
+    const labelType = process.env.BPOST_LABEL_TYPE || '';
     try {
       const labelPayload = {
         ClientReferenceCodeList: ['ARCA-' + order.id],
-        LabelStart: 1,
-        LabelType: labelType
+        LabelStart: 1
       };
+      if (labelType) labelPayload.LabelType = labelType;
       const labelResp = await utils.bpostCall('POST', '/v3/labels/', labelPayload, token);
       console.log('[Bpost] labels resp:', JSON.stringify(labelResp).substring(0, 500));
 
