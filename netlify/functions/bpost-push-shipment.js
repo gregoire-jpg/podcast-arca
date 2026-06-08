@@ -167,9 +167,14 @@ exports.handler = async function (event) {
     if (!order_id) return { statusCode: 400, body: 'order_id manquant' };
 
     const order = await loadOrder(order_id);
-    const host = event.headers.host || 'podcast-arca.netlify.app';
-    const callbackUrl = 'https://' + host + '/.netlify/functions/bpost-callback';
-    const token = await utils.getValidToken(callbackUrl);
+    // ShopUrl envoyée à Bpost /v3/keys : c'est ce qui détermine le SCOPE
+    // dans lequel les shipments apparaissent côté Shipping Manager web.
+    // Le plugin Woo officiel envoie get_home_url() = URL canonique du
+    // site marchand. Pour ARCA c'est arca-revue.com (compte SM d'Antoine).
+    // Override possible via env BPOST_SHOP_URL si on découvre une autre
+    // URL associée au compte (cf. SM admin → settings).
+    const shopUrl = process.env.BPOST_SHOP_URL || 'https://arca-revue.com';
+    const token = await utils.getValidToken(shopUrl);
 
     // ── 0) Shortcut : si on a déjà un CallbackURL Bpost en attente (préfixe
     //      "pending:" dans bpost_label_url), on le hit directement avant de

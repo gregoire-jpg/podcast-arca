@@ -36,23 +36,41 @@ function basicAuth(username, body) {
 // ─────────────────────────────────────────────────────────────
 
 async function fetchStoredToken() {
-  const r = await fetch(supaUrl() + '/rest/v1/arca_bpost_tokens?id=eq.1&select=token,expire_at', {
+  // shop_url stocké pour invalider le cache si on change la "boutique"
+  // déclarée à Bpost. Plugin Woo officiel envoie get_home_url() (URL
+  // canonique du site marchand) comme ShopUrl — c'est ce qui définit le
+  // SCOPE dans lequel les shipments apparaissent côté SM web.
+  // Le select tente shop_url ; si la colonne n'existe pas encore, on
+  // retombe sur la version legacy sans.
+  let r = await fetch(supaUrl() + '/rest/v1/arca_bpost_tokens?id=eq.1&select=token,expire_at,shop_url', {
     headers: { apikey: supaKey(), Authorization: 'Bearer ' + supaKey() }
   });
-  if (!r.ok) return null;
+  if (!r.ok) {
+    r = await fetch(supaUrl() + '/rest/v1/arca_bpost_tokens?id=eq.1&select=token,expire_at', {
+      headers: { apikey: supaKey(), Authorization: 'Bearer ' + supaKey() }
+    });
+    if (!r.ok) return null;
+  }
   const rows = await r.json();
   return rows && rows[0] || null;
 }
 
-async function saveToken(token, expire) {
-  await fetch(supaUrl() + '/rest/v1/arca_bpost_tokens?id=eq.1', {
-    method: 'PATCH',
-    headers: {
-      apikey: supaKey(), Authorization: 'Bearer ' + supaKey(),
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ token, expire_at: expire, updated_at: new Date().toISOString() })
-  });
+async function saveToken(token, expire, shopUrl) {
+  // PATCH avec shop_url d'abord ; si la colonne n'existe pas (400), retry
+  // sans (legacy schema). Garantit que la fonction ne plante pas si la
+  // migration BDD n'a pas encore été appliquée.
+  const fullBody = { token, expire_at: expire, shop_url: shopUrl || null, updated_at: new Date().toISOString() };
+  const minimalBody = { token, expire_at: expire, updated_at: new Date().toISOString() };
+  const url = supaUrl() + '/rest/v1/arca_bpost_tokens?id=eq.1';
+  const hdrs = {
+    apikey: supaKey(), Authorization: 'Bearer ' + supaKey(),
+    'Content-Type': 'application/json'
+  };
+  let r = await fetch(url, { method: 'PATCH', headers: hdrs, body: JSON.stringify(fullBody) });
+  if (!r.ok) {
+    console.warn('[Bpost] PATCH avec shop_url KO (' + r.status + '), retry sans');
+    await fetch(url, { method: 'PATCH', headers: hdrs, body: JSON.stringify(minimalBody) });
+  }
 }
 
 // POST /v3/keys avec public key → retourne un Token (~10 jours)
@@ -79,17 +97,24 @@ async function requestNewToken(shopUrl) {
   return { token: data.Key, expire: data.Expire };
 }
 
-// Renvoie un token valide : depuis le cache si expire > now+2j, sinon en demande un nouveau
+// Renvoie un token valide. Renouvelle si :
+//  - pas de token en cache
+//  - token expire dans <2 jours
+//  - shopUrl demandé ≠ shop_url stocké (scope a changé)
 async function getValidToken(shopUrl) {
   const stored = await fetchStoredToken();
-  if (stored && stored.token) {
+  const scopeMatches = stored && stored.shop_url === shopUrl;
+  if (stored && stored.token && scopeMatches) {
     const expire = new Date(stored.expire_at + 'T00:00:00Z');
-    const limit = new Date(Date.now() + 2 * 24 * 3600 * 1000); // dans 2 jours
+    const limit = new Date(Date.now() + 2 * 24 * 3600 * 1000);
     if (expire > limit) return stored.token;
   }
+  if (stored && !scopeMatches) {
+    console.log('[Bpost] ShopUrl a changé (' + (stored.shop_url || 'null') + ' → ' + shopUrl + '), nouveau token');
+  }
   const fresh = await requestNewToken(shopUrl);
-  await saveToken(fresh.token, fresh.expire);
-  console.log('[Bpost] Token renouvelé, expire', fresh.expire);
+  await saveToken(fresh.token, fresh.expire, shopUrl);
+  console.log('[Bpost] Token renouvelé pour ShopUrl=' + shopUrl + ', expire', fresh.expire);
   return fresh.token;
 }
 
