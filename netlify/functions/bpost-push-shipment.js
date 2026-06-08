@@ -79,7 +79,17 @@ function shopItemHex(cref) {
   return crypto.createHash('md5').update(cref).digest('hex').substring(0, 32);
 }
 
-function buildShipment(order, refSuffix) {
+// Au premier essai on tente "ARCA-N" (lisible dans SM web). Si Bpost
+// répond "already exists" (cas des commandes qui ont des ghosts laissés
+// par les anciens push cassés), on bascule sur un suffixe random hex
+// 8 chars — impossible de retomber sur un ghost existant.
+function buildCref(orderId, attempt) {
+  if (attempt === 0) return 'ARCA-' + orderId;
+  const rnd = crypto.randomBytes(4).toString('hex');  // 8 chars hex
+  return 'ARCA-' + orderId + '-' + rnd;
+}
+
+function buildShipment(order, attempt) {
   const addr = parseStreet(order.rue);
   let houseNumber = '1';
   let numberExt = order.complement || '';
@@ -92,7 +102,7 @@ function buildShipment(order, refSuffix) {
     }
   }
   const country = ISO2[order.pays] || 'BE';
-  const cref = 'ARCA-' + order.id + (refSuffix ? '-' + refSuffix : '');
+  const cref = buildCref(order.id, attempt);
 
   return {
     ShopItemId: shopItemHex(cref),
