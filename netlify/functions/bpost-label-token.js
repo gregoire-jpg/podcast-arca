@@ -25,14 +25,15 @@ exports.handler = async function (event) {
     return json(401, { error: 'Mot de passe incorrect' });
   }
   const ref = body.ref;
-  if (!ref || !/^ARCA-\d+(-r\d+)?$/.test(ref)) return json(400, { error: 'ref invalide' });
+  if (!ref || !/^ARCA-\d+$/.test(ref)) return json(400, { error: 'ref invalide' });
 
   const secret = process.env.BPOST_LABEL_SECRET || process.env.ADMIN_PASSWORD;
   if (!secret) return json(500, { error: 'BPOST_LABEL_SECRET non configuré' });
 
   const exp = Math.floor(Date.now() / 1000) + TOKEN_TTL_SEC;
   const sig = crypto.createHmac('sha256', secret).update(ref + '.' + exp).digest('hex');
-  const url = '/.netlify/functions/bpost-fetch-label?ref=' + encodeURIComponent(ref) +
+  // Endpoint cible = bpost-print-label (nouveau, API XML SHM).
+  const url = '/.netlify/functions/bpost-print-label?ref=' + encodeURIComponent(ref) +
               '&exp=' + exp + '&sig=' + sig;
 
   return json(200, { url, expiresAt: exp });

@@ -813,6 +813,7 @@
       <button class="btn btn-navy" id="cmd-new" style="margin-left:12px">+ Nouvelle commande</button>
       <button class="btn btn-gold" id="cmd-print-mainpropre" style="margin-left:6px" title="PDF imprimable des commandes en main propre (non clôturées)">📋 PDF main propre</button>
       <button class="btn btn-gold" id="cmd-debug-bpost" style="margin-left:6px" title="Liste les carriers autorisés sur le contrat Bpost ARCA" onclick="CMD.debugBpost()">🔧 Debug Bpost</button>
+      <button class="btn btn-gold" id="cmd-shm-test" style="margin-left:6px" title="Teste les credentials sur l'API XML SHM" onclick="CMD.testShmAuth()">🔬 Test SHM Auth</button>
       <button class="btn btn-gold" id="cmd-refresh" style="margin-left:6px">⟳ Actualiser</button>
     </div>
   </div>
@@ -4622,6 +4623,28 @@ CMD.debugBpostOrder = function(orderId) {
     w.document.close();
   })
   .catch(function(e) { alert('Erreur debug : ' + e.message); });
+};
+
+// Teste les credentials qu'on a en env Netlify sur l'API XML SHM
+// (api-parcel.bpost.be/services/shm). Essaie plusieurs combinaisons
+// accountId × passphrase pour voir lesquelles passent l'auth.
+CMD.testShmAuth = function() {
+  var pwd = sessionStorage.getItem('admin_pwd') || prompt('Mot de passe admin');
+  if (!pwd) return;
+  sessionStorage.setItem('admin_pwd', pwd);
+  fetch('/.netlify/functions/bpost-shm-test', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pwd })
+  })
+  .then(function(r) { return r.text().then(function(t) { return { ok: r.ok, status: r.status, text: t }; }); })
+  .then(function(res) {
+    var w = window.open('', '_blank');
+    if (!w) { alert('Pop-up bloqué.'); return; }
+    w.document.write('<html><head><title>Bpost SHM Auth Test</title><style>body{font:13px monospace;padding:1em;background:#1e1e1e;color:#dcdcdc}pre{white-space:pre-wrap;word-break:break-all}h1{color:#9cdcfe}.ok{color:#4ec9b0}.ko{color:#f48771}</style></head><body><h1>Bpost SHM auth test (HTTP ' + res.status + ')</h1><pre>' + res.text.replace(/[&<>]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}) + '</pre></body></html>');
+    w.document.close();
+  })
+  .catch(function(e) { alert('Erreur test SHM : ' + e.message); });
 };
 
 // Diagnostic Bpost : dump le scope du token et la liste des carriers
