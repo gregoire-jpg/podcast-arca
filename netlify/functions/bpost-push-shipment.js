@@ -31,6 +31,22 @@ function computeWeightG(items) {
   return Math.max(g, 100);
 }
 
+// ShipmentItems[] — sans ce tableau, Bpost retombe sur 100g par défaut
+// pour l'affichage du poids sur l'étiquette intl (validé 2026-06-08
+// après que ARTERO ait reçu une étiquette à 0.100kg au lieu de 0.6kg).
+// Format aligné sur plugin Woo officiel 3.2.3 (class-woo-Bpost-order.php:316).
+function buildShipmentItems(items) {
+  return (items || []).map(it => ({
+    Count: it.qty || 1,
+    Id: it.num || 0,
+    Name: it.title || ('N°' + it.num),
+    Type: '',
+    Value: parseFloat(it.price || 0),
+    Weight: WEIGHTS[it.num] || 600,
+    ArticleNumber: ''
+  }));
+}
+
 function parseStreet(rue) {
   if (!rue) return { street: '', number: '' };
   const cleaned = String(rue).trim();
@@ -120,7 +136,8 @@ function buildShipment(order, attempt) {
       { Id: 126, Value: productId }
     ],
     Carrier: { Id: 68 },
-    Weight: computeWeightG(order.items)
+    Weight: computeWeightG(order.items),
+    ShipmentItems: buildShipmentItems(order.items)
   };
 }
 
