@@ -3906,7 +3906,7 @@ CMD.render = function() {
             // SANS recréer d'expédition (sinon MR re-facture à chaque impression).
             if (o.livraison === 'Mondial Relay') {
               if (o.mr_label_url) {
-                return '<button class="cmd-act print" onclick="CMD.printLabel(' + JSON.stringify(o.mr_label_url) + ')" title="Rouvre l\'étiquette déjà générée (aucune nouvelle expédition MR, aucune re-facturation)">🖨️ Imprimer étiquette</button>'
+                return '<button class="cmd-act print" onclick="CMD.printMr(' + o.id + ')" title="Rouvre l\'étiquette déjà générée (aucune nouvelle expédition MR, aucune re-facturation)">🖨️ Imprimer étiquette</button>'
                   + '<button class="cmd-act" style="background:#888;color:#fff" onclick="CMD.regenMr(' + o.id + ', event, true)" title="⚠ Forcer la RECRÉATION de l\'étiquette chez MR (FACTURÉE) — uniquement si le PDF stocké est corrompu">↻</button>';
               }
               // Pas encore d'étiquette MR → bouton pour la générer (1ère création, facturée 1×)
@@ -4567,6 +4567,17 @@ CMD.printBpostLabel = function(cref) {
   form.submit();
   // Le form reste attaché 1s pour garantir la soumission, puis on nettoie
   setTimeout(function() { try { document.body.removeChild(form); } catch(e) {} }, 1000);
+};
+
+// Réimpression d'une étiquette MR DÉJÀ générée : on retrouve la commande et on
+// rouvre simplement l'URL PDF stockée (URL GET stable côté MR). AUCUN appel
+// serveur, AUCUNE nouvelle expédition → zéro re-facturation. Si l'URL stockée
+// est corrompue (page blanche), utiliser le bouton ↻ (force) qui recrée l'étiquette.
+CMD.printMr = function(id) {
+  var o = CMD.orders.find(function(x){ return x.id === id; });
+  if (!o) { alert('Commande introuvable.'); return; }
+  if (!o.mr_label_url) { CMD.regenMr(id); return; }  // pas encore générée → 1ère génération (idempotent)
+  CMD.printLabel(o.mr_label_url);
 };
 
 // Ouvre l'étiquette PDF dans un nouvel onglet (et tente d'ouvrir le dialog d'impression)
