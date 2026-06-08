@@ -1257,6 +1257,12 @@
 <script>
 'use strict';
 
+/* ═══════════════════ VERSION MARKER ═══════════════════ */
+// Marker visible dans console pour confirmer que le browser sert la dernière
+// version. Si Greg voit "Unexpected end of input" et PAS ce log → erreur
+// dans un bloc PRÉCÉDENT du HTML (extension, widget MR, etc.).
+console.log('[admin] v2026-06-08-21:55 — bpost form POST, regex random hex');
+
 /* ═══════════════════ STATE ═══════════════════ */
 var S = { episodes: [], config: {}, pwd: '', dirty: new Set() };
 
@@ -3866,11 +3872,21 @@ CMD.render = function() {
               if (o.bpost_label_url === 'manual:shipping-manager') {
                 return '<span class="cmd-badge paid" title="Étiquette imprimée hors API (saisie SM web)">✓ Bpost (traitée manuellement)</span>';
               }
-              // Marqueur bpost-fetch:ARCA-XX → PDF récupérable via token signé
+              // Marqueur bpost-fetch:ARCA-XX → PDF récupérable
               if (o.bpost_label_url && String(o.bpost_label_url).startsWith('bpost-fetch:')) {
                 var bfCref = o.bpost_label_url.replace(/^bpost-fetch:/, '');
+                // Form HTML statique : marche MÊME si tout le JS plante
+                // (extension qui injecte un script cassé, etc.). On stocke
+                // le password en sessionStorage côté admin auth normal et
+                // un input hidden minimaliste lit via inline onclick.
+                var bfCrefSafe = CMD.esc(bfCref);
                 return ''
-                  + '<button class="cmd-act print" onclick="CMD.printBpostLabel(' + JSON.stringify(bfCref) + ')">🖨️ Imprimer étiquette</button>'
+                  + '<form method="POST" action="/.netlify/functions/bpost-print-direct" target="_blank" style="display:inline" '
+                  +   'onsubmit="this.querySelector(\'[name=password]\').value = sessionStorage.getItem(\'admin_pwd\') || prompt(\'Mot de passe admin\') || \'\'; sessionStorage.setItem(\'admin_pwd\', this.querySelector(\'[name=password]\').value);">'
+                  +   '<input type="hidden" name="ref" value="' + bfCrefSafe + '">'
+                  +   '<input type="hidden" name="password" value="">'
+                  +   '<button type="submit" class="cmd-act print">🖨️ Imprimer étiquette</button>'
+                  + '</form>'
                   + '<button class="cmd-act" style="background:#888;color:#fff" onclick="CMD.debugBpostOrder(' + o.id + ')" title="Diagnostic Bpost">🔧</button>';
               }
               // URL Bpost directe (rare : LabelUrl renvoyée)
