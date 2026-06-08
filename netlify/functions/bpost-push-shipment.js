@@ -267,47 +267,13 @@ exports.handler = async function (event) {
     const shopUrl = process.env.BPOST_SHOP_URL || fallbackShopUrl;
     const token = await utils.getValidToken(shopUrl);
 
-    // ── 0) Shortcut : si on a déjà un CallbackURL Bpost en attente (préfixe
-    //      "pending:" dans bpost_label_url), on le hit directement avant de
-    //      tout refaire. Le PDF a eu le temps d'être généré entre 2 clics
-    //      utilisateur (généralement 30s suffisent côté Bpost).
-    if (order.bpost_label_url && String(order.bpost_label_url).startsWith('pending:')) {
-      const pendingCb = order.bpost_label_url.replace(/^pending:/, '');
-      try {
-        const poll = await utils.bpostCall('GET', new URL(pendingCb).pathname, null, token);
-        if (poll && poll.LabelUrl) {
-          await updateOrder(order_id, { bpost_label_url: poll.LabelUrl });
-          console.log('[Bpost] PDF récupéré via callback stocké');
-          return {
-            statusCode: 200,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ok: true, bpost_label_url: poll.LabelUrl, bpost_reference: 'ARCA-' + order_id })
-          };
-        }
-        console.log('[Bpost] callback stocké pas encore prêt, on relance un POST /labels');
-      } catch (e) {
-        console.warn('[Bpost] callback stocké KO:', e.message, '— on relance le flux');
-      }
-    }
-
-    // ── 0ter) Si la commande a déjà un cref Bpost en BDD, on saute
-    //          la création (pas de double facturation) et on va direct
-    //          chercher l'étiquette avec ce cref.
+    // ── 0ter) Si la commande a déjà été poussée, on ne re-crée pas.
+    //          L'impression se fait dans Shipping Manager web Bpost
+    //          (Carrier 68 = bpost shm ne génère pas de PDF via API
+    //          Plug-in, c'est by design). On renvoie juste le cref.
     if (order.bpost_reference && /^ARCA-\d+/.test(order.bpost_reference)) {
-      console.log('[Bpost] commande déjà poussée cref=' + order.bpost_reference + ', skip create, fetch label only');
-      const labelRes = await tryFetchLabel(order_id, token, order.bpost_reference);
-      let storedUrl;
-      if (labelRes.ready && labelRes.mode === 'binary') {
-        storedUrl = 'bpost-fetch:' + order.bpost_reference;
-      } else if (labelRes.ready && labelRes.mode === 'url') {
-        storedUrl = labelRes.labelUrl;
-      } else if (labelRes.pending && labelRes.cbUrl) {
-        storedUrl = 'pending:' + labelRes.cbUrl;
-      } else {
-        // Même sans confirmation, le PDF se débloque souvent au prochain
-        // appel via /bpost-fetch-label. On stocke cette URL.
-        storedUrl = 'bpost-fetch:' + order.bpost_reference;
-      }
+      console.log('[Bpost] commande déjà poussée cref=' + order.bpost_reference + ', skip recréation');
+      const storedUrl = 'manual:shipping-manager:' + order.bpost_reference;
       await updateOrder(order_id, { bpost_label_url: storedUrl });
       return {
         statusCode: 200,
@@ -316,10 +282,7 @@ exports.handler = async function (event) {
           ok: true,
           bpost_reference: order.bpost_reference,
           bpost_label_url: storedUrl,
-          label_mode: labelRes.mode || 'fetch-on-demand',
-          message: labelRes.ready
-            ? 'Étiquette prête. Clique sur "Imprimer étiquette".'
-            : 'Shipment déjà chez Bpost. Le PDF est en cours de génération — clique sur "Imprimer étiquette" dans 30s.'
+          message: 'Shipment ' + order.bpost_reference + ' déjà chez Bpost. Imprime-le dans Shipping Manager web (onglet Commandes).'
         })
       };
     }
@@ -425,28 +388,13 @@ exports.handler = async function (event) {
       };
     }
 
-    // ── 2) Récupérer l'étiquette PDF ────────────────────────────────
-    const labelRes = await tryFetchLabel(order_id, token, chosenCref);
-
-    // ── 3) Stocker l'URL utilisable par l'admin ─────────────────────
-    // Si Bpost a renvoyé le PDF en binaire, on stocke une URL Netlify
-    // (/bpost-fetch-label?ref=<cref>) qui rejouera POST /labels à la
-    // demande et streamera le PDF au browser.
-    // Si Bpost a renvoyé une LabelUrl directe, on la stocke telle quelle.
-    // Si le PDF est en attente (callback), on stocke "pending:<cbUrl>".
-    let storedUrl;
-    if (labelRes.ready && labelRes.mode === 'binary') {
-      storedUrl = 'bpost-fetch:' + chosenCref;
-    } else if (labelRes.ready && labelRes.mode === 'url') {
-      storedUrl = labelRes.labelUrl;
-    } else if (labelRes.pending && labelRes.cbUrl) {
-      storedUrl = 'pending:' + labelRes.cbUrl;
-    } else {
-      // Même sans callback, le PDF sera probablement dispo plus tard via
-      // POST /labels. On stocke une URL fetch-label : le 2e clic tentera.
-      storedUrl = 'bpost-fetch:' + chosenCref;
-    }
-
+    // ── 2) Shipment matérialisé chez Bpost — on stocke le cref et on
+    //       laisse l'admin ouvrir Shipping Manager web pour imprimer.
+    //       (Carrier 68 / bpost shm ne fournit pas de PDF via Plug-in
+    //       API ; "Invalid service level code" sur /v3/labels confirmé
+    //       le 2026-06-08. Pour auto-PDF il faudrait l'API XML deep
+    //       integration api.bpost.be/services/shm/.)
+    const storedUrl = 'manual:shipping-manager:' + chosenCref;
     await updateOrder(order_id, {
       bpost_shipment_id: chosenCref,
       bpost_reference:   chosenCref,
@@ -455,23 +403,6 @@ exports.handler = async function (event) {
       bpost_pushed_at:   new Date().toISOString()
     });
 
-    if (!labelRes.ready) {
-      return {
-        statusCode: 200,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ok: true,
-          bpost_reference: chosenCref,
-          bpost_label_url: storedUrl,
-          label_pending: !!labelRes.pending,
-          label_errors: labelRes.errors || [],
-          message: labelRes.pending
-            ? 'Shipment créé chez Bpost (réf ' + chosenCref + '). Le PDF est en cours de génération — clique sur "Imprimer étiquette" dans 30s.'
-            : 'Shipment créé. Le PDF s\'ouvrira via le bouton "Imprimer étiquette".'
-        })
-      };
-    }
-
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
@@ -479,7 +410,7 @@ exports.handler = async function (event) {
         ok: true,
         bpost_reference: chosenCref,
         bpost_label_url: storedUrl,
-        label_mode: labelRes.mode
+        message: 'Shipment ' + chosenCref + ' poussé chez Bpost. Ouvre Shipping Manager web → onglet Commandes → imprime.'
       })
     };
   } catch (e) {

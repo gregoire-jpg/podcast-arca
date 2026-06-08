@@ -3860,30 +3860,25 @@ CMD.render = function() {
             // Bpost (Poste avec suivi) — un seul bouton qui gère tous les cas
             // grâce au flux refactor 2026-06-08.
             if (o.livraison === 'Poste avec suivi') {
+              // Déjà marquée traitée manuellement (legacy ou cliquée)
               if (o.bpost_label_url === 'manual:shipping-manager') {
                 return '<span class="cmd-badge paid" title="Étiquette téléchargée et imprimée depuis le Shipping Manager Bpost web">✓ Bpost (traitée manuellement)</span>';
               }
-              // Marqueur "bpost-fetch:ARCA-XX" : ouvre via token HMAC signé
-              // (l'URL avec PII ne doit JAMAIS être stockée en clair)
-              if (o.bpost_label_url && String(o.bpost_label_url).startsWith('bpost-fetch:')) {
-                var refCref = o.bpost_label_url.replace(/^bpost-fetch:/, '');
-                return '<button class="cmd-act print" onclick="CMD.printBpostLabel(' + JSON.stringify(refCref) + ')">🖨️ Imprimer étiquette</button>';
+              // Shipment poussé chez Bpost — à imprimer dans SM web
+              // (le Carrier 68 / bpost shm ne génère pas de PDF via Plug-in API).
+              if (o.bpost_label_url && String(o.bpost_label_url).startsWith('manual:shipping-manager:')) {
+                var smCref = o.bpost_label_url.replace(/^manual:shipping-manager:/, '');
+                return ''
+                  + '<button class="cmd-act print" onclick="CMD.openBpostSmWeb(' + JSON.stringify(smCref) + ')" title="Ouvre Shipping Manager web — cherche la référence ' + smCref + '">🖨️ Imprimer dans SM web (réf ' + smCref + ')</button>'
+                  + '<button class="cmd-act done" onclick="CMD.markBpostManual(' + o.id + ')" title="Marquer comme imprimée">✓ Imprimée</button>'
+                  + '<button class="cmd-act" style="background:#888;color:#fff" onclick="CMD.debugBpostOrder(' + o.id + ')" title="Diagnostic Bpost">🔧</button>';
               }
-              // URL Bpost directe (rare) : bouton Imprimer classique
-              if (o.bpost_label_url && !String(o.bpost_label_url).startsWith('pending:')) {
+              // URL Bpost directe (cas rare où une LabelUrl est retournée)
+              if (o.bpost_label_url && !String(o.bpost_label_url).startsWith('pending:') && !String(o.bpost_label_url).startsWith('bpost-fetch:')) {
                 return '<button class="cmd-act print" onclick="CMD.printLabel(' + JSON.stringify(o.bpost_label_url) + ')">🖨️ Imprimer étiquette</button>';
               }
-              // Pas encore prêt OU rien : bouton unique qui push/retry.
-              // Backend détecte "Shipment already exists" et "pending:" pour
-              // ne pas créer de doublon (pas de double facturation).
-              var label;
-              if (o.bpost_label_url && String(o.bpost_label_url).startsWith('pending:')) {
-                label = '⏳ Bpost prépare le PDF — clique pour récupérer';
-              } else if (o.bpost_pushed_at) {
-                label = '🔄 Réessayer Bpost';
-              } else {
-                label = '📦 Envoyer à Bpost';
-              }
+              // Pas encore poussée : bouton "Envoyer à Bpost"
+              var label = o.bpost_pushed_at ? '🔄 Réessayer Bpost' : '📦 Envoyer à Bpost';
               return ''
                 + '<button class="cmd-act bpost" onclick="CMD.pushBpost(' + o.id + ')">' + label + '</button>'
                 + '<button class="cmd-act done" onclick="CMD.markBpostManual(' + o.id + ')" title="Si tu as téléchargé l\'étiquette depuis le Shipping Manager Bpost web et imprimée, marque la commande comme traitée manuellement">✓ Traitée manuellement</button>'
@@ -4487,6 +4482,27 @@ CMD.regenMr = function(id, evt) {
   });
 };
 
+// Ouvre Shipping Manager web Bpost dans un nouvel onglet, copie le
+// cref dans le presse-papier pour le rechercher facilement. Le Plug-in
+// API ne fournit pas de PDF côté serveur — l'impression se fait depuis
+// SM web (où Antoine et Greg sont authentifiés).
+CMD.openBpostSmWeb = function(cref) {
+  try { navigator.clipboard.writeText(cref); } catch (e) {}
+  var url = 'https://shippingmanager.bpost.be/ShippingManager/OrderManagement/Orders';
+  var w = window.open(url, '_blank');
+  if (!w) {
+    alert('Pop-up bloqué — autorise les pop-ups pour podcast-arca.netlify.app.\n\nLe cref ' + cref + ' a été copié dans le presse-papier. Ouvre Shipping Manager Bpost et colle dans la recherche.');
+    return;
+  }
+  // Petit toast non-bloquant
+  var toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#1f5b3a;color:#fff;padding:12px 18px;border-radius:6px;font:.9em Arial;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
+  toast.textContent = 'Référence ' + cref + ' copiée — colle-la dans la recherche SM web';
+  document.body.appendChild(toast);
+  setTimeout(function(){ toast.style.transition = 'opacity .5s'; toast.style.opacity = '0'; }, 3000);
+  setTimeout(function(){ toast.remove(); }, 3700);
+};
+
 // Étiquette Bpost via marqueur "bpost-fetch:ARCA-XX" : on demande un
 // token signé HMAC (court, 10 min) à /bpost-label-token (auth password)
 // puis on ouvre l'URL signée dans un nouvel onglet. Le PDF lui-même
@@ -4554,13 +4570,22 @@ CMD.pushBpost = function(id) {
   })
   .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
   .then(function(d) {
-    if (d.bpost_label_url) {
-      // Ouvre direct le PDF dans un nouvel onglet pour impression
+    // Cas normal : Carrier 68 ne fournit pas de PDF via Plug-in API.
+    // Le shipment est dans le SM web, à imprimer là-bas.
+    if (d.bpost_label_url && String(d.bpost_label_url).startsWith('manual:shipping-manager:')) {
+      var cref = d.bpost_label_url.replace(/^manual:shipping-manager:/, '');
+      CMD.load();
+      // Ouvre direct le SM web pour imprimer
+      CMD.openBpostSmWeb(cref);
+      return;
+    }
+    // Cas rare : URL directe (legacy Bpost ou autre)
+    if (d.bpost_label_url && !String(d.bpost_label_url).startsWith('pending:') && !String(d.bpost_label_url).startsWith('bpost-fetch:')) {
       CMD.printLabel(d.bpost_label_url);
     } else {
-      alert('✓ Commande envoyée à Bpost\nRéf: ' + d.bpost_reference + '\n(Étiquette PDF pas encore disponible, recharge dans 30s)');
+      alert('✓ Commande envoyée à Bpost\nRéf: ' + d.bpost_reference + '\n\nVa l\'imprimer dans Shipping Manager web → onglet Commandes.');
     }
-    CMD.load();   // reload pour afficher le nouvel état
+    CMD.load();
   })
   .catch(function(e) {
     alert('Erreur : ' + e.message);
