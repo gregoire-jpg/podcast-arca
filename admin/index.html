@@ -3864,12 +3864,21 @@ CMD.render = function() {
               if (o.bpost_label_url) {
                 return '<button class="cmd-act print" onclick="CMD.printLabel(' + JSON.stringify(o.bpost_label_url) + ')">🖨️ Imprimer étiquette</button>';
               }
+              // pushed_at posé mais pas d'URL : génération en cours côté Bpost OU
+              // push de jadis qui a échoué silencieusement (cas ARTERO du 2026-06-08
+              // avec HouseNumber=0 et LabelType A6 invalides). Si pushed_at > 5 min,
+              // l'utilisateur peut relancer manuellement.
+              var pushedAt = new Date(o.bpost_pushed_at);
+              var ageMin = (Date.now() - pushedAt.getTime()) / 60000;
+              if (ageMin > 5) {
+                return '<button class="cmd-act bpost" onclick="CMD.pushBpost(' + o.id + ')" title="Le push initial a probablement échoué — relancer">🔄 Réessayer Bpost</button>';
+              }
               return '<span class="cmd-badge paid">✓ Bpost (PDF en cours)</span>';
             }
-            // Mondial Relay
+            // Mondial Relay : on régénère toujours pour éviter les URLs expirées (24-48h)
             if (o.livraison === 'Mondial Relay') {
               if (o.mr_label_url) {
-                return '<button class="cmd-act print" onclick="CMD.printLabel(' + JSON.stringify(o.mr_label_url) + ')">🖨️ Imprimer étiquette</button>';
+                return '<button class="cmd-act print" onclick="CMD.regenMr(' + o.id + ', event)" title="Régénère l\'étiquette MR puis l\'ouvre — évite les URLs expirées">🖨️ Imprimer étiquette</button>';
               }
               // Pas encore d'étiquette MR → bouton pour la générer
               if (o.mr_relay_code) {
@@ -4431,11 +4440,19 @@ CMD.toggleDetail = function(id) {
   CMD.render();
 };
 
-// Génère l'étiquette MR pour une commande qui n'en a pas encore
-CMD.regenMr = function(id) {
-  if (!confirm('Générer l\'étiquette Mondial Relay pour cette commande ?')) return;
-  var btn = event.target;
-  btn.disabled = true; btn.textContent = '⏳ Génération...';
+// Génère (ou régénère) l'étiquette MR puis l'ouvre.
+// Utilisé pour les 2 boutons MR :
+//   - "Générer étiquette MR" : 1ère fois sur une commande sans étiquette
+//   - "Imprimer étiquette MR" : déjà générée, mais on régénère car les URLs
+//     MR Connect v2 ont une durée de vie limitée (24-48h) → l'URL stockée
+//     en BDD finit par retourner une page blanche ("bouton HS" reporté
+//     par Antoine le 2026-06-08).
+CMD.regenMr = function(id, evt) {
+  evt = evt || window.event;
+  var btn = evt && evt.target;
+  var initial = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Génération…'; }
+
   fetch('/.netlify/functions/regenerate-mr-label', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -4444,7 +4461,7 @@ CMD.regenMr = function(id) {
   .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
   .then(function(d) {
     if (d.mr_label_url) {
-      CMD.printLabel(d.mr_label_url);  // ouvre direct le PDF
+      CMD.printLabel(d.mr_label_url);
     } else {
       alert('Étiquette générée (n° ' + d.mr_expedition + ') mais URL PDF absente.');
     }
@@ -4452,7 +4469,7 @@ CMD.regenMr = function(id) {
   })
   .catch(function(e) {
     alert('Erreur : ' + e.message);
-    btn.disabled = false; btn.textContent = '📍 Générer étiquette MR';
+    if (btn) { btn.disabled = false; btn.textContent = initial; }
   });
 };
 

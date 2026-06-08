@@ -136,6 +136,34 @@ exports.handler = async function (event) {
     const shipResp = await utils.bpostCall('POST', '/v3/shipments/', shipPayload, token);
     console.log('[Bpost] shipments resp:', JSON.stringify(shipResp).substring(0, 500));
 
+    // ── Vérification des erreurs côté Bpost ────────────────────────────
+    // Avant le 2026-06-08 on marquait bpost_pushed_at même en cas d'échec API
+    // → les commandes restaient bloquées sur "PDF en cours" sans recours
+    // (cf. signalement Antoine ARTERO). Maintenant on lève une erreur claire
+    // et on ne touche PAS à la BDD si le shipment n'a pas été créé.
+    const shipments = Array.isArray(shipResp.Shipment) ? shipResp.Shipment : [];
+    const apiErrors = [];
+    shipments.forEach(s => {
+      if (Array.isArray(s.ErrorList)) {
+        s.ErrorList.forEach(e => apiErrors.push((e.Tekst || e.Info || 'erreur').trim()));
+      }
+    });
+    if (shipResp.Error && shipResp.Error.Id && shipResp.Error.Id !== 0) {
+      apiErrors.push((shipResp.Error.Info || ('Error ' + shipResp.Error.Id)).trim());
+    }
+    if (apiErrors.length) {
+      console.error('[Bpost] shipment refusé:', apiErrors.join(' | '));
+      return {
+        statusCode: 422,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ok: false,
+          error: 'Bpost a refusé la commande : ' + apiErrors.join(' · '),
+          api_errors: apiErrors
+        })
+      };
+    }
+
     // 2) POST /v3/labels — démarre génération PDF
     // LabelType : A4 par défaut (format universel, accepté partout). Surchargeable
     // via env BPOST_LABEL_TYPE pour s'aligner sur une étiqueteuse thermique. Le
