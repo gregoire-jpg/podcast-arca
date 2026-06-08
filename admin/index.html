@@ -4512,6 +4512,18 @@ CMD.printBpostLabel = function(cref) {
   var pwd = sessionStorage.getItem('admin_pwd') || prompt('Mot de passe admin');
   if (!pwd) return;
   sessionStorage.setItem('admin_pwd', pwd);
+
+  // CRITIQUE : window.open DOIT être appelé synchrone dans le user
+  // gesture (clic). Si on attend la fin du fetch, Chrome/Firefox bloquent
+  // silencieusement. On ouvre un onglet "loading" et on le redirige
+  // une fois le token signé reçu.
+  var w = window.open('about:blank', '_blank');
+  if (!w) {
+    alert('Pop-up bloqué — autorise les pop-ups pour podcast-arca.netlify.app puis réessaye.');
+    return;
+  }
+  try { w.document.write('<html><body style="font:14px Arial;padding:2em;color:#666">Chargement de l\'étiquette Bpost…</body></html>'); } catch(e) {}
+
   fetch('/.netlify/functions/bpost-label-token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -4519,11 +4531,10 @@ CMD.printBpostLabel = function(cref) {
   })
   .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
   .then(function(d) {
-    var w = window.open(d.url, '_blank');
-    if (!w) { alert('Pop-up bloqué — autorise les pop-ups pour podcast-arca.netlify.app puis réessaye.'); return; }
-    try { w.addEventListener('load', function(){ try { w.print(); } catch(e){} }); } catch(e){}
+    w.location.href = d.url;
   })
   .catch(function(e) {
+    try { w.close(); } catch(_) {}
     if (/incorrect/i.test(e.message)) sessionStorage.removeItem('admin_pwd');
     alert('Erreur étiquette Bpost : ' + e.message);
   });
