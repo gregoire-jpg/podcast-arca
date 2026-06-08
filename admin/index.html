@@ -3884,12 +3884,16 @@ CMD.render = function() {
                 + '<button class="cmd-act done" onclick="CMD.markBpostManual(' + o.id + ')" title="Marquer comme traitée hors API">✓ Traitée manuellement</button>'
                 + '<button class="cmd-act" style="background:#888;color:#fff" onclick="CMD.debugBpostOrder(' + o.id + ')" title="Diagnostic Bpost">🔧</button>';
             }
-            // Mondial Relay : on régénère toujours pour éviter les URLs expirées (24-48h)
+            // Mondial Relay : l'étiquette est créée UNE seule fois (à la commande ou
+            // au 1er clic "Générer"). L'URL PDF MR est une URL GET stable (clef
+            // expedition+crc), donc "Imprimer" ne fait que rouvrir l'URL stockée —
+            // SANS recréer d'expédition (sinon MR re-facture à chaque impression).
             if (o.livraison === 'Mondial Relay') {
               if (o.mr_label_url) {
-                return '<button class="cmd-act print" onclick="CMD.regenMr(' + o.id + ', event)" title="Régénère l\'étiquette MR puis l\'ouvre — évite les URLs expirées">🖨️ Imprimer étiquette</button>';
+                return '<button class="cmd-act print" onclick="CMD.printLabel(' + JSON.stringify(o.mr_label_url) + ')" title="Rouvre l\'étiquette déjà générée (aucune nouvelle expédition MR, aucune re-facturation)">🖨️ Imprimer étiquette</button>'
+                  + '<button class="cmd-act" style="background:#888;color:#fff" onclick="CMD.regenMr(' + o.id + ', event, true)" title="⚠ Forcer la RECRÉATION de l\'étiquette chez MR (FACTURÉE) — uniquement si le PDF stocké est corrompu">↻</button>';
               }
-              // Pas encore d'étiquette MR → bouton pour la générer
+              // Pas encore d'étiquette MR → bouton pour la générer (1ère création, facturée 1×)
               if (o.mr_relay_code) {
                 return '<button class="cmd-act mr" onclick="CMD.regenMr(' + o.id + ')">📍 Générer étiquette MR</button>';
               }
@@ -4449,23 +4453,29 @@ CMD.toggleDetail = function(id) {
   CMD.render();
 };
 
-// Génère (ou régénère) l'étiquette MR puis l'ouvre.
-// Utilisé pour les 2 boutons MR :
-//   - "Générer étiquette MR" : 1ère fois sur une commande sans étiquette
-//   - "Imprimer étiquette MR" : déjà générée, mais on régénère car les URLs
-//     MR Connect v2 ont une durée de vie limitée (24-48h) → l'URL stockée
-//     en BDD finit par retourner une page blanche ("bouton HS" reporté
-//     par Antoine le 2026-06-08).
-CMD.regenMr = function(id, evt) {
+// Crée l'étiquette MR (1ère génération) ou la FORCE-recrée, puis l'ouvre.
+// ⚠ Chaque appel ici crée une expédition MR FACTURÉE (POST /api/Shipment est la
+//   seule méthode de l'API Connect v2 — pas de "reprint" serveur).
+//   - "Générer étiquette MR" (force absent) : 1ère création sur une commande qui
+//     n'a pas encore d'étiquette. Le backend est idempotent : si une expédition
+//     existe déjà, il renvoie l'URL stockée sans re-facturer.
+//   - bouton ↻ (force=true) : RECRÉE volontairement l'étiquette (re-facturé),
+//     réservé au cas où le PDF stocké est réellement corrompu.
+// La simple réimpression d'une étiquette existante NE passe PAS par ici : elle
+// rouvre directement o.mr_label_url via CMD.printLabel (URL GET stable, 0 coût).
+CMD.regenMr = function(id, evt, force) {
   evt = evt || window.event;
   var btn = evt && evt.target;
   var initial = btn ? btn.textContent : '';
+  if (force && !confirm('⚠ Recréer l\'étiquette chez Mondial Relay ?\n\nUne NOUVELLE expédition sera créée et FACTURÉE par MR.\nÀ n\'utiliser que si le PDF actuel est corrompu (page blanche).')) {
+    return;
+  }
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Génération…'; }
 
   fetch('/.netlify/functions/regenerate-mr-label', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ order_id: id })
+    body: JSON.stringify({ order_id: id, force: !!force })
   })
   .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
   .then(function(d) {

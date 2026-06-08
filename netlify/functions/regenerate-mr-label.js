@@ -1,6 +1,15 @@
-// Regenere l'etiquette Mondial Relay pour une commande existante (admin only).
-// POST { order_id: N } -> { success, mr_expedition, mr_label_url }
-// Recharge la commande depuis Supabase, appelle createLabel(), met a jour la BDD.
+// Etiquette Mondial Relay pour une commande existante (admin only).
+// POST { order_id: N, force?: true } -> { success, mr_expedition, mr_label_url, reused? }
+//
+// IMPORTANT — ANTI DOUBLE-FACTURATION :
+// L'endpoint MR Connect v2 /api/Shipment est la SEULE methode dispo et chaque
+// appel CREE une expedition => MR facture a chaque fois. Il n'existe aucun verbe
+// "reprint". L'URL PDF renvoyee (outputField) est une URL GET statique (clef
+// expedition + crc), valable tant que l'expedition existe : ce n'est PAS un token
+// qui expire. Donc si la commande a deja une expedition + une URL stockee, on
+// RENVOIE l'URL telle quelle, sans rappeler createLabel (= sans re-facturer).
+// On ne (re)cree une expedition que si aucune n'existe encore, ou si force:true
+// est explicitement passe (cas rare : URL stockee reellement corrompue).
 
 const { createLabel } = require('./mr-label');
 
@@ -34,6 +43,20 @@ exports.handler = async function(event) {
   if ((order.livraison || '').toLowerCase().indexOf('mondial') < 0) {
     return json(400, { error: "Cette commande n'est pas en livraison Mondial Relay" });
   }
+
+  // ── Idempotence : etiquette deja generee → on renvoie l'URL stockee sans
+  //    recreer d'expedition (chaque POST /api/Shipment est facture par MR).
+  const force = body.force === true || body.force === 1 || body.force === '1';
+  if (!force && order.mr_expedition && order.mr_label_url) {
+    console.log('[regenerate-mr-label] orderId=' + orderId + ' etiquette deja existante (exp=' + order.mr_expedition + ') → reimpression URL stockee, AUCUNE nouvelle expedition MR creee.');
+    return json(200, {
+      success: true,
+      mr_expedition: order.mr_expedition,
+      mr_label_url: order.mr_label_url,
+      reused: true
+    });
+  }
+
   if (!order.mr_relay_code) {
     return json(400, { error: 'Code point relais manquant sur la commande' });
   }
@@ -57,7 +80,7 @@ exports.handler = async function(event) {
     if (it && it.num) orderData['qty-n' + it.num] = String(it.qty || 0);
   });
 
-  console.log('[regenerate-mr-label] orderId=' + orderId + ' nom=' + order.nom + ' relay=' + order.mr_relay_code);
+  console.log('[regenerate-mr-label] CREATION expedition MR FACTUREE pour orderId=' + orderId + ' nom=' + order.nom + ' relay=' + order.mr_relay_code + (force ? ' (force=true)' : ' (1ere generation, pas d\'expedition existante)'));
 
   let label;
   try {
