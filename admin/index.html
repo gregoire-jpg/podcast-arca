@@ -1071,6 +1071,12 @@
 .cmd-actions-cell { text-align:right; vertical-align:middle; }
 .cmd-actions-wrap { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:4px; }
 .cmd-actions-wrap .cmd-act { white-space:nowrap; }
+/* Menu déroulant ⋯ pour les actions secondaires (email, rappel, payée, clôturer, annuler) */
+.cmd-act-menu-wrap { position:relative; display:inline-block; }
+.cmd-act-menu { position:absolute; right:0; top:100%; margin-top:6px; background:#fff; border:1px solid var(--border); border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.15); min-width:230px; z-index:1000; padding:4px 0; }
+.cmd-act-menu button { display:block; width:100%; text-align:left; padding:9px 16px; border:0; background:transparent; cursor:pointer; font:.88em/1.3 Arial; color:var(--navy); }
+.cmd-act-menu button:hover { background:#faf8f3; }
+.cmd-act-menu button + button { border-top:1px solid #f3efe4; }
 /* Sections groupées par canal de livraison (Main propre / MR / Bpost / Autre) */
 .cmd-canal-section { background:#fff; border:1px solid var(--border); border-radius:8px; margin-bottom:14px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.04); }
 .cmd-canal-header { display:flex; align-items:center; gap:12px; padding:12px 18px; background:#faf8f3; cursor:pointer; user-select:none; transition:.15s; }
@@ -3871,6 +3877,46 @@ CMD.load = function() {
 // État sous-onglet Expéditions
 CMD.search = '';
 CMD.canalCollapsed = {};  // { mainpropre: false, mr: false, ... }
+CMD.openActionMenu = null;  // id de la commande dont le menu ⋯ est ouvert
+
+// HTML du menu ⋯ (actions secondaires) pour une commande
+CMD.actionMenuHtml = function(o) {
+  // Construit la liste des items selon l'état de la commande
+  var items = [];
+  if (!o.cancelled && o.email) {
+    items.push('<button onclick="CMD.sendConfirmation(' + o.id + ')">✉ Renvoyer la confirmation</button>');
+  }
+  if (!o.cancelled && !o.paye && o.email) {
+    items.push('<button onclick="CMD.sendReminder(' + o.id + ')">⏰ Envoyer un rappel</button>');
+  }
+  if (!o.cancelled && !o.cloturee) {
+    items.push('<button onclick="CMD.togglePaye(' + o.id + ')">' + (o.paye ? '↶ Marquer non payée' : '✓ Marquer payée') + '</button>');
+  }
+  if (!o.cancelled) {
+    items.push('<button onclick="CMD.toggleClose(' + o.id + ')">' + (o.cloturee ? '🔓 Rouvrir' : '🔒 Clôturer') + '</button>');
+  }
+  if (o.cancelled) {
+    items.push('<button onclick="CMD.toggleCancel(' + o.id + ')">↻ Restaurer</button>');
+  } else if (!o.cloturee) {
+    items.push('<button onclick="CMD.toggleCancel(' + o.id + ')" style="color:#c1272d">✗ Annuler</button>');
+  }
+  if (!items.length) return '';
+
+  var menuOpen = (CMD.openActionMenu === o.id);
+  var menuHtml = menuOpen
+    ? '<div class="cmd-act-menu">' + items.join('') + '</div>'
+    : '';
+  return '<div class="cmd-act-menu-wrap">'
+    + '<button class="cmd-act" onclick="CMD.toggleActionMenu(' + o.id + ', event)" title="Plus d\'actions">⋯</button>'
+    + menuHtml
+    + '</div>';
+};
+
+CMD.toggleActionMenu = function(id, ev) {
+  if (ev) ev.stopPropagation();
+  CMD.openActionMenu = (CMD.openActionMenu === id) ? null : id;
+  CMD.render();
+};
 
 // Classification canal de livraison → clé canonique
 CMD.canalize = function(livraison) {
@@ -4013,10 +4059,6 @@ CMD.tableHtml = function(list) {
             // Bpost (Poste avec suivi) — un seul bouton qui gère tous les cas
             // grâce au flux refactor 2026-06-08.
             if (o.livraison === 'Poste avec suivi') {
-              // Traitée manuellement (legacy ou clic explicite)
-              if (o.bpost_label_url === 'manual:shipping-manager') {
-                return '<span class="cmd-badge paid" title="Étiquette imprimée hors API (saisie SM web)">✓ Bpost (traitée manuellement)</span>';
-              }
               // Marqueur bpost-fetch:ARCA-XX → PDF récupérable
               if (o.bpost_label_url && String(o.bpost_label_url).startsWith('bpost-fetch:')) {
                 var bfCref = o.bpost_label_url.replace(/^bpost-fetch:/, '');
@@ -4039,9 +4081,7 @@ CMD.tableHtml = function(list) {
               }
               // Pas encore poussée : bouton "Envoyer à Bpost"
               var label = o.bpost_pushed_at ? '🔄 Réessayer Bpost' : '📦 Envoyer à Bpost';
-              return ''
-                + '<button class="cmd-act bpost" onclick="CMD.pushBpost(' + o.id + ')">' + label + '</button>'
-                + '<button class="cmd-act done" onclick="CMD.markBpostManual(' + o.id + ')" title="Marquer comme traitée hors API">✓ Traitée manuellement</button>';
+              return '<button class="cmd-act bpost" onclick="CMD.pushBpost(' + o.id + ')">' + label + '</button>';
             }
             // Mondial Relay : l'étiquette est créée UNE seule fois (à la commande ou
             // au 1er clic "Générer"). L'URL PDF MR est une URL GET stable (clef
@@ -4059,11 +4099,7 @@ CMD.tableHtml = function(list) {
             }
             return '';
           })()
-        + (o.cancelled || !o.email ? '' : '<button class="cmd-act mail" onclick="CMD.sendConfirmation(' + o.id + ')" title="Renvoyer la confirmation à ' + CMD.esc(o.email) + '">✉</button>')
-        + (o.cancelled || o.paye || !o.email ? '' : '<button class="cmd-act remind" onclick="CMD.sendReminder(' + o.id + ')" title="Envoyer un rappel chaleureux à ' + CMD.esc(o.email) + ' avec récap complet + liens de paiement à jour">⏰ Rappel</button>')
-        + (o.cancelled || o.cloturee ? '' : '<button class="cmd-act ' + (o.paye ? 'unpaid' : 'paid') + '" onclick="CMD.togglePaye(' + o.id + ')" title="' + (o.paye ? 'Marquer comme non payée' : 'Marquer comme payée') + '">' + (o.paye ? '↶ Non payée' : '✓ Marquer payée') + '</button>')
-        + (o.cancelled ? '' : '<button class="cmd-act ' + (o.cloturee ? 'reopen' : 'close') + '" onclick="CMD.toggleClose(' + o.id + ')">' + (o.cloturee ? 'Rouvrir' : 'Clôturer') + '</button>')
-        + (o.cancelled || o.cloturee ? '' : '<button class="cmd-act cancel" onclick="CMD.toggleCancel(' + o.id + ')">✗ Annuler</button>')
+        + CMD.actionMenuHtml(o)
       + '</div></td>'
       + '</tr>';
     if (CMD.expanded[o.id]) {
@@ -4671,27 +4707,6 @@ CMD.printLabel = function(url) {
   try { w.addEventListener('load', function(){ try { w.print(); } catch(e){} }); } catch(e){}
 };
 
-// Marque une commande Bpost comme traitée manuellement : l'étiquette a été
-// téléchargée et imprimée depuis le Shipping Manager Bpost web (cas où
-// l'API ne renvoie pas le PDF mais le shipment existe bel et bien chez
-// Bpost). Pose un placeholder pour débloquer l'UI sans recréer de shipment.
-CMD.markBpostManual = function(id) {
-  var o = CMD.orders.find(function(x){ return x.id === id; });
-  if (!o) return;
-  var msg = 'Confirmer que l\'étiquette ARCA-' + id + ' a été téléchargée et imprimée depuis le Shipping Manager Bpost web ?\n\nCela débloque l\'UI sans recréer de shipment (donc pas de double facturation).';
-  if (!confirm(msg)) return;
-  CMD.api('/arca_orders?id=eq.' + id, {
-    method: 'PATCH',
-    body: { bpost_label_url: 'manual:shipping-manager' }
-  })
-  .then(function() {
-    o.bpost_label_url = 'manual:shipping-manager';
-    CMD.render();
-    alert('✓ Marquée comme traitée manuellement.');
-  })
-  .catch(function(e) { alert('Erreur : ' + e.message); });
-};
-
 CMD.pushBpost = function(id) {
   if (!confirm('Envoyer cette commande à Bpost Shipping Manager ?')) return;
   var btn = event.target;
@@ -5252,6 +5267,14 @@ document.addEventListener('input', function(e) {
       CMD.render();
     }, 150);
   }
+});
+
+// Click-outside : ferme le menu ⋯ actif si on clique ailleurs
+document.addEventListener('click', function(e) {
+  if (CMD.openActionMenu == null) return;
+  if (e.target.closest('.cmd-act-menu-wrap')) return;  // dans le menu / sur le bouton
+  CMD.openActionMenu = null;
+  if (CMD.loaded) CMD.render();
 });
 
 // Activer les filtres + sous-onglets
