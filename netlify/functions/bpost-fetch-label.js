@@ -50,46 +50,53 @@ exports.handler = async function (event) {
     const callbackUrl = 'https://' + host + '/.netlify/functions/bpost-callback';
     const token = await utils.getValidToken(callbackUrl);
 
-    const labelType = process.env.BPOST_LABEL_TYPE || '';
-    const payload = {
-      ClientReferenceCodeList: ['ARCA-' + order.id],
-      LabelStart: 1
-    };
-    if (labelType) payload.LabelType = labelType;
-
-    const resp = await utils.bpostCall('POST', '/v3/labels/', payload, token);
-    console.log('[Bpost fetch-label] resp:', JSON.stringify(resp).substring(0, 500));
+    const labelTypeOverride = process.env.BPOST_LABEL_TYPE || '';
+    const candidates = labelTypeOverride
+      ? [labelTypeOverride]
+      : ['A6_PDF', 'A4_PDF', 'BpostLabel', 'A6', 'A4'];
 
     let labelUrl = null;
-    if (resp.LabelUrl) labelUrl = resp.LabelUrl;
-    else if (resp.CallbackURL || resp.CallbackUrl) {
+    let lastErrs = [];
+    for (const lt of candidates) {
+      const payload = {
+        ClientReferenceCodeList: ['ARCA-' + order.id],
+        LabelStart: 1,
+        LabelType: lt
+      };
+      const resp = await utils.bpostCall('POST', '/v3/labels/', payload, token);
+      console.log('[Bpost fetch-label] try LabelType=' + lt + ' →', JSON.stringify(resp).substring(0, 400));
+
       const cbUrl = resp.CallbackURL || resp.CallbackUrl;
-      // Polling : 6 essais à 1.5s d'intervalle
-      for (let i = 0; i < 6; i++) {
-        await new Promise(r => setTimeout(r, 1500));
-        try {
-          const poll = await utils.bpostCall('GET', new URL(cbUrl).pathname, null, token);
-          if (poll.LabelUrl) { labelUrl = poll.LabelUrl; break; }
-        } catch (e) { console.warn('[Bpost fetch-label] poll', i, 'err:', e.message); }
+      if (resp.LabelUrl) { labelUrl = resp.LabelUrl; break; }
+      if (cbUrl) {
+        for (let i = 0; i < 6; i++) {
+          await new Promise(r => setTimeout(r, 1500));
+          try {
+            const poll = await utils.bpostCall('GET', new URL(cbUrl).pathname, null, token);
+            if (poll.LabelUrl) { labelUrl = poll.LabelUrl; break; }
+          } catch (e) { console.warn('[Bpost fetch-label] poll', i, 'err:', e.message); }
+        }
+        if (labelUrl) break;
       }
+      // Collecte erreurs si rien obtenu
+      const errs = [];
+      if (Array.isArray(resp.ErrorList)) resp.ErrorList.forEach(e => errs.push((e.Tekst || e.Info || 'erreur').trim()));
+      if (resp.Error && resp.Error.Info) errs.push(resp.Error.Info);
+      lastErrs = errs;
+      console.warn('[Bpost fetch-label] LabelType ' + lt + ' KO:', errs.join(' | '));
     }
 
     if (!labelUrl) {
-      // Vérifie si Bpost retourne une erreur exploitable
-      const errs = [];
-      if (resp.ErrorList && Array.isArray(resp.ErrorList)) {
-        resp.ErrorList.forEach(e => errs.push((e.Tekst || e.Info || 'erreur').trim()));
-      }
-      if (resp.Error && resp.Error.Info) errs.push(resp.Error.Info);
       return {
         statusCode: 502,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ok: false,
-          error: errs.length
-            ? 'Bpost label : ' + errs.join(' · ')
+          error: lastErrs.length
+            ? 'Bpost label : ' + lastErrs.join(' · ') + '. Aucun LabelType n\'a été accepté — télécharge depuis le Shipping Manager.'
             : 'Bpost label : pas de PDF retourné. Va le télécharger manuellement depuis le Shipping Manager.',
-          api_errors: errs
+          api_errors: lastErrs,
+          tried_label_types: candidates
         })
       };
     }

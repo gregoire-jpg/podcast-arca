@@ -276,34 +276,58 @@ exports.handler = async function (event) {
     console.log('[Bpost] shipment accepté avec', usedCarrier.name, '(id=' + carrierId + ')');
 
     // 2) POST /v3/labels — démarre génération PDF
-    // Bpost v3 refuse "A4" et "A6" en LabelType ("Illegal format in field").
-    // Le payload minimal SANS LabelType laisse Bpost choisir son format par
-    // défaut, qui est utilisable via l'étiqueteuse (driver fit-to-page).
-    // BPOST_LABEL_TYPE peut être posé si Bpost réintroduit un jour des formats
-    // explicites — sinon on omet le champ.
+    // Bpost v3 a durci la validation de LabelType : "A4" et "A6" sont
+    // refusés ("Illegal format in field"), mais omettre le champ renvoie
+    // "Required field missing". Les formats valides actuels sont les
+    // libellés avec suffixe (A4_PDF, A6_PDF, BpostLabel…). On les teste
+    // en cascade jusqu'à trouver celui qui passe.
     let labelUrl = null;
-    const labelType = process.env.BPOST_LABEL_TYPE || '';
-    try {
-      const labelPayload = {
-        ClientReferenceCodeList: ['ARCA-' + order.id],
-        LabelStart: 1
-      };
-      if (labelType) labelPayload.LabelType = labelType;
-      const labelResp = await utils.bpostCall('POST', '/v3/labels/', labelPayload, token);
-      console.log('[Bpost] labels resp:', JSON.stringify(labelResp).substring(0, 500));
+    const labelTypeOverride = process.env.BPOST_LABEL_TYPE || '';
+    const labelTypeCandidates = labelTypeOverride
+      ? [labelTypeOverride]
+      : ['A6_PDF', 'A4_PDF', 'BpostLabel', 'A6', 'A4'];
 
-      // L'API retourne soit l'URL directe, soit un callback URL pour polling
-      if (labelResp.LabelUrl) labelUrl = labelResp.LabelUrl;
-      else if (labelResp.CallbackUrl) {
-        // Polling simple : 5 essais à 1s d'intervalle
-        for (let i = 0; i < 5; i++) {
-          await new Promise(r => setTimeout(r, 1500));
-          const poll = await utils.bpostCall('GET', new URL(labelResp.CallbackUrl).pathname, null, token);
-          if (poll.LabelUrl) { labelUrl = poll.LabelUrl; break; }
+    for (const lt of labelTypeCandidates) {
+      try {
+        const labelPayload = {
+          ClientReferenceCodeList: ['ARCA-' + order.id],
+          LabelStart: 1,
+          LabelType: lt
+        };
+        const labelResp = await utils.bpostCall('POST', '/v3/labels/', labelPayload, token);
+        console.log('[Bpost] try LabelType=' + lt + ' →', JSON.stringify(labelResp).substring(0, 300));
+
+        // Si la réponse contient un CallbackURL malgré une erreur, on peut le
+        // suivre quand même (Bpost renvoie parfois les 2 dans la même réponse).
+        const cbUrl = labelResp.CallbackURL || labelResp.CallbackUrl;
+        const ltErr = (labelResp.Error && labelResp.Error.Info) || '';
+        if (!cbUrl && !labelResp.LabelUrl && /labeltype/i.test(ltErr)) {
+          console.warn('[Bpost] LabelType ' + lt + ' refusé:', ltErr, '— essai suivant');
+          continue;
         }
+
+        if (labelResp.LabelUrl) labelUrl = labelResp.LabelUrl;
+        else if (cbUrl) {
+          // Polling : 6 essais à 1.5s
+          for (let i = 0; i < 6; i++) {
+            await new Promise(r => setTimeout(r, 1500));
+            try {
+              const poll = await utils.bpostCall('GET', new URL(cbUrl).pathname, null, token);
+              if (poll.LabelUrl) { labelUrl = poll.LabelUrl; break; }
+            } catch (e) { console.warn('[Bpost] poll', i, 'err:', e.message); }
+          }
+        }
+        if (labelUrl) {
+          console.log('[Bpost] LabelType=' + lt + ' a marché');
+          break;  // sortir de la boucle des candidats
+        }
+      } catch (e) {
+        console.warn('[Bpost] LabelType ' + lt + ' exception:', e.message);
       }
-    } catch (e) {
-      console.warn('Label generation failed (shipment OK):', e.message);
+    }
+
+    if (!labelUrl) {
+      console.warn('[Bpost] aucun LabelType n\'a produit de PDF — shipment OK, label à récupérer manuellement');
     }
 
     // 3) Update arca.orders
