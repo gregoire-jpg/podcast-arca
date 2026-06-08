@@ -181,8 +181,10 @@ async function tryFetchLabel(token, cref) {
   if (!cbUrl) {
     return { ready: false, errors: ['Aucun CallbackURL retourné'] };
   }
-  // Polling court (4×1.3s = 5.2s, < timeout Netlify 10s)
-  for (let i = 0; i < 4; i++) {
+  // Polling long (6×1.3s = 7.8s, < timeout Netlify 10s).
+  // "API work in progress" = label en cours côté Bpost, on continue.
+  // Vrai ghost = erreur définitive (Invalid service level, etc.).
+  for (let i = 0; i < 6; i++) {
     await new Promise(r => setTimeout(r, 1300));
     let poll;
     try {
@@ -194,6 +196,12 @@ async function tryFetchLabel(token, cref) {
       return { ready: true, mode: 'binary' };
     }
     const pollErrs = extractErrors(poll);
+    // Status transitoire "work in progress" → continue polling
+    if (pollErrs.length > 0 && pollErrs.every(e => /work in progress|in progress|generating/i.test(e))) {
+      console.log('[Bpost] label en cours de génération, attente…');
+      continue;
+    }
+    // Vraie erreur définitive
     if (pollErrs.length > 0) {
       return { ready: false, errors: pollErrs, ghost: true };
     }
@@ -203,6 +211,7 @@ async function tryFetchLabel(token, cref) {
       return { ready: false, errors: ['Finished=100 sans LabelPDF ni LabelUrl'] };
     }
   }
+  // Pas prêt après 7.8s — on stocke le callback, admin réessayera plus tard
   return { ready: false, pending: true, cbUrl };
 }
 
