@@ -3861,6 +3861,9 @@ CMD.render = function() {
               if (!o.bpost_pushed_at) {
                 return '<button class="cmd-act bpost" onclick="CMD.pushBpost(' + o.id + ')">📦 Envoyer à Bpost</button>';
               }
+              if (o.bpost_label_url === 'manual:shipping-manager') {
+                return '<span class="cmd-badge paid" title="Étiquette téléchargée et imprimée depuis le Shipping Manager Bpost web">✓ Bpost (traitée manuellement)</span>';
+              }
               if (o.bpost_label_url) {
                 return '<button class="cmd-act print" onclick="CMD.printLabel(' + JSON.stringify(o.bpost_label_url) + ')">🖨️ Imprimer étiquette</button>';
               }
@@ -3871,7 +3874,9 @@ CMD.render = function() {
               var pushedAt = new Date(o.bpost_pushed_at);
               var ageMin = (Date.now() - pushedAt.getTime()) / 60000;
               if (ageMin > 2) {
-                return '<button class="cmd-act print" onclick="CMD.fetchBpostLabel(' + o.id + ')" title="Récupère le PDF du shipment déjà créé côté Bpost (gratuit, pas de duplication)">🔄 Récupérer étiquette</button>';
+                return ''
+                  + '<button class="cmd-act print" onclick="CMD.fetchBpostLabel(' + o.id + ')" title="Récupère le PDF du shipment déjà créé côté Bpost (gratuit, pas de duplication)">🔄 Récupérer étiquette</button>'
+                  + '<button class="cmd-act done" onclick="CMD.markBpostManual(' + o.id + ')" title="Marquer comme traitée manuellement (étiquette téléchargée depuis Shipping Manager Bpost) — débloque l\'UI">✓ Traitée manuellement</button>';
               }
               return '<span class="cmd-badge paid">✓ Bpost (PDF en cours)</span>';
             }
@@ -4480,6 +4485,28 @@ CMD.printLabel = function(url) {
   if (!w) { alert('Pop-up bloqué — autorise les pop-ups pour podcast-arca.netlify.app puis réessaye.'); return; }
   // Tentative d'auto-print après chargement (peut être bloqué pour PDF cross-origin — le viewer PDF natif a son propre bouton Imprimer)
   try { w.addEventListener('load', function(){ try { w.print(); } catch(e){} }); } catch(e){}
+};
+
+// Marque une commande Bpost comme traitée manuellement : l'étiquette a
+// été téléchargée depuis le Shipping Manager Bpost web (cas où l'API
+// retourne pas le PDF mais le shipment existe bel et bien). Pose un
+// label_url synthétique pour débloquer l'UI sans recréer de shipment.
+CMD.markBpostManual = function(id) {
+  var o = CMD.orders.find(function(x){ return x.id === id; });
+  if (!o) return;
+  var msg = 'Confirmer que l\'étiquette ARCA-' + id + ' a été téléchargée et imprimée depuis le Shipping Manager Bpost web ?\n\nCela débloque l\'UI sans recréer de shipment (donc pas de double facturation).';
+  if (!confirm(msg)) return;
+  // On stocke un placeholder "manual" reconnaissable
+  CMD.api('/arca_orders?id=eq.' + id, {
+    method: 'PATCH',
+    body: { bpost_label_url: 'manual:shipping-manager' }
+  })
+  .then(function() {
+    o.bpost_label_url = 'manual:shipping-manager';
+    CMD.render();
+    alert('✓ Marquée comme traitée manuellement.');
+  })
+  .catch(function(e) { alert('Erreur : ' + e.message); });
 };
 
 // Récupère le PDF d'étiquette pour un shipment Bpost DÉJÀ créé.
