@@ -115,55 +115,48 @@ function extractErrors(resp) {
   return errs;
 }
 
-// Récupère LabelUrl en testant plusieurs LabelType integer (Plugin API attend
-// INTEGER, pas string). Ordre essayé : env override → 0 (default) → 1, 2, 3.
+// Récupère LabelUrl. Plugin API attend LabelType en INTEGER, pas string.
+// Une seule tentative + polling court pour rester sous le timeout Netlify (10s).
+// Override possible via env BPOST_LABEL_TYPE si jamais 0 ne marche pas.
 async function tryFetchLabel(orderId, token) {
   const envOverride = process.env.BPOST_LABEL_TYPE;
-  const candidates = envOverride
-    ? [parseInt(envOverride, 10)]
-    : [0, 1, 2, 3, 4];
+  const labelType = envOverride != null && envOverride !== ''
+    ? parseInt(envOverride, 10)
+    : 0;  // 0 = default Bpost (Bpost choisit le format)
 
-  let lastErrs = [];
-  for (const lt of candidates) {
-    if (!Number.isFinite(lt)) continue;
-    const payload = {
-      ClientReferenceCodeList: ['ARCA-' + orderId],
-      LabelStart: 1,
-      LabelType: lt
-    };
-    let resp;
-    try {
-      resp = await utils.bpostCall('POST', '/v3/labels/', payload, token);
-    } catch (e) {
-      console.warn('[Bpost] LabelType=' + lt + ' exception:', e.message);
-      lastErrs = ['exception: ' + e.message];
-      continue;
-    }
-    console.log('[Bpost] try LabelType=' + lt + ' →', JSON.stringify(resp).substring(0, 300));
+  const payload = {
+    ClientReferenceCodeList: ['ARCA-' + orderId],
+    LabelStart: 1,
+    LabelType: labelType
+  };
 
-    if (resp && resp.LabelUrl) {
-      console.log('[Bpost] LabelType=' + lt + ' a renvoyé LabelUrl direct');
-      return { url: resp.LabelUrl, labelTypeUsed: lt };
-    }
-    const cbUrl = resp && (resp.CallbackURL || resp.CallbackUrl);
-    if (cbUrl) {
-      for (let i = 0; i < 6; i++) {
-        await new Promise(r => setTimeout(r, 1500));
-        try {
-          const poll = await utils.bpostCall('GET', new URL(cbUrl).pathname, null, token);
-          if (poll && poll.LabelUrl) {
-            console.log('[Bpost] LabelType=' + lt + ' a renvoyé via callback');
-            return { url: poll.LabelUrl, labelTypeUsed: lt };
-          }
-        } catch (e) {
-          console.warn('[Bpost] poll', i, 'err:', e.message);
-        }
+  let resp;
+  try {
+    resp = await utils.bpostCall('POST', '/v3/labels/', payload, token);
+  } catch (e) {
+    console.warn('[Bpost] /labels exception:', e.message);
+    return { url: null, errors: ['exception: ' + e.message], labelTypeUsed: labelType };
+  }
+  console.log('[Bpost] /labels (LabelType=' + labelType + ') →', JSON.stringify(resp).substring(0, 400));
+
+  if (resp && resp.LabelUrl) {
+    return { url: resp.LabelUrl, labelTypeUsed: labelType };
+  }
+
+  // Polling : 3 essais × 1.2s = 3.6s max. Total fonction <8s.
+  const cbUrl = resp && (resp.CallbackURL || resp.CallbackUrl);
+  if (cbUrl) {
+    for (let i = 0; i < 3; i++) {
+      await new Promise(r => setTimeout(r, 1200));
+      try {
+        const poll = await utils.bpostCall('GET', new URL(cbUrl).pathname, null, token);
+        if (poll && poll.LabelUrl) return { url: poll.LabelUrl, labelTypeUsed: labelType };
+      } catch (e) {
+        console.warn('[Bpost] poll', i, 'err:', e.message);
       }
     }
-    lastErrs = extractErrors(resp);
-    if (lastErrs.length) console.warn('[Bpost] LabelType=' + lt + ' erreurs:', lastErrs.join(' | '));
   }
-  return { url: null, errors: lastErrs };
+  return { url: null, errors: extractErrors(resp), labelTypeUsed: labelType, cbUrl };
 }
 
 exports.handler = async function (event) {
