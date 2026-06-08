@@ -825,6 +825,10 @@
       <button class="cmd-tab"    data-cmd="done">Clôturées</button>
       <button class="cmd-tab"    data-cmd="cancelled">Annulées</button>
       <button class="cmd-tab"    data-cmd="all">Toutes</button>
+      <div style="position:relative;flex:1;min-width:220px;max-width:380px;margin-left:12px">
+        <input type="search" id="cmd-search" placeholder="🔍 Recherche : nom, email, n°, code MR…" autocomplete="off"
+               style="width:100%;padding:7px 10px 7px 14px;border:1px solid var(--border);border-radius:6px;font:.9em Arial;box-sizing:border-box">
+      </div>
       <span style="flex:1"></span>
       <button class="btn btn-gold" id="cmd-print-mainpropre" title="PDF imprimable des commandes en main propre (non clôturées)">📋 PDF main propre</button>
     </div>
@@ -1061,9 +1065,24 @@
 .cmd-stat-table td.num { text-align:right; font-variant-numeric:tabular-nums; }
 .cmd-stat-table tr:last-child td { border-bottom:none; }
 .cmd-stat-bar { display:inline-block; height:8px; background:var(--gold); border-radius:2px; vertical-align:middle; margin-right:6px; }
-.cmd-table { width:100%; border-collapse:collapse; font:.88em/1.4 Arial; background:#fff; border-radius:6px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.05); }
+.cmd-table { width:100%; border-collapse:collapse; font:.88em/1.4 Arial; background:#fff; border-radius:6px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.05); table-layout:auto; }
 .cmd-table th { background:var(--navy); color:#fff; padding:10px 12px; text-align:left; font:.75em/1 Arial; letter-spacing:1.5px; text-transform:uppercase; }
 .cmd-table td { padding:11px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
+.cmd-actions-cell { text-align:right; vertical-align:middle; }
+.cmd-actions-wrap { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:4px; }
+.cmd-actions-wrap .cmd-act { white-space:nowrap; }
+/* Sections groupées par canal de livraison (Main propre / MR / Bpost / Autre) */
+.cmd-canal-section { background:#fff; border:1px solid var(--border); border-radius:8px; margin-bottom:14px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.04); }
+.cmd-canal-header { display:flex; align-items:center; gap:12px; padding:12px 18px; background:#faf8f3; cursor:pointer; user-select:none; transition:.15s; }
+.cmd-canal-header:hover { background:#f3efe4; }
+.cmd-canal-icon { font-size:1.3em; }
+.cmd-canal-label { font:bold .95em/1 Georgia; color:var(--navy); flex:1; }
+.cmd-canal-count { font:.78em/1 Arial; color:var(--muted); padding:3px 10px; background:#fff; border-radius:12px; border:1px solid var(--border); }
+.cmd-canal-total { font:bold .95em/1 Arial; color:var(--navy); font-variant-numeric:tabular-nums; margin-left:8px; }
+.cmd-canal-toggle { font:.9em/1 Arial; color:var(--muted); margin-left:6px; width:18px; text-align:center; }
+.cmd-canal-body { padding:0; }
+.cmd-canal-body .cmd-table { border-radius:0; box-shadow:none; }
+.cmd-canal-body .cmd-table th { background:#fff; color:var(--navy); border-bottom:2px solid var(--border); }
 .cmd-table tr:last-child td { border-bottom:none; }
 .cmd-table tr.row-done td { opacity:.55; }
 .cmd-table tr.row-cancelled td { opacity:.45; text-decoration:line-through; text-decoration-color:#c1272d; }
@@ -3849,28 +3868,124 @@ CMD.load = function() {
   CMD.loadStock();
 };
 
+// État sous-onglet Expéditions
+CMD.search = '';
+CMD.canalCollapsed = {};  // { mainpropre: false, mr: false, ... }
+
+// Classification canal de livraison → clé canonique
+CMD.canalize = function(livraison) {
+  if (!livraison) return 'autre';
+  var l = String(livraison).toLowerCase();
+  if (/main propre/.test(l))           return 'mainpropre';
+  if (/mondial|relay/.test(l))         return 'mr';
+  if (/poste|suivi|bpost|colissimo/.test(l)) return 'bpost';
+  return 'autre';
+};
+
+// Métadonnées des canaux
+CMD.CANAL_ORDER = ['mainpropre', 'mr', 'bpost', 'autre'];
+CMD.CANAL_INFO = {
+  mainpropre: { icon: '🚶', label: 'En main propre',     color: '#3a8b5c' },
+  mr:         { icon: '📍', label: 'Mondial Relay',       color: '#3a6db8' },
+  bpost:      { icon: '📦', label: 'Bpost (Poste avec suivi)', color: '#c1272d' },
+  autre:      { icon: '✉️', label: 'Autre / Nous consulter',   color: '#888888' }
+};
+
+// Match plein-texte sur une commande
+CMD.matchSearch = function(o, q) {
+  if (!q) return true;
+  q = q.toLowerCase().trim();
+  if (!q) return true;
+  var hay = [
+    o.nom, o.email, o.telephone, o.rue, o.cp, o.ville, o.pays,
+    'ARCA-' + o.id, '#' + o.id, String(o.id),
+    o.mr_relay_code, o.mr_relay_info, o.mr_expedition,
+    o.bpost_reference, o.bpost_shipment_id,
+    o.notes, o.paiement, o.livraison
+  ].filter(Boolean).join(' ').toLowerCase();
+  // Multi-mots : tous les mots doivent matcher
+  return q.split(/\s+/).every(function(w){ return hay.indexOf(w) !== -1; });
+};
+
 CMD.render = function() {
   CMD.renderStock();
   if (!CMD.loaded) return;
-  var list = CMD.orders.filter(function(o) {
+
+  // 1. Filtrer par statut (tab)
+  var byStatus = CMD.orders.filter(function(o) {
     if (CMD.filter === 'todo')      return !o.cloturee && !o.cancelled;
     if (CMD.filter === 'done')      return o.cloturee && !o.cancelled;
     if (CMD.filter === 'cancelled') return o.cancelled;
-    return true;  // 'all'
+    return true;
   });
 
-  var todoCount = CMD.orders.filter(function(o){ return !o.cloturee && !o.cancelled; }).length;
-  document.getElementById('cmd-counter').textContent = todoCount + ' à traiter · ' + CMD.orders.length + ' total';
+  // 2. Appliquer la recherche
+  var q = CMD.search || '';
+  var list = q ? byStatus.filter(function(o){ return CMD.matchSearch(o, q); }) : byStatus;
 
-  // Récap par numéro (toujours visible — basé sur TOUTES les commandes, pas filtré)
+  // Counter header
+  var todoCount = CMD.orders.filter(function(o){ return !o.cloturee && !o.cancelled; }).length;
+  var counterText = todoCount + ' à traiter · ' + CMD.orders.length + ' total';
+  if (q) counterText += ' · 🔍 ' + list.length + ' résultats';
+  document.getElementById('cmd-counter').textContent = counterText;
+
+  // Récap par numéro toujours visible (calculé sur TOUTES les commandes)
   var summary = CMD.summaryHtml();
 
   if (!list.length) {
-    document.getElementById('cmd-list').innerHTML = summary + '<div class="empty">Aucune commande dans cette catégorie.</div>';
+    var emptyMsg = q
+      ? 'Aucun résultat pour « ' + CMD.esc(q) + ' ».'
+      : 'Aucune commande dans cette catégorie.';
+    document.getElementById('cmd-list').innerHTML = summary + '<div class="empty">' + emptyMsg + '</div>';
     return;
   }
 
-  var html = summary + '<table class="cmd-table">';
+  // 3. Décider : sections groupées par canal OU liste plate ?
+  // - todo ou all → grouper par canal (Main propre / MR / Bpost / Autre)
+  // - done ou cancelled → liste plate (info historique)
+  var grouped = (CMD.filter === 'todo' || CMD.filter === 'all');
+  var html = summary;
+
+  if (grouped) {
+    // Groupage
+    var groups = {};
+    list.forEach(function(o) {
+      var c = CMD.canalize(o.livraison);
+      (groups[c] = groups[c] || []).push(o);
+    });
+    CMD.CANAL_ORDER.forEach(function(canal) {
+      var orders = groups[canal];
+      if (!orders || !orders.length) return;
+      var info = CMD.CANAL_INFO[canal];
+      var total = orders.reduce(function(s, o){ return s + parseFloat(o.total_eur || 0); }, 0);
+      var collapsed = !!CMD.canalCollapsed[canal];
+      html += '<div class="cmd-canal-section" style="border-left:4px solid ' + info.color + '">'
+        +   '<div class="cmd-canal-header" onclick="CMD.toggleCanal(' + JSON.stringify(canal) + ')">'
+        +     '<span class="cmd-canal-icon">' + info.icon + '</span>'
+        +     '<span class="cmd-canal-label">' + info.label + '</span>'
+        +     '<span class="cmd-canal-count">' + orders.length + ' commande' + (orders.length > 1 ? 's' : '') + '</span>'
+        +     '<span class="cmd-canal-total">' + total.toFixed(2) + ' €</span>'
+        +     '<span class="cmd-canal-toggle">' + (collapsed ? '▸' : '▾') + '</span>'
+        +   '</div>'
+        +   (collapsed ? '' : '<div class="cmd-canal-body">' + CMD.tableHtml(orders) + '</div>')
+        + '</div>';
+    });
+  } else {
+    html += CMD.tableHtml(list);
+  }
+
+  document.getElementById('cmd-list').innerHTML = html;
+};
+
+// Toggle collapse d'une section canal — pas de full render, juste DOM swap
+CMD.toggleCanal = function(canal) {
+  CMD.canalCollapsed[canal] = !CMD.canalCollapsed[canal];
+  CMD.render();
+};
+
+// HTML d'une table de commandes (utilisé par render groupé ou plat)
+CMD.tableHtml = function(list) {
+  var html = '<table class="cmd-table">';
   html += '<thead><tr><th>Date</th><th>Client</th><th>Items</th><th>Total</th><th>Pays</th><th>Livraison</th><th>Statut</th><th style="text-align:right">Actions</th></tr></thead><tbody>';
   list.forEach(function(o) {
     var date = new Date(o.created_at).toLocaleString('fr', { dateStyle:'short', timeStyle:'short' });
@@ -3888,7 +4003,7 @@ CMD.render = function() {
       + '<td>' + CMD.esc(o.pays || '—') + '</td>'
       + '<td>' + CMD.esc(o.livraison || '—') + '</td>'
       + '<td>' + statusBadge + '</td>'
-      + '<td style="text-align:right;white-space:nowrap">'
+      + '<td class="cmd-actions-cell"><div class="cmd-actions-wrap">'
         + '<button class="cmd-act" onclick="CMD.toggleDetail(' + o.id + ')">' + (CMD.expanded[o.id] ? 'Masquer' : 'Voir') + '</button>'
         + (function(){
             if (o.cancelled) {
@@ -3949,14 +4064,14 @@ CMD.render = function() {
         + (o.cancelled || o.cloturee ? '' : '<button class="cmd-act ' + (o.paye ? 'unpaid' : 'paid') + '" onclick="CMD.togglePaye(' + o.id + ')" title="' + (o.paye ? 'Marquer comme non payée' : 'Marquer comme payée') + '">' + (o.paye ? '↶ Non payée' : '✓ Marquer payée') + '</button>')
         + (o.cancelled ? '' : '<button class="cmd-act ' + (o.cloturee ? 'reopen' : 'close') + '" onclick="CMD.toggleClose(' + o.id + ')">' + (o.cloturee ? 'Rouvrir' : 'Clôturer') + '</button>')
         + (o.cancelled || o.cloturee ? '' : '<button class="cmd-act cancel" onclick="CMD.toggleCancel(' + o.id + ')">✗ Annuler</button>')
-      + '</td>'
+      + '</div></td>'
       + '</tr>';
     if (CMD.expanded[o.id]) {
       html += '<tr><td colspan="8" class="cmd-detail">' + CMD.detailHtml(o) + '</td></tr>';
     }
   });
   html += '</tbody></table>';
-  document.getElementById('cmd-list').innerHTML = html;
+  return html;
 };
 
 CMD.detailHtml = function(o) {
@@ -5127,6 +5242,17 @@ CMD.submitCreate = function() {
     if (btn) { btn.disabled = false; btn.textContent = 'Créer la commande'; }
   });
 };
+
+// Recherche full-text (debounce 150ms)
+document.addEventListener('input', function(e) {
+  if (e.target.id === 'cmd-search') {
+    clearTimeout(CMD._searchTimer);
+    CMD._searchTimer = setTimeout(function() {
+      CMD.search = e.target.value || '';
+      CMD.render();
+    }, 150);
+  }
+});
 
 // Activer les filtres + sous-onglets
 document.addEventListener('click', function(e) {
