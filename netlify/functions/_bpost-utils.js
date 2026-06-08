@@ -10,12 +10,12 @@
 
 const crypto = require('crypto');
 
-// VRAI domaine confirmé 2026-06-08 par le screenshot du SM web :
-// "Orders are sent to: https://plugins.bpost.be" (Plug-ins → Key
-// management → Show details). pluginsapi.bpost.be (avec "api") = doc
-// publique, retourne 401 sur tout shipment réel — c'est ce qu'on a
-// utilisé pendant 4 jours par erreur.
-const BPOST_BASE   = 'https://plugins.bpost.be';
+// API REST Bpost Plug-in v3. plugins.bpost.be (sans "api") est le
+// portail web user-facing (OAuth login). pluginsapi.bpost.be est
+// l'API REST appelée en backend par le plugin et qui retourne
+// du JSON. Test 2026-06-08 : plugins.bpost.be/v3/keys retourne du
+// HTML qui redirige vers login.bpost.be (page OAuth), pas une API.
+const BPOST_BASE   = 'https://pluginsapi.bpost.be';
 const BPOST_APPID  = 'C6D32390-F48C-3D20-81F8-91932E7E4DE1';   // APPID Woo plugin officiel
 const PLUGIN_VER   = '3.2.3';
 const PLATFORM_VER = '6.5';
