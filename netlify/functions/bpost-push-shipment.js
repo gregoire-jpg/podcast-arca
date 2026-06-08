@@ -171,6 +171,29 @@ exports.handler = async function (event) {
     const callbackUrl = 'https://' + host + '/.netlify/functions/bpost-callback';
     const token = await utils.getValidToken(callbackUrl);
 
+    // ── 0) Shortcut : si on a déjà un CallbackURL Bpost en attente (préfixe
+    //      "pending:" dans bpost_label_url), on le hit directement avant de
+    //      tout refaire. Le PDF a eu le temps d'être généré entre 2 clics
+    //      utilisateur (généralement 30s suffisent côté Bpost).
+    if (order.bpost_label_url && String(order.bpost_label_url).startsWith('pending:')) {
+      const pendingCb = order.bpost_label_url.replace(/^pending:/, '');
+      try {
+        const poll = await utils.bpostCall('GET', new URL(pendingCb).pathname, null, token);
+        if (poll && poll.LabelUrl) {
+          await updateOrder(order_id, { bpost_label_url: poll.LabelUrl });
+          console.log('[Bpost] PDF récupéré via callback stocké');
+          return {
+            statusCode: 200,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ok: true, bpost_label_url: poll.LabelUrl, bpost_reference: 'ARCA-' + order_id })
+          };
+        }
+        console.log('[Bpost] callback stocké pas encore prêt, on relance un POST /labels');
+      } catch (e) {
+        console.warn('[Bpost] callback stocké KO:', e.message, '— on relance le flux');
+      }
+    }
+
     // ── 1) Créer le shipment (ou détecter qu'il existe déjà) ────────
     const shipment = buildShipment(order);
     console.log('[Bpost] shipment payload:', JSON.stringify(shipment));
@@ -201,21 +224,23 @@ exports.handler = async function (event) {
     }
 
     // ── 2) Récupérer l'étiquette PDF ────────────────────────────────
-    const { url: labelUrl, errors: labelErrs, labelTypeUsed } = await tryFetchLabel(order_id, token);
+    const { url: labelUrl, errors: labelErrs, labelTypeUsed, cbUrl } = await tryFetchLabel(order_id, token);
 
     // ── 3) Mettre à jour la BDD ────────────────────────────────────
+    // Si le PDF est dispo on le stocke. Sinon si Bpost nous a donné un
+    // CallbackURL, on le mémorise avec un préfixe "pending:" pour que le
+    // prochain clic puisse aller chercher le PDF directement sans recréer.
+    const storedUrl = labelUrl || (cbUrl ? 'pending:' + cbUrl : null);
     await updateOrder(order_id, {
       bpost_shipment_id: 'ARCA-' + order_id,
       bpost_reference:   'ARCA-' + order_id,
-      bpost_label_url:   labelUrl,
+      bpost_label_url:   storedUrl,
       bpost_status:      'pushed',
       bpost_pushed_at:   new Date().toISOString()
     });
 
     if (!labelUrl) {
-      // Shipment OK mais aucun LabelType n'a produit de PDF. Antoine peut
-      // soit retenter (Bpost peut prendre quelques minutes), soit aller
-      // chercher l'étiquette dans le Shipping Manager.
+      const stillPending = !!cbUrl;
       return {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json' },
@@ -223,9 +248,11 @@ exports.handler = async function (event) {
           ok: true,
           bpost_reference: 'ARCA-' + order_id,
           bpost_label_url: null,
-          label_pending: true,
+          label_pending: stillPending,
           label_errors: labelErrs || [],
-          message: 'Shipment créé chez Bpost (réf ARCA-' + order_id + ') mais le PDF n\'est pas encore récupérable. Réessaye dans quelques minutes ou télécharge depuis le Shipping Manager.'
+          message: stillPending
+            ? 'Shipment créé chez Bpost (réf ARCA-' + order_id + '). Bpost génère le PDF — réclique le bouton dans 30s pour le récupérer.'
+            : 'Shipment créé mais Bpost n\'a pas retourné de URL. Va le chercher dans le Shipping Manager ou marque comme traitée manuellement.'
         })
       };
     }

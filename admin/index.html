@@ -3857,17 +3857,26 @@ CMD.render = function() {
             }
             if (o.cloturee) return '';
             // Bpost (Poste avec suivi) — un seul bouton qui gère tous les cas
-            // grâce au flux refactor 2026-06-08 : push, retry, déjà-créé, label.
+            // grâce au flux refactor 2026-06-08.
             if (o.livraison === 'Poste avec suivi') {
               if (o.bpost_label_url === 'manual:shipping-manager') {
                 return '<span class="cmd-badge paid" title="Étiquette téléchargée et imprimée depuis le Shipping Manager Bpost web">✓ Bpost (traitée manuellement)</span>';
               }
-              if (o.bpost_label_url) {
+              // PDF prêt et URL réelle : bouton Imprimer
+              if (o.bpost_label_url && !String(o.bpost_label_url).startsWith('pending:')) {
                 return '<button class="cmd-act print" onclick="CMD.printLabel(' + JSON.stringify(o.bpost_label_url) + ')">🖨️ Imprimer étiquette</button>';
               }
-              // Pas encore de label : un seul bouton qui (re)tente le push complet.
-              // Backend détecte "Shipment already exists" et ne recrée pas.
-              var label = o.bpost_pushed_at ? '🔄 Réessayer / Récupérer étiquette' : '📦 Envoyer à Bpost';
+              // Pas encore prêt OU rien : bouton unique qui push/retry.
+              // Backend détecte "Shipment already exists" et "pending:" pour
+              // ne pas créer de doublon (pas de double facturation).
+              var label;
+              if (o.bpost_label_url && String(o.bpost_label_url).startsWith('pending:')) {
+                label = '⏳ Bpost prépare le PDF — clique pour récupérer';
+              } else if (o.bpost_pushed_at) {
+                label = '🔄 Réessayer Bpost';
+              } else {
+                label = '📦 Envoyer à Bpost';
+              }
               return ''
                 + '<button class="cmd-act bpost" onclick="CMD.pushBpost(' + o.id + ')">' + label + '</button>'
                 + '<button class="cmd-act done" onclick="CMD.markBpostManual(' + o.id + ')" title="Si tu as téléchargé l\'étiquette depuis le Shipping Manager Bpost web et imprimée, marque la commande comme traitée manuellement">✓ Traitée manuellement</button>';
