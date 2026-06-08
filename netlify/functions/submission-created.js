@@ -10,7 +10,9 @@
 //                          (doit être une adresse d'un domaine vérifié sur Brevo)
 //   - MR_PRIVATE_KEY    : clé privée Mondial Relay (pour génération auto étiquette)
 
-const { createLabel } = require('./mr-label');
+// NB : l'étiquette Mondial Relay n'est plus générée ici (à la commande) — elle
+// est créée au moment de l'expédition depuis l'admin (regenerate-mr-label.js),
+// pour ne pas facturer un colis avant paiement / avant expédition réelle.
 const { createStripePaymentLink, createPaypalOrder } = require('./create-payment-link');
 
 // Fin de la souscription préférentielle N°8 : 25 mai 2026 minuit heure belge = 25 mai 22:00 UTC
@@ -82,17 +84,14 @@ exports.handler = async function(event) {
       }
     }
 
-    // Génération étiquette Mondial Relay si applicable
+    // Étiquette Mondial Relay : VOLONTAIREMENT non générée à la commande.
+    // Chaque POST /api/Shipment est facturé par MR ; générer avant l'expédition
+    // coûtait pour rien (virements jamais payés, doublons à l'impression).
+    // → L'étiquette est créée UNE seule fois, au moment de l'expédition, via le
+    //   bouton "Générer étiquette MR" de l'admin (regenerate-mr-label.js).
+    // mrLabel reste null : les mails affichent le point relais mais pas encore
+    // de n° d'expédition (le tracking client suivra à la génération si besoin).
     let mrLabel = null;
-    if ((d.livraison || "") === "Mondial Relay" && d["mr-relay-code"]) {
-      console.log("Génération étiquette Mondial Relay pour code relais", d["mr-relay-code"]);
-      mrLabel = await createLabel(d);
-      if (mrLabel.error) {
-        console.error("Erreur Mondial Relay:", mrLabel.error);
-      } else {
-        console.log("Étiquette MR créée:", mrLabel.expedition);
-      }
-    }
 
     const html = buildEmailHtml(d, mrLabel, paypalVerifyWarning);
     const text = buildEmailText(d, mrLabel);
@@ -450,16 +449,20 @@ function buildEmailHtml(d, mrLabel, paypalVerifyWarning) {
     </table>
   </td></tr>` : "";
 
-  // Bouton "Créer l'étiquette sur MR Connect" — uniquement en filet de sécurité
-  // (affiché si livraison MR mais la génération API a échoué).
-  const mrApiFailed = isMondialRelay && (!mrLabel || !mrLabel.success);
-  const mrConnectButton = mrApiFailed ? `
+  // Rappel : l'étiquette MR se génère au moment de l'expédition, depuis l'admin
+  // Commandes ARCA (PAS sur le portail MR — sinon le colis n'est pas relié à la
+  // commande en base). Affiché tant qu'aucune étiquette n'existe pour la commande.
+  const mrNotYet = isMondialRelay && (!mrLabel || !mrLabel.success);
+  const mrConnectButton = mrNotYet ? `
   <tr><td style="padding:0 36px 18px;">
-    <table cellpadding="0" cellspacing="0">
-      <tr><td style="background:#c8a060;border-radius:4px;">
-        <a href="https://connect.mondialrelay.com/" target="_blank" style="display:inline-block;padding:12px 22px;font:bold 11px Arial;letter-spacing:1.5px;text-transform:uppercase;color:#fff;text-decoration:none;">
-          📦 Créer l'étiquette sur MR Connect →
-        </a>
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#fff8ec;border:1px dashed #c8a060;border-radius:4px;">
+      <tr><td style="padding:14px 18px;">
+        <p style="margin:0 0 10px;font:13px/1.5 Georgia;color:#7a5c20;">Étiquette à générer <strong>au moment de l'expédition</strong> (après réception du paiement le cas échéant).</p>
+        <table cellpadding="0" cellspacing="0"><tr><td style="background:#c8a060;border-radius:4px;">
+          <a href="https://podcast-arca.netlify.app/admin/#commandes" target="_blank" style="display:inline-block;padding:12px 22px;font:bold 11px Arial;letter-spacing:1.5px;text-transform:uppercase;color:#fff;text-decoration:none;">
+            📍 Générer l'étiquette dans l'admin →
+          </a>
+        </td></tr></table>
       </td></tr>
     </table>
   </td></tr>` : "";
