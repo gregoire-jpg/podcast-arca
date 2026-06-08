@@ -66,17 +66,48 @@ async function updateOrder(orderId, fields) {
   });
 }
 
-// Carrier IDs Bpost Shipping Manager Plug-in API v3 :
-//   BE (national)        : 301 = bpack 24h home
-//   International home   : 303 = bpack World Business
-// L'auto-select (sans Carrier ou Id=0) crée un ghost shipment qui apparait
-// dans les stats mais reste invisible côté admin web. On force un vrai
-// Carrier ID pour que le shipment soit matérialisé et exploitable.
-function carrierIdForCountry(iso2) {
-  return iso2 === 'BE' ? 301 : 303;
+// Sélection dynamique du carrier : on liste ceux autorisés sur le
+// contrat ARCA (GET /v3/carriers/allowed/) et on choisit celui qui
+// matche le pays cible. Doc Bpost trop évasive pour hardcoder un
+// CarrierId — il dépend du contrat de chaque marchand.
+//
+// Heuristique de matching :
+//   - pays BE  → carrier dont le nom NE contient PAS "international/world"
+//   - pays !BE → carrier dont le nom contient "international/world", ou
+//                carrier marqué internationalAllowed=true / countries=...
+//   - fallback : on prend le premier
+//
+// Si la requête /carriers/allowed/ retourne 0 carrier (compte
+// non configuré) → on omet le bloc Carrier et on laisse Bpost
+// trancher. Si Bpost refuse à nouveau, c'est qu'il faut configurer
+// les produits dans le SM web (côté ARCA).
+function pickCarrierForCountry(carriers, iso2) {
+  if (!Array.isArray(carriers) || carriers.length === 0) return null;
+  const wantsIntl = iso2 !== 'BE';
+
+  const score = (c) => {
+    const name = ((c.Name || c.CarrierName || c.Code || '') + '').toLowerCase();
+    const isIntl = /international|world|europe|abroad/.test(name);
+    // Champ explicite "countries" si Bpost le retourne
+    const countries = (c.Countries || c.CountryList || '').toString().toUpperCase();
+    const matchesCountry = countries && countries.indexOf(iso2) !== -1;
+
+    if (wantsIntl) {
+      if (matchesCountry) return 10;
+      if (isIntl) return 5;
+      return 1;
+    }
+    if (matchesCountry) return 10;
+    if (isIntl) return 1;
+    return 5;
+  };
+
+  const sorted = carriers.slice().sort((a, b) => score(b) - score(a));
+  const best = sorted[0];
+  return best && (best.Id || best.CarrierId) || null;
 }
 
-function buildShipment(order, refSuffix) {
+function buildShipment(order, refSuffix, carrierId) {
   const addr = parseStreet(order.rue);
   // Bpost refuse HouseNumber == 0. Si rien d'extractible, on met 1.
   let houseNumber = 1;
@@ -90,9 +121,9 @@ function buildShipment(order, refSuffix) {
     }
   }
   const country = ISO2[order.pays] || 'BE';
-  const carrierId = carrierIdForCountry(country);
   const cref = 'ARCA-' + order.id + (refSuffix ? '-' + refSuffix : '');
-  return {
+
+  const shipment = {
     ShopItemId: cref,
     ClientReferenceCode: cref,
     Address: {
@@ -107,9 +138,12 @@ function buildShipment(order, refSuffix) {
       Phone: order.telephone || '',
       Email: order.email || ''
     },
-    Carrier: { Id: carrierId },
     Weight: computeWeightG(order.items)
   };
+  if (carrierId) {
+    shipment.Carrier = { Id: carrierId };
+  }
+  return shipment;
 }
 
 function extractErrors(resp) {
@@ -220,17 +254,38 @@ exports.handler = async function (event) {
       }
     }
 
+    // ── 0bis) Lister les carriers autorisés sur le compte ──────────
+    // On choisit celui qui matche le pays. Si la requête échoue ou
+    // retourne vide, on tente sans bloc Carrier (auto-select).
+    const country = ISO2[order.pays] || 'BE';
+    let carrierId = null;
+    try {
+      const allowedResp = await utils.fetchAllowedCarriers(token);
+      console.log('[Bpost] /carriers/allowed/ →', JSON.stringify(allowedResp).substring(0, 600));
+      const carriers = utils.extractCarrierArray(allowedResp);
+      carrierId = pickCarrierForCountry(carriers, country);
+      console.log('[Bpost] carrier choisi pour ' + country + ' → ' + (carrierId || 'aucun (auto-select)'));
+    } catch (e) {
+      console.warn('[Bpost] /carriers/allowed/ KO:', e.message, '— on tente auto-select');
+    }
+
     // ── 1) Créer le shipment, avec suffixe -r1, -r2… si "already exists" ──
-    // Les premiers pushs (avant qu'on force un Carrier ID) ont créé des
-    // ghosts côté Bpost. On veut un cref propre pour le shipment réellement
-    // matérialisé. À chaque "already exists", on incrémente un suffixe.
+    // Stratégie :
+    //   - 1er essai avec le carrier choisi (ou sans bloc si null)
+    //   - "already exists" → on incrémente le suffixe et on retente
+    //   - "Carrier not available" → on retire le bloc Carrier et on retente
+    //     une fois (auto-select)
     let chosenCref = null;
     let shipErrs = [];
+    let carrierIdUsed = carrierId;
+    let triedWithoutCarrier = false;
     const maxRetries = 5;
+
     for (let i = 0; i < maxRetries; i++) {
       const suffix = i === 0 ? null : ('r' + i);
-      const shipment = buildShipment(order, suffix);
-      console.log('[Bpost] try shipment cref=' + shipment.ClientReferenceCode);
+      const shipment = buildShipment(order, suffix, carrierIdUsed);
+      console.log('[Bpost] try shipment cref=' + shipment.ClientReferenceCode +
+        ' carrier=' + (carrierIdUsed || 'auto'));
 
       const shipResp = await utils.bpostCall('POST', '/v3/shipments/', { Shipment: [shipment] }, token);
       console.log('[Bpost] /shipments →', JSON.stringify(shipResp).substring(0, 300));
@@ -246,6 +301,15 @@ exports.handler = async function (event) {
         console.log('[Bpost] ' + shipment.ClientReferenceCode + ' déjà pris (ghost), retry avec suffixe');
         continue;
       }
+      // "Carrier not available" → fallback : retire le bloc Carrier UNE FOIS
+      if (shipErrs.some(e => /carrier.*not.*available|choose another/i.test(e)) && !triedWithoutCarrier) {
+        console.log('[Bpost] carrier ' + carrierIdUsed + ' refusé, retry sans bloc Carrier (auto-select)');
+        carrierIdUsed = null;
+        triedWithoutCarrier = true;
+        // on garde le même suffixe → on rejoue ce tour (i--)
+        i--;
+        continue;
+      }
       // Toute autre erreur → on arrête
       return {
         statusCode: 422,
@@ -253,7 +317,8 @@ exports.handler = async function (event) {
         body: JSON.stringify({
           ok: false,
           error: 'Bpost a refusé la commande : ' + shipErrs.join(' · '),
-          api_errors: shipErrs
+          api_errors: shipErrs,
+          carrier_tried: carrierIdUsed
         })
       };
     }

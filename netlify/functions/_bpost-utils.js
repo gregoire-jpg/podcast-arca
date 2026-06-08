@@ -151,8 +151,31 @@ function verifyCallbackSignature(receivedSig, status, trackingId, callbackUrl) {
   return crypto.timingSafeEqual(Buffer.from(receivedSig), Buffer.from(expected));
 }
 
+// ─────────────────────────────────────────────────────────────
+// GET /v3/carriers/allowed/ — liste les carriers autorisés sur
+// le contrat du compte. Doc Bpost très minimaliste sur la
+// structure exacte de la réponse : on accepte plusieurs formes
+// (Carrier[], CarrierList[], racine = array). Le caller adapte.
+// ─────────────────────────────────────────────────────────────
+async function fetchAllowedCarriers(token) {
+  return bpostCall('GET', '/v3/carriers/allowed/', null, token);
+}
+
+function extractCarrierArray(resp) {
+  if (!resp) return [];
+  if (Array.isArray(resp)) return resp;
+  if (Array.isArray(resp.Carrier)) return resp.Carrier;
+  if (Array.isArray(resp.CarrierList)) return resp.CarrierList;
+  if (Array.isArray(resp.AllowedCarrier)) return resp.AllowedCarrier;
+  if (Array.isArray(resp.AllowedCarrierList)) return resp.AllowedCarrierList;
+  // Si resp = un seul objet carrier
+  if (resp.Id || resp.CarrierId) return [resp];
+  return [];
+}
+
 module.exports = {
   BPOST_BASE, BPOST_APPID,
   sign, basicAuth, getValidToken, bpostCall, verifyCallbackSignature,
+  fetchAllowedCarriers, extractCarrierArray,
   supaUrl, supaKey
 };

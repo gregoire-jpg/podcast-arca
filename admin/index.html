@@ -812,6 +812,7 @@
       <button class="cmd-tab"    data-cmd="all">Toutes</button>
       <button class="btn btn-navy" id="cmd-new" style="margin-left:12px">+ Nouvelle commande</button>
       <button class="btn btn-gold" id="cmd-print-mainpropre" style="margin-left:6px" title="PDF imprimable des commandes en main propre (non clôturées)">📋 PDF main propre</button>
+      <button class="btn btn-gold" id="cmd-debug-bpost" style="margin-left:6px" title="Liste les carriers autorisés sur le contrat Bpost ARCA" onclick="CMD.debugBpost()">🔧 Debug Bpost</button>
       <button class="btn btn-gold" id="cmd-refresh" style="margin-left:6px">⟳ Actualiser</button>
     </div>
   </div>
@@ -4532,6 +4533,27 @@ CMD.pushBpost = function(id) {
     alert('Erreur : ' + e.message);
     btn.disabled = false; btn.textContent = '📦 Envoyer à Bpost';
   });
+};
+
+// Diagnostic Bpost : dump le scope du token et la liste des carriers
+// autorisés sur le contrat ARCA. À utiliser quand un push échoue avec
+// "Carrier not available" pour voir ce qui est réellement disponible.
+CMD.debugBpost = function() {
+  var pwd = sessionStorage.getItem('admin_pwd') || prompt('Mot de passe admin');
+  if (!pwd) return;
+  fetch('/.netlify/functions/bpost-debug-account', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pwd })
+  })
+  .then(function(r) { return r.text().then(function(t) { return { ok: r.ok, status: r.status, text: t }; }); })
+  .then(function(res) {
+    var w = window.open('', '_blank');
+    if (!w) { alert('Pop-up bloqué.'); return; }
+    w.document.write('<html><head><title>Bpost debug</title><style>body{font:13px monospace;padding:1em;background:#1e1e1e;color:#dcdcdc}pre{white-space:pre-wrap;word-break:break-all}h1{color:#9cdcfe}</style></head><body><h1>Bpost diagnostic (HTTP ' + res.status + ')</h1><pre>' + res.text.replace(/[&<>]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}) + '</pre></body></html>');
+    w.document.close();
+  })
+  .catch(function(e) { alert('Erreur debug Bpost : ' + e.message); });
 };
 
 CMD.toggleClose = function(id) {
