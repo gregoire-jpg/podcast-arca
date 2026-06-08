@@ -61,16 +61,19 @@ async function updateOrder(orderId, fields) {
   });
 }
 
-function shopItemHex(cref) {
-  return crypto.createHash('md5').update(cref).digest('hex').substring(0, 32);
-}
-
 function buildCref(orderId, attempt) {
   if (attempt === 0) return 'ARCA-' + orderId;
   const rnd = crypto.randomBytes(4).toString('hex');
   return 'ARCA-' + orderId + '-' + rnd;
 }
 
+// Format payload validé sur le plugin Woo officiel v3.2.3 (téléchargé
+// le 2026-06-08, classes-Bpost-order.php get_api_props ligne 574).
+// Différences critiques avec ce qu'on faisait avant :
+//   - ShopItemId = order.id ENTIER brut (pas md5 hex)
+//   - OptionList à la RACINE du Shipment (PAS dans Carrier !) ← LE BUG
+//   - Carrier = { Id: 68 } seul
+//   - Streetname2 + State ajoutés (vides acceptables) pour matcher 100%
 function buildShipment(order, attempt) {
   const addr = parseStreet(order.rue);
   let houseNumber = '1';
@@ -85,31 +88,39 @@ function buildShipment(order, attempt) {
   }
   const country = ISO2[order.pays] || 'BE';
   const cref = buildCref(order.id, attempt);
-  // Product Bpost selon pays (cf. Shipping rules Antoine confirmées) :
+  // Product Bpost selon pays (cf. Shipping rules Antoine + contrat ARCA) :
   //   BE → 302 bpack 24h Pro
   //   !BE → 303 bpack World Business
   const productId = country === 'BE' ? '302' : '303';
 
+  // ShopItemId = entier nu si premier essai (cas plugin officiel),
+  // ou random hex 8 chars en retry pour éviter collision avec ghosts.
+  const shopItemId = attempt === 0
+    ? order.id
+    : parseInt(crypto.randomBytes(4).toString('hex'), 16);
+
   return {
-    ShopItemId: shopItemHex(cref),
+    ShopItemId: shopItemId,
     ClientReferenceCode: cref,
     Address: {
-      Name: order.nom || '—',
       CompanyName: '',
+      Name: order.nom || '—',
       Streetname1: addr.street || (order.rue || '').slice(0, 40) || 'Adresse',
+      Streetname2: '',
       HouseNumber: houseNumber,
       NumberExtension: numberExt,
       PostalCode: order.cp || '',
       City: order.ville || '',
+      State: '',
       Country: country,
       Phone: order.telephone || '',
       Email: order.email || ''
     },
-    Weight: computeWeightG(order.items),
-    Carrier: {
-      Id: 68,
-      OptionList: [{ Id: 126, Value: productId }]
-    }
+    OptionList: [
+      { Id: 126, Value: productId }
+    ],
+    Carrier: { Id: 68 },
+    Weight: computeWeightG(order.items)
   };
 }
 
