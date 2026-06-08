@@ -117,52 +117,103 @@ exports.handler = async function (event) {
     const callbackUrl = 'https://' + host + '/.netlify/functions/bpost-callback';
     const token = await utils.getValidToken(callbackUrl);
 
-    // Récupère le 1er carrier compatible (bpack@home par défaut)
-    // Pour MVP : on prend l'ID 301 (Bpack 24/7 & Bpack@bpost) si dispo, sinon le premier
-    let carrierId = 301; // valeur par défaut testée sur GET /carriers
+    // Construit la liste des carriers candidats selon le pays.
+    // ARTERO (France) le 2026-06-08 a planté avec carrier 301 ("Carrier not
+    // available") → il fallait International. Stratégie : on essaye plusieurs
+    // candidats dans l'ordre, on garde le premier qui passe.
+    const isBE = !order.pays || /belgique/i.test(order.pays);
+    let candidates = [];
     try {
       const carriers = await utils.bpostCall('GET', '/v3/carriers/', null, token);
       const list = (carriers.Carrier || []).flatMap(c =>
         (c.OptionList || []).flatMap(o => o.OptionValues || [])
       );
-      const home = list.find(o => /bpack/i.test(o.Name) && !o.IsPickup);
-      if (home && home.Id) carrierId = parseInt(home.Id, 10);
-    } catch (e) {
-      console.warn('Carrier lookup failed, using default 301:', e.message);
-    }
-
-    // 1) POST /v3/shipments
-    const shipPayload = { Shipment: [buildShipment(order, carrierId)] };
-    const shipResp = await utils.bpostCall('POST', '/v3/shipments/', shipPayload, token);
-    console.log('[Bpost] shipments resp:', JSON.stringify(shipResp).substring(0, 500));
-
-    // ── Vérification des erreurs côté Bpost ────────────────────────────
-    // Avant le 2026-06-08 on marquait bpost_pushed_at même en cas d'échec API
-    // → les commandes restaient bloquées sur "PDF en cours" sans recours
-    // (cf. signalement Antoine ARTERO). Maintenant on lève une erreur claire
-    // et on ne touche PAS à la BDD si le shipment n'a pas été créé.
-    const shipments = Array.isArray(shipResp.Shipment) ? shipResp.Shipment : [];
-    const apiErrors = [];
-    shipments.forEach(s => {
-      if (Array.isArray(s.ErrorList)) {
-        s.ErrorList.forEach(e => apiErrors.push((e.Tekst || e.Info || 'erreur').trim()));
+      if (isBE) {
+        // BE : home > pickup. Priorité bpack@home / bpack 24h.
+        const home = list.filter(o => /bpack/i.test(o.Name) && !o.IsPickup);
+        const pickup = list.filter(o => /bpack/i.test(o.Name) && o.IsPickup);
+        candidates = [...home, ...pickup].map(o => ({ id: parseInt(o.Id, 10), name: o.Name }));
+        // Filet : fallback codé en dur si la liste API est vide
+        if (!candidates.length) candidates = [{ id: 301, name: 'Bpack 24h home (default)' }];
+      } else {
+        // International : tout ce qui contient "international" en priorité,
+        // puis le reste. On filtre les pickup pour les envois hors BE.
+        const intl = list.filter(o => /international/i.test(o.Name) && !o.IsPickup);
+        const others = list.filter(o => !o.IsPickup && !intl.includes(o));
+        candidates = [...intl, ...others].map(o => ({ id: parseInt(o.Id, 10), name: o.Name }));
       }
-    });
-    if (shipResp.Error && shipResp.Error.Id && shipResp.Error.Id !== 0) {
-      apiErrors.push((shipResp.Error.Info || ('Error ' + shipResp.Error.Id)).trim());
+    } catch (e) {
+      console.warn('Carrier lookup failed:', e.message);
+      candidates = [{ id: 301, name: 'Bpack 24h home (fallback)' }];
     }
-    if (apiErrors.length) {
-      console.error('[Bpost] shipment refusé:', apiErrors.join(' | '));
+    if (!candidates.length) {
+      return {
+        statusCode: 422,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ok: false, error: 'Aucun carrier Bpost disponible pour ' + (order.pays || 'la destination') })
+      };
+    }
+
+    // 1) POST /v3/shipments — on essaye chaque carrier dans l'ordre
+    let shipResp = null;
+    let usedCarrier = null;
+    let lastErrors = [];
+    for (const c of candidates) {
+      const shipPayload = { Shipment: [buildShipment(order, c.id)] };
+      const resp = await utils.bpostCall('POST', '/v3/shipments/', shipPayload, token);
+      console.log('[Bpost] try carrier', c.id, c.name, '→', JSON.stringify(resp).substring(0, 300));
+
+      const shipments = Array.isArray(resp.Shipment) ? resp.Shipment : [];
+      const errs = [];
+      shipments.forEach(s => {
+        if (Array.isArray(s.ErrorList)) {
+          s.ErrorList.forEach(e => errs.push((e.Tekst || e.Info || 'erreur').trim()));
+        }
+      });
+      if (resp.Error && resp.Error.Id && resp.Error.Id !== 0) {
+        errs.push((resp.Error.Info || ('Error ' + resp.Error.Id)).trim());
+      }
+
+      if (!errs.length) {
+        shipResp = resp;
+        usedCarrier = c;
+        break;
+      }
+      lastErrors = errs;
+      // Si l'erreur est "Carrier not available", on essaye le suivant.
+      // Pour toute autre erreur (HouseNumber, adresse, etc.), inutile de
+      // changer de carrier → on s'arrête immédiatement.
+      const onlyCarrierIssue = errs.every(e => /carrier not available/i.test(e));
+      if (!onlyCarrierIssue) {
+        console.error('[Bpost] erreur non-carrier, arrêt:', errs.join(' | '));
+        return {
+          statusCode: 422,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ok: false,
+            error: 'Bpost a refusé la commande : ' + errs.join(' · '),
+            api_errors: errs
+          })
+        };
+      }
+      console.warn('[Bpost] carrier', c.id, 'non disponible, on essaie le suivant');
+    }
+
+    if (!shipResp || !usedCarrier) {
       return {
         statusCode: 422,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ok: false,
-          error: 'Bpost a refusé la commande : ' + apiErrors.join(' · '),
-          api_errors: apiErrors
+          error: 'Bpost : aucun carrier disponible pour cette destination (' + (order.pays || '?') + '). ' + lastErrors.join(' · '),
+          api_errors: lastErrors,
+          tried: candidates.map(c => c.id + ' ' + c.name)
         })
       };
     }
+
+    const carrierId = usedCarrier.id;
+    console.log('[Bpost] shipment accepté avec carrier', carrierId, usedCarrier.name);
 
     // 2) POST /v3/labels — démarre génération PDF
     // LabelType : A4 par défaut (format universel, accepté partout). Surchargeable
