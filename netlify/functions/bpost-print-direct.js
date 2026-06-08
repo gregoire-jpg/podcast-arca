@@ -7,6 +7,44 @@
 
 const utils = require('./_bpost-utils.js');
 
+// ── Cache PDF en BDD (anti-double-facturation) ─────────────────────
+// Après la 1ère impression réussie, on stocke le PDF base64 dans
+// arca_orders.bpost_label_pdf_b64. Au re-clic, on sert depuis la BDD
+// SANS appeler /v3/labels (qui pourrait potentiellement re-facturer).
+async function loadCachedPdf(ref) {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
+  const url = process.env.SUPABASE_URL + '/rest/v1/arca_orders'
+            + '?bpost_reference=eq.' + encodeURIComponent(ref)
+            + '&select=bpost_label_pdf_b64,bpost_label_fetched_at';
+  const r = await fetch(url, {
+    headers: { apikey: process.env.SUPABASE_SERVICE_KEY, Authorization: 'Bearer ' + process.env.SUPABASE_SERVICE_KEY }
+  });
+  if (!r.ok) return null;
+  const rows = await r.json();
+  if (rows && rows[0] && rows[0].bpost_label_pdf_b64) {
+    return { b64: rows[0].bpost_label_pdf_b64, fetchedAt: rows[0].bpost_label_fetched_at };
+  }
+  return null;
+}
+
+async function saveCachedPdf(ref, buffer) {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return;
+  const url = process.env.SUPABASE_URL + '/rest/v1/arca_orders?bpost_reference=eq.' + encodeURIComponent(ref);
+  await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      apikey: process.env.SUPABASE_SERVICE_KEY,
+      Authorization: 'Bearer ' + process.env.SUPABASE_SERVICE_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      bpost_label_pdf_b64: buffer.toString('base64'),
+      bpost_label_fetched_at: new Date().toISOString(),
+      bpost_status: 'PRINTED'
+    })
+  });
+}
+
 function extractErrors(resp) {
   const errs = [];
   const shipments = Array.isArray(resp && resp.Shipment) ? resp.Shipment : [];
@@ -54,6 +92,16 @@ exports.handler = async function (event) {
   }
 
   try {
+    // ── ANTI-DOUBLE-FACTURATION : check cache PDF en BDD ──────────
+    // Si le PDF est déjà imprimé une fois, on le sert depuis la BDD
+    // SANS appeler Bpost (zéro risque de double facture).
+    const cached = await loadCachedPdf(ref);
+    if (cached && cached.b64) {
+      console.log('[Bpost print] cache HIT pour ' + ref + ' (fetched ' + cached.fetchedAt + ')');
+      return pdfResponse(Buffer.from(cached.b64, 'base64'), ref);
+    }
+    console.log('[Bpost print] cache MISS pour ' + ref + ', appel Bpost');
+
     const host = event.headers.host || 'podcast-arca.netlify.app';
     const shopUrl = process.env.BPOST_SHOP_URL || ('https://' + host + '/.netlify/functions/bpost-callback');
     const token = await utils.getValidToken(shopUrl);
@@ -68,6 +116,7 @@ exports.handler = async function (event) {
     let resp = await utils.bpostCall('POST', '/v3/labels/', labelPayload, token);
 
     if (resp && resp.__binary) {
+      try { await saveCachedPdf(ref, resp.buffer); } catch (e) { console.warn('[cache] save KO:', e.message); }
       return pdfResponse(resp.buffer, ref);
     }
 
@@ -83,6 +132,7 @@ exports.handler = async function (event) {
           continue;
         }
         if (poll && poll.__binary) {
+          try { await saveCachedPdf(ref, poll.buffer); } catch (e) { console.warn('[cache] save KO:', e.message); }
           return pdfResponse(poll.buffer, ref);
         }
         const errs = extractErrors(poll);
@@ -91,7 +141,9 @@ exports.handler = async function (event) {
         }
         if (poll && poll.Finished === 100) {
           if (poll.LabelPDF) {
-            return pdfResponse(Buffer.from(poll.LabelPDF, 'base64'), ref);
+            const pdfBuf = Buffer.from(poll.LabelPDF, 'base64');
+            try { await saveCachedPdf(ref, pdfBuf); } catch (e) { console.warn('[cache] save KO:', e.message); }
+            return pdfResponse(pdfBuf, ref);
           }
           if (poll.LabelUrl) {
             return { statusCode: 302, headers: { Location: poll.LabelUrl }, body: '' };
