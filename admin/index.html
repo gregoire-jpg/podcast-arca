@@ -4486,7 +4486,7 @@ CMD.regenMr = function(id, evt) {
 // SM web (où Antoine et Greg sont authentifiés).
 CMD.openBpostSmWeb = function(cref) {
   try { navigator.clipboard.writeText(cref); } catch (e) {}
-  var url = 'https://shippingmanager.bpost.be/ShippingManager/OrderManagement/Orders';
+  var url = 'https://shippingmanager.bpost.be/';
   var w = window.open(url, '_blank');
   if (!w) {
     alert('Pop-up bloqué — autorise les pop-ups pour podcast-arca.netlify.app.\n\nLe cref ' + cref + ' a été copié dans le presse-papier. Ouvre Shipping Manager Bpost et colle dans la recherche.');
@@ -4574,7 +4574,7 @@ CMD.pushBpost = function(id) {
       try { navigator.clipboard.writeText(d.clipboard_text); } catch(e) {}
     }
     // Ouvre Shipping Manager web direct
-    var smUrl = d.sm_url || 'https://shippingmanager.bpost.be/ShippingManager/OrderManagement/Orders';
+    var smUrl = d.sm_url || 'https://shippingmanager.bpost.be/';
     var w = window.open(smUrl, '_blank');
     if (!w) {
       alert('Pop-up bloqué — autorise les pop-ups pour podcast-arca.netlify.app puis réessaye.\n\nInfos copiées dans le presse-papier :\n\n' + (d.clipboard_text || ''));

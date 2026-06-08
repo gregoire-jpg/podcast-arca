@@ -83,7 +83,7 @@ exports.handler = async function (event) {
         bpost_reference: cref,
         bpost_label_url: 'manual:shipping-manager:' + cref,
         clipboard_text: lines.join('\n'),
-        sm_url: 'https://shippingmanager.bpost.be/ShippingManager/OrderManagement/Orders',
+        sm_url: 'https://shippingmanager.bpost.be/',
         message: 'Infos copiées. Ouvre Shipping Manager web → New shipment → colle les infos → imprime.'
       })
     };
