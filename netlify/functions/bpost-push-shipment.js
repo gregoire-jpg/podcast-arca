@@ -29,12 +29,22 @@ function computeWeightG(items) {
   return Math.max(g, 100);
 }
 
-// Parse une rue "Rue de la Brasserie, 18" → { street: "Rue de la Brasserie", number: 18 }
+// Parse une rue → { street, number }. Tolère plusieurs formats :
+//   "Rue de la Brasserie, 18"   → "Rue de la Brasserie" + 18
+//   "Rue de la Brasserie 18"    → "Rue de la Brasserie" + 18
+//   "18 Rue de la Brasserie"    → "Rue de la Brasserie" + 18  (rare, anglo)
+//   "Avenue Louise 18A"          → "Avenue Louise" + 18A
 function parseStreet(rue) {
   if (!rue) return { street: '', number: '' };
-  const m = rue.match(/^(.+?)[,\s]+(\d+\w?)$/);
-  if (m) return { street: m[1].trim(), number: m[2] };
-  return { street: rue, number: '' };
+  const cleaned = String(rue).trim();
+  // Numéro à la fin (cas usuel)
+  let m = cleaned.match(/^(.+?)[,\s]+(\d+\s*\w?)$/);
+  if (m) return { street: m[1].trim(), number: m[2].replace(/\s+/g, '') };
+  // Numéro au début (anglo-saxon)
+  m = cleaned.match(/^(\d+\s*\w?)\s+(.+)$/);
+  if (m) return { street: m[2].trim(), number: m[1].replace(/\s+/g, '') };
+  // Pas de numéro extractible
+  return { street: cleaned, number: '' };
 }
 
 async function loadOrder(orderId) {
@@ -59,15 +69,29 @@ async function updateOrder(orderId, fields) {
 
 function buildShipment(order, carrierId) {
   const addr = parseStreet(order.rue);
+  // Bpost refuse les HouseNumber == 0 ("Value too low or string too short").
+  // Si on n'a pas pu extraire de numéro, on met 1 par défaut et on déplace la
+  // mention exacte dans NumberExtension/Streetname1 pour que le facteur la voie.
+  let houseNumber = 1;
+  let numberExt = order.complement || '';
+  if (addr.number) {
+    const n = parseInt(addr.number, 10);
+    if (Number.isFinite(n) && n > 0) {
+      houseNumber = n;
+      // Si "18A" → 18 + extension "A"
+      const ext = String(addr.number).replace(/^\d+/, '').trim();
+      if (ext) numberExt = (numberExt ? numberExt + ' ' : '') + ext;
+    }
+  }
   return {
     ShopItemId: 'ARCA-' + order.id,
     ClientReferenceCode: 'ARCA-' + order.id,
     Address: {
       Name: order.nom || '—',
       CompanyName: '',
-      Streetname1: addr.street,
-      HouseNumber: addr.number ? parseInt(addr.number, 10) : 0,
-      NumberExtension: order.complement || '',
+      Streetname1: addr.street || (order.rue || '').slice(0, 40) || 'Adresse',
+      HouseNumber: houseNumber,
+      NumberExtension: numberExt,
       PostalCode: order.cp || '',
       City: order.ville || '',
       Country: ISO3[order.pays] || 'BEL',
@@ -113,12 +137,17 @@ exports.handler = async function (event) {
     console.log('[Bpost] shipments resp:', JSON.stringify(shipResp).substring(0, 500));
 
     // 2) POST /v3/labels — démarre génération PDF
+    // LabelType : A4 par défaut (format universel, accepté partout). Surchargeable
+    // via env BPOST_LABEL_TYPE pour s'aligner sur une étiqueteuse thermique. Le
+    // format A6 a été retiré de l'API Bpost en juin 2026 (cf. erreur HTTP du
+    // 2026-06-08 "Data error LabelType (A6)").
     let labelUrl = null;
+    const labelType = process.env.BPOST_LABEL_TYPE || 'A4';
     try {
       const labelPayload = {
         ClientReferenceCodeList: ['ARCA-' + order.id],
         LabelStart: 1,
-        LabelType: 'A6'   // format A6 standard Bpost
+        LabelType: labelType
       };
       const labelResp = await utils.bpostCall('POST', '/v3/labels/', labelPayload, token);
       console.log('[Bpost] labels resp:', JSON.stringify(labelResp).substring(0, 500));
