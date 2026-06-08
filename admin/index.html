@@ -829,8 +829,6 @@
         <input type="search" id="cmd-search" placeholder="🔍 Recherche : nom, email, n°, code MR…" autocomplete="off"
                style="width:100%;padding:7px 10px 7px 14px;border:1px solid var(--border);border-radius:6px;font:.9em Arial;box-sizing:border-box">
       </div>
-      <span style="flex:1"></span>
-      <button class="btn btn-gold" id="cmd-print-mainpropre" title="PDF imprimable des commandes en main propre (non clôturées)">📋 PDF main propre</button>
     </div>
     <div id="cmd-list"><div class="empty">Chargement…</div></div>
   </div>
@@ -3876,8 +3874,15 @@ CMD.load = function() {
 
 // État sous-onglet Expéditions
 CMD.search = '';
-CMD.canalCollapsed = {};  // { mainpropre: false, mr: false, ... }
+// Par défaut : tous les canaux repliés (le user déplie ce qu'il veut traiter)
+CMD.canalCollapsed = { mainpropre: true, mr: true, bpost: true, autre: true };
+CMD.summaryCollapsed = true;  // récap par numéro replié par défaut
 CMD.openActionMenu = null;  // id de la commande dont le menu ⋯ est ouvert
+
+CMD.toggleSummary = function() {
+  CMD.summaryCollapsed = !CMD.summaryCollapsed;
+  CMD.render();
+};
 
 // HTML du menu ⋯ (actions secondaires) pour une commande
 CMD.actionMenuHtml = function(o) {
@@ -3891,6 +3896,11 @@ CMD.actionMenuHtml = function(o) {
   }
   if (!o.cancelled && !o.cloturee) {
     items.push('<button onclick="CMD.togglePaye(' + o.id + ')">' + (o.paye ? '↶ Marquer non payée' : '✓ Marquer payée') + '</button>');
+  }
+  // Force regen MR : uniquement si commande MR active avec étiquette existante.
+  // Facturé chez MR à chaque appel — d'où le warning rouge et la mention "FACTURÉE".
+  if (!o.cancelled && !o.cloturee && o.livraison === 'Mondial Relay' && o.mr_label_url) {
+    items.push('<button onclick="CMD.regenMr(' + o.id + ', null, true)" style="color:#c1272d" title="Forcer la recréation de l\'étiquette MR (nouvelle expédition chez MR, FACTURÉE)">↻ Régénérer étiquette MR (FACTURÉE)</button>');
   }
   if (!o.cancelled) {
     items.push('<button onclick="CMD.toggleClose(' + o.id + ')">' + (o.cloturee ? '🔓 Rouvrir' : '🔒 Clôturer') + '</button>');
@@ -3999,18 +4009,30 @@ CMD.render = function() {
       var c = CMD.canalize(o.livraison);
       (groups[c] = groups[c] || []).push(o);
     });
+    // Quand recherche active, auto-déplier les sections qui contiennent
+    // des résultats (sinon on doit cliquer 3 fois pour voir le match).
+    var hasSearch = !!(q && q.trim());
     CMD.CANAL_ORDER.forEach(function(canal) {
       var orders = groups[canal];
       if (!orders || !orders.length) return;
       var info = CMD.CANAL_INFO[canal];
       var total = orders.reduce(function(s, o){ return s + parseFloat(o.total_eur || 0); }, 0);
-      var collapsed = !!CMD.canalCollapsed[canal];
+      var collapsed = !hasSearch && !!CMD.canalCollapsed[canal];
+      // Bouton "PDF main propre" intégré au header de la section mainpropre.
+      // stopPropagation pour ne pas déclencher le toggle collapse.
+      var canalAction = '';
+      if (canal === 'mainpropre') {
+        canalAction = '<button onclick="event.stopPropagation();CMD.printMainPropre()" '
+          + 'title="PDF imprimable des commandes en main propre (non clôturées)" '
+          + 'style="padding:5px 12px;background:#c8a060;color:#fff;border:0;border-radius:4px;font:.78em/1 Arial;cursor:pointer;letter-spacing:.5px;margin-right:8px">📋 PDF</button>';
+      }
       html += '<div class="cmd-canal-section" style="border-left:4px solid ' + info.color + '">'
         +   '<div class="cmd-canal-header" onclick="CMD.toggleCanal(' + JSON.stringify(canal) + ')">'
         +     '<span class="cmd-canal-icon">' + info.icon + '</span>'
         +     '<span class="cmd-canal-label">' + info.label + '</span>'
         +     '<span class="cmd-canal-count">' + orders.length + ' commande' + (orders.length > 1 ? 's' : '') + '</span>'
         +     '<span class="cmd-canal-total">' + total.toFixed(2) + ' €</span>'
+        +     canalAction
         +     '<span class="cmd-canal-toggle">' + (collapsed ? '▸' : '▾') + '</span>'
         +   '</div>'
         +   (collapsed ? '' : '<div class="cmd-canal-body">' + CMD.tableHtml(orders) + '</div>')
@@ -4089,8 +4111,7 @@ CMD.tableHtml = function(list) {
             // SANS recréer d'expédition (sinon MR re-facture à chaque impression).
             if (o.livraison === 'Mondial Relay') {
               if (o.mr_label_url) {
-                return '<button class="cmd-act print" onclick="CMD.printMr(' + o.id + ')" title="Rouvre l\'étiquette déjà générée (aucune nouvelle expédition MR, aucune re-facturation)">🖨️ Imprimer étiquette</button>'
-                  + '<button class="cmd-act" style="background:#888;color:#fff" onclick="CMD.regenMr(' + o.id + ', event, true)" title="⚠ Forcer la RECRÉATION de l\'étiquette chez MR (FACTURÉE) — uniquement si le PDF stocké est corrompu">↻</button>';
+                return '<button class="cmd-act print" onclick="CMD.printMr(' + o.id + ')" title="Rouvre l\'étiquette déjà générée (aucune nouvelle expédition MR, aucune re-facturation)">🖨️ Imprimer étiquette</button>';
               }
               // Pas encore d'étiquette MR → bouton pour la générer (1ère création, facturée 1×)
               if (o.mr_relay_code) {
@@ -4231,9 +4252,19 @@ CMD.summaryHtml = function() {
       + '<td style="text-align:right;color:#666">' + customRevenue.toFixed(0) + ' €</td>'
       + '</tr>';
   }
+  var summaryCollapsed = !!CMD.summaryCollapsed;
+  if (summaryCollapsed) {
+    // Replié : juste le header cliquable avec une mini-info (TOTAL livres vendus)
+    return ''
+      + '<div class="cmd-summary cmd-summary-collapsed" onclick="CMD.toggleSummary()" '
+      +   'style="cursor:pointer;padding:12px 18px;display:flex;align-items:center;gap:14px">'
+      +   '<span style="font:bold .95em/1 Georgia;color:var(--navy);flex:1">▸ 📚 Récapitulatif par numéro</span>'
+      +   '<span style="font:.85em/1 Arial;color:var(--muted)">' + (totalShip + totalDone) + ' livres · ' + grandRevenue.toFixed(0) + ' €</span>'
+      + '</div>';
+  }
   return ''
     + '<div class="cmd-summary">'
-      + '<div class="cmd-summary-title">📚 Récapitulatif par numéro</div>'
+      + '<div class="cmd-summary-title" onclick="CMD.toggleSummary()" style="cursor:pointer">▾ 📚 Récapitulatif par numéro</div>'
       + '<table class="cmd-summary-table">'
         + '<thead><tr><th>Numéro</th><th>À expédier</th><th>Clôturées</th><th>Total commandé</th><th style="text-align:right">CA livres</th></tr></thead>'
         + '<tbody>' + rows + '</tbody>'
