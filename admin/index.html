@@ -3876,7 +3876,8 @@ CMD.render = function() {
               if (ageMin > 2) {
                 return ''
                   + '<button class="cmd-act print" onclick="CMD.fetchBpostLabel(' + o.id + ')" title="Récupère le PDF du shipment déjà créé côté Bpost (gratuit, pas de duplication)">🔄 Récupérer étiquette</button>'
-                  + '<button class="cmd-act done" onclick="CMD.markBpostManual(' + o.id + ')" title="Marquer comme traitée manuellement (étiquette téléchargée depuis Shipping Manager Bpost) — débloque l\'UI">✓ Traitée manuellement</button>';
+                  + '<button class="cmd-act done" onclick="CMD.markBpostManual(' + o.id + ')" title="Marquer comme traitée manuellement (étiquette téléchargée depuis Shipping Manager Bpost) — débloque l\'UI">✓ Traitée manuellement</button>'
+                  + '<button class="cmd-act cancel" onclick="CMD.resetBpost(' + o.id + ')" title="Reset le statut Bpost en BDD (à utiliser SEULEMENT si tu as vérifié que rien n\'a été créé côté Bpost — sinon doublon facturé !)">⟲ Réinitialiser Bpost</button>';
               }
               return '<span class="cmd-badge paid">✓ Bpost (PDF en cours)</span>';
             }
@@ -4485,6 +4486,43 @@ CMD.printLabel = function(url) {
   if (!w) { alert('Pop-up bloqué — autorise les pop-ups pour podcast-arca.netlify.app puis réessaye.'); return; }
   // Tentative d'auto-print après chargement (peut être bloqué pour PDF cross-origin — le viewer PDF natif a son propre bouton Imprimer)
   try { w.addEventListener('load', function(){ try { w.print(); } catch(e){} }); } catch(e){}
+};
+
+// Reset le statut Bpost d'une commande en BDD : vide bpost_pushed_at et
+// bpost_label_url pour qu'elle redevienne "📦 Envoyer à Bpost". À utiliser
+// UNIQUEMENT si on a vérifié dans le Shipping Manager Bpost qu'aucun
+// shipment n'a réellement été créé — sinon repousser créerait un doublon
+// facturé.
+CMD.resetBpost = function(id) {
+  var o = CMD.orders.find(function(x){ return x.id === id; });
+  if (!o) return;
+  var msg = ''
+    + 'RESET du statut Bpost pour ARCA-' + id + '.\n\n'
+    + '⚠ À utiliser SEULEMENT si tu as vérifié dans le Shipping Manager '
+    + 'Bpost qu\'aucun shipment n\'a été créé pour cette commande.\n\n'
+    + 'Sinon repousser créerait un DOUBLON FACTURÉ.\n\n'
+    + 'Continuer ?';
+  if (!confirm(msg)) return;
+  CMD.api('/arca_orders?id=eq.' + id, {
+    method: 'PATCH',
+    body: {
+      bpost_pushed_at: null,
+      bpost_label_url: null,
+      bpost_shipment_id: null,
+      bpost_reference: null,
+      bpost_status: null
+    }
+  })
+  .then(function() {
+    o.bpost_pushed_at = null;
+    o.bpost_label_url = null;
+    o.bpost_shipment_id = null;
+    o.bpost_reference = null;
+    o.bpost_status = null;
+    CMD.render();
+    alert('⟲ Statut Bpost réinitialisé. Tu peux maintenant cliquer "Envoyer à Bpost".');
+  })
+  .catch(function(e) { alert('Erreur : ' + e.message); });
 };
 
 // Marque une commande Bpost comme traitée manuellement : l'étiquette a
