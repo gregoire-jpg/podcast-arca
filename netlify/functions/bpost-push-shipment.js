@@ -66,48 +66,65 @@ async function updateOrder(orderId, fields) {
   });
 }
 
-// Sélection dynamique du carrier : on liste ceux autorisés sur le
-// contrat ARCA (GET /v3/carriers/allowed/) et on choisit celui qui
-// matche le pays cible. Doc Bpost trop évasive pour hardcoder un
-// CarrierId — il dépend du contrat de chaque marchand.
+// Sélection dynamique Carrier + Product depuis /v3/carriers/allowed/.
 //
-// Heuristique de matching :
-//   - pays BE  → carrier dont le nom NE contient PAS "international/world"
-//   - pays !BE → carrier dont le nom contient "international/world", ou
-//                carrier marqué internationalAllowed=true / countries=...
-//   - fallback : on prend le premier
-//
-// Si la requête /carriers/allowed/ retourne 0 carrier (compte
-// non configuré) → on omet le bloc Carrier et on laisse Bpost
-// trancher. Si Bpost refuse à nouveau, c'est qu'il faut configurer
-// les produits dans le SM web (côté ARCA).
+// Structure réelle Bpost (validée le 2026-06-08 sur le contrat ARCA) :
+//   - Carrier 68 = "bpost shm" (home + PUDO)
+//   - Carrier 71 = "bpost SML" (Send My Label)
+//   - À l'intérieur, OptionList "Product" (ClassId 126) avec :
+//       302 bpack 24h Pro              ← BE national, livraison domicile
+//       303 bpack World Business       ← international, domicile
+//       301 Bpack 24/7 & Bpack@bpost   ← PUDO (point relais)
+//       304 bpack 24h business         ← BE national alt
+//       309 International Home Economy ← intl éco (liste pays restreinte)
+//   - Le payload /shipments attend Carrier.Id (le carrier 68) ET un
+//     OptionList contenant le Product. Sinon Bpost répond "Carrier not
+//     available" ou "Product required".
 function pickCarrierForCountry(carriers, iso2) {
   if (!Array.isArray(carriers) || carriers.length === 0) return null;
+
+  // 1) Choisir le Carrier "bpost shm" (livraison domicile)
+  const carrier = carriers.find(c => /bpost\s*shm/i.test(c.Name || ''))
+               || carriers.find(c => String(c.Id) === '68')
+               || carriers[0];
+  if (!carrier) return null;
+
+  // 2) Trouver l'OptionList "Product"
+  const productOpt = (carrier.OptionList || []).find(o =>
+    o && (o.Name === 'Product' || o.ClassId === 126)
+  );
+  if (!productOpt || !Array.isArray(productOpt.OptionValues)) {
+    return { carrierId: parseInt(carrier.Id, 10), productClassId: null, productId: null };
+  }
+
+  // 3) Choisir le Product selon le pays cible
   const wantsIntl = iso2 !== 'BE';
+  const candidates = productOpt.OptionValues.filter(v => v && v.IsPickup === 0);
+  let chosen = null;
 
-  const score = (c) => {
-    const name = ((c.Name || c.CarrierName || c.Code || '') + '').toLowerCase();
-    const isIntl = /international|world|europe|abroad/.test(name);
-    // Champ explicite "countries" si Bpost le retourne
-    const countries = (c.Countries || c.CountryList || '').toString().toUpperCase();
-    const matchesCountry = countries && countries.indexOf(iso2) !== -1;
+  if (wantsIntl) {
+    // International : préfère bpack World Business (303), fallback Economy
+    chosen = candidates.find(v => String(v.Id) === '303')
+          || candidates.find(v => /world business/i.test(v.Name || ''))
+          || candidates.find(v => String(v.Id) === '309')
+          || candidates.find(v => /international.*home/i.test(v.Name || ''));
+  } else {
+    // BE national : préfère bpack 24h Pro (302), fallback business/Pack
+    chosen = candidates.find(v => String(v.Id) === '302')
+          || candidates.find(v => /24h\s*pro/i.test(v.Name || ''))
+          || candidates.find(v => String(v.Id) === '304')
+          || candidates.find(v => /24h\s*business/i.test(v.Name || ''));
+  }
 
-    if (wantsIntl) {
-      if (matchesCountry) return 10;
-      if (isIntl) return 5;
-      return 1;
-    }
-    if (matchesCountry) return 10;
-    if (isIntl) return 1;
-    return 5;
+  return {
+    carrierId: parseInt(carrier.Id, 10),
+    productClassId: productOpt.Id,
+    productId: chosen ? String(chosen.Id) : null,
+    productName: chosen ? chosen.Name : null
   };
-
-  const sorted = carriers.slice().sort((a, b) => score(b) - score(a));
-  const best = sorted[0];
-  return best && (best.Id || best.CarrierId) || null;
 }
 
-function buildShipment(order, refSuffix, carrierId) {
+function buildShipment(order, refSuffix, carrierInfo, includeProduct) {
   const addr = parseStreet(order.rue);
   // Bpost refuse HouseNumber == 0. Si rien d'extractible, on met 1.
   let houseNumber = 1;
@@ -140,8 +157,14 @@ function buildShipment(order, refSuffix, carrierId) {
     },
     Weight: computeWeightG(order.items)
   };
-  if (carrierId) {
-    shipment.Carrier = { Id: carrierId };
+  if (carrierInfo && carrierInfo.carrierId) {
+    shipment.Carrier = { Id: carrierInfo.carrierId };
+    if (includeProduct && carrierInfo.productId && carrierInfo.productClassId) {
+      shipment.Carrier.OptionList = [{
+        Id: carrierInfo.productClassId,
+        Value: carrierInfo.productId
+      }];
+    }
   }
   return shipment;
 }
@@ -254,38 +277,48 @@ exports.handler = async function (event) {
       }
     }
 
-    // ── 0bis) Lister les carriers autorisés sur le compte ──────────
-    // On choisit celui qui matche le pays. Si la requête échoue ou
-    // retourne vide, on tente sans bloc Carrier (auto-select).
+    // ── 0bis) Lister les carriers autorisés et choisir Carrier+Product ──
+    // Structure validée le 2026-06-08 : Carrier 68 ("bpost shm") + un
+    // Product dans OptionList (302 = bpack 24h Pro pour BE, 303 = bpack
+    // World Business pour intl).
     const country = ISO2[order.pays] || 'BE';
-    let carrierId = null;
+    let carrierInfo = null;
     try {
       const allowedResp = await utils.fetchAllowedCarriers(token);
-      console.log('[Bpost] /carriers/allowed/ →', JSON.stringify(allowedResp).substring(0, 600));
       const carriers = utils.extractCarrierArray(allowedResp);
-      carrierId = pickCarrierForCountry(carriers, country);
-      console.log('[Bpost] carrier choisi pour ' + country + ' → ' + (carrierId || 'aucun (auto-select)'));
+      carrierInfo = pickCarrierForCountry(carriers, country);
+      console.log('[Bpost] choix pour ' + country + ' →',
+        carrierInfo
+          ? ('Carrier ' + carrierInfo.carrierId + ' + Product ' +
+             (carrierInfo.productId || 'aucun') +
+             ' (' + (carrierInfo.productName || '') + ')')
+          : 'aucun carrier disponible');
     } catch (e) {
       console.warn('[Bpost] /carriers/allowed/ KO:', e.message, '— on tente auto-select');
     }
 
-    // ── 1) Créer le shipment, avec suffixe -r1, -r2… si "already exists" ──
-    // Stratégie :
-    //   - 1er essai avec le carrier choisi (ou sans bloc si null)
-    //   - "already exists" → on incrémente le suffixe et on retente
-    //   - "Carrier not available" → on retire le bloc Carrier et on retente
-    //     une fois (auto-select)
+    // ── 1) Créer le shipment ────────────────────────────────────────
+    // Cascade de fallbacks :
+    //   mode A : Carrier + Product (config la plus complète)
+    //   mode B : Carrier seul (sans OptionList)
+    //   mode C : pas de bloc Carrier (auto-select Bpost)
+    // + retry suffixe -r1, -r2… si "already exists" (ghosts).
     let chosenCref = null;
     let shipErrs = [];
-    let carrierIdUsed = carrierId;
-    let triedWithoutCarrier = false;
-    const maxRetries = 5;
+    let mode = carrierInfo && carrierInfo.productId ? 'A' : (carrierInfo ? 'B' : 'C');
+    let suffixIdx = 0;
+    const maxAttempts = 10;
+    let attempts = 0;
 
-    for (let i = 0; i < maxRetries; i++) {
-      const suffix = i === 0 ? null : ('r' + i);
-      const shipment = buildShipment(order, suffix, carrierIdUsed);
-      console.log('[Bpost] try shipment cref=' + shipment.ClientReferenceCode +
-        ' carrier=' + (carrierIdUsed || 'auto'));
+    while (attempts++ < maxAttempts) {
+      const suffix = suffixIdx === 0 ? null : ('r' + suffixIdx);
+      let ci = null, includeProduct = false;
+      if (mode === 'A') { ci = carrierInfo; includeProduct = true; }
+      else if (mode === 'B') { ci = carrierInfo; includeProduct = false; }
+      // mode C → ci=null → pas de Carrier
+
+      const shipment = buildShipment(order, suffix, ci, includeProduct);
+      console.log('[Bpost] try mode=' + mode + ' cref=' + shipment.ClientReferenceCode);
 
       const shipResp = await utils.bpostCall('POST', '/v3/shipments/', { Shipment: [shipment] }, token);
       console.log('[Bpost] /shipments →', JSON.stringify(shipResp).substring(0, 300));
@@ -293,23 +326,31 @@ exports.handler = async function (event) {
       shipErrs = extractErrors(shipResp);
       if (shipErrs.length === 0) {
         chosenCref = shipment.ClientReferenceCode;
-        console.log('[Bpost] shipment matérialisé avec cref=' + chosenCref);
+        console.log('[Bpost] OK — shipment matérialisé en mode ' + mode + ' avec cref=' + chosenCref);
         break;
       }
-      // "already exists" → on tente le suffixe suivant
+
+      // "already exists" → suffixe suivant, même mode
       if (shipErrs.some(e => /already exists/i.test(e))) {
-        console.log('[Bpost] ' + shipment.ClientReferenceCode + ' déjà pris (ghost), retry avec suffixe');
+        console.log('[Bpost] cref déjà pris (ghost), retry suffixe');
+        suffixIdx++;
         continue;
       }
-      // "Carrier not available" → fallback : retire le bloc Carrier UNE FOIS
-      if (shipErrs.some(e => /carrier.*not.*available|choose another/i.test(e)) && !triedWithoutCarrier) {
-        console.log('[Bpost] carrier ' + carrierIdUsed + ' refusé, retry sans bloc Carrier (auto-select)');
-        carrierIdUsed = null;
-        triedWithoutCarrier = true;
-        // on garde le même suffixe → on rejoue ce tour (i--)
-        i--;
-        continue;
+
+      // "Carrier not available" / "Product invalid" → on rétrograde le mode
+      if (shipErrs.some(e => /carrier.*not.*available|choose another|product/i.test(e))) {
+        if (mode === 'A') {
+          console.log('[Bpost] mode A refusé → mode B (Carrier sans Product)');
+          mode = 'B';
+          continue;
+        }
+        if (mode === 'B') {
+          console.log('[Bpost] mode B refusé → mode C (auto-select)');
+          mode = 'C';
+          continue;
+        }
       }
+
       // Toute autre erreur → on arrête
       return {
         statusCode: 422,
@@ -318,7 +359,8 @@ exports.handler = async function (event) {
           ok: false,
           error: 'Bpost a refusé la commande : ' + shipErrs.join(' · '),
           api_errors: shipErrs,
-          carrier_tried: carrierIdUsed
+          mode_tried: mode,
+          carrier_info: carrierInfo
         })
       };
     }
@@ -329,8 +371,9 @@ exports.handler = async function (event) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ok: false,
-          error: 'Bpost a refusé après ' + maxRetries + ' tentatives (tous les crefs en collision). Dernière erreur : ' + shipErrs.join(' · '),
-          api_errors: shipErrs
+          error: 'Bpost refuse après ' + maxAttempts + ' tentatives. Dernière erreur : ' + shipErrs.join(' · '),
+          api_errors: shipErrs,
+          carrier_info: carrierInfo
         })
       };
     }
