@@ -47,6 +47,38 @@ function buildShipmentItems(items) {
   }));
 }
 
+// Pays UE 27 (mai 2026 — UK exclu post-Brexit, CH/NO/IS pas UE).
+// Pour ces pays : pas de douane (Customs absent du payload).
+// Pour tout le reste (CA, US, UK, CH, AU, JP…) : Bpost exige Customs.
+const UE_27 = new Set([
+  'BE','BG','CZ','DK','DE','EE','IE','GR','ES','FR','HR','IT','CY',
+  'LV','LT','LU','HU','MT','NL','AT','PL','PT','RO','SI','SK','FI','SE'
+]);
+
+// Customs CN22/CN23 — format Plug-in API v3 aligné sur plugin Woo
+// officiel (class-Bpost-order.php:627). CustomsType : 3 = GOODS
+// (marchandises), 2 = GIFT, 4 = DOCUMENTS, 5 = SAMPLE, 6 = OTHER.
+// Pour ARCA = livres + revue littéraire = GOODS (3).
+// Description max 40 chars. Value en euros (string décimal).
+function buildCustoms(order) {
+  const country = ISO2[order.pays] || 'BE';
+  if (UE_27.has(country)) return null;  // pas de douane intra-UE
+
+  const totalArticles = (order.items || []).reduce((sum, it) => {
+    return sum + (it.qty || 0) * parseFloat(it.price || 0);
+  }, 0);
+  // Fallback sur total_eur - port_eur si items vides
+  const fallback = parseFloat(order.total_eur || 0) - parseFloat(order.port_eur || 0);
+  const value = totalArticles > 0 ? totalArticles : Math.max(fallback, 1);
+
+  return {
+    CustomsType: 3,  // GOODS
+    Description: 'Livres / Revue litteraire ARCA'.substring(0, 40),
+    Type: '',
+    Value: value.toFixed(2)
+  };
+}
+
 function parseStreet(rue) {
   if (!rue) return { street: '', number: '' };
   const cleaned = String(rue).trim();
@@ -115,7 +147,7 @@ function buildShipment(order, attempt) {
     ? order.id
     : parseInt(crypto.randomBytes(4).toString('hex'), 16);
 
-  return {
+  const shipment = {
     ShopItemId: shopItemId,
     ClientReferenceCode: cref,
     Address: {
@@ -139,6 +171,10 @@ function buildShipment(order, attempt) {
     Weight: computeWeightG(order.items),
     ShipmentItems: buildShipmentItems(order.items)
   };
+  // Customs : ajouté UNIQUEMENT si pays hors UE (CA, US, UK, CH…)
+  const customs = buildCustoms(order);
+  if (customs) shipment.Customs = customs;
+  return shipment;
 }
 
 function extractErrors(resp) {
