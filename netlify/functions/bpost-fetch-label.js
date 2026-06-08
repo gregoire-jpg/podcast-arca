@@ -33,7 +33,9 @@ exports.handler = async function (event) {
   const q = event.queryStringParameters || {};
   const ref = q.ref;
   if (!ref) return text(400, 'ref manquant');
-  if (!/^ARCA-\d+(-r\d+)?$/.test(ref)) return text(400, 'ref invalide');
+  // Format autorisé : ARCA-N (canonique), ARCA-N-rN (legacy retry suffix),
+  // ARCA-N-XXXXXXXX (random hex 8 chars depuis 2026-06-08 anti-ghost).
+  if (!/^ARCA-\d+(-r\d+|-[0-9a-f]{4,16})?$/.test(ref)) return text(400, 'ref invalide');
 
   if (!verifySignature(ref, q.exp, q.sig)) {
     return text(403, 'Signature absente, invalide ou expirée — demande un nouveau lien depuis l\'admin.');

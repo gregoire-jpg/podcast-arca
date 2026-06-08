@@ -25,7 +25,8 @@ exports.handler = async function (event) {
     return json(401, { error: 'Mot de passe incorrect' });
   }
   const ref = body.ref;
-  if (!ref || !/^ARCA-\d+$/.test(ref)) return json(400, { error: 'ref invalide' });
+  // Accepte aussi les suffixes random hex (anti-ghost depuis 2026-06-08).
+  if (!ref || !/^ARCA-\d+(-r\d+|-[0-9a-f]{4,16})?$/.test(ref)) return json(400, { error: 'ref invalide' });
 
   const secret = process.env.BPOST_LABEL_SECRET || process.env.ADMIN_PASSWORD;
   if (!secret) return json(500, { error: 'BPOST_LABEL_SECRET non configuré' });

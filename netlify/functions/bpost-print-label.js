@@ -45,7 +45,7 @@ exports.handler = async function (event) {
   const q = event.queryStringParameters || {};
   const ref = q.ref;
   if (!ref) return text(400, 'ref manquant');
-  if (!/^ARCA-\d+$/.test(ref)) return text(400, 'ref invalide');
+  if (!/^ARCA-\d+(-r\d+|-[0-9a-f]{4,16})?$/.test(ref)) return text(400, 'ref invalide');
 
   if (!verifySignature(ref, q.exp, q.sig)) {
     return text(403, 'Signature absente, invalide ou expirée — relance depuis l\'admin.');
