@@ -79,6 +79,21 @@ async function updateOrder(orderId, fields) {
   });
 }
 
+// Extrait les erreurs API d'une réponse Bpost /v3/shipments.
+function extractBpostErrors(resp) {
+  const errs = [];
+  const shipments = Array.isArray(resp && resp.Shipment) ? resp.Shipment : [];
+  shipments.forEach(s => {
+    if (Array.isArray(s.ErrorList)) {
+      s.ErrorList.forEach(e => errs.push((e.Tekst || e.Info || 'erreur').trim()));
+    }
+  });
+  if (resp && resp.Error && resp.Error.Id && resp.Error.Id !== 0) {
+    errs.push((resp.Error.Info || ('Error ' + resp.Error.Id)).trim());
+  }
+  return errs;
+}
+
 function buildShipment(order, carrierId) {
   const addr = parseStreet(order.rue);
   // Bpost refuse les HouseNumber == 0 ("Value too low or string too short").
@@ -110,7 +125,8 @@ function buildShipment(order, carrierId) {
       Phone: order.telephone || '',
       Email: order.email || ''
     },
-    Carrier: { Id: carrierId },
+    // Carrier optionnel : null → auto-select par Bpost (recommandé Plugin v3)
+    Carrier: carrierId ? { Id: carrierId } : undefined,
     Weight: computeWeightG(order.items)
   };
 }
@@ -166,49 +182,68 @@ exports.handler = async function (event) {
       };
     }
 
-    // 1) POST /v3/shipments — on essaye chaque carrier dans l'ordre
+    // 1) POST /v3/shipments — stratégie multi-tentatives
+    //
+    // Tentative #1 : SANS Carrier dans le payload. Bpost auto-sélectionne le
+    // carrier optimal selon (poids × destination × contrats du compte). C'est
+    // la voie recommandée par la doc Plugin v3 — le forçage d'un carrier
+    // déclenche "Carrier not available" si le mapping option↔contrat n'est
+    // pas exact.
+    //
+    // Tentative #2..N : si #1 échoue, on retombe sur le forçage par carrier
+    // (ancien comportement) en passant chaque candidat.
     let shipResp = null;
     let usedCarrier = null;
     let lastErrors = [];
-    for (const c of candidates) {
-      const shipPayload = { Shipment: [buildShipment(order, c.id)] };
-      const resp = await utils.bpostCall('POST', '/v3/shipments/', shipPayload, token);
-      console.log('[Bpost] try carrier', c.id, c.name, '→', JSON.stringify(resp).substring(0, 300));
 
-      const shipments = Array.isArray(resp.Shipment) ? resp.Shipment : [];
-      const errs = [];
-      shipments.forEach(s => {
-        if (Array.isArray(s.ErrorList)) {
-          s.ErrorList.forEach(e => errs.push((e.Tekst || e.Info || 'erreur').trim()));
-        }
-      });
-      if (resp.Error && resp.Error.Id && resp.Error.Id !== 0) {
-        errs.push((resp.Error.Info || ('Error ' + resp.Error.Id)).trim());
-      }
+    // Log du payload exact (debug 2026-06-08 ARTERO)
+    const baseShipment = buildShipment(order, null);
+    console.log('[Bpost] base shipment payload:', JSON.stringify(baseShipment));
 
+    // Tentative 1 : auto-select
+    {
+      const autoShipment = Object.assign({}, baseShipment);
+      delete autoShipment.Carrier;
+      const resp = await utils.bpostCall('POST', '/v3/shipments/', { Shipment: [autoShipment] }, token);
+      console.log('[Bpost] try auto-select →', JSON.stringify(resp).substring(0, 400));
+      const errs = extractBpostErrors(resp);
       if (!errs.length) {
         shipResp = resp;
-        usedCarrier = c;
-        break;
+        usedCarrier = { id: null, name: 'auto-select' };
+      } else {
+        lastErrors = errs;
+        const onlyCarrierIssue = errs.every(e => /carrier not available/i.test(e));
+        if (!onlyCarrierIssue) {
+          console.error('[Bpost] erreur non-carrier dès auto-select, arrêt:', errs.join(' | '));
+          return {
+            statusCode: 422,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ok: false, error: 'Bpost a refusé la commande : ' + errs.join(' · '), api_errors: errs })
+          };
+        }
       }
-      lastErrors = errs;
-      // Si l'erreur est "Carrier not available", on essaye le suivant.
-      // Pour toute autre erreur (HouseNumber, adresse, etc.), inutile de
-      // changer de carrier → on s'arrête immédiatement.
-      const onlyCarrierIssue = errs.every(e => /carrier not available/i.test(e));
-      if (!onlyCarrierIssue) {
-        console.error('[Bpost] erreur non-carrier, arrêt:', errs.join(' | '));
-        return {
-          statusCode: 422,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ok: false,
-            error: 'Bpost a refusé la commande : ' + errs.join(' · '),
-            api_errors: errs
-          })
-        };
+    }
+
+    // Tentatives 2..N : forçage carrier par candidat
+    if (!shipResp) {
+      for (const c of candidates) {
+        const shipPayload = { Shipment: [buildShipment(order, c.id)] };
+        const resp = await utils.bpostCall('POST', '/v3/shipments/', shipPayload, token);
+        console.log('[Bpost] try carrier', c.id, c.name, '→', JSON.stringify(resp).substring(0, 400));
+        const errs = extractBpostErrors(resp);
+        if (!errs.length) { shipResp = resp; usedCarrier = c; break; }
+        lastErrors = errs;
+        const onlyCarrierIssue = errs.every(e => /carrier not available/i.test(e));
+        if (!onlyCarrierIssue) {
+          console.error('[Bpost] erreur non-carrier, arrêt:', errs.join(' | '));
+          return {
+            statusCode: 422,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ok: false, error: 'Bpost a refusé la commande : ' + errs.join(' · '), api_errors: errs })
+          };
+        }
+        console.warn('[Bpost] carrier', c.id, 'non disponible, on essaie le suivant');
       }
-      console.warn('[Bpost] carrier', c.id, 'non disponible, on essaie le suivant');
     }
 
     if (!shipResp || !usedCarrier) {
@@ -217,15 +252,16 @@ exports.handler = async function (event) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ok: false,
-          error: 'Bpost : aucun carrier disponible pour cette destination (' + (order.pays || '?') + '). ' + lastErrors.join(' · '),
+          error: 'Bpost : aucun carrier disponible pour cette destination (' + (order.pays || '?') + '). Cause probable : contrat international non activé sur le compte Shipping Manager OU adresse mal formatée. ' + lastErrors.join(' · '),
           api_errors: lastErrors,
-          tried: candidates.map(c => c.id + ' ' + c.name)
+          tried_auto_select: true,
+          tried_carriers: candidates.map(c => c.id + ' ' + c.name)
         })
       };
     }
 
-    const carrierId = usedCarrier.id;
-    console.log('[Bpost] shipment accepté avec carrier', carrierId, usedCarrier.name);
+    const carrierId = usedCarrier.id || 0;
+    console.log('[Bpost] shipment accepté avec', usedCarrier.name, '(id=' + carrierId + ')');
 
     // 2) POST /v3/labels — démarre génération PDF
     // LabelType : A4 par défaut (format universel, accepté partout). Surchargeable
