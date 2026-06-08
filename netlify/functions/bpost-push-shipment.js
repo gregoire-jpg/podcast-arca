@@ -66,6 +66,16 @@ async function updateOrder(orderId, fields) {
   });
 }
 
+// Carrier IDs Bpost Shipping Manager Plug-in API v3 :
+//   BE (national)        : 301 = bpack 24h home
+//   International home   : 303 = bpack World Business
+// L'auto-select (sans Carrier ou Id=0) crée un ghost shipment qui apparait
+// dans les stats mais reste invisible côté admin web. On force un vrai
+// Carrier ID pour que le shipment soit matérialisé et exploitable.
+function carrierIdForCountry(iso2) {
+  return iso2 === 'BE' ? 301 : 303;
+}
+
 function buildShipment(order) {
   const addr = parseStreet(order.rue);
   // Bpost refuse HouseNumber == 0. Si rien d'extractible, on met 1.
@@ -79,6 +89,8 @@ function buildShipment(order) {
       if (ext) numberExt = (numberExt ? numberExt + ' ' : '') + ext;
     }
   }
+  const country = ISO2[order.pays] || 'BE';
+  const carrierId = carrierIdForCountry(country);
   return {
     ShopItemId: 'ARCA-' + order.id,
     ClientReferenceCode: 'ARCA-' + order.id,
@@ -90,10 +102,11 @@ function buildShipment(order) {
       NumberExtension: numberExt,
       PostalCode: order.cp || '',
       City: order.ville || '',
-      Country: ISO2[order.pays] || 'BE',
+      Country: country,
       Phone: order.telephone || '',
       Email: order.email || ''
     },
+    Carrier: { Id: carrierId },
     Weight: computeWeightG(order.items)
   };
 }
