@@ -4513,31 +4513,34 @@ CMD.printBpostLabel = function(cref) {
   if (!pwd) return;
   sessionStorage.setItem('admin_pwd', pwd);
 
-  // CRITIQUE : window.open DOIT être appelé synchrone dans le user
-  // gesture (clic). Si on attend la fin du fetch, Chrome/Firefox bloquent
-  // silencieusement. On ouvre un onglet "loading" et on le redirige
-  // une fois le token signé reçu.
-  var w = window.open('about:blank', '_blank');
-  if (!w) {
-    alert('Pop-up bloqué — autorise les pop-ups pour podcast-arca.netlify.app puis réessaye.');
-    return;
-  }
-  try { w.document.write('<html><body style="font:14px Arial;padding:2em;color:#666">Chargement de l\'étiquette Bpost…</body></html>'); } catch(e) {}
+  // Form POST sync vers /bpost-print-direct avec target=_blank :
+  //   - 100% synchrone (form.submit() est dans le user gesture du clic)
+  //   - pas de window.open après async (qui se faisait bloquer)
+  //   - le password transite dans le body POST, jamais en URL
+  //   - le PDF s'affiche directement dans le nouvel onglet (Content-Type pdf)
+  var form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '/.netlify/functions/bpost-print-direct';
+  form.target = '_blank';
+  form.style.display = 'none';
+  form.enctype = 'application/x-www-form-urlencoded';
 
-  fetch('/.netlify/functions/bpost-label-token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password: pwd, ref: cref })
-  })
-  .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
-  .then(function(d) {
-    w.location.href = d.url;
-  })
-  .catch(function(e) {
-    try { w.close(); } catch(_) {}
-    if (/incorrect/i.test(e.message)) sessionStorage.removeItem('admin_pwd');
-    alert('Erreur étiquette Bpost : ' + e.message);
-  });
+  var p1 = document.createElement('input');
+  p1.type = 'hidden';
+  p1.name = 'password';
+  p1.value = pwd;
+  form.appendChild(p1);
+
+  var p2 = document.createElement('input');
+  p2.type = 'hidden';
+  p2.name = 'ref';
+  p2.value = cref;
+  form.appendChild(p2);
+
+  document.body.appendChild(form);
+  form.submit();
+  // Le form reste attaché 1s pour garantir la soumission, puis on nettoie
+  setTimeout(function() { try { document.body.removeChild(form); } catch(e) {} }, 1000);
 };
 
 // Ouvre l'étiquette PDF dans un nouvel onglet (et tente d'ouvrir le dialog d'impression)
