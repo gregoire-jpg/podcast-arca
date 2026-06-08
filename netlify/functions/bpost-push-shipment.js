@@ -104,6 +104,16 @@ function buildShipment(order, attempt) {
   const country = ISO2[order.pays] || 'BE';
   const cref = buildCref(order.id, attempt);
 
+  // Product selon pays :
+  //   BE  → 302 bpack 24h Pro
+  //   !BE → 303 bpack World Business
+  // Les Shipping rules d'Antoine ne déclenchent que si Product est
+  // DÉJÀ défini et matche la condition. Sans Product dans le payload,
+  // Bpost ne peut pas assigner de service level → "No valid items" sur
+  // POST /labels. On envoie donc directement le bon Product ; la rule
+  // écrasera avec la même valeur (no-op).
+  const productId = country === 'BE' ? '302' : '303';
+
   return {
     ShopItemId: shopItemHex(cref),
     ClientReferenceCode: cref,
@@ -120,10 +130,12 @@ function buildShipment(order, attempt) {
       Email: order.email || ''
     },
     Weight: computeWeightG(order.items),
-    // Carrier seul, PAS d'OptionList — les Shipping rules d'Antoine
-    // (SM web → Shipping rules) assignent automatiquement bpack 24h Pro
-    // pour BE et bpack World Business pour international.
-    Carrier: { Id: 68 }
+    Carrier: {
+      Id: 68,
+      OptionList: [
+        { Id: 126, Value: productId }
+      ]
+    }
   };
 }
 
