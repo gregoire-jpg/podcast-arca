@@ -812,9 +812,6 @@
       <button class="cmd-tab"    data-cmd="all">Toutes</button>
       <button class="btn btn-navy" id="cmd-new" style="margin-left:12px">+ Nouvelle commande</button>
       <button class="btn btn-gold" id="cmd-print-mainpropre" style="margin-left:6px" title="PDF imprimable des commandes en main propre (non clôturées)">📋 PDF main propre</button>
-      <button class="btn btn-gold" id="cmd-debug-bpost" style="margin-left:6px" title="Liste les carriers autorisés sur le contrat Bpost ARCA" onclick="CMD.debugBpost()">🔧 Debug Bpost</button>
-      <button class="btn btn-gold" id="cmd-shm-test" style="margin-left:6px" title="Teste les credentials sur l'API XML SHM" onclick="CMD.testShmAuth()">🔬 Test SHM Auth</button>
-      <button class="btn btn-gold" id="cmd-activate-carrier" style="margin-left:6px" title="Active Carrier 68/71 + dump rules existantes" onclick="CMD.activateCarrier()">⚡ Activer Carrier</button>
       <button class="btn btn-gold" id="cmd-refresh" style="margin-left:6px">⟳ Actualiser</button>
     </div>
   </div>
@@ -1256,12 +1253,6 @@
 
 <script>
 'use strict';
-
-/* ═══════════════════ VERSION MARKER ═══════════════════ */
-// Marker visible dans console pour confirmer que le browser sert la dernière
-// version. Si Greg voit "Unexpected end of input" et PAS ce log → erreur
-// dans un bloc PRÉCÉDENT du HTML (extension, widget MR, etc.).
-console.log('[admin] v2026-06-08-21:55 — bpost form POST, regex random hex');
 
 /* ═══════════════════ STATE ═══════════════════ */
 var S = { episodes: [], config: {}, pwd: '', dirty: new Set() };
@@ -3886,8 +3877,7 @@ CMD.render = function() {
                   +   '<input type="hidden" name="ref" value="' + bfCrefSafe + '">'
                   +   '<input type="hidden" name="password" value="">'
                   +   '<button type="submit" class="cmd-act print">🖨️ Imprimer étiquette</button>'
-                  + '</form>'
-                  + '<button class="cmd-act" style="background:#888;color:#fff" onclick="CMD.debugBpostOrder(' + o.id + ')" title="Diagnostic Bpost">🔧</button>';
+                  + '</form>';
               }
               // URL Bpost directe (rare : LabelUrl renvoyée)
               if (o.bpost_label_url && !String(o.bpost_label_url).startsWith('pending:')) {
@@ -3897,8 +3887,7 @@ CMD.render = function() {
               var label = o.bpost_pushed_at ? '🔄 Réessayer Bpost' : '📦 Envoyer à Bpost';
               return ''
                 + '<button class="cmd-act bpost" onclick="CMD.pushBpost(' + o.id + ')">' + label + '</button>'
-                + '<button class="cmd-act done" onclick="CMD.markBpostManual(' + o.id + ')" title="Marquer comme traitée hors API">✓ Traitée manuellement</button>'
-                + '<button class="cmd-act" style="background:#888;color:#fff" onclick="CMD.debugBpostOrder(' + o.id + ')" title="Diagnostic Bpost">🔧</button>';
+                + '<button class="cmd-act done" onclick="CMD.markBpostManual(' + o.id + ')" title="Marquer comme traitée hors API">✓ Traitée manuellement</button>';
             }
             // Mondial Relay : l'étiquette est créée UNE seule fois (à la commande ou
             // au 1er clic "Générer"). L'URL PDF MR est une URL GET stable (clef
@@ -4508,67 +4497,6 @@ CMD.regenMr = function(id, evt, force) {
   });
 };
 
-// Ouvre Shipping Manager web Bpost dans un nouvel onglet, copie le
-// cref dans le presse-papier pour le rechercher facilement. Le Plug-in
-// API ne fournit pas de PDF côté serveur — l'impression se fait depuis
-// SM web (où Antoine et Greg sont authentifiés).
-CMD.openBpostSmWeb = function(cref) {
-  try { navigator.clipboard.writeText(cref); } catch (e) {}
-  var url = 'https://shippingmanager.bpost.be/';
-  var w = window.open(url, '_blank');
-  if (!w) {
-    alert('Pop-up bloqué — autorise les pop-ups pour podcast-arca.netlify.app.\n\nLe cref ' + cref + ' a été copié dans le presse-papier. Ouvre Shipping Manager Bpost et colle dans la recherche.');
-    return;
-  }
-  // Petit toast non-bloquant
-  var toast = document.createElement('div');
-  toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#1f5b3a;color:#fff;padding:12px 18px;border-radius:6px;font:.9em Arial;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
-  toast.textContent = 'Référence ' + cref + ' copiée — colle-la dans la recherche SM web';
-  document.body.appendChild(toast);
-  setTimeout(function(){ toast.style.transition = 'opacity .5s'; toast.style.opacity = '0'; }, 3000);
-  setTimeout(function(){ toast.remove(); }, 3700);
-};
-
-// Étiquette Bpost via marqueur "bpost-fetch:ARCA-XX" : on demande un
-// token signé HMAC (court, 10 min) à /bpost-label-token (auth password)
-// puis on ouvre l'URL signée dans un nouvel onglet. Le PDF lui-même
-// transite par /bpost-fetch-label, qui valide la signature et le TTL.
-// Les ARCA-N étant énumérables, jamais d'URL en clair stockée.
-CMD.printBpostLabel = function(cref) {
-  var pwd = sessionStorage.getItem('admin_pwd') || prompt('Mot de passe admin');
-  if (!pwd) return;
-  sessionStorage.setItem('admin_pwd', pwd);
-
-  // Form POST sync vers /bpost-print-direct avec target=_blank :
-  //   - 100% synchrone (form.submit() est dans le user gesture du clic)
-  //   - pas de window.open après async (qui se faisait bloquer)
-  //   - le password transite dans le body POST, jamais en URL
-  //   - le PDF s'affiche directement dans le nouvel onglet (Content-Type pdf)
-  var form = document.createElement('form');
-  form.method = 'POST';
-  form.action = '/.netlify/functions/bpost-print-direct';
-  form.target = '_blank';
-  form.style.display = 'none';
-  form.enctype = 'application/x-www-form-urlencoded';
-
-  var p1 = document.createElement('input');
-  p1.type = 'hidden';
-  p1.name = 'password';
-  p1.value = pwd;
-  form.appendChild(p1);
-
-  var p2 = document.createElement('input');
-  p2.type = 'hidden';
-  p2.name = 'ref';
-  p2.value = cref;
-  form.appendChild(p2);
-
-  document.body.appendChild(form);
-  form.submit();
-  // Le form reste attaché 1s pour garantir la soumission, puis on nettoie
-  setTimeout(function() { try { document.body.removeChild(form); } catch(e) {} }, 1000);
-};
-
 // Réimpression d'une étiquette MR DÉJÀ générée : on retrouve la commande et on
 // rouvre simplement l'URL PDF stockée (URL GET stable côté MR). AUCUN appel
 // serveur, AUCUNE nouvelle expédition → zéro re-facturation. Si l'URL stockée
@@ -4622,23 +4550,17 @@ CMD.pushBpost = function(id) {
   .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
   .then(function(d) {
     CMD.load();
-    // Label dispo via token signé → on lance direct l'impression
-    if (d.bpost_label_url && String(d.bpost_label_url).startsWith('bpost-fetch:')) {
-      var cref = d.bpost_label_url.replace(/^bpost-fetch:/, '');
-      if (d.label_ready) {
-        CMD.printBpostLabel(cref);
-      } else if (d.pending) {
-        alert('✓ Shipment ' + d.bpost_reference + ' créé chez Bpost.\nPDF en cours de génération — clique "Imprimer étiquette" dans 30s.');
-      } else {
-        CMD.printBpostLabel(cref);
-      }
-      return;
+    // Le rendu va afficher un bouton "🖨️ Imprimer étiquette" (form HTML
+    // POST sync vers /bpost-print-direct) sur la ligne mise à jour.
+    var msg = '✓ Shipment ' + d.bpost_reference + ' créé chez Bpost.';
+    if (d.label_ready) {
+      msg += '\nÉtiquette prête — clique "🖨️ Imprimer étiquette" sur la commande.';
+    } else if (d.pending) {
+      msg += '\nPDF en cours de génération côté Bpost — clique "🖨️ Imprimer étiquette" dans 30s.';
+    } else {
+      msg += '\nClique "🖨️ Imprimer étiquette" sur la commande.';
     }
-    if (d.bpost_label_url && !String(d.bpost_label_url).startsWith('pending:')) {
-      CMD.printLabel(d.bpost_label_url);
-      return;
-    }
-    alert('✓ Commande envoyée à Bpost\nRéf: ' + d.bpost_reference);
+    alert(msg);
   })
   .catch(function(e) {
     var msg = 'Erreur Bpost : ' + e.message;
@@ -4648,93 +4570,6 @@ CMD.pushBpost = function(id) {
     alert(msg);
     btn.disabled = false; btn.textContent = '📦 Envoyer à Bpost';
   });
-};
-
-// Diagnostic profond d'UNE commande : dump shipments récents, GET
-// shipment, POST labels et tracking pour tous les crefs candidats.
-// À utiliser quand le PDF ne sort pas après un push apparemment réussi.
-CMD.debugBpostOrder = function(orderId) {
-  var pwd = sessionStorage.getItem('admin_pwd') || prompt('Mot de passe admin');
-  if (!pwd) return;
-  fetch('/.netlify/functions/bpost-debug-order', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password: pwd, order_id: orderId })
-  })
-  .then(function(r) { return r.text().then(function(t) { return { ok: r.ok, status: r.status, text: t }; }); })
-  .then(function(res) {
-    var w = window.open('', '_blank');
-    if (!w) { alert('Pop-up bloqué.'); return; }
-    w.document.write('<html><head><title>Bpost order ' + orderId + '</title><style>body{font:13px monospace;padding:1em;background:#1e1e1e;color:#dcdcdc}pre{white-space:pre-wrap;word-break:break-all}h1{color:#9cdcfe}</style></head><body><h1>Bpost order #' + orderId + ' (HTTP ' + res.status + ')</h1><pre>' + res.text.replace(/[&<>]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}) + '</pre></body></html>');
-    w.document.close();
-  })
-  .catch(function(e) { alert('Erreur debug : ' + e.message); });
-};
-
-// Active Carrier 68/71 via POST /v3/carriers/carrier/{id} (body vide)
-// + dump les rules existantes côté API. Indispensable pour vérifier
-// si le carrier est "allowed" mais pas "activated" (cause possible
-// des ghosts depuis 4 jours).
-CMD.activateCarrier = function() {
-  var pwd = sessionStorage.getItem('admin_pwd') || prompt('Mot de passe admin');
-  if (!pwd) return;
-  sessionStorage.setItem('admin_pwd', pwd);
-  fetch('/.netlify/functions/bpost-activate-carrier', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password: pwd })
-  })
-  .then(function(r) { return r.text().then(function(t) { return { ok: r.ok, status: r.status, text: t }; }); })
-  .then(function(res) {
-    var w = window.open('', '_blank');
-    if (!w) { alert('Pop-up bloqué.'); return; }
-    w.document.write('<html><head><title>Bpost activate carrier</title><style>body{font:13px monospace;padding:1em;background:#1e1e1e;color:#dcdcdc}pre{white-space:pre-wrap;word-break:break-all}h1{color:#9cdcfe}</style></head><body><h1>Bpost activate carrier (HTTP ' + res.status + ')</h1><pre>' + res.text.replace(/[&<>]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}) + '</pre></body></html>');
-    w.document.close();
-  })
-  .catch(function(e) { alert('Erreur activate : ' + e.message); });
-};
-
-// Teste les credentials qu'on a en env Netlify sur l'API XML SHM
-// (api-parcel.bpost.be/services/shm). Essaie plusieurs combinaisons
-// accountId × passphrase pour voir lesquelles passent l'auth.
-CMD.testShmAuth = function() {
-  var pwd = sessionStorage.getItem('admin_pwd') || prompt('Mot de passe admin');
-  if (!pwd) return;
-  sessionStorage.setItem('admin_pwd', pwd);
-  fetch('/.netlify/functions/bpost-shm-test', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password: pwd })
-  })
-  .then(function(r) { return r.text().then(function(t) { return { ok: r.ok, status: r.status, text: t }; }); })
-  .then(function(res) {
-    var w = window.open('', '_blank');
-    if (!w) { alert('Pop-up bloqué.'); return; }
-    w.document.write('<html><head><title>Bpost SHM Auth Test</title><style>body{font:13px monospace;padding:1em;background:#1e1e1e;color:#dcdcdc}pre{white-space:pre-wrap;word-break:break-all}h1{color:#9cdcfe}.ok{color:#4ec9b0}.ko{color:#f48771}</style></head><body><h1>Bpost SHM auth test (HTTP ' + res.status + ')</h1><pre>' + res.text.replace(/[&<>]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}) + '</pre></body></html>');
-    w.document.close();
-  })
-  .catch(function(e) { alert('Erreur test SHM : ' + e.message); });
-};
-
-// Diagnostic Bpost : dump le scope du token et la liste des carriers
-// autorisés sur le contrat ARCA. À utiliser quand un push échoue avec
-// "Carrier not available" pour voir ce qui est réellement disponible.
-CMD.debugBpost = function() {
-  var pwd = sessionStorage.getItem('admin_pwd') || prompt('Mot de passe admin');
-  if (!pwd) return;
-  fetch('/.netlify/functions/bpost-debug-account', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password: pwd })
-  })
-  .then(function(r) { return r.text().then(function(t) { return { ok: r.ok, status: r.status, text: t }; }); })
-  .then(function(res) {
-    var w = window.open('', '_blank');
-    if (!w) { alert('Pop-up bloqué.'); return; }
-    w.document.write('<html><head><title>Bpost debug</title><style>body{font:13px monospace;padding:1em;background:#1e1e1e;color:#dcdcdc}pre{white-space:pre-wrap;word-break:break-all}h1{color:#9cdcfe}</style></head><body><h1>Bpost diagnostic (HTTP ' + res.status + ')</h1><pre>' + res.text.replace(/[&<>]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}) + '</pre></body></html>');
-    w.document.close();
-  })
-  .catch(function(e) { alert('Erreur debug Bpost : ' + e.message); });
 };
 
 CMD.toggleClose = function(id) {
