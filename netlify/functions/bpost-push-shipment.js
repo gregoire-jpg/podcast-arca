@@ -298,7 +298,7 @@ exports.handler = async function (event) {
       const labelRes = await tryFetchLabel(order_id, token, order.bpost_reference);
       let storedUrl;
       if (labelRes.ready && labelRes.mode === 'binary') {
-        storedUrl = '/.netlify/functions/bpost-fetch-label?ref=' + encodeURIComponent(order.bpost_reference);
+        storedUrl = 'bpost-fetch:' + order.bpost_reference;
       } else if (labelRes.ready && labelRes.mode === 'url') {
         storedUrl = labelRes.labelUrl;
       } else if (labelRes.pending && labelRes.cbUrl) {
@@ -306,7 +306,7 @@ exports.handler = async function (event) {
       } else {
         // Même sans confirmation, le PDF se débloque souvent au prochain
         // appel via /bpost-fetch-label. On stocke cette URL.
-        storedUrl = '/.netlify/functions/bpost-fetch-label?ref=' + encodeURIComponent(order.bpost_reference);
+        storedUrl = 'bpost-fetch:' + order.bpost_reference;
       }
       await updateOrder(order_id, { bpost_label_url: storedUrl });
       return {
@@ -436,7 +436,7 @@ exports.handler = async function (event) {
     // Si le PDF est en attente (callback), on stocke "pending:<cbUrl>".
     let storedUrl;
     if (labelRes.ready && labelRes.mode === 'binary') {
-      storedUrl = '/.netlify/functions/bpost-fetch-label?ref=' + encodeURIComponent(chosenCref);
+      storedUrl = 'bpost-fetch:' + chosenCref;
     } else if (labelRes.ready && labelRes.mode === 'url') {
       storedUrl = labelRes.labelUrl;
     } else if (labelRes.pending && labelRes.cbUrl) {
@@ -444,7 +444,7 @@ exports.handler = async function (event) {
     } else {
       // Même sans callback, le PDF sera probablement dispo plus tard via
       // POST /labels. On stocke une URL fetch-label : le 2e clic tentera.
-      storedUrl = '/.netlify/functions/bpost-fetch-label?ref=' + encodeURIComponent(chosenCref);
+      storedUrl = 'bpost-fetch:' + chosenCref;
     }
 
     await updateOrder(order_id, {

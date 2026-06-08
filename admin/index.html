@@ -3863,7 +3863,13 @@ CMD.render = function() {
               if (o.bpost_label_url === 'manual:shipping-manager') {
                 return '<span class="cmd-badge paid" title="Étiquette téléchargée et imprimée depuis le Shipping Manager Bpost web">✓ Bpost (traitée manuellement)</span>';
               }
-              // PDF prêt et URL réelle : bouton Imprimer
+              // Marqueur "bpost-fetch:ARCA-XX" : ouvre via token HMAC signé
+              // (l'URL avec PII ne doit JAMAIS être stockée en clair)
+              if (o.bpost_label_url && String(o.bpost_label_url).startsWith('bpost-fetch:')) {
+                var refCref = o.bpost_label_url.replace(/^bpost-fetch:/, '');
+                return '<button class="cmd-act print" onclick="CMD.printBpostLabel(' + JSON.stringify(refCref) + ')">🖨️ Imprimer étiquette</button>';
+              }
+              // URL Bpost directe (rare) : bouton Imprimer classique
               if (o.bpost_label_url && !String(o.bpost_label_url).startsWith('pending:')) {
                 return '<button class="cmd-act print" onclick="CMD.printLabel(' + JSON.stringify(o.bpost_label_url) + ')">🖨️ Imprimer étiquette</button>';
               }
@@ -4478,6 +4484,32 @@ CMD.regenMr = function(id, evt) {
   .catch(function(e) {
     alert('Erreur : ' + e.message);
     if (btn) { btn.disabled = false; btn.textContent = initial; }
+  });
+};
+
+// Étiquette Bpost via marqueur "bpost-fetch:ARCA-XX" : on demande un
+// token signé HMAC (court, 10 min) à /bpost-label-token (auth password)
+// puis on ouvre l'URL signée dans un nouvel onglet. Le PDF lui-même
+// transite par /bpost-fetch-label, qui valide la signature et le TTL.
+// Les ARCA-N étant énumérables, jamais d'URL en clair stockée.
+CMD.printBpostLabel = function(cref) {
+  var pwd = sessionStorage.getItem('admin_pwd') || prompt('Mot de passe admin');
+  if (!pwd) return;
+  sessionStorage.setItem('admin_pwd', pwd);
+  fetch('/.netlify/functions/bpost-label-token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pwd, ref: cref })
+  })
+  .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
+  .then(function(d) {
+    var w = window.open(d.url, '_blank');
+    if (!w) { alert('Pop-up bloqué — autorise les pop-ups pour podcast-arca.netlify.app puis réessaye.'); return; }
+    try { w.addEventListener('load', function(){ try { w.print(); } catch(e){} }); } catch(e){}
+  })
+  .catch(function(e) {
+    if (/incorrect/i.test(e.message)) sessionStorage.removeItem('admin_pwd');
+    alert('Erreur étiquette Bpost : ' + e.message);
   });
 };
 

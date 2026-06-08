@@ -1,22 +1,43 @@
 // bpost-fetch-label.js — Stream le PDF d'étiquette Bpost directement
-// au browser via une URL Netlify (pas besoin de Supabase Storage).
+// au browser via une URL Netlify signée HMAC.
 //
-// Usage : GET /.netlify/functions/bpost-fetch-label?ref=ARCA-16
-//   → 200 application/pdf  : le binaire de l'étiquette
-//   → 202 text/plain        : "label pending" (PDF pas encore généré)
-//   → 4xx text/plain        : erreur (cref inconnu, password incorrect…)
+// Usage : GET /.netlify/functions/bpost-fetch-label?ref=ARCA-16&exp=...&sig=...
+//   → 200 application/pdf : le binaire de l'étiquette
+//   → 202 text/plain      : "label pending" (PDF pas encore généré)
+//   → 401/403             : signature absente, invalide ou expirée
+//   → 4xx text/plain      : erreur (cref inconnu…)
 //
-// Pas de password sur cette URL — c'est un lien qu'on ouvre dans le
-// browser depuis l'admin (un nouvel onglet ne peut pas POST + password).
-// La protection est que la ref ARCA-XX doit exister et l'admin doit
-// l'avoir poussé d'abord.
+// Auth : signature HMAC (ref + exp) avec BPOST_LABEL_SECRET, émise par
+// /bpost-label-token (qui demande ADMIN_PASSWORD). Les ARCA-N étant
+// énumérables séquentiellement et le PDF contenant nom+adresse+phone
+// du client, l'endpoint NE DOIT PAS être accessible sans signature.
 
+const crypto = require('crypto');
 const utils = require('./_bpost-utils.js');
 
+function verifySignature(ref, exp, sig) {
+  if (!ref || !exp || !sig) return false;
+  const expNum = parseInt(exp, 10);
+  if (!Number.isFinite(expNum)) return false;
+  if (expNum < Math.floor(Date.now() / 1000)) return false;  // expirée
+  const secret = process.env.BPOST_LABEL_SECRET || process.env.ADMIN_PASSWORD;
+  if (!secret) return false;
+  const expected = crypto.createHmac('sha256', secret).update(ref + '.' + expNum).digest('hex');
+  const a = Buffer.from(sig, 'utf8');
+  const b = Buffer.from(expected, 'utf8');
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
+
 exports.handler = async function (event) {
-  const ref = (event.queryStringParameters || {}).ref;
+  const q = event.queryStringParameters || {};
+  const ref = q.ref;
   if (!ref) return text(400, 'ref manquant');
   if (!/^ARCA-\d+(-r\d+)?$/.test(ref)) return text(400, 'ref invalide');
+
+  if (!verifySignature(ref, q.exp, q.sig)) {
+    return text(403, 'Signature absente, invalide ou expirée — demande un nouveau lien depuis l\'admin.');
+  }
 
   try {
     const host = event.headers.host || 'podcast-arca.netlify.app';
@@ -37,7 +58,7 @@ exports.handler = async function (event) {
         headers: {
           'Content-Type': 'application/pdf',
           'Content-Disposition': 'inline; filename="' + ref + '.pdf"',
-          'Cache-Control': 'public, max-age=86400'
+          'Cache-Control': 'private, no-store, max-age=0'
         },
         body: resp.buffer.toString('base64'),
         isBase64Encoded: true
@@ -58,7 +79,11 @@ exports.handler = async function (event) {
         if (poll && poll.__binary) {
           return {
             statusCode: 200,
-            headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': 'inline; filename="' + ref + '.pdf"' },
+            headers: {
+              'Content-Type': 'application/pdf',
+              'Content-Disposition': 'inline; filename="' + ref + '.pdf"',
+              'Cache-Control': 'private, no-store, max-age=0'
+            },
             body: poll.buffer.toString('base64'),
             isBase64Encoded: true
           };
