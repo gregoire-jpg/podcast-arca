@@ -13,12 +13,24 @@
 
 const utils = require('./_bpost-utils.js');
 
-// Mapping pays → ISO3 (Bpost exige ISO3)
-const ISO3 = {
-  'Belgique': 'BEL', 'France': 'FRA', 'Luxembourg': 'LUX', 'Pays-Bas': 'NLD',
-  'Allemagne': 'DEU', 'Autriche': 'AUT', 'Italie': 'ITA', 'Espagne': 'ESP',
-  'Portugal': 'PRT', 'Royaume-Uni': 'GBR', 'Suisse': 'CHE', 'Canada': 'CAN',
-  'DOM-TOM': 'FRA', 'Autres pays UE': 'BEL'
+// Mapping pays FR → ISO2 (Bpost API v3 attend ISO2, pas ISO3).
+// L'ancien mapping ISO3 (BEL, FRA…) faisait que Bpost rejetait toutes les
+// commandes hors-BE avec "Carrier not available" (commande ARTERO 2026-06-08).
+const ISO2 = {
+  'Belgique':       'BE',
+  'France':         'FR',
+  'Luxembourg':     'LU',
+  'Pays-Bas':       'NL',
+  'Allemagne':      'DE',
+  'Autriche':       'AT',
+  'Italie':         'IT',
+  'Espagne':        'ES',
+  'Portugal':       'PT',
+  'Royaume-Uni':    'GB',
+  'Suisse':         'CH',
+  'Canada':         'CA',
+  'DOM-TOM':        'FR',
+  'Autres pays UE': 'BE'
 };
 
 // Poids mesurés (pesées réelles 2026-05-18 pour 3/4/5/7; 600g par défaut, 350g recueil)
@@ -94,7 +106,7 @@ function buildShipment(order, carrierId) {
       NumberExtension: numberExt,
       PostalCode: order.cp || '',
       City: order.ville || '',
-      Country: ISO3[order.pays] || 'BEL',
+      Country: ISO2[order.pays] || 'BE',
       Phone: order.telephone || '',
       Email: order.email || ''
     },
