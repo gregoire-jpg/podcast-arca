@@ -4093,7 +4093,7 @@ CMD.tableHtml = function(list) {
                 var bfCrefSafe = CMD.esc(bfCref);
                 return ''
                   + '<form method="POST" action="/.netlify/functions/bpost-print-direct" target="_blank" style="display:inline" '
-                  +   'onsubmit="this.querySelector(\'[name=password]\').value = sessionStorage.getItem(\'admin_pwd\') || prompt(\'Mot de passe admin\') || \'\'; sessionStorage.setItem(\'admin_pwd\', this.querySelector(\'[name=password]\').value);">'
+                  +   'onsubmit="this.querySelector(\'[name=password]\').value = sessionStorage.getItem(\'arca_pwd\') || prompt(\'Mot de passe admin\') || \'\'; sessionStorage.setItem(\'arca_pwd\', this.querySelector(\'[name=password]\').value);">'
                   +   '<input type="hidden" name="ref" value="' + bfCrefSafe + '">'
                   +   '<input type="hidden" name="password" value="">'
                   +   '<button type="submit" class="cmd-act print">🖨️ Imprimer étiquette</button>'
