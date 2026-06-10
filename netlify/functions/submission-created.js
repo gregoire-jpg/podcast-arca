@@ -19,6 +19,18 @@ const { createStripePaymentLink, createPaypalOrder } = require('./create-payment
 const PROMO_DEADLINE = new Date('2026-05-25T22:00:00Z');
 function getN8Price() { return new Date() < PROMO_DEADLINE ? 15 : 20; }
 
+// Extrait le code MR à 8 chiffres depuis le barcode complet 26 chiffres (format
+// '41' + code 8 + 16 internes). C'est ce code court qui sert pour le suivi
+// (numeroExpedition=…). Le retour MR Connect v2 stocke le barcode complet,
+// mais MR attend le code court pour le tracking. Sinon le lien ne marche pas.
+function shortMrExp(barcode) {
+  if (!barcode) return barcode;
+  const s = String(barcode).replace(/\D/g, '');
+  if (s.length >= 10 && s.indexOf('41') === 0) return s.substring(2, 10);
+  if (s.length === 8) return s;
+  return barcode;
+}
+
 exports.handler = async function(event) {
   // Note: les invocations event-triggered (Netlify Forms) n'ont pas de httpMethod.
   try {
@@ -727,13 +739,14 @@ function buildClientEmailHtml(d, mrLabel, payLinks) {
   let trackingBlock = "";
   if (isMondialRelay && mrLabel && mrLabel.success && mrLabel.expedition) {
     const cp = String(d.cp || "").replace(/\D/g, "");
-    const trackUrl = `https://www.mondialrelay.com/suivi-de-colis/?numeroExpedition=${encodeURIComponent(mrLabel.expedition)}&codePostal=${encodeURIComponent(cp)}`;
+    const trackingCode = shortMrExp(mrLabel.expedition);
+    const trackUrl = `https://www.mondialrelay.com/suivi-de-colis/?numeroExpedition=${encodeURIComponent(trackingCode)}&codePostal=${encodeURIComponent(cp)}`;
     trackingBlock = `
     <tr><td style="padding:0 36px 20px;">
       <table width="100%" cellpadding="0" cellspacing="0" style="background:#fffbf4;border:1px solid #c8a060;border-radius:5px;">
         <tr><td style="padding:18px 22px;">
           <p style="margin:0 0 6px;font:11px Arial;letter-spacing:2px;text-transform:uppercase;color:#c8a060;font-weight:bold;">📦 Suivi de votre colis</p>
-          <p style="margin:0 0 10px;font:14px Georgia;color:#444;">Numéro d'expédition : <strong style="color:#2d3461;font-family:'Courier New',monospace;">${esc(mrLabel.expedition)}</strong></p>
+          <p style="margin:0 0 10px;font:14px Georgia;color:#444;">Numéro d'expédition : <strong style="color:#2d3461;font-family:'Courier New',monospace;">${esc(trackingCode)}</strong></p>
           <table cellpadding="0" cellspacing="0"><tr><td style="background:#2d3461;border-radius:4px;">
             <a href="${esc(trackUrl)}" style="display:inline-block;padding:10px 20px;font:bold 11px Arial;letter-spacing:1.5px;text-transform:uppercase;color:#fff;text-decoration:none;">Suivre mon colis →</a>
           </td></tr></table>
@@ -952,7 +965,7 @@ function buildClientEmailText(d, mrLabel, payLinks) {
     const cp = String(d.cp || "").replace(/\D/g, "");
     txt += `SUIVI MONDIAL RELAY\n`;
     txt += `  Numéro d'expédition : ${mrLabel.expedition}\n`;
-    txt += `  Suivre : https://www.mondialrelay.com/suivi-de-colis/?numeroExpedition=${encodeURIComponent(mrLabel.expedition)}&codePostal=${encodeURIComponent(cp)}\n\n`;
+    txt += `  Suivre : https://www.mondialrelay.com/suivi-de-colis/?numeroExpedition=${encodeURIComponent(shortMrExp(mrLabel.expedition))}&codePostal=${encodeURIComponent(cp)}\n\n`;
   }
   txt += `LIVRAISON : ${d.livraison || "—"}\n`;
   if (isMondialRelay && d["mr-relay-info"]) txt += `  ${d["mr-relay-info"]}\n`;

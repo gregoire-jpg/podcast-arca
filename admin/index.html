@@ -3710,6 +3710,19 @@ CMD.esc = function(s) {
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 };
 
+// Extrait le code Mondial Relay à 8 chiffres depuis le barcode complet stocké
+// en BDD (26 chiffres, format '41' + code 8 + 16 chiffres internes).
+// C'est ce code à 8 chiffres qu'il faut pour le suivi sur mondialrelay.com
+// et qui apparaît dans &expedition= de l'URL du label.
+// Retourne null si format inconnu (fallback au barcode brut côté caller).
+CMD.shortMrExp = function(barcode) {
+  if (!barcode) return null;
+  var s = String(barcode).replace(/\D/g, '');
+  if (s.length >= 10 && s.indexOf('41') === 0) return s.substring(2, 10);
+  if (s.length === 8) return s;
+  return null;
+};
+
 // Ouvre une fenêtre print-ready avec la liste des commandes en main propre
 // (non clôturées + non annulées). Auto-lance window.print() : l'utilisateur
 // choisit "Enregistrer au format PDF" dans le dialog navigateur.
@@ -4163,9 +4176,15 @@ CMD.detailHtml = function(o) {
           : '<p style="margin:4px 0 0;font:.85em Georgia;color:#777;font-style:italic">Adresse facturation = livraison</p>')
       + '</div>'
     : '';
+  // mr_expedition stocké = barcode complet 26 chiffres (ex 41009705180101752173414188).
+  // Pour le suivi MR il faut le code à 8 chiffres (caractères 3-10, ex 00970518)
+  // qu'on extrait à la volée. C'est aussi ce qui est dans &expedition= de l'URL label.
+  var mrExpShort = CMD.shortMrExp(o.mr_expedition);
   var mrLine = o.mr_expedition
-    ? '<p><strong>Étiquette MR</strong> : <code>' + CMD.esc(o.mr_expedition) + '</code> · '
-      + '<a href="https://www.mondialrelay.com/suivi-de-colis/?numeroExpedition=' + encodeURIComponent(o.mr_expedition) + '&codePostal=' + encodeURIComponent((o.cp || '').replace(/\D/g,'')) + '" target="_blank">Suivre →</a></p>' : '';
+    ? '<p><strong>Étiquette MR</strong> : '
+      + '<code title="Code à 8 chiffres — à utiliser pour le suivi MR">' + CMD.esc(mrExpShort || o.mr_expedition) + '</code> '
+      + (mrExpShort ? '<small style="color:var(--muted)">(barcode complet : ' + CMD.esc(o.mr_expedition) + ')</small> ' : '')
+      + '· <a href="https://www.mondialrelay.com/suivi-de-colis/?numeroExpedition=' + encodeURIComponent(mrExpShort || o.mr_expedition) + '&codePostal=' + encodeURIComponent((o.cp || '').replace(/\D/g,'')) + '" target="_blank">Suivre →</a></p>' : '';
   var paymentRef = o.stripe_session_id ? 'Stripe : <code>' + CMD.esc(o.stripe_session_id) + '</code>'
                   : o.paypal_order_id ? 'PayPal : <code>' + CMD.esc(o.paypal_order_id) + '</code>' : '';
   // Bloc note interne (saisie au moment de la création de la commande)
