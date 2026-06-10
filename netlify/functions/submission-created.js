@@ -740,7 +740,7 @@ function buildClientEmailHtml(d, mrLabel, payLinks) {
   if (isMondialRelay && mrLabel && mrLabel.success && mrLabel.expedition) {
     const cp = String(d.cp || "").replace(/\D/g, "");
     const trackingCode = shortMrExp(mrLabel.expedition);
-    const trackUrl = `https://www.mondialrelay.com/suivi-de-colis/?numeroExpedition=${encodeURIComponent(trackingCode)}&codePostal=${encodeURIComponent(cp)}`;
+    const trackUrl = `https://www.mondialrelay.fr/suivi-de-colis/?numeroExpedition=${encodeURIComponent(trackingCode)}&codePostal=${encodeURIComponent(cp)}`;
     trackingBlock = `
     <tr><td style="padding:0 36px 20px;">
       <table width="100%" cellpadding="0" cellspacing="0" style="background:#fffbf4;border:1px solid #c8a060;border-radius:5px;">
@@ -965,7 +965,7 @@ function buildClientEmailText(d, mrLabel, payLinks) {
     const cp = String(d.cp || "").replace(/\D/g, "");
     txt += `SUIVI MONDIAL RELAY\n`;
     txt += `  Numéro d'expédition : ${mrLabel.expedition}\n`;
-    txt += `  Suivre : https://www.mondialrelay.com/suivi-de-colis/?numeroExpedition=${encodeURIComponent(shortMrExp(mrLabel.expedition))}&codePostal=${encodeURIComponent(cp)}\n\n`;
+    txt += `  Suivre : https://www.mondialrelay.fr/suivi-de-colis/?numeroExpedition=${encodeURIComponent(shortMrExp(mrLabel.expedition))}&codePostal=${encodeURIComponent(cp)}\n\n`;
   }
   txt += `LIVRAISON : ${d.livraison || "—"}\n`;
   if (isMondialRelay && d["mr-relay-info"]) txt += `  ${d["mr-relay-info"]}\n`;

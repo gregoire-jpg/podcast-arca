@@ -4184,7 +4184,7 @@ CMD.detailHtml = function(o) {
     ? '<p><strong>Étiquette MR</strong> : '
       + '<code title="Code à 8 chiffres — à utiliser pour le suivi MR">' + CMD.esc(mrExpShort || o.mr_expedition) + '</code> '
       + (mrExpShort ? '<small style="color:var(--muted)">(barcode complet : ' + CMD.esc(o.mr_expedition) + ')</small> ' : '')
-      + '· <a href="https://www.mondialrelay.com/suivi-de-colis/?numeroExpedition=' + encodeURIComponent(mrExpShort || o.mr_expedition) + '&codePostal=' + encodeURIComponent((o.cp || '').replace(/\D/g,'')) + '" target="_blank">Suivre →</a></p>' : '';
+      + '· <a href="https://www.mondialrelay.fr/suivi-de-colis/?numeroExpedition=' + encodeURIComponent(mrExpShort || o.mr_expedition) + '&codePostal=' + encodeURIComponent((o.cp || '').replace(/\D/g,'')) + '" target="_blank">Suivre →</a></p>' : '';
   var paymentRef = o.stripe_session_id ? 'Stripe : <code>' + CMD.esc(o.stripe_session_id) + '</code>'
                   : o.paypal_order_id ? 'PayPal : <code>' + CMD.esc(o.paypal_order_id) + '</code>' : '';
   // Bloc note interne (saisie au moment de la création de la commande)
