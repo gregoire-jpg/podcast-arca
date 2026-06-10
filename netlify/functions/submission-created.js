@@ -424,11 +424,16 @@ function buildEmailHtml(d, mrLabel, paypalVerifyWarning) {
   const paypalStatus = d["paypal-status"] || "";
   const paypalId = d["paypal-order-id"] || "";
   const isPaid = paypalStatus.startsWith("PAID");
-  // Détection du provider à partir de paypal-status ou du mode paiement choisi
+  // Détection du provider à partir de paypal-status ou du mode paiement choisi.
+  // Bug fix : utilise le paiement réel saisi (Autre, Virement, En main propre…)
+  // au lieu de retomber sur PayPal par défaut.
   const isStripe = /stripe/i.test(paypalStatus) || /carte|bancontact/i.test(d.paiement || "");
-  const provider = isStripe ? "Stripe" : "PayPal";
+  const isPaypalProvider = /paypal/i.test(paypalStatus) || /paypal/i.test(d.paiement || "");
+  const provider = isStripe ? "Stripe"
+                  : isPaypalProvider ? "PayPal"
+                  : (d.paiement || "—");
   const statusBadge = isPaid
-    ? `<div style="display:inline-block;padding:6px 14px;background:#3a8a4a;color:#fff;font:bold 11px Arial;letter-spacing:1.5px;text-transform:uppercase;border-radius:4px;">✓ Payé via ${provider}</div>`
+    ? `<div style="display:inline-block;padding:6px 14px;background:#3a8a4a;color:#fff;font:bold 11px Arial;letter-spacing:1.5px;text-transform:uppercase;border-radius:4px;">✓ Payé via ${esc(provider)}</div>`
     : `<div style="display:inline-block;padding:6px 14px;background:#c8a060;color:#fff;font:bold 11px Arial;letter-spacing:1.5px;text-transform:uppercase;border-radius:4px;">⏳ Paiement à recevoir</div>`;
 
   // Lien étiquette
@@ -671,11 +676,22 @@ function buildEmailText(d, mrLabel) {
 // ═══════════════════════════════════════════════════════════════
 // Email de confirmation au client (stylisé ARCA, sans l'étiquette MR)
 // ═══════════════════════════════════════════════════════════════
+// Libellé humain du moyen de paiement à insérer dans "Votre paiement <X> a bien
+// été enregistré". Retourne null si mode non reconnu → on enlève la mention.
+function paymentLabel(paymentMode, paypalStatus) {
+  const s = (paypalStatus || "") + " " + (paymentMode || "");
+  if (/stripe|carte|bancontact/i.test(s)) return "par carte bancaire";
+  if (/paypal/i.test(s))                  return "PayPal";
+  if (/virement/i.test(s))                return "par virement bancaire";
+  if (/main propre/i.test(s))             return "en main propre";
+  return null;
+}
+
 function buildClientEmailHtml(d, mrLabel, payLinks) {
   const paypalStatus = d["paypal-status"] || "";
   const isPaid = paypalStatus.startsWith("PAID");
   const isStripe = /stripe/i.test(paypalStatus) || /carte|bancontact/i.test(d.paiement || "");
-  const providerLabel = isStripe ? "par carte bancaire" : "PayPal";
+  const providerLabel = paymentLabel(d.paiement, paypalStatus);
   const isMondialRelay = (d.livraison || "") === "Mondial Relay";
   const totMatchClient = (d["commande-details"] || "").match(/TOTAL:\s*(\d+(?:[.,]\d+)?)\s*€/);
   const total = totMatchClient ? totMatchClient[1].replace(',', '.') : "—";
@@ -782,7 +798,9 @@ function buildClientEmailHtml(d, mrLabel, payLinks) {
 
   let paymentMsg;
   if (isPaid) {
-    paymentMsg = `<p style="margin:0;font:15px/1.7 Georgia;color:#444;">Votre paiement <strong style="color:#2d3461;">${providerLabel}</strong> a bien été enregistré. Nous préparons votre commande.</p>`;
+    paymentMsg = providerLabel
+      ? `<p style="margin:0;font:15px/1.7 Georgia;color:#444;">Votre paiement <strong style="color:#2d3461;">${providerLabel}</strong> a bien été enregistré. Nous préparons votre commande.</p>`
+      : `<p style="margin:0;font:15px/1.7 Georgia;color:#444;">Votre commande a bien été enregistrée. Nous la préparons.</p>`;
   } else if (payNowBlock) {
     // Avec liens de paiement direct : pay-now en avant, IBAN en alternative
     paymentMsg = `<p style="margin:0 0 14px;font:15px/1.7 Georgia;color:#444;">Pour finaliser votre commande, choisissez votre moyen de paiement préféré&nbsp;:</p>${payNowBlock}<p style="margin:0 0 8px;font:13px Georgia;color:#666;font-style:italic">Ou par virement bancaire&nbsp;:</p>${ibanBlock}`;
@@ -887,7 +905,7 @@ function buildClientEmailText(d, mrLabel, payLinks) {
   const paypalStatus = d["paypal-status"] || "";
   const isPaid = paypalStatus.startsWith("PAID");
   const isStripe = /stripe/i.test(paypalStatus) || /carte|bancontact/i.test(d.paiement || "");
-  const providerLabel = isStripe ? "par carte bancaire" : "PayPal";
+  const providerLabel = paymentLabel(d.paiement, paypalStatus);
   const isMondialRelay = (d.livraison || "") === "Mondial Relay";
   const totMatch = (d["commande-details"] || "").match(/TOTAL:\s*(\d+(?:[.,]\d+)?)\s*€/);
   const total = totMatch ? totMatch[1].replace(',', '.') : "—";
@@ -896,7 +914,9 @@ function buildClientEmailText(d, mrLabel, payLinks) {
   txt += `Bonjour ${(d.nom || "").split(' ')[0] || ""},\n\n`;
   const links = payLinks || {};
   if (isPaid) {
-    txt += `Votre paiement ${providerLabel} a bien été enregistré. Nous préparons votre commande.\n\n`;
+    txt += providerLabel
+      ? `Votre paiement ${providerLabel} a bien été enregistré. Nous préparons votre commande.\n\n`
+      : `Votre commande a bien été enregistrée. Nous la préparons.\n\n`;
   } else if (links.stripeUrl || links.paypalUrl) {
     txt += `PAYER EN LIGNE EN 1 CLIC\n  Montant : ${total} €\n`;
     if (links.stripeUrl) txt += `  Carte bancaire / Bancontact : ${links.stripeUrl}\n`;

@@ -89,7 +89,9 @@ function formDataFromOrder(o) {
   if (o.shipping_discount_eur && o.shipping_discount_eur > 0) parts.push('Remise port -' + o.shipping_discount_eur + ' €');
   if (o.discount_note) parts.push('Motif remise: ' + o.discount_note);
   parts.push('Port: ' + (o.port_eur || 0) + ' €');
-  parts.push('TOTAL: ' + (o.total_eur || sousTotal) + ' €');
+  // Bug fix : si total_eur === 0 (cas Service de Presse avec remise 100%),
+  // l'opérateur || retombait sur sousTotal. Check explicite.
+  parts.push('TOTAL: ' + (o.total_eur != null ? o.total_eur : sousTotal) + ' €');
   d['commande-details'] = parts.join(' | ');
   // Champs séparés pour faciliter le parsing
   d['_discount_eur'] = o.discount_eur || 0;
