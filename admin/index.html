@@ -4216,7 +4216,7 @@ CMD.detailHtml = function(o) {
             if (!pack) return '';
             var nBooks = (o.items || []).reduce(function(s,i){ return s + (i.qty||0); }, 0);
             var unit = nBooks <= CMD.PACKAGING.pouch_max_books ? CMD.PACKAGING.pouch : CMD.PACKAGING.case;
-            return '<p style="font:.85em/1.3 Arial;color:var(--muted)">📦 Emballage estimé : <strong>' + pack.toFixed(2) + ' € TTC</strong> '
+            return '<p style="font:.85em/1.3 Arial;color:var(--muted)">📦 Emballage estimé : <strong>' + pack.toFixed(2) + ' € HT</strong> '
               + '<small>(' + unit.code + ' — ' + unit.label + ')</small></p>';
           })()
         + '<p><strong>Paiement</strong> : ' + CMD.esc(o.paiement || '—') + (o.paye ? ' <span class="cmd-badge paid">PAYÉ</span>' : ' <span class="cmd-badge pending">EN ATTENTE</span>') + '</p>'
@@ -4645,8 +4645,8 @@ CMD.profitHtml = function() {
   var discHt  = discTtc / CMD.VAT_SALE;
   // Coût emballage absorbé — calculé à partir des commandes actives non annulées,
   // peu importe le statut. Utilise la même règle que CMD.packagingCost (PCF18
-  // pour 1-2 livres, MLB356 sinon). Coût TTC absorbé = part non récupérable HT
-  // côté article (les cartons sont une charge brute, TVA non répercutée sur la vente).
+  // pour 1-2 livres, MLB356 sinon). HT car la TVA 21 % est récupérée — cohérent
+  // avec le reste du tableau bénéfice (Achat HT, Vente HT, Marge HT).
   var packCost = 0;
   CMD.orders.forEach(function(o){
     if (o.cancelled) return;
@@ -4670,7 +4670,7 @@ CMD.profitHtml = function() {
             + '<td></td><td style="text-align:right;font-weight:bold;color:#777">' + Math.round(tPotential) + ' €</td></tr>'
           + '<tr><td colspan="5" style="color:#c00">− Remises commandes (pack / panier), HT</td>'
             + '<td style="text-align:right;color:#c00">−' + Math.round(discHt) + ' €</td><td colspan="2"></td></tr>'
-          + '<tr><td colspan="5" style="color:#c00">− Coût d\'emballage (Rajapack, TTC)</td>'
+          + '<tr><td colspan="5" style="color:#c00">− Coût d\'emballage (Rajapack, HT)</td>'
             + '<td style="text-align:right;color:#c00" title="' + CMD.PACKAGING.facture + '">−' + Math.round(packCost) + ' €</td><td colspan="2"></td></tr>'
           + '<tr><td colspan="5"><strong>BÉNÉFICE NET RÉALISÉ</strong></td>'
             + '<td style="text-align:right;font-weight:bold;font-size:1.1em;color:#2a7a2a">' + Math.round(realNet) + ' €</td>'
@@ -4692,7 +4692,7 @@ CMD.profitHtml = function() {
       + '<div style="margin-top:8px;font-size:.8em;color:#888;font-style:italic">'
         + 'Achat HT = facture imprimeur ÷ 1,055, remise 40 % au prorata, + port 0,42 €/livre. Bénéfice HT vs HT (TVA neutre). '
         + 'Réalisé = CA réel des ventes (prix réellement pratiqués, ex. souscription N°8) − coût. Potentiel = marge au prix actuel × stock restant. '
-        + 'Emballage = règle ' + CMD.PACKAGING.pouch.code + '/' + CMD.PACKAGING.case.code + ' TTC (source : ' + CMD.PACKAGING.facture + ').'
+        + 'Emballage = règle ' + CMD.PACKAGING.pouch.code + '/' + CMD.PACKAGING.case.code + ' HT (TVA 21 % récupérée, source : ' + CMD.PACKAGING.facture + ').'
       + '</div>'
     + '</div>';
 };
@@ -4914,9 +4914,10 @@ CMD.renderStats = function() {
   var months = Object.keys(byMonth).sort().slice(-12);
   var maxMonth = months.reduce(function(m, k){ return Math.max(m, byMonth[k]); }, 1);
 
-  // Coût d'emballage absorbé total + ventilation pochettes / étuis
-  // Calculé sur les commandes actives non annulées, peu importe le statut
-  // (clôturée ou pas — le carton a été utilisé dès que c'est parti).
+  // Coût d'emballage absorbé total + ventilation pochettes / étuis.
+  // HT (la TVA 21 % est récupérée par ARCA Societas). Calculé sur les
+  // commandes actives non annulées, peu importe le statut (clôturée ou pas
+  // — le carton a été utilisé dès que c'est parti).
   var packCostTotal = 0, nPouches = 0, nCases = 0, nWithPack = 0;
   active.forEach(function(o) {
     var n = (o.items || []).reduce(function(s,i){ return s + (i.qty||0); }, 0);
@@ -4924,11 +4925,11 @@ CMD.renderStats = function() {
     nWithPack++;
     if (n <= CMD.PACKAGING.pouch_max_books) {
       nPouches++;
-      packCostTotal += CMD.PACKAGING.pouch.cost_ttc;
+      packCostTotal += CMD.PACKAGING.pouch.cost_ht;
     } else {
       var nc = Math.ceil(n / CMD.PACKAGING.case_capacity);
       nCases += nc;
-      packCostTotal += nc * CMD.PACKAGING.case.cost_ttc;
+      packCostTotal += nc * CMD.PACKAGING.case.cost_ht;
     }
   });
   var packCostAvg = nWithPack > 0 ? packCostTotal / nWithPack : 0;
@@ -4945,33 +4946,33 @@ CMD.renderStats = function() {
     +   '<div class="cmd-kpi"><div class="cmd-kpi-label">CA total</div><div class="cmd-kpi-value">' + euros(caTotal) + '</div><div class="cmd-kpi-sub">' + active.length + ' commandes actives</div></div>'
     +   '<div class="cmd-kpi"><div class="cmd-kpi-label">CA encaissé</div><div class="cmd-kpi-value">' + euros(caPaid) + '</div><div class="cmd-kpi-sub">' + nPaid + ' payées</div></div>'
     +   '<div class="cmd-kpi"><div class="cmd-kpi-label">Panier moyen</div><div class="cmd-kpi-value">' + euros(avgBasket) + '</div><div class="cmd-kpi-sub">par commande active</div></div>'
-    +   '<div class="cmd-kpi"><div class="cmd-kpi-label">Emballage absorbé</div><div class="cmd-kpi-value">' + euros(packCostTotal) + '</div><div class="cmd-kpi-sub">' + euros(packCostAvg) + ' / commande</div></div>'
+    +   '<div class="cmd-kpi"><div class="cmd-kpi-label">Emballage absorbé (HT)</div><div class="cmd-kpi-value">' + euros(packCostTotal) + '</div><div class="cmd-kpi-sub">' + euros(packCostAvg) + ' / commande</div></div>'
     + '</div>';
 
-  // Détail coûts emballage
+  // Détail coûts emballage (HT — TVA 21 % récupérée)
   html += '<div class="cmd-stat-section">'
-    + '<h3>📦 Coût d\'emballage (estimé)</h3>'
+    + '<h3>📦 Coût d\'emballage (estimé, HT)</h3>'
     + '<table class="cmd-stat-table">'
-    +   '<thead><tr><th>Format</th><th>Code</th><th class="num">Unitaire TTC</th><th class="num">Utilisé</th><th class="num">Coût total</th></tr></thead>'
+    +   '<thead><tr><th>Format</th><th>Code</th><th class="num">Unitaire HT</th><th class="num">Utilisé</th><th class="num">Coût total HT</th></tr></thead>'
     +   '<tbody>'
     +     '<tr><td>' + CMD.PACKAGING.pouch.label + ' <small style="color:var(--muted)">(1-' + CMD.PACKAGING.pouch_max_books + ' livres)</small></td>'
     +       '<td><code>' + CMD.PACKAGING.pouch.code + '</code></td>'
-    +       '<td class="num">' + euros(CMD.PACKAGING.pouch.cost_ttc) + '</td>'
+    +       '<td class="num">' + euros(CMD.PACKAGING.pouch.cost_ht) + '</td>'
     +       '<td class="num">' + nPouches + '</td>'
-    +       '<td class="num">' + euros(nPouches * CMD.PACKAGING.pouch.cost_ttc) + '</td></tr>'
+    +       '<td class="num">' + euros(nPouches * CMD.PACKAGING.pouch.cost_ht) + '</td></tr>'
     +     '<tr><td>' + CMD.PACKAGING.case.label + ' <small style="color:var(--muted)">(3-' + CMD.PACKAGING.case_capacity + ' livres)</small></td>'
     +       '<td><code>' + CMD.PACKAGING.case.code + '</code></td>'
-    +       '<td class="num">' + euros(CMD.PACKAGING.case.cost_ttc) + '</td>'
+    +       '<td class="num">' + euros(CMD.PACKAGING.case.cost_ht) + '</td>'
     +       '<td class="num">' + nCases + '</td>'
-    +       '<td class="num">' + euros(nCases * CMD.PACKAGING.case.cost_ttc) + '</td></tr>'
+    +       '<td class="num">' + euros(nCases * CMD.PACKAGING.case.cost_ht) + '</td></tr>'
     +   '</tbody>'
     +   '<tfoot><tr>'
-    +     '<td colspan="3"><strong>Total absorbé sur ' + nWithPack + ' commandes</strong></td>'
+    +     '<td colspan="3"><strong>Total HT absorbé sur ' + nWithPack + ' commandes</strong></td>'
     +     '<td class="num"><strong>' + (nPouches + nCases) + '</strong></td>'
     +     '<td class="num"><strong>' + euros(packCostTotal) + '</strong></td>'
     +   '</tr></tfoot>'
     + '</table>'
-    + '<p style="margin:10px 0 0;font:.78em/1.4 Arial;color:var(--muted);font-style:italic">Source : ' + CMD.PACKAGING.facture + ' — calcul TTC (TVA 21 %). Estimation à partir du nombre de livres par commande (' + CMD.PACKAGING.pouch.code + ' ≤ ' + CMD.PACKAGING.pouch_max_books + ', ' + CMD.PACKAGING.case.code + ' sinon).</p>'
+    + '<p style="margin:10px 0 0;font:.78em/1.4 Arial;color:var(--muted);font-style:italic">Source : ' + CMD.PACKAGING.facture + ' — calcul HT (TVA 21 % récupérée). Estimation à partir du nombre de livres par commande (' + CMD.PACKAGING.pouch.code + ' ≤ ' + CMD.PACKAGING.pouch_max_books + ', ' + CMD.PACKAGING.case.code + ' sinon).</p>'
     + '</div>';
 
   // CA par mois
@@ -5152,20 +5153,21 @@ CMD.PACK_DISCOUNT  = 40;
 // Emballage Rajapack — facture VF25012714 du 19/02/2025.
 // MLB356 Étui Multiwell 27×18,5 cm (12 cartons × 25 = 300 unités à 318,00 € HT)
 // PCF18  Pochette plate brune 18×16,4 cm 400g (5 cartons × 100 = 500 unités à 163,25 € HT)
-// TVA 21%. On exprime le coût TTC (le HT est rapporté en compta, mais le coût
-// réel absorbé par la commande inclut la TVA non récupérable côté article).
+// TVA 21 % récupérée par ARCA Societas → on raisonne en HT (cohérent avec le
+// tableau Prix d'achat & bénéfice : Achat HT, Vente HT, Marge HT).
+// cost_ttc reste accessible pour info / mémo.
 CMD.PACKAGING = {
   facture: 'Rajapack VF25012714 · 19/02/2025',
   pouch: {  // PCF18 — pour 1 à 2 livres
     code: 'PCF18',
     label: 'Pochette plate 18×16,4 cm',
-    cost_ht: 0.3265,
+    cost_ht:  0.3265,
     cost_ttc: 0.395065
   },
   case: {   // MLB356 — pour 3 livres et +
     code: 'MLB356',
     label: 'Étui Multiwell 27×18,5 cm',
-    cost_ht: 1.06,
+    cost_ht:  1.06,
     cost_ttc: 1.2826
   },
   // Seuil de bascule pochette → étui
@@ -5174,7 +5176,9 @@ CMD.PACKAGING = {
   case_capacity: 9
 };
 
-// Retourne le coût d'emballage estimé (TTC €) pour une commande.
+// Retourne le coût d'emballage estimé (HT €) pour une commande.
+// HT car la TVA est récupérée → c'est ce qui impacte réellement la marge,
+// cohérent avec le tableau Prix d'achat & bénéfice.
 // Règle simple :
 //   1-2 livres   → 1 pochette
 //   3-9 livres   → 1 étui
@@ -5184,9 +5188,9 @@ CMD.packagingCost = function(items) {
   (items || []).forEach(function(it){ totalBooks += (it.qty || 0); });
   if (totalBooks === 0) return 0;
   var P = CMD.PACKAGING;
-  if (totalBooks <= P.pouch_max_books) return P.pouch.cost_ttc;
+  if (totalBooks <= P.pouch_max_books) return P.pouch.cost_ht;
   var nCases = Math.ceil(totalBooks / P.case_capacity);
-  return nCases * P.case.cost_ttc;
+  return nCases * P.case.cost_ht;
 };
 
 // Ajoute une ligne d'article libre dans le formulaire
