@@ -4643,7 +4643,16 @@ CMD.profitHtml = function() {
   });
   var discTtc = CMD.productDiscounts();
   var discHt  = discTtc / CMD.VAT_SALE;
-  var realNet = tRealGross - discHt;
+  // Coût emballage absorbé — calculé à partir des commandes actives non annulées,
+  // peu importe le statut. Utilise la même règle que CMD.packagingCost (PCF18
+  // pour 1-2 livres, MLB356 sinon). Coût TTC absorbé = part non récupérable HT
+  // côté article (les cartons sont une charge brute, TVA non répercutée sur la vente).
+  var packCost = 0;
+  CMD.orders.forEach(function(o){
+    if (o.cancelled) return;
+    packCost += CMD.packagingCost(o.items);
+  });
+  var realNet = tRealGross - discHt - packCost;
   var note = missing ? '<div style="margin:8px 0 0;font-size:.82em;color:#c1272d">⚠️ Un coût d\'achat manque (N°5, hors facture réassort) — non compté dans les totaux. Clique sur ✎ pour le renseigner.</div>' : '';
   return ''
     + '<div class="cmd-summary" style="margin-top:18px">'
@@ -4661,6 +4670,8 @@ CMD.profitHtml = function() {
             + '<td></td><td style="text-align:right;font-weight:bold;color:#777">' + Math.round(tPotential) + ' €</td></tr>'
           + '<tr><td colspan="5" style="color:#c00">− Remises commandes (pack / panier), HT</td>'
             + '<td style="text-align:right;color:#c00">−' + Math.round(discHt) + ' €</td><td colspan="2"></td></tr>'
+          + '<tr><td colspan="5" style="color:#c00">− Coût d\'emballage (Rajapack, TTC)</td>'
+            + '<td style="text-align:right;color:#c00" title="' + CMD.PACKAGING.facture + '">−' + Math.round(packCost) + ' €</td><td colspan="2"></td></tr>'
           + '<tr><td colspan="5"><strong>BÉNÉFICE NET RÉALISÉ</strong></td>'
             + '<td style="text-align:right;font-weight:bold;font-size:1.1em;color:#2a7a2a">' + Math.round(realNet) + ' €</td>'
             + '<td></td><td style="text-align:right;color:#777;font-size:.85em">stock à venir</td></tr>'
@@ -4680,7 +4691,8 @@ CMD.profitHtml = function() {
       + note
       + '<div style="margin-top:8px;font-size:.8em;color:#888;font-style:italic">'
         + 'Achat HT = facture imprimeur ÷ 1,055, remise 40 % au prorata, + port 0,42 €/livre. Bénéfice HT vs HT (TVA neutre). '
-        + 'Réalisé = CA réel des ventes (prix réellement pratiqués, ex. souscription N°8) − coût. Potentiel = marge au prix actuel × stock restant.'
+        + 'Réalisé = CA réel des ventes (prix réellement pratiqués, ex. souscription N°8) − coût. Potentiel = marge au prix actuel × stock restant. '
+        + 'Emballage = règle ' + CMD.PACKAGING.pouch.code + '/' + CMD.PACKAGING.case.code + ' TTC (source : ' + CMD.PACKAGING.facture + ').'
       + '</div>'
     + '</div>';
 };
