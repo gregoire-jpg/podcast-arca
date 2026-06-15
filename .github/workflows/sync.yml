@@ -40,6 +40,23 @@ jobs:
       - name: Installer dépendances Python
         run: pip install yt-dlp dropbox
 
+      - name: Préparer les cookies YouTube (anti bot-gate)
+        # Le secret YT_COOKIES contient le fichier cookies.txt format Netscape
+        # exporté depuis le navigateur (extension "Get cookies.txt LOCALLY").
+        # Si le secret est vide, le step ne fait rien et yt-dlp tournera sans
+        # cookies (comme avant) — utile pour debug.
+        env:
+          YT_COOKIES: ${{ secrets.YT_COOKIES }}
+        run: |
+          if [ -n "$YT_COOKIES" ]; then
+            printf '%s' "$YT_COOKIES" > /tmp/yt-cookies.txt
+            chmod 600 /tmp/yt-cookies.txt
+            echo "YT_COOKIES_FILE=/tmp/yt-cookies.txt" >> "$GITHUB_ENV"
+            echo "Cookies YouTube écrits ($(wc -l < /tmp/yt-cookies.txt) lignes)."
+          else
+            echo "Aucun secret YT_COOKIES — yt-dlp tournera sans cookies (risque bot-gate)."
+          fi
+
       - name: Synchronisation
         env:
           DROPBOX_APP_KEY:       ${{ secrets.DROPBOX_APP_KEY }}
@@ -51,6 +68,10 @@ jobs:
           else
             python scripts/sync.py
           fi
+
+      - name: Nettoyer les cookies
+        if: always()
+        run: rm -f /tmp/yt-cookies.txt
 
       - name: Commit episodes.json si modifié
         run: |

@@ -43,6 +43,20 @@ EPISODES_FILE = ROOT / "episodes.json"
 ORPHANS_FILE  = ROOT / "orphans.json"   # mapping youtube_id -> classification éditoriale
 DROPBOX_DIR   = "/Podcast ARCA"
 
+# ──────────────────── yt-dlp helpers ─────────────────
+
+def yt_dlp_cookie_args():
+    """
+    Retourne les args yt-dlp pour passer un fichier de cookies si
+    YT_COOKIES_FILE est défini dans l'env (format Netscape cookies.txt).
+    Utilisé pour contourner le bot-gate YouTube sur GitHub Actions.
+    Comportement inchangé en local si la variable n'est pas posée.
+    """
+    cookies_path = os.environ.get("YT_COOKIES_FILE", "").strip()
+    if cookies_path and os.path.isfile(cookies_path):
+        return ["--cookies", cookies_path]
+    return []
+
 # ──────────────────── Utilitaires ────────────────────
 
 def load_json(path):
@@ -127,7 +141,8 @@ def discover_playlists(channel_id, exclude_titles):
     print(f"🔍 Découverte des playlists sur la chaîne…")
 
     res = subprocess.run(
-        [sys.executable, "-m", "yt_dlp", "-J", "--flat-playlist", "--no-warnings", url],
+        [sys.executable, "-m", "yt_dlp", "-J", "--flat-playlist", "--no-warnings",
+         *yt_dlp_cookie_args(), url],
         capture_output=True, text=True, timeout=120,
     )
     if res.returncode != 0:
@@ -172,7 +187,8 @@ def all_videos(playlist_id):
     """Toutes les vidéos d'une playlist via yt-dlp (mode --init)."""
     res = subprocess.run(
         [sys.executable, "-m", "yt_dlp", "--flat-playlist", "--print", "%(id)s\t%(title)s",
-         "--no-warnings", f"https://www.youtube.com/playlist?list={playlist_id}"],
+         "--no-warnings", *yt_dlp_cookie_args(),
+         f"https://www.youtube.com/playlist?list={playlist_id}"],
         capture_output=True, text=True, encoding="utf-8", errors="replace",
     )
     videos = []
@@ -200,6 +216,7 @@ def process_video(video_id, pl_title, pl_slug, pl_meta):
              "--extract-audio", "--audio-format", "mp3", "--audio-quality", "5",
              "--output", out_tpl,
              "--print-json", "--no-warnings",
+             *yt_dlp_cookie_args(),
              yt_url],
             capture_output=True, text=True,
         )
