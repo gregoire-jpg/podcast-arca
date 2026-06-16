@@ -61,3 +61,15 @@ verify_jwt = false
 
 [functions.arca-brevo-diag]
 verify_jwt = false
+
+[functions.arca-bpost-push-shipment]
+verify_jwt = false
+
+[functions.arca-bpost-callback]
+verify_jwt = false
+
+[functions.arca-bpost-print-direct]
+verify_jwt = false
+
+[functions.arca-regenerate-mr-label]
+verify_jwt = false
