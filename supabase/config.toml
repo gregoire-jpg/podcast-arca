@@ -25,3 +25,6 @@ verify_jwt = false
 
 [functions.arca-finalize-stripe-order]
 verify_jwt = false
+
+[functions.arca-order-submit]
+verify_jwt = false
