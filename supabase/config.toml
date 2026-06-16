@@ -28,3 +28,9 @@ verify_jwt = false
 
 [functions.arca-order-submit]
 verify_jwt = false
+
+[functions.arca-paypal-capture]
+verify_jwt = false
+
+[functions.arca-stripe-webhook]
+verify_jwt = false
