@@ -49,3 +49,15 @@ verify_jwt = false
 
 [functions.arca-restock-notify]
 verify_jwt = false
+
+[functions.arca-db-proxy]
+verify_jwt = false
+
+[functions.arca-storage-upload]
+verify_jwt = false
+
+[functions.arca-save-file]
+verify_jwt = false
+
+[functions.arca-brevo-diag]
+verify_jwt = false
