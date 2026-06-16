@@ -1,0 +1,18 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  podcast-arca → Edge Functions hébergées dans le projet Supabase BEYA
+#  Project ref : fsbyoxotsmmzejefiaqg  (le même qui porte arca_orders & co.)
+#
+#  ⚠ GARDE-FOU : depuis CE repo, ne JAMAIS lancer `supabase db push`.
+#     Ce config.toml ne contient VOLONTAIREMENT aucune section [api] / [db],
+#     pour ne pas écraser l'exposition des schemas de l'ERP Beya.
+#     Uniquement :  supabase functions deploy <nom> --project-ref fsbyoxotsmmzejefiaqg
+# ─────────────────────────────────────────────────────────────────────────────
+
+project_id = "fsbyoxotsmmzejefiaqg"
+
+# Toutes les functions ARCA sont publiques (appelées par le front sans JWT Supabase).
+[functions.arca-stock]
+verify_jwt = false
+
+[functions.arca-track-count]
+verify_jwt = false
