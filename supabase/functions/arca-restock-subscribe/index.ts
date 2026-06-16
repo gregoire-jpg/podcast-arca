@@ -5,7 +5,7 @@
 import { json, preflight } from "../_shared/cors.ts";
 import { arcaEnv } from "../_shared/env.ts";
 import { supaEnv } from "../_shared/supa.ts";
-import { arcaTitle, arcaShort, wrapHtml, fromEmail, sendBrevo } from "../_shared/arca-mail.ts";
+import { arcaTitle, arcaShort, wrapHtml, fromEmail, sendBrevo, esc } from "../_shared/arca-mail.ts";
 
 Deno.serve(async (req) => {
   const pre = preflight(req);
@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
           subject: "🔔 Nouvelle alerte réassort — " + arcaShort(num),
           htmlContent: wrapHtml(
             "<p><strong>Nouvelle inscription à l'alerte réassort.</strong></p>"
-            + "<p>Ouvrage : <strong>" + arcaShort(num) + "</strong><br>E-mail : <strong>" + email + "</strong></p>"
+            + "<p>Ouvrage : <strong>" + arcaShort(num) + "</strong><br>E-mail : <strong>" + esc(email) + "</strong></p>"
             + "<p style=\"color:#777;font-size:13px\">Retrouvez tous les inscrits en attente dans l'admin (module Stock → Alertes réassort).</p>",
           ),
           textContent: "Nouvelle alerte réassort.\nOuvrage : " + arcaShort(num) + "\nE-mail : " + email,

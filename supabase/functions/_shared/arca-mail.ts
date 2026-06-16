@@ -5,6 +5,13 @@ import { arcaEnv } from "./env.ts";
 
 const BREVO_URL = "https://api.brevo.com/v3/smtp/email";
 
+// Échappe une valeur destinée à être interpolée dans du HTML d'email (anti-injection).
+export function esc(s: any) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
 export function arcaTitle(num: any) {
   return Number(num) === 9 ? "le Recueil de prières" : ("la revue ARCA n°" + num);
 }
