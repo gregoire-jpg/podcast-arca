@@ -72,9 +72,12 @@ Deno.serve(async (req) => {
     // ─── Statut PAYÉ : JAMAIS issu du champ client. (Re)vérification serveur Stripe + PayPal. ───
     // Si le client prétend "PAID" sans transaction réellement payée vérifiable → on blanchit
     // paypal-status (=> tous les isPaid downstream deviennent false) et on alerte dans le mail.
+    // Appel authentifié admin/S2S (send-confirmation, manuel) → on fait confiance au statut
+    // (commande déjà encaissée/vérifiée en BDD, ex. virement sans id de transaction).
+    // Appel public → vérification serveur obligatoire (anti-spoof).
     let paypalVerifyWarning: string | null = null;
     const declaredPaid = (d["paypal-status"] || "").startsWith("PAID");
-    if (declaredPaid) {
+    if (declaredPaid && !internalAuthed) {
       let verified = false;
       if (isStripeId) {
         const sv = await verifyStripeSession(sessId);

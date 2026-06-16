@@ -34,3 +34,18 @@ verify_jwt = false
 
 [functions.arca-stripe-webhook]
 verify_jwt = false
+
+[functions.arca-send-reminder]
+verify_jwt = false
+
+[functions.arca-send-confirmation]
+verify_jwt = false
+
+[functions.arca-send-cancellation]
+verify_jwt = false
+
+[functions.arca-restock-subscribe]
+verify_jwt = false
+
+[functions.arca-restock-notify]
+verify_jwt = false

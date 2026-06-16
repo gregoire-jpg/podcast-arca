@@ -6,7 +6,7 @@
 import { arcaEnv } from "./env.ts";
 import { corsHeaders } from "./cors.ts";
 
-function timingSafeEqual(a: string, b: string): boolean {
+export function timingSafeEqual(a: string, b: string): boolean {
   const ab = new TextEncoder().encode(a);
   const bb = new TextEncoder().encode(b);
   if (ab.length !== bb.length) return false;
