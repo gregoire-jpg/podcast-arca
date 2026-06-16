@@ -3,12 +3,17 @@
 // POST { order_id, provider: 'stripe'|'paypal', amount_eur, label } → { url, provider }
 
 import { json, preflight } from "../_shared/cors.ts";
+import { requireAdmin } from "../_shared/auth.ts";
 import { createStripePaymentLink, createPaypalOrder } from "../_shared/payments.ts";
 
 Deno.serve(async (req) => {
   const pre = preflight(req);
   if (pre) return pre;
   if (req.method !== "POST") return json(405, { error: "Method not allowed" });
+
+  // Endpoint ADMIN : montant fourni par l'appelant → exige l'auth admin (fail-closed).
+  const unauth = requireAdmin(req);
+  if (unauth) return unauth;
 
   let body: any;
   try { body = await req.json(); } catch { return json(400, { error: "Invalid JSON" }); }
