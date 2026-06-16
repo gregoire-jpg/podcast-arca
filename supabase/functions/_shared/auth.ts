@@ -15,6 +15,14 @@ function timingSafeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
+// Variante booléenne : l'appel est-il authentifié admin / serveur-à-serveur ?
+// FAIL-CLOSED : false si ARCA_ADMIN_PASSWORD absent.
+export function isAdmin(req: Request): boolean {
+  const secret = arcaEnv("ADMIN_PASSWORD");
+  const provided = req.headers.get("x-admin-password") ?? "";
+  return !!secret && timingSafeEqual(provided, secret);
+}
+
 // Retourne une Response 401 si l'appel n'est pas authentifié admin, sinon null.
 export function requireAdmin(req: Request): Response | null {
   const secret = arcaEnv("ADMIN_PASSWORD");

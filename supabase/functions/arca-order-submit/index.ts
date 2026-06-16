@@ -8,6 +8,7 @@
 
 import { arcaEnv } from "../_shared/env.ts";
 import { supaEnv } from "../_shared/supa.ts";
+import { isAdmin } from "../_shared/auth.ts";
 import { createStripePaymentLink, createPaypalOrder } from "../_shared/payments.ts";
 
 const PROMO_DEADLINE = new Date("2026-05-25T22:00:00Z");
@@ -41,11 +42,16 @@ Deno.serve(async (req) => {
     const d: any = submission.data || body.data || {};
     console.log("Processing commande for:", d.nom, "/", d.email, "/ paiement:", d.paiement);
 
+    // Flags privilégiés (_no_persist, _order_id) : honorés UNIQUEMENT si appel authentifié
+    // admin / serveur-à-serveur (en-tête x-admin-password). Sinon → on persiste et dédublonne
+    // toujours, on ne génère pas de lien depuis un _order_id forgé.
+    const internalAuthed = isAdmin(req);
+    const noPersist = internalAuthed && (body._no_persist || d._no_persist);
+
     // ─── Idempotence : Stripe webhook + redirect navigateur → pas de double mail. ───
-    const skipDedup = body._no_persist || d._no_persist;
     const sessId = d["paypal-order-id"] || "";
     const isStripeId = sessId.startsWith("cs_");
-    if (!skipDedup && isStripeId && SUPABASE_URL && SUPABASE_KEY) {
+    if (!noPersist && isStripeId && SUPABASE_URL && SUPABASE_KEY) {
       try {
         const checkUrl = `${SUPABASE_URL}/rest/v1/arca_orders?stripe_session_id=eq.${encodeURIComponent(sessId)}&select=id`;
         const ck = await fetch(checkUrl, {
@@ -63,20 +69,27 @@ Deno.serve(async (req) => {
       }
     }
 
-    // ─── Vérification PayPal côté serveur (anti-forgery) ───
+    // ─── Statut PAYÉ : JAMAIS issu du champ client. (Re)vérification serveur Stripe + PayPal. ───
+    // Si le client prétend "PAID" sans transaction réellement payée vérifiable → on blanchit
+    // paypal-status (=> tous les isPaid downstream deviennent false) et on alerte dans le mail.
     let paypalVerifyWarning: string | null = null;
-    const ppOrderId = d["paypal-order-id"] || "";
-    const isPaypalOrder = ppOrderId && !ppOrderId.startsWith("cs_") && /paypal/i.test((d.paiement || "") + (d["paypal-status"] || ""));
     const declaredPaid = (d["paypal-status"] || "").startsWith("PAID");
-    if (isPaypalOrder && declaredPaid) {
-      const verify = await verifyPayPalOrder(ppOrderId);
-      if (!verify.ok) {
-        console.error("[PayPal verify] ÉCHEC pour", ppOrderId, ":", verify.reason);
-        paypalVerifyWarning = "Vérification PayPal ÉCHOUÉE : " + verify.reason;
-        d["paypal-status"] = "";
+    if (declaredPaid) {
+      let verified = false;
+      if (isStripeId) {
+        const sv = await verifyStripeSession(sessId);
+        verified = sv.ok && sv.paid;
+        if (!verified) paypalVerifyWarning = "Vérification Stripe ÉCHOUÉE : " + (sv.reason || "session non payée");
+        else console.log("[Stripe verify] OK", sessId, "amount=" + sv.amount + " " + sv.currency);
+      } else if (sessId) {
+        const verify = await verifyPayPalOrder(sessId);
+        verified = verify.ok;
+        if (!verified) paypalVerifyWarning = "Vérification PayPal ÉCHOUÉE : " + verify.reason;
+        else console.log("[PayPal verify] OK", sessId, "status=" + verify.status + " amount=" + verify.amount + " " + verify.currency);
       } else {
-        console.log("[PayPal verify] OK pour", ppOrderId, "· status=" + verify.status + " · amount=" + verify.amount + " " + verify.currency);
+        paypalVerifyWarning = "Statut PAID déclaré sans identifiant de transaction — ignoré.";
       }
+      if (!verified) d["paypal-status"] = "";
     }
 
     // Étiquette MR : générée plus tard (à l'expédition), pas ici.
@@ -120,7 +133,7 @@ Deno.serve(async (req) => {
 
     // ─── Liens de paiement en ligne (Stripe + PayPal) si non payé ───
     const payLinks: any = { stripeUrl: null, paypalUrl: null };
-    const orderIdForPay = body._order_id || d._order_id;
+    const orderIdForPay = internalAuthed ? (body._order_id || d._order_id) : null;
     if (!isPaid && orderIdForPay) {
       const totMatch = (d["commande-details"] || "").match(/TOTAL:\s*(\d+(?:[.,]\d+)?)/);
       const amountEur = totMatch ? parseFloat(totMatch[1].replace(",", ".")) : 0;
@@ -159,11 +172,11 @@ Deno.serve(async (req) => {
     }
 
     // ─── Persistance Supabase (arca_orders) ───
-    if (!body._no_persist && !d._no_persist) {
+    if (!noPersist) {
       try { await persistOrder(d, mrLabel); }
       catch (e) { console.error("Supabase persist error:", (e as Error).message); }
     } else {
-      console.log("[Skip persist] _no_persist flag set");
+      console.log("[Skip persist] _no_persist (appel authentifié)");
     }
 
     return new Response("Email sent", { status: 200 });
@@ -213,6 +226,25 @@ async function verifyPayPalOrder(orderId: string): Promise<any> {
       return { ok: false, status, amount, currency, payerEmail, reason: "Status PayPal '" + status + "' (attendu APPROVED ou COMPLETED)" };
     }
     return { ok: true, status, amount, currency, payerEmail };
+  } catch (e) {
+    return { ok: false, reason: "Exception : " + (e as Error).message };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Vérification d'une session Stripe Checkout côté serveur (anti-forge)
+// Retourne { ok, paid, amount, currency, reason }
+// ─────────────────────────────────────────────────────────────
+async function verifyStripeSession(sessionId: string): Promise<any> {
+  const KEY = arcaEnv("STRIPE_SECRET_KEY");
+  if (!KEY) return { ok: false, reason: "STRIPE_SECRET_KEY absent" };
+  try {
+    const r = await fetch("https://api.stripe.com/v1/checkout/sessions/" + encodeURIComponent(sessionId), {
+      headers: { "Authorization": "Bearer " + KEY },
+    });
+    const s = await r.json();
+    if (!r.ok) return { ok: false, reason: "Stripe " + r.status + " : " + ((s.error && s.error.message) || "") };
+    return { ok: true, paid: s.payment_status === "paid", amount: s.amount_total, currency: s.currency };
   } catch (e) {
     return { ok: false, reason: "Exception : " + (e as Error).message };
   }
