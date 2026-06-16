@@ -20,14 +20,12 @@ Deno.serve(async (req) => {
 
     const callbackUrl = arcaEnv("FUNCTIONS_BASE") + "/arca-bpost-callback";
 
-    if (receivedSig) {
-      const valid = await bp.verifyCallbackSignature(receivedSig, status, trackingId, callbackUrl);
-      if (!valid) {
-        console.warn("[Bpost callback] HMAC invalid for", shopItemId, status);
-        return new Response("Invalid signature", { status: 401 });
-      }
-    } else {
-      console.warn("[Bpost callback] No signature provided, proceeding anyway");
+    // Signature OBLIGATOIRE : ce callback mute arca_orders → on refuse tout appel non signé/invalide.
+    if (!receivedSig) return new Response("Missing signature", { status: 401 });
+    const valid = await bp.verifyCallbackSignature(receivedSig, status, trackingId, callbackUrl);
+    if (!valid) {
+      console.warn("[Bpost callback] HMAC invalid for", shopItemId, status);
+      return new Response("Invalid signature", { status: 401 });
     }
 
     console.log("[Bpost callback]", shopItemId, "→", status, "tracking=", trackingId);
@@ -35,10 +33,13 @@ Deno.serve(async (req) => {
     if (!m) return new Response("No matching order (" + shopItemId + ")", { status: 200 });
     const orderId = parseInt(m[1], 10);
 
+    // Défense en profondeur : on borne les valeurs persistées (même si signées par Bpost).
+    const safeStatus = String(status).slice(0, 60);
+    const safeTracking = trackingId ? String(trackingId).slice(0, 80) : null;
     await fetch(bp.supaUrl() + "/rest/v1/arca_orders?id=eq." + orderId, {
       method: "PATCH",
       headers: { apikey: bp.supaKey(), Authorization: "Bearer " + bp.supaKey(), "Content-Type": "application/json" },
-      body: JSON.stringify({ bpost_status: status, bpost_tracking: trackingId || null, bpost_status_at: new Date().toISOString() }),
+      body: JSON.stringify({ bpost_status: safeStatus, bpost_tracking: safeTracking, bpost_status_at: new Date().toISOString() }),
     });
     return new Response("OK", { status: 200 });
   } catch (err) {

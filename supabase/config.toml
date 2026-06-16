@@ -73,3 +73,9 @@ verify_jwt = false
 
 [functions.arca-regenerate-mr-label]
 verify_jwt = false
+
+[functions.arca-dropbox-token]
+verify_jwt = false
+
+[functions.arca-upload-doc]
+verify_jwt = false
