@@ -10,9 +10,18 @@
 
 project_id = "fsbyoxotsmmzejefiaqg"
 
-# Toutes les functions ARCA sont publiques (appelées par le front sans JWT Supabase).
+# Toutes les functions ARCA sont publiques (appelées par le front / Stripe / PayPal sans JWT Supabase).
 [functions.arca-stock]
 verify_jwt = false
 
 [functions.arca-track-count]
+verify_jwt = false
+
+[functions.arca-create-payment-link]
+verify_jwt = false
+
+[functions.arca-create-stripe-session]
+verify_jwt = false
+
+[functions.arca-finalize-stripe-order]
 verify_jwt = false

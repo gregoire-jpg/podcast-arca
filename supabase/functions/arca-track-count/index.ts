@@ -8,6 +8,7 @@
 //    table Supabase (arca_counts) — voir PLAN_migration_arca_netlify.md.
 
 import { json, preflight } from "../_shared/cors.ts";
+import { arcaEnv } from "../_shared/env.ts";
 
 function b64decode(s: string): string {
   return new TextDecoder().decode(Uint8Array.from(atob(s), (c) => c.charCodeAt(0)));
@@ -29,9 +30,9 @@ Deno.serve(async (req) => {
     return json(400, { error: "Paramètres invalides" });
   }
 
-  const token = Deno.env.get("GITHUB_TOKEN");
-  const owner = Deno.env.get("GITHUB_OWNER") || "gregoire-jpg";
-  const repo = Deno.env.get("GITHUB_REPO") || "podcast-arca";
+  const token = arcaEnv("GITHUB_TOKEN");
+  const owner = arcaEnv("GITHUB_OWNER") || "gregoire-jpg";
+  const repo = arcaEnv("GITHUB_REPO") || "podcast-arca";
   const path = "counts.json";
 
   const apiBase = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
