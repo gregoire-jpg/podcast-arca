@@ -14,6 +14,23 @@ const ISO2: Record<string, string> = {
 const WEIGHTS: Record<number, number> = { 1: 600, 2: 600, 3: 735, 4: 565, 5: 506, 6: 600, 7: 532, 8: 600, 9: 350 };
 const UE_27 = new Set(["BE", "BG", "CZ", "DK", "DE", "EE", "IE", "GR", "ES", "FR", "HR", "IT", "CY", "LV", "LT", "LU", "HU", "MT", "NL", "AT", "PL", "PT", "RO", "SI", "SK", "FI", "SE"]);
 
+// DOM-TOM → vrai code ISO depuis le code postal (97x/98x). 'FR' générique
+// est HORS territoire douanier/fiscal UE mais déclencherait la branche UE
+// (pas de douane) → colis bloqué. On résout le code réel pour générer la
+// douane comme pour le Canada. Fallback 'FR' si CP inconnu = comportement
+// actuel, aucune régression. À valider sur un vrai envoi pour les TOM Pacifique.
+const DOM_TOM_CP: Record<string, string> = {
+  "971": "GP", "972": "MQ", "973": "GF", "974": "RE",
+  "975": "PM", "976": "YT", "977": "BL", "978": "MF",
+};
+function resolveCountry(order: any) {
+  if (order.pays === "DOM-TOM") {
+    const cp = String(order.cp || "").replace(/\s/g, "");
+    return DOM_TOM_CP[cp.slice(0, 3)] || "FR";
+  }
+  return ISO2[order.pays] || "BE";
+}
+
 function randHex(n: number) {
   const a = new Uint8Array(n);
   crypto.getRandomValues(a);
@@ -31,7 +48,7 @@ function buildShipmentItems(items: any[]) {
   }));
 }
 function buildCustoms(order: any) {
-  const country = ISO2[order.pays] || "BE";
+  const country = resolveCountry(order);
   if (UE_27.has(country)) return null;
   const totalArticles = (order.items || []).reduce((sum: number, it: any) => sum + (it.qty || 0) * parseFloat(it.price || 0), 0);
   const fallback = parseFloat(order.total_eur || 0) - parseFloat(order.port_eur || 0);
@@ -76,7 +93,7 @@ function buildShipment(order: any, attempt: number) {
       if (ext) numberExt = (numberExt ? numberExt + " " : "") + ext;
     }
   }
-  const country = ISO2[order.pays] || "BE";
+  const country = resolveCountry(order);
   const cref = buildCref(order.id, attempt);
   const productId = country === "BE" ? "302" : "303";
   const shopItemId = attempt === 0 ? order.id : parseInt(randHex(4), 16);

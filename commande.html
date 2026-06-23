@@ -1391,7 +1391,18 @@ function updateSummary() {
            + '</div>';
   }
 
-  sumEl.innerHTML = detailsHtml + fraisHtml + totalHtml + note + n8Note;
+  // Avis taxes d'import pour les destinations hors Union européenne.
+  // Le prix Arca ne comprend pas la taxe locale (TVA/TPS) du pays du client,
+  // perçue à la livraison par sa poste (cf. retour client Canada, juin 2026).
+  var customsNote = '';
+  var NON_UE = ['Royaume-Uni', 'Suisse', 'Canada', 'DOM-TOM'];
+  if (NON_UE.indexOf(pays) !== -1) {
+    customsNote = '<div style="margin-top:14px;padding:10px 12px;background:rgba(255,255,255,.06);border-left:3px solid rgba(255,255,255,.32);border-radius:3px;font:11.5px/1.45 Arial;color:rgba(255,255,255,.82);">'
+      + '🌍 <strong style="color:#fff;">Livraison hors Union européenne</strong> — Le prix ne comprend pas les taxes d\'importation de votre pays (TVA/TPS locale), perçues à la livraison par votre service postal et à votre charge. Les livres sont exonérés de droits de douane ; seule la taxe locale (souvent réduite sur les livres) peut s\'appliquer.'
+      + '</div>';
+  }
+
+  sumEl.innerHTML = detailsHtml + fraisHtml + totalHtml + note + n8Note + customsNote;
   document.getElementById('submit-btn').disabled = false;
   document.getElementById('commande-details').value = detailsText.join(' | ') + ' | Sous-total revues: ' + totalRevues + ' € | Port: ' + frais + ' € | TOTAL: ' + total + ' €';
 
