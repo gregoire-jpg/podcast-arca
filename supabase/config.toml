@@ -79,3 +79,7 @@ verify_jwt = false
 
 [functions.arca-upload-doc]
 verify_jwt = false
+
+# Admin du site ina-illustrations (hors périmètre ARCA mais même projet beya, préfixe ina-)
+[functions.ina-admin]
+verify_jwt = false
