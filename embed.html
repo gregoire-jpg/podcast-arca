@@ -333,15 +333,15 @@
     // mais sans le ?v= un cache CDN pourrait survivre quelques minutes.
     var bust = '?v=' + Date.now();
     Promise.all([
-      fetch("https://podcast-arca.netlify.app/episodes.json" + bust).then(function (r) { return r.json(); }),
-      fetch("https://podcast-arca.netlify.app/config.json" + bust).then(function (r)   { return r.json(); })
+      fetch("episodes.json" + bust).then(function (r) { return r.json(); }),
+      fetch("config.json" + bust).then(function (r)   { return r.json(); })
     ]).then(function (res) {
       S.episodes = res[0];
       S.config   = res[1];
       var epsEl = document.getElementById('pod-eps');
       if (epsEl) epsEl.textContent = S.episodes.length + ' épisodes · Philosophie · Hermétisme · Alchimie';
       // Charger les compteurs d'écoutes
-      fetch('https://podcast-arca.netlify.app/counts.json?' + Date.now())
+      fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-track-count?' + Date.now())
         .then(function(r){ return r.json(); })
         .then(function(c){
           S.counts = c;
@@ -553,7 +553,7 @@
     audio.play();
     var epKey = ep.youtube_id || ep.id || '';
     if (epKey) {
-      fetch('/.netlify/functions/track-count', {
+      fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-track-count', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({type:'play', id: epKey})
       }).then(function(r){ return r.json(); }).then(function(d){

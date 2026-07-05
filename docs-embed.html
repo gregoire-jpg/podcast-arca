@@ -154,14 +154,14 @@
 
   function init(){
     Promise.all([
-      fetch('https://podcast-arca.netlify.app/documents.json?'+Date.now()).then(function(r){return r.json();}),
-      fetch('https://podcast-arca.netlify.app/docs-images.json?'+Date.now()).then(function(r){return r.json();}).catch(function(){return{};})
+      fetch('documents.json?'+Date.now()).then(function(r){return r.json();}),
+      fetch('docs-images.json?'+Date.now()).then(function(r){return r.json();}).catch(function(){return{};})
     ]).then(function(all){var r=all[0],img=all[1];
       if(img.sections) Object.assign(IMGS,img.sections);
       if(img.categories) Object.assign(IMGS,img.categories);
       D.docs=r;
       // Charger les compteurs de téléchargements
-      fetch('https://podcast-arca.netlify.app/counts.json?'+Date.now())
+      fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-track-count?'+Date.now())
         .then(function(res){return res.json();})
         .then(function(c){
           D.counts=c;
@@ -338,7 +338,7 @@
 })();
 
 function trackDl(id){
-  fetch('/.netlify/functions/track-count',{
+  fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-track-count',{
     method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({type:'download',id:id})
   }).then(function(r){return r.json();}).then(function(d){

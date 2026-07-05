@@ -398,7 +398,7 @@ function buildEmailHtml(d: any, mrLabel: any, paypalVerifyWarning: any) {
   const mrRelayInfo = d["mr-relay-info"] || "";
   const mrRelayCode = d["mr-relay-code"] || "";
   const isMondialRelay = (d.livraison || "") === "Mondial Relay";
-  const adminUrl = (arcaEnv("ADMIN_URL") || "https://podcast-arca.netlify.app/admin") + "/#commandes";
+  const adminUrl = (arcaEnv("ADMIN_URL") || "https://gregoire-jpg.github.io/podcast-arca/admin") + "/#commandes";
   const mrBlock = isMondialRelay && mrRelayInfo ? `
   <tr><td style="padding:0 36px 20px;">
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#fffbf4;border:1px solid #c8a060;border-radius:4px;">

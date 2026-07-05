@@ -879,7 +879,7 @@ button, input, select, textarea { font-family: inherit; }
 <script>
 'use strict';
 
-// ── Modal alert ARCA (remplace alert() natif qui affiche "podcast-arca.netlify.app indique") ──
+// ── Modal alert ARCA (remplace alert() natif qui affiche "le site indique") ──
 function arcaAlert(message) {
   var modal = document.getElementById('arca-alert-modal');
   var msgEl = document.getElementById('arca-alert-msg');
@@ -1242,7 +1242,7 @@ function updatePackVisibility() {
 }
 
 function loadAvailability() {
-  fetch('/.netlify/functions/arca-stock', { cache: 'no-store' })
+  fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-stock', { cache: 'no-store' })
     .then(function (r) { return r.json(); })
     .then(function (d) {
       AVAILABILITY = (d && d.available) ? d.available : {};
@@ -1270,7 +1270,7 @@ function submitRestock(e, num) {
   var hp = form.querySelector('.rs-hp');
   var btn = form.querySelector('.restock-btn');
   btn.disabled = true; btn.textContent = 'Envoi…';
-  fetch('/.netlify/functions/arca-restock-subscribe', {
+  fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-restock-subscribe', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: email, num: num, website: hp ? hp.value : '' })
@@ -1548,7 +1548,7 @@ function payerAvecStripe() {
     data[el.name] = el.value;
   });
 
-  fetch('/.netlify/functions/create-stripe-session', {
+  fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-create-stripe-session', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
@@ -1790,7 +1790,7 @@ function sendOrderToFunction(isPaypal, paypalId) {
   var btn = document.getElementById('submit-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Envoi en cours…'; }
 
-  fetch('/.netlify/functions/submission-created', {
+  fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-order-submit', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ form_name: 'commande-arca', data: data })
