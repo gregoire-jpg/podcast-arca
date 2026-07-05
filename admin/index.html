@@ -1072,7 +1072,7 @@
 .cmd-actions-wrap .cmd-act { white-space:nowrap; }
 /* Menu déroulant ⋯ pour les actions secondaires (email, rappel, payée, clôturer, annuler) */
 .cmd-act-menu-wrap { position:relative; display:inline-block; }
-.cmd-act-menu { position:absolute; right:0; top:100%; margin-top:6px; background:#fff; border:1px solid var(--border); border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.15); min-width:230px; z-index:1000; padding:4px 0; }
+.cmd-act-menu { position:fixed; background:#fff; border:1px solid var(--border); border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.18); min-width:230px; z-index:9999; padding:4px 0; }
 .cmd-act-menu button { display:block; width:100%; text-align:left; padding:9px 16px; border:0; background:transparent; cursor:pointer; font:.88em/1.3 Arial; color:var(--navy); }
 .cmd-act-menu button:hover { background:#faf8f3; }
 .cmd-act-menu button + button { border-top:1px solid #f3efe4; }
@@ -4058,6 +4058,30 @@ CMD.render = function() {
   }
 
   document.getElementById('cmd-list').innerHTML = html;
+  CMD.positionActionMenu();
+};
+
+// Positionne le menu ⋯ ouvert en position:fixed (échappe à overflow:hidden du
+// tableau et de la carte de canal — sinon la dernière ligne est rognée).
+// Ouvre vers le bas, ou vers le haut si la ligne est trop près du bas de l'écran.
+CMD.positionActionMenu = function() {
+  if (CMD.openActionMenu == null) return;
+  var menu = document.querySelector('.cmd-act-menu');
+  if (!menu) return;
+  var wrap = menu.parentNode;
+  var btn = wrap ? wrap.querySelector('.cmd-act') : null;
+  if (!btn) return;
+  var r = btn.getBoundingClientRect();
+  var mw = menu.offsetWidth || 230;
+  var mh = menu.offsetHeight || 200;
+  var left = Math.max(8, r.right - mw);
+  var top = r.bottom + 6;
+  if (top + mh > window.innerHeight - 8) {
+    var up = r.top - mh - 6;
+    top = up >= 8 ? up : Math.max(8, window.innerHeight - mh - 8);
+  }
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
 };
 
 // Toggle collapse d'une section canal — pas de full render, juste DOM swap
