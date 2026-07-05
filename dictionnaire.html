@@ -234,7 +234,7 @@ function render() {
 }
 
 /* ── Chargement ── */
-fetch('https://podcast-arca.netlify.app/dictionnaire.json?' + Date.now())
+fetch('dictionnaire.json?' + Date.now())
   .then(function(r){ return r.json(); })
   .then(function(data){
     D.entries = data;

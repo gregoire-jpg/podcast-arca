@@ -1358,7 +1358,7 @@ function dialog(title, msg, onOk, opts) {
 
 /* ═══════════════════ API ═══════════════════ */
 function saveFile(filename, data, cb) {
-  fetch('/.netlify/functions/save-file', {
+  fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-save-file', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ password: S.pwd, filename: filename, data: data })
@@ -1379,7 +1379,7 @@ function tryLogin() {
   err.style.display = 'none';
   btn.disabled = true;
   btn.textContent = 'Vérification…';
-  fetch('/.netlify/functions/db-proxy', {
+  fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-db-proxy', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -1420,7 +1420,7 @@ $('btn-logout').addEventListener('click', function() { sessionStorage.removeItem
 
 /* ═══════════════════ LOAD ═══════════════════ */
 function loadData() {
-  var base = 'https://podcast-arca.netlify.app';
+  var base = '..';
   Promise.all([
     fetch(base + '/episodes.json?'  + Date.now()).then(function(r) { return r.json(); }),
     fetch(base + '/config.json?'    + Date.now()).then(function(r) { return r.json(); }),
@@ -1800,7 +1800,7 @@ $('btn-save-config').addEventListener('click', function() {
 var D = { docs: [], dirty: new Set() };
 
 function loadDocs() {
-  fetch('https://podcast-arca.netlify.app/documents.json?' + Date.now())
+  fetch('../documents.json?' + Date.now())
     .then(function(r){ return r.json(); })
     .then(function(docs){
       D.docs = docs;
@@ -1899,7 +1899,7 @@ var MAX_DIRECT_UPLOAD_MB = 100;
 // limite 6 MB payload). Le token court (4h max) est obtenu via
 // dropbox-token.js, gated par ADMIN_PASSWORD.
 function uploadDirectToDropbox(file, remotePath, onProgress) {
-  return fetch('/.netlify/functions/dropbox-token', {
+  return fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-dropbox-token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ password: S.pwd }),
@@ -2059,7 +2059,7 @@ $('add-doc-ok').addEventListener('click', function(){
 var GL = { terms: [], dirty: false, editIdx: -1, search: '' };
 
 function loadGlossaire() {
-  fetch('https://podcast-arca.netlify.app/glossaire.json?' + Date.now())
+  fetch('../glossaire.json?' + Date.now())
     .then(function(r){ return r.json(); })
     .then(function(data){
       GL.terms = data;
@@ -2222,7 +2222,7 @@ var SECTION_ICONS  = { revue:'📰', articles:'📄', livres:'📖', 'lus-pour-v
 var SECTION_HAS_CATS = ['articles','lus-pour-vous'];
 
 function loadDocsImages() {
-  fetch('https://podcast-arca.netlify.app/docs-images.json?'+Date.now())
+  fetch('../docs-images.json?'+Date.now())
     .then(function(r){ return r.json(); })
     .then(function(d){
       DN.images = d;
@@ -2456,7 +2456,7 @@ $('btn-save-docs').addEventListener('click',function(){
 var DC = { entries: [], dirty: false, editIdx: -1, search: '', lettre: '' };
 
 function loadDictionnaire() {
-  fetch('https://podcast-arca.netlify.app/dictionnaire.json?' + Date.now())
+  fetch('../dictionnaire.json?' + Date.now())
     .then(function(r){ return r.json(); })
     .then(function(data){
       DC.entries = data;
@@ -2591,7 +2591,7 @@ var CIT = {
   url: 'https://fsbyoxotsmmzejefiaqg.supabase.co',
   anon: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYnlveG90c21temVqZWZpYXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNjM2NTMsImV4cCI6MjA5MjkzOTY1M30.WeggZAYy3N6hZp6vLQyQWoi_55KHPdhhFcA9P-MO3UA',
   // Le service_role key n'est plus jamais embarqué dans la page : toutes les
-  // écritures passent par /.netlify/functions/db-proxy (auth via S.pwd).
+  // écritures passent par https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-db-proxy (auth via S.pwd).
   loaded: false,
   citations: [], auteurs: [], inscrits: [],
   curEditId: null, curEditAuteurId: null,
@@ -2621,7 +2621,7 @@ function citApi(path, opts) {
   }
   // Écritures (et lectures privilégiées) : via proxy serveur, password requis
   var preferHeader = (opts.headers && opts.headers.Prefer) || null;
-  return fetch('/.netlify/functions/db-proxy', {
+  return fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-db-proxy', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -3339,7 +3339,7 @@ function resBulkLancer(force) {
         if (!blob) { ko++; i++; setTimeout(suivante, 100); return; }
         var path = 'pensee-' + c.id + '-' + Date.now() + '.png';
         blobToBase64(blob).then(function(b64) {
-          return fetch('/.netlify/functions/storage-upload', {
+          return fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-storage-upload', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -3607,7 +3607,7 @@ function resSauvegarder() {
     var path = 'pensee-' + RES.current.id + '-' + Date.now() + '.png';
     $('res-status').textContent = 'Upload Storage…';
     blobToBase64(blob).then(function(b64) {
-      return fetch('/.netlify/functions/storage-upload', {
+      return fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-storage-upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -3676,7 +3676,7 @@ var CMD = {
 CMD.api = function(path, opts) {
   opts = opts || {};
   var preferHeader = (opts.headers && opts.headers.Prefer) || (opts.prefer || null);
-  return fetch('/.netlify/functions/db-proxy', {
+  return fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-db-proxy', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -4105,7 +4105,7 @@ CMD.tableHtml = function(list) {
                 // un input hidden minimaliste lit via inline onclick.
                 var bfCrefSafe = CMD.esc(bfCref);
                 return ''
-                  + '<form method="POST" action="/.netlify/functions/bpost-print-direct" target="_blank" style="display:inline" '
+                  + '<form method="POST" action="https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-bpost-print-direct" target="_blank" style="display:inline" '
                   +   'onsubmit="this.querySelector(\'[name=password]\').value = sessionStorage.getItem(\'arca_pwd\') || prompt(\'Mot de passe admin\') || \'\'; sessionStorage.setItem(\'arca_pwd\', this.querySelector(\'[name=password]\').value);">'
                   +   '<input type="hidden" name="ref" value="' + bfCrefSafe + '">'
                   +   '<input type="hidden" name="password" value="">'
@@ -4441,7 +4441,7 @@ CMD.notifyRestock = function(num) {
   var n = (CMD.alerts || []).filter(function(a) { return a.num === num; }).length;
   if (!n) { alert('Personne en attente pour ce numéro.'); return; }
   if (!confirm('Envoyer l\'e-mail « de nouveau disponible » à ' + n + ' inscrit(s) du N°' + num + ' ?\nIls seront ensuite marqués comme prévenus.')) return;
-  fetch('/.netlify/functions/arca-restock-notify', {
+  fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-restock-notify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ password: S.pwd, num: num })
@@ -4747,9 +4747,9 @@ CMD.regenMr = function(id, evt, force) {
   }
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Génération…'; }
 
-  fetch('/.netlify/functions/regenerate-mr-label', {
+  fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-regenerate-mr-label', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' , 'x-admin-password': S.pwd },
     body: JSON.stringify({ order_id: id, force: !!force })
   })
   .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
@@ -4782,7 +4782,7 @@ CMD.printMr = function(id) {
 CMD.printLabel = function(url) {
   if (!url) { alert('Étiquette pas encore disponible.'); return; }
   var w = window.open(url, '_blank');
-  if (!w) { alert('Pop-up bloqué — autorise les pop-ups pour podcast-arca.netlify.app puis réessaye.'); return; }
+  if (!w) { alert('Pop-up bloqué — autorise les pop-ups pour ce site puis réessaye.'); return; }
   // Tentative d'auto-print après chargement (peut être bloqué pour PDF cross-origin — le viewer PDF natif a son propre bouton Imprimer)
   try { w.addEventListener('load', function(){ try { w.print(); } catch(e){} }); } catch(e){}
 };
@@ -4791,9 +4791,9 @@ CMD.pushBpost = function(id) {
   if (!confirm('Envoyer cette commande à Bpost Shipping Manager ?')) return;
   var btn = event.target;
   btn.disabled = true; btn.textContent = '⏳ Envoi...';
-  fetch('/.netlify/functions/bpost-push-shipment', {
+  fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-bpost-push-shipment', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' , 'x-admin-password': S.pwd },
     body: JSON.stringify({ order_id: id })
   })
   .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
@@ -5043,9 +5043,9 @@ CMD.sendReminder = function(id) {
   if (!o.email) { alert('Pas d\'email renseigné sur cette commande.'); return; }
   if (o.paye)   { alert('Cette commande est déjà marquée payée.'); return; }
   if (!confirm('Envoyer un rappel à ' + o.email + ' ?\n(récap complet + 3 modes de paiement)')) return;
-  fetch('/.netlify/functions/send-reminder', {
+  fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-send-reminder', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' , 'x-admin-password': S.pwd },
     body: JSON.stringify({ order_id: id })
   })
   .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
@@ -5064,9 +5064,9 @@ CMD.sendConfirmation = function(id, silent) {
   if (!o) return;
   if (!o.email) { alert('Pas d\'email renseigné sur cette commande, impossible d\'envoyer.'); return; }
   if (!silent && !confirm('Renvoyer la confirmation à ' + o.email + ' ?')) return;
-  fetch('/.netlify/functions/send-confirmation', {
+  fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-send-confirmation', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' , 'x-admin-password': S.pwd },
     body: JSON.stringify({ order_id: id })
   })
   .then(function(r) { return r.json().then(function(d) { if (!r.ok) throw new Error(d.error || 'HTTP '+r.status); return d; }); })
@@ -5122,9 +5122,9 @@ CMD.toggleCancel = function(id) {
     CMD.render();
     if (notifyClient) {
       // Envoi du mail d'annulation en arrière-plan
-      fetch('/.netlify/functions/send-cancellation', {
+      fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-send-cancellation', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' , 'x-admin-password': S.pwd },
         body: JSON.stringify({ order_id: id, reason: reason || '' })
       })
       .then(function(r2) { return r2.json().then(function(d){ if (!r2.ok) throw new Error(d.error || 'HTTP '+r2.status); return d; }); })

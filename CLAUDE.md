@@ -4,7 +4,7 @@ Site **admin + ressources** pour le projet podcast "Arca". Sert d'admin central 
 
 **GitHub** : `gregoire-jpg/podcast-arca` (public)
 **Site public WordPress** : https://arca-revue.com (séparé, pas dans ce repo)
-**Admin Netlify** : https://podcast-arca.netlify.app/admin/
+**Admin Netlify** : https://gregoire-jpg.github.io/podcast-arca/admin/
 
 ## Stack technique
 

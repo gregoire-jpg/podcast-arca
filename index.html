@@ -726,7 +726,7 @@
     audio.play();
     // Tracker l'écoute
     if (ep.id) {
-      fetch('/.netlify/functions/track-count', {
+      fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-track-count', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({type:'play', id: ep.id})
       }).then(function(r){ return r.json(); }).then(function(d){
@@ -804,7 +804,7 @@
 })();
 
 // Charger le total d'écoutes
-fetch('/counts.json?' + Date.now()).then(function(r){ return r.json(); }).then(function(d){
+fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-track-count?' + Date.now()).then(function(r){ return r.json(); }).then(function(d){
   var el = document.getElementById('pod-count');
   if (el && d.totals && d.totals.plays > 0) {
     el.textContent = d.totals.plays;

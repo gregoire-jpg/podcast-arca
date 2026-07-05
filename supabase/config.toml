@@ -1,0 +1,85 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  podcast-arca → Edge Functions hébergées dans le projet Supabase BEYA
+#  Project ref : fsbyoxotsmmzejefiaqg  (le même qui porte arca_orders & co.)
+#
+#  ⚠ GARDE-FOU : depuis CE repo, ne JAMAIS lancer `supabase db push`.
+#     Ce config.toml ne contient VOLONTAIREMENT aucune section [api] / [db],
+#     pour ne pas écraser l'exposition des schemas de l'ERP Beya.
+#     Uniquement :  supabase functions deploy <nom> --project-ref fsbyoxotsmmzejefiaqg
+# ─────────────────────────────────────────────────────────────────────────────
+
+project_id = "fsbyoxotsmmzejefiaqg"
+
+# Toutes les functions ARCA sont publiques (appelées par le front / Stripe / PayPal sans JWT Supabase).
+[functions.arca-stock]
+verify_jwt = false
+
+[functions.arca-track-count]
+verify_jwt = false
+
+[functions.arca-create-payment-link]
+verify_jwt = false
+
+[functions.arca-create-stripe-session]
+verify_jwt = false
+
+[functions.arca-finalize-stripe-order]
+verify_jwt = false
+
+[functions.arca-order-submit]
+verify_jwt = false
+
+[functions.arca-paypal-capture]
+verify_jwt = false
+
+[functions.arca-stripe-webhook]
+verify_jwt = false
+
+[functions.arca-send-reminder]
+verify_jwt = false
+
+[functions.arca-send-confirmation]
+verify_jwt = false
+
+[functions.arca-send-cancellation]
+verify_jwt = false
+
+[functions.arca-restock-subscribe]
+verify_jwt = false
+
+[functions.arca-restock-notify]
+verify_jwt = false
+
+[functions.arca-db-proxy]
+verify_jwt = false
+
+[functions.arca-storage-upload]
+verify_jwt = false
+
+[functions.arca-save-file]
+verify_jwt = false
+
+[functions.arca-brevo-diag]
+verify_jwt = false
+
+[functions.arca-bpost-push-shipment]
+verify_jwt = false
+
+[functions.arca-bpost-callback]
+verify_jwt = false
+
+[functions.arca-bpost-print-direct]
+verify_jwt = false
+
+[functions.arca-regenerate-mr-label]
+verify_jwt = false
+
+[functions.arca-dropbox-token]
+verify_jwt = false
+
+[functions.arca-upload-doc]
+verify_jwt = false
+
+# Admin du site ina-illustrations (hors périmètre ARCA mais même projet beya, préfixe ina-)
+[functions.ina-admin]
+verify_jwt = false

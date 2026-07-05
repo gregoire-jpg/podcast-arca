@@ -24,6 +24,24 @@ const ISO2 = {
   'DOM-TOM': 'FR', 'Autres pays UE': 'BE'
 };
 
+// DOM-TOM → vrai code ISO depuis le code postal (97x/98x). 'FR' générique
+// est HORS territoire douanier/fiscal UE mais déclencherait la branche UE
+// (pas de douane) → colis bloqué. On résout le code réel pour générer la
+// douane comme pour le Canada. Fallback 'FR' si CP inconnu = comportement
+// actuel, aucune régression. NB : codes Antilles/Océan Indien confirmés
+// couverts par Bpost World ; à valider sur un vrai envoi pour les TOM Pacifique.
+const DOM_TOM_CP = {
+  '971': 'GP', '972': 'MQ', '973': 'GF', '974': 'RE',
+  '975': 'PM', '976': 'YT', '977': 'BL', '978': 'MF'
+};
+function resolveCountry(order) {
+  if (order.pays === 'DOM-TOM') {
+    const cp = String(order.cp || '').replace(/\s/g, '');
+    return DOM_TOM_CP[cp.slice(0, 3)] || 'FR';
+  }
+  return ISO2[order.pays] || 'BE';
+}
+
 const WEIGHTS = { 1:600, 2:600, 3:735, 4:565, 5:506, 6:600, 7:532, 8:600, 9:350 };
 function computeWeightG(items) {
   let g = 0;
@@ -61,7 +79,7 @@ const UE_27 = new Set([
 // Pour ARCA = livres + revue littéraire = GOODS (3).
 // Description max 40 chars. Value en euros (string décimal).
 function buildCustoms(order) {
-  const country = ISO2[order.pays] || 'BE';
+  const country = resolveCountry(order);
   if (UE_27.has(country)) return null;  // pas de douane intra-UE
 
   const totalArticles = (order.items || []).reduce((sum, it) => {
@@ -134,7 +152,7 @@ function buildShipment(order, attempt) {
       if (ext) numberExt = (numberExt ? numberExt + ' ' : '') + ext;
     }
   }
-  const country = ISO2[order.pays] || 'BE';
+  const country = resolveCountry(order);
   const cref = buildCref(order.id, attempt);
   // Product Bpost selon pays (cf. Shipping rules Antoine + contrat ARCA) :
   //   BE → 302 bpack 24h Pro
