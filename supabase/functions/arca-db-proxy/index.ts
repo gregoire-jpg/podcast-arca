@@ -56,5 +56,8 @@ Deno.serve(async (req) => {
   const responseHeaders: Record<string, string> = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
   const cr = resp.headers.get("content-range");
   if (cr) responseHeaders["Content-Range"] = cr;
+  // 204 No Content : la spec HTTP interdit un body — sinon le navigateur casse la
+  // connexion et fetch() rejette en "Failed to fetch" (alors que l'écriture DB est passée).
+  if (resp.status === 204) return new Response(null, { status: 204, headers: responseHeaders });
   return new Response(text || "{}", { status: resp.status, headers: responseHeaders });
 });
