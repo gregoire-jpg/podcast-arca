@@ -288,6 +288,7 @@
         <button class="nav-btn"    data-panel="dictionnaire">Dictionnaire</button>
         <button class="nav-btn"    data-panel="citations">Pensées Traditionnelles</button>
         <button class="nav-btn"    data-panel="commandes">Commandes ARCA</button>
+        <button class="nav-btn"    data-panel="campagnes">Campagnes</button>
       </nav>
     </div>
     <button class="btn-logout" id="btn-logout">Déconnexion</button>
@@ -795,6 +796,32 @@
         <iframe id="prev-iframe" title="Aperçu mobile" style="width:100%;height:100%;border:none;border-radius:32px;background:var(--white);display:block"></iframe>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ══ CAMPAGNES (moteur mailer, org ARCA) ══ -->
+<div class="panel" id="panel-campagnes">
+  <div class="docs-nav">
+    <div class="docs-bc"><span class="docs-bc-cur">Campagnes e-mail</span></div>
+  </div>
+  <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.07);padding:28px;max-width:640px;margin:18px auto">
+    <h3 style="font-family:Georgia,serif;color:var(--navy);margin:0 0 10px">Moteur de campagnes ARCA</h3>
+    <p style="color:#444;line-height:1.55;margin:0 0 8px">
+      Les campagnes e-mail ARCA (newsletters, annonces de parution) sont gérées dans
+      la plateforme <strong>mailer</strong> — envoi via Amazon SES, statistiques
+      d'ouvertures/clics, désabonnement automatique.
+    </p>
+    <p style="color:#444;line-height:1.55;margin:0 0 18px">
+      L'accès est <strong>cloisonné par organisation</strong> : votre compte mailer ne
+      montre que les listes et campagnes ARCA. Segments disponibles : abonnés Arca Revue,
+      Les amis, acheteurs par numéro (N°1–N°8), Recueil de prières, Pack complet.
+    </p>
+    <a class="btn btn-gold" href="https://mailer-gray-eight.vercel.app" target="_blank" rel="noopener"
+       style="text-decoration:none;display:inline-block">Ouvrir le moteur de campagnes ↗</a>
+    <p style="color:var(--muted);font-size:.85em;margin:14px 0 0">
+      Connexion avec votre compte mailer (distinct du mot de passe admin ARCA).
+      Les acheteurs de la boutique sont synchronisés automatiquement chaque nuit (04h30 UTC).
+    </p>
   </div>
 </div>
 
