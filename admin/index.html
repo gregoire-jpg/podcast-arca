@@ -668,6 +668,7 @@
     <div class="toolbar" style="margin-bottom:18px">
       <div class="t-row t-filter">
         <span class="t-label">Auteurs</span>
+        <input class="t-input" type="text" id="cit-search-auteur" placeholder="Rechercher un auteur…" style="flex:1;min-width:180px">
         <span class="t-spacer"></span>
         <button class="btn btn-gold" id="cit-add-auteur">+ Ajouter un auteur</button>
       </div>
@@ -2824,6 +2825,7 @@ function citRender() {
   $(id).addEventListener('input', citRender);
   $(id).addEventListener('change', citRender);
 });
+$('cit-search-auteur').addEventListener('input', citRenderAuteurs);
 
 /* ── Modale citation ── */
 function citOpen(id) {
@@ -2883,10 +2885,16 @@ function citDelete(id) {
 $('cit-add').addEventListener('click', function() { citOpen(null); });
 
 /* ── Auteurs ── */
+// Normalisation pour recherche insensible à la casse ET aux accents
+// (translittérations : « abu » doit trouver « Abû », « Bayazid » etc.).
+function citNorm(s) { return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
 function citRenderAuteurs() {
   var box = $('cit-auteurs-list');
   if (CIT.auteurs.length === 0) { box.innerHTML = '<div class="empty">Aucun auteur</div>'; return; }
-  box.innerHTML = CIT.auteurs.map(function(a) {
+  var q = citNorm((($('cit-search-auteur') || {}).value) || '').trim();
+  var liste = q ? CIT.auteurs.filter(function(a) { return citNorm(a.nom).indexOf(q) !== -1; }) : CIT.auteurs;
+  if (liste.length === 0) { box.innerHTML = '<div class="empty">Aucun auteur ne correspond à « ' + esc(q) + ' »</div>'; return; }
+  box.innerHTML = liste.map(function(a) {
     var nbCit = CIT.citations.filter(function(c) { return c.auteur_id === a.id; }).length;
     return '<div class="cit-card' + (a.mise_en_avant ? ' featured' : '') + '">' +
       '<div class="cit-row">' +
