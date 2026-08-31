@@ -14,10 +14,16 @@ function privateKey() { return arcaEnv("BPOST_SM_PRIVATE_KEY"); }
 export function supaUrl() { return supaEnv().url; }
 export function supaKey() { return supaEnv().key; }
 
+// Doc Bpost (/v3/apidocs/usa/authenticate) : "Make sure the hash has no padding
+// at the end. If it has, remove it." → on retire les '=' finaux du base64.
+function unpad(b64: string): string {
+  return b64.replace(/=+$/, "");
+}
+
 async function hmacBase64(secret: string, message: string): Promise<string> {
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(message));
-  return btoa(String.fromCharCode(...new Uint8Array(sig)));
+  return unpad(btoa(String.fromCharCode(...new Uint8Array(sig))));
 }
 
 export async function sign(username: string, body: string): Promise<string> {
@@ -56,14 +62,38 @@ async function saveToken(token: string, expire: string, shopUrl: string) {
 }
 
 async function requestNewToken(shopUrl: string): Promise<any> {
+  // Fail-fast lisible : sans secret, l'HMAC est calcule avec une cle vide et
+  // Bpost repond un 401 opaque ({"Error":{"Id":"401"}}) impossible a diagnostiquer.
+  const missing = [
+    !publicKey() && "ARCA_BPOST_SM_PUBLIC_KEY",
+    !privateKey() && "ARCA_BPOST_SM_PRIVATE_KEY",
+  ].filter(Boolean);
+  if (missing.length) {
+    throw new Error("Secret(s) Bpost absent(s) dans le projet Supabase : " + missing.join(", ") + ".");
+  }
+
   const body = JSON.stringify({ PluginVersion: PLUGIN_VER, ShopUrl: shopUrl, PlatformVersion: PLATFORM_VER });
   const r = await fetch(BPOST_BASE + "/v3/keys", {
     method: "POST",
     headers: { "X-APPID": BPOST_APPID, "Content-Type": "application/json", "Accept": "application/json", "Authorization": await basicAuth(publicKey(), body) },
     body,
   });
-  const data = await r.json();
-  if (!r.ok || !data.Key) throw new Error("Bpost /v3/keys failed: " + JSON.stringify(data).substring(0, 200));
+  const raw = await r.text();
+  let data: any;
+  try { data = JSON.parse(raw); } catch { data = raw; }
+  if (r.status === 401) {
+    // Doc Bpost : un 401 sur /v3/keys = "there is a problem with your keys or
+    // your account". Les cles sont liees a UN seul install → une paire revoquee
+    // ou reutilisee ailleurs ne redonnera jamais de token.
+    throw new Error(
+      "Bpost refuse la paire de cles (401 sur /v3/keys, ShopUrl=" + shopUrl + "). " +
+      "Regenere la cle publique/secrete du plug-in dans Shipping Manager, puis mets a jour " +
+      "ARCA_BPOST_SM_PUBLIC_KEY / ARCA_BPOST_SM_PRIVATE_KEY. Reponse : " + JSON.stringify(data).substring(0, 200)
+    );
+  }
+  if (!r.ok || !data || !data.Key) {
+    throw new Error("Bpost /v3/keys → HTTP " + r.status + " : " + JSON.stringify(data).substring(0, 200));
+  }
   return { token: data.Key, expire: data.Expire };
 }
 
@@ -104,8 +134,9 @@ export async function bpostCall(method: string, path: string, body: any, token: 
 
 export async function verifyCallbackSignature(receivedSig: string, status: string, trackingId: string, callbackUrl: string): Promise<boolean> {
   const expected = await hmacBase64(privateKey(), status + "," + trackingId + "," + callbackUrl);
-  if (receivedSig.length !== expected.length) return false;
+  const got = unpad(receivedSig || "");   // Bpost peut envoyer la signature avec ou sans padding
+  if (got.length !== expected.length) return false;
   let diff = 0;
-  for (let i = 0; i < expected.length; i++) diff |= receivedSig.charCodeAt(i) ^ expected.charCodeAt(i);
+  for (let i = 0; i < expected.length; i++) diff |= got.charCodeAt(i) ^ expected.charCodeAt(i);
   return diff === 0;
 }
