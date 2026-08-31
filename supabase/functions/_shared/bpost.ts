@@ -14,8 +14,10 @@ function privateKey() { return arcaEnv("BPOST_SM_PRIVATE_KEY"); }
 export function supaUrl() { return supaEnv().url; }
 export function supaKey() { return supaEnv().key; }
 
-// Doc Bpost (/v3/apidocs/usa/authenticate) : "Make sure the hash has no padding
-// at the end. If it has, remove it." → on retire les '=' finaux du base64.
+// La doc Bpost demande un hash base64 SANS padding, mais l'implementation Netlify
+// signait AVEC padding (.digest("base64")) et Bpost l'acceptait — dernier envoi
+// reussi le 2026-06-09. On garde donc la forme paddee, prouvee en prod, et on se
+// contente de normaliser les deux cotes quand on COMPARE une signature recue.
 function unpad(b64: string): string {
   return b64.replace(/=+$/, "");
 }
@@ -23,7 +25,7 @@ function unpad(b64: string): string {
 async function hmacBase64(secret: string, message: string): Promise<string> {
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(message));
-  return unpad(btoa(String.fromCharCode(...new Uint8Array(sig))));
+  return btoa(String.fromCharCode(...new Uint8Array(sig)));
 }
 
 export async function sign(username: string, body: string): Promise<string> {
@@ -35,18 +37,26 @@ export async function basicAuth(username: string, body: string): Promise<string>
   return "Basic " + btoa(username + ":" + sig);
 }
 
+// Renvoie la ligne de cache + un drapeau disant si la colonne shop_url existe.
+// Sans ce drapeau, l'absence de colonne rendait `stored.shop_url` undefined, donc
+// scopeMatches toujours faux, donc le cache JAMAIS utilise : chaque action Bpost
+// redemandait un token a /v3/keys.
 async function fetchStoredToken(): Promise<any> {
+  let hasShopUrl = true;
   let r = await fetch(supaUrl() + "/rest/v1/arca_bpost_tokens?id=eq.1&select=token,expire_at,shop_url", {
     headers: { apikey: supaKey(), Authorization: "Bearer " + supaKey() },
   });
   if (!r.ok) {
+    hasShopUrl = false;
     r = await fetch(supaUrl() + "/rest/v1/arca_bpost_tokens?id=eq.1&select=token,expire_at", {
       headers: { apikey: supaKey(), Authorization: "Bearer " + supaKey() },
     });
     if (!r.ok) return null;
   }
   const rows = await r.json();
-  return (rows && rows[0]) || null;
+  const row = (rows && rows[0]) || null;
+  if (row) row.__hasShopUrl = hasShopUrl;
+  return row;
 }
 
 async function saveToken(token: string, expire: string, shopUrl: string) {
@@ -87,8 +97,11 @@ async function requestNewToken(shopUrl: string): Promise<any> {
     // ou reutilisee ailleurs ne redonnera jamais de token.
     throw new Error(
       "Bpost refuse la paire de cles (401 sur /v3/keys, ShopUrl=" + shopUrl + "). " +
-      "Regenere la cle publique/secrete du plug-in dans Shipping Manager, puis mets a jour " +
-      "ARCA_BPOST_SM_PUBLIC_KEY / ARCA_BPOST_SM_PRIVATE_KEY. Reponse : " + JSON.stringify(data).substring(0, 200)
+      "Doc Bpost : les cles sont liees a UN SEUL install — celui-ci etait " +
+      "https://podcast-arca.netlify.app/.netlify/functions/bpost-callback avant la migration. " +
+      "Pistes : (1) forcer ARCA_BPOST_SHOP_URL sur l'ancienne valeur, (2) regenerer la paire dans " +
+      "Shipping Manager puis mettre a jour ARCA_BPOST_SM_PUBLIC_KEY / ARCA_BPOST_SM_PRIVATE_KEY. " +
+      "Reponse : " + JSON.stringify(data).substring(0, 200)
     );
   }
   if (!r.ok || !data || !data.Key) {
@@ -99,7 +112,9 @@ async function requestNewToken(shopUrl: string): Promise<any> {
 
 export async function getValidToken(shopUrl: string): Promise<string> {
   const stored = await fetchStoredToken();
-  const scopeMatches = stored && stored.shop_url === shopUrl;
+  // Scope verifie seulement si la colonne existe (sinon on ne peut pas savoir →
+  // on fait confiance a la date d'expiration, comme le faisait la version Netlify).
+  const scopeMatches = stored && (!stored.__hasShopUrl || stored.shop_url === shopUrl);
   if (stored && stored.token && scopeMatches) {
     const expire = new Date(stored.expire_at + "T00:00:00Z");
     const limit = new Date(Date.now() + 2 * 24 * 3600 * 1000);
@@ -134,9 +149,11 @@ export async function bpostCall(method: string, path: string, body: any, token: 
 
 export async function verifyCallbackSignature(receivedSig: string, status: string, trackingId: string, callbackUrl: string): Promise<boolean> {
   const expected = await hmacBase64(privateKey(), status + "," + trackingId + "," + callbackUrl);
-  const got = unpad(receivedSig || "");   // Bpost peut envoyer la signature avec ou sans padding
-  if (got.length !== expected.length) return false;
+  // Bpost peut envoyer la signature avec ou sans padding → on normalise les deux cotes.
+  const got = unpad(receivedSig || "");
+  const exp = unpad(expected);
+  if (got.length !== exp.length) return false;
   let diff = 0;
-  for (let i = 0; i < expected.length; i++) diff |= got.charCodeAt(i) ^ expected.charCodeAt(i);
+  for (let i = 0; i < exp.length; i++) diff |= got.charCodeAt(i) ^ exp.charCodeAt(i);
   return diff === 0;
 }
