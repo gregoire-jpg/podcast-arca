@@ -1,0 +1,120 @@
+name: Sync YouTube → Arca Rivista (MP3)
+
+# Site italien arcarivista.it (dépôt privé arca-rivista) : chaque nouvelle vidéo de
+# la chaîne @arcarivista devient un épisode podcast avec son MP3. Le workflow vit
+# ici, dans le dépôt public, pour ne pas consommer le quota Actions des dépôts privés.
+# Indépendant de la synchro FR (sync.yml) : autres secrets, rien n'est commité.
+#
+# Sobre : flux RSS + `ls` SSH d'abord ; s'il n'y a rien de neuf, on s'arrête là
+# (ni ffmpeg ni yt-dlp installés).
+
+on:
+  schedule:
+    - cron: "30 5 * * *"   # 1× par jour (7 h 30 l'été, 6 h 30 l'hiver à Bruxelles)
+  workflow_dispatch:
+    inputs:
+      all:
+        description: "Rattrapage : toutes les vidéos de la chaîne (sinon les 15 dernières du flux RSS)"
+        required: false
+        default: false
+        type: boolean
+      ingest_only:
+        description: "Seulement relancer l'enregistrement en base des MP3 déjà sur le serveur"
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: sync-rivista
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    env:
+      SSH_HOST: ${{ secrets.RIVISTA_SSH_HOST }}
+      SSH_USER: ${{ secrets.RIVISTA_SSH_USER }}
+      SSH_KEY: ~/.ssh/rivista_key
+      REMOTE_DOCROOT: sites/arcarivista.it
+      CHANNEL_ID: UCTm9Iopq6Rpch_AkJtvEZrw
+
+    steps:
+      - name: Checkout (script seul)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts/sync_rivista.py
+          sparse-checkout-cone-mode: false
+
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Clé SSH Infomaniak
+        env:
+          RIVISTA_SSH_KEY: ${{ secrets.RIVISTA_SSH_KEY }}
+        run: |
+          if [ -z "$RIVISTA_SSH_KEY" ] || [ -z "$SSH_HOST" ] || [ -z "$SSH_USER" ]; then
+            echo "::error::Secrets RIVISTA_SSH_KEY / RIVISTA_SSH_HOST / RIVISTA_SSH_USER manquants."
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          printf '%s\n' "$RIVISTA_SSH_KEY" > ~/.ssh/rivista_key
+          chmod 600 ~/.ssh/rivista_key
+          ssh-keyscan -4 -T 10 -p 22 "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: yt-dlp (rattrapage complet seulement)
+        if: ${{ inputs.all && !inputs.ingest_only }}
+        run: pip install --quiet "yt-dlp[default]"
+
+      - name: Vidéos à traiter
+        id: plan
+        if: ${{ !inputs.ingest_only }}
+        run: |
+          python scripts/sync_rivista.py plan ${{ inputs.all && '--all' || '' }} > ids.txt
+          ids="$(tr '\n' ' ' < ids.txt | xargs)"
+          echo "ids=$ids" >> "$GITHUB_OUTPUT"
+          if [ -z "$ids" ]; then echo "Rien de neuf."; else echo "À traiter : $ids"; fi
+
+      - name: ffmpeg
+        if: ${{ steps.plan.outputs.ids != '' }}
+        run: |
+          which ffmpeg && ffmpeg -version | head -1 && exit 0 || true
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - name: yt-dlp
+        if: ${{ steps.plan.outputs.ids != '' && !inputs.all }}
+        run: pip install --quiet "yt-dlp[default]"
+
+      - name: Cookies YouTube (anti bot-gate, facultatif)
+        if: ${{ steps.plan.outputs.ids != '' }}
+        env:
+          YT_COOKIES: ${{ secrets.YT_COOKIES }}
+        run: |
+          if [ -n "$YT_COOKIES" ]; then
+            printf '%s' "$YT_COOKIES" > "$RUNNER_TEMP/yt-cookies.txt"
+            chmod 600 "$RUNNER_TEMP/yt-cookies.txt"
+            echo "YT_COOKIES_FILE=$RUNNER_TEMP/yt-cookies.txt" >> "$GITHUB_ENV"
+            echo "Cookies YouTube écrits."
+          else
+            echo "Aucun secret YT_COOKIES : yt-dlp tourne sans cookies (risque bot-gate)."
+          fi
+
+      - name: Téléchargement, MP3, envoi, enregistrement
+        if: ${{ steps.plan.outputs.ids != '' }}
+        env:
+          IDS: ${{ steps.plan.outputs.ids }}
+        run: python scripts/sync_rivista.py run $IDS
+
+      - name: Enregistrement en base seulement
+        if: ${{ inputs.ingest_only }}
+        run: python scripts/sync_rivista.py ingest
+
+      - name: Nettoyage
+        if: always()
+        run: rm -f ~/.ssh/rivista_key "$RUNNER_TEMP/yt-cookies.txt"
