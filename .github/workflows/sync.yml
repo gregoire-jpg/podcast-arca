@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write      # Pour commit + push de episodes.json
+      actions: write       # Pour relancer le déploiement GitHub Pages
 
     steps:
       - name: Checkout
@@ -83,12 +84,17 @@ jobs:
         # always() : les épisodes importés sont gardés même si d'autres ont
         # échoué (le step Synchronisation sort en erreur pour rendre le run rouge).
         if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add episodes.json
-          git diff --staged --quiet \
-            || git commit -m "sync: $(date -u '+%Y-%m-%d %H:%M UTC')"
+          if git diff --staged --quiet; then echo "Aucun nouvel épisode."; exit 0; fi
+          git commit -m "sync: $(date -u '+%Y-%m-%d %H:%M UTC')"
           # L'admin peut avoir poussé entre-temps (rattrapage long) : on se recale.
           git pull --rebase --autostash
           git push
+          # Un push fait avec le jeton du workflow ne déclenche pas pages.yml :
+          # sans cet appel, les épisodes restent invisibles sur le site.
+          gh workflow run pages.yml --ref main
