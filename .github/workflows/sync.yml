@@ -8,8 +8,12 @@ on:
       init:
         description: "Import initial (toutes les vidéos de toutes les playlists)"
         required: false
-        default: "false"
+        default: false
         type: boolean
+
+concurrency:
+  group: sync-podcasts
+  cancel-in-progress: false
 
 jobs:
   sync:
@@ -38,7 +42,9 @@ jobs:
           sudo apt-get install -y --no-install-recommends ffmpeg
 
       - name: Installer dépendances Python
-        run: pip install yt-dlp dropbox
+        # [default] = dépendances recommandées (yt-dlp-ejs pour le défi JS YouTube,
+        # avec node déjà présent sur ubuntu-latest). Sans elles : 403 sur l'audio.
+        run: pip install -U "yt-dlp[default]" dropbox
 
       - name: Préparer les cookies YouTube (anti bot-gate)
         # Le secret YT_COOKIES contient le fichier cookies.txt format Netscape
@@ -74,10 +80,15 @@ jobs:
         run: rm -f /tmp/yt-cookies.txt
 
       - name: Commit episodes.json si modifié
+        # always() : les épisodes importés sont gardés même si d'autres ont
+        # échoué (le step Synchronisation sort en erreur pour rendre le run rouge).
+        if: always()
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add episodes.json
           git diff --staged --quiet \
             || git commit -m "sync: $(date -u '+%Y-%m-%d %H:%M UTC')"
+          # L'admin peut avoir poussé entre-temps (rattrapage long) : on se recale.
+          git pull --rebase --autostash
           git push

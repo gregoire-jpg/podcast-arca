@@ -82,9 +82,14 @@
     }
     .pa-ep-meta { flex: 1; min-width: 0; }
     .pa-ep-title {
-      font: normal 1.05em/1.35 Georgia, serif; color: var(--white);
-      margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font: normal 1.05em/1.35 Georgia, serif; color: var(--white); margin-bottom: 5px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
+    .pa-yt {
+      font: .72em/1 Arial, sans-serif; color: rgba(255,255,255,.6); text-decoration: none;
+      border: 1px solid rgba(255,255,255,.2); border-radius: 4px; padding: 3px 7px; margin-left: 6px;
+    }
+    .pa-yt:hover { color: var(--white); border-color: var(--gold); }
     .pa-ep-author { font: .78em/1 Arial, sans-serif; color: var(--gold); margin-bottom: 3px; }
     .pa-ep-playlist { font: italic .78em/1 Georgia, serif; color: rgba(255,255,255,.45); }
 
@@ -198,9 +203,19 @@
       font: italic 1em/1.6 Georgia, serif; color: var(--muted);
     }
 
+    .pa-ep-row:focus-visible, .pa-pl-card:focus-visible, .pa-featured-card:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
     @media (max-width: 600px) {
-      .pa-tab { padding: 13px 14px; font-size: .62em; }
+      .pa-tab { padding: 13px 12px; font-size: .62em; letter-spacing: 1.5px; }
       .pa-player { padding: 16px 14px 14px; }
+      .pa-controls { flex-wrap: wrap; gap: 6px; }
+      .pa-playlist-grid { padding: 14px; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+      .pa-pl-thumb { height: 100px; }
+      .pa-featured-thumbs { grid-template-columns: repeat(3, 1fr); }
+      .pa-featured-thumbs > :nth-child(n+4) { display: none; }
+      .pa-list { padding: 0 14px 30px; }
+      .pa-row-num { display: none; }
+      .pa-row-title { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
     }
 
     /* Bandeau */
@@ -208,7 +223,7 @@
     .pa-eyebrow { display: block; font: .65em/1 Arial; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
     .pa-header h1 { font: normal 2.4em/1 Georgia; letter-spacing: 5px; text-transform: uppercase; color: #fff; margin-bottom: 16px; }
     .pa-rule { width: 44px; height: 2px; background: var(--gold); margin: 0 auto 16px; }
-    .pa-header p { font: italic 1em/1 Georgia; color: rgba(255,255,255,.55); }
+    .pa-header p { font: italic 1em/1.45 Georgia; color: rgba(255,255,255,.55); }
     .pa-stat{margin-top:12px;display:inline-flex;align-items:center;gap:8px;
       padding:5px 16px;border:1px solid rgba(200,160,96,.4);border-radius:20px;
       font:.68em/1 Arial;letter-spacing:2px;text-transform:uppercase;
@@ -286,6 +301,7 @@
       <button class="pa-btn-play" id="btn-play">▶</button>
       <button class="pa-btn" id="btn-fwd">15↪</button>
       <button class="pa-btn" id="btn-next">⏭</button>
+      <a class="pa-yt" id="pa-yt" href="#" target="_blank" rel="noopener" title="Voir la vidéo sur YouTube" style="display:none">YouTube ↗</a>
       <select class="pa-speed" id="pa-speed">
         <option value="0.75">0.75×</option>
         <option value="1" selected>1×</option>
@@ -320,12 +336,19 @@
   var btnPlay = $("btn-play");
 
   /* Auto-resize : notifie la hauteur au parent (site ARCA) */
+  var lastH = 0;
   function notifyHeight() {
     // Mesurer le contenu réel (pas scrollHeight qui ne rétrécit pas)
-    var h = document.body.getBoundingClientRect().height ||
-            document.documentElement.offsetHeight;
-    window.parent.postMessage({ type: "pa-resize", height: Math.ceil(h) + 20 }, "https://arca-revue.com");
+    var h = Math.ceil(document.body.getBoundingClientRect().height ||
+            document.documentElement.offsetHeight) + 20;
+    if (h === lastH) return;
+    lastH = h;
+    // "*" : seule la hauteur part, rien de sensible ; l'embed reste utilisable
+    // quel que soit l'hôte (arca-revue.com, www., arca.toundra.be, essais).
+    if (window.parent !== window) window.parent.postMessage({ type: "pa-resize", height: h }, "*");
   }
+  // Toute variation de hauteur (images, polices, lecteur) est renvoyée au parent.
+  if (window.ResizeObserver) new ResizeObserver(function () { notifyHeight(); }).observe(document.body);
 
   function init() {
     // Cache-buster Date.now() : empêche le navigateur ET les CDN intermédiaires
@@ -496,7 +519,7 @@
       return ep.image_url?'<img src="'+esc(ep.image_url)+'" alt="" loading="lazy">':'<div class="pa-featured-ph"></div>';
     }).join("");
 
-    var html='<div class="pa-featured-card" data-slug="recent">'+
+    var html='<div class="pa-featured-card" data-slug="recent" role="button" tabindex="0">'+
       '<div class="pa-featured-thumbs">'+thumbs+'</div>'+
       '<div class="pa-featured-body">'+
         '<div class="pa-featured-badge">★ Nouveautés</div>'+
@@ -508,7 +531,7 @@
       var count=counts[pl.slug]||0;
       var authors=(pl.ep.authors||[]).map(function(a){return(S.config.authors||{})[a]||a;}).join(", ");
       var thumb=pl.ep.image_url?'<img class="pa-pl-thumb" src="'+esc(pl.ep.image_url)+'" alt="" loading="lazy">':'<div class="pa-pl-thumb"></div>';
-      html+='<div class="pa-pl-card" data-slug="'+esc(pl.slug)+'">'+thumb+'<div class="pa-pl-body"><div class="pa-pl-name">'+esc(pl.title)+'</div><div class="pa-pl-info"><span class="pa-pl-count">'+count+' épisode'+(count>1?'s':'')+'</span>'+(authors?' · '+esc(authors):'')+'</div></div></div>';
+      html+='<div class="pa-pl-card" data-slug="'+esc(pl.slug)+'" role="button" tabindex="0">'+thumb+'<div class="pa-pl-body"><div class="pa-pl-name">'+esc(pl.title)+'</div><div class="pa-pl-info"><span class="pa-pl-count">'+count+' épisode'+(count>1?'s':'')+'</span>'+(authors?' · '+esc(authors):'')+'</div></div></div>';
     });
 
     plGrid.innerHTML=html;
@@ -526,7 +549,7 @@
     var epKey = ep.youtube_id || ep.id || '';
     var plays = S.counts && S.counts.plays && epKey ? (S.counts.plays[epKey] || 0) : 0;
     var playsHtml = plays > 0 ? '<span class="pa-row-count">▶ ' + plays + '</span>' : '';
-    return '<div class="pa-ep-row' + (isPlaying ? ' playing' : '') + '" data-idx="' + idx + '">' +
+    return '<div class="pa-ep-row' + (isPlaying ? ' playing' : '') + '" data-idx="' + idx + '" role="button" tabindex="0">' +
       '<div class="pa-row-play-icon">' + (isPlaying ? '▶' : '') + '</div>' +
       '<div class="pa-row-num">' + num + '</div>' + thumb +
       '<div class="pa-row-info"><div class="pa-row-title">' + esc(ep.title) + '</div>' +
@@ -550,7 +573,18 @@
     S.idx = idx;
     audio.src = ep.audio_url;
     audio.playbackRate = parseFloat($("pa-speed").value);
-    audio.play();
+    var pr = audio.play();
+    if (pr && pr.catch) pr.catch(function () { btnPlay.textContent = "▶"; });
+    var yt = $("pa-yt");
+    if (ep.youtube_id) { yt.href = "https://www.youtube.com/watch?v=" + encodeURIComponent(ep.youtube_id); yt.style.display = ""; }
+    else yt.style.display = "none";
+    if ("mediaSession" in navigator && window.MediaMetadata) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: ep.title || "", artist: $("pa-ep-author").textContent || "Revue ARCA",
+        album: ep.playlist_title || "Revue ARCA",
+        artwork: ep.image_url ? [{ src: ep.image_url }] : []
+      });
+    }
     var epKey = ep.youtube_id || ep.id || '';
     if (epKey) {
       fetch('https://fsbyoxotsmmzejefiaqg.supabase.co/functions/v1/arca-track-count', {
@@ -578,10 +612,19 @@
     } else {
       $("pa-thumb").style.display = "none"; $("pa-thumb-ph").style.display = "flex";
     }
+    if ("mediaSession" in navigator && window.MediaMetadata) {
+      navigator.mediaSession.metadata.artist = $("pa-ep-author").textContent || "Revue ARCA";
+    }
     player.classList.add("on");
     updateProgress();
     highlightPlaying();
     setTimeout(notifyHeight, 200);
+    // Le lecteur est en haut de l'embed : un clic sur un épisode en bas de liste
+    // le laissait hors de vue. "nearest" fait défiler la page parente seulement
+    // s'il n'est pas déjà visible.
+    setTimeout(function () {
+      try { player.scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (e) { player.scrollIntoView(false); }
+    }, 250);
   }
 
   function togglePlay() { if (!audio.src) return; audio.paused ? audio.play() : audio.pause(); }
@@ -610,6 +653,13 @@
   }
   function pad(n) { return n < 10 ? "0" + n : String(n); }
   function esc(s) { return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  // Clavier : Entrée / Espace sur une carte ou un épisode = clic.
+  document.addEventListener("keydown", function (e) {
+    if ((e.key === "Enter" || e.key === " ") && e.target.getAttribute && e.target.getAttribute("role") === "button") {
+      e.preventDefault(); e.target.click();
+    }
+  });
 
   if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); } else { init(); }
 })();

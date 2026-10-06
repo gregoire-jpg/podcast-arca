@@ -23,7 +23,7 @@ Format orphans.json :
      "subject":        "entretiens" }]
 """
 
-import os, sys, json, subprocess, tempfile, time, re
+import os, sys, json, subprocess, tempfile, time, re, shutil
 import xml.etree.ElementTree as ET
 import urllib.request
 from datetime import datetime, timezone
@@ -44,6 +44,22 @@ ORPHANS_FILE  = ROOT / "orphans.json"   # mapping youtube_id -> classification �
 DROPBOX_DIR   = "/Podcast ARCA"
 
 # ──────────────────── yt-dlp helpers ─────────────────
+
+def yt_dlp_base_args():
+    """
+    Arguments communs à tous les appels yt-dlp :
+    - métadonnées en français (sans quoi YouTube renvoie les titres traduits
+      automatiquement dans la langue du runner, ex. « The Found Message… ») ;
+    - moteur JS (yt-dlp >= 2025.11 en a besoin pour YouTube) si node est là ;
+    - cookies anti bot-gate si fournis.
+    """
+    args = ["--no-warnings", "--extractor-args", "youtube:lang=fr"]
+    if shutil.which("node"):
+        args += ["--js-runtimes", "node"]
+    return args + yt_dlp_cookie_args()
+
+BOT_GATE = "confirm you"   # « Sign in to confirm you’re not a bot »
+FAILURES = []              # (video_id, raison) — fait échouer le run à la fin
 
 def yt_dlp_cookie_args():
     """
@@ -141,9 +157,8 @@ def discover_playlists(channel_id, exclude_titles):
     print(f"🔍 Découverte des playlists sur la chaîne…")
 
     res = subprocess.run(
-        [sys.executable, "-m", "yt_dlp", "-J", "--flat-playlist", "--no-warnings",
-         *yt_dlp_cookie_args(), url],
-        capture_output=True, text=True, timeout=120,
+        [sys.executable, "-m", "yt_dlp", "-J", "--flat-playlist", *yt_dlp_base_args(), url],
+        capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180,
     )
     if res.returncode != 0:
         print(f"  ⚠  yt-dlp error: {res.stderr[:200]}")
@@ -180,16 +195,19 @@ def rss_videos(playlist_id):
             for e in root.findall("atom:entry", ns)
         ]
     except Exception as exc:
-        print(f"  ⚠  RSS inaccessible: {exc}")
-        return []
+        # Le flux RSS YouTube tombe régulièrement en 404/500 : on se rabat sur
+        # yt-dlp (mêmes 15 dernières) plutôt que de sauter la playlist.
+        print(f"  ⚠  RSS inaccessible ({exc}) — repli sur yt-dlp")
+        return all_videos(playlist_id, limit=15)
 
-def all_videos(playlist_id):
-    """Toutes les vidéos d'une playlist via yt-dlp (mode --init)."""
+def all_videos(playlist_id, limit=None):
+    """Toutes les vidéos d'une playlist via yt-dlp (mode --init, ou repli RSS)."""
+    extra = ["--playlist-end", str(limit)] if limit else []
     res = subprocess.run(
         [sys.executable, "-m", "yt_dlp", "--flat-playlist", "--print", "%(id)s\t%(title)s",
-         "--no-warnings", *yt_dlp_cookie_args(),
+         *extra, *yt_dlp_base_args(),
          f"https://www.youtube.com/playlist?list={playlist_id}"],
-        capture_output=True, text=True, encoding="utf-8", errors="replace",
+        capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=300,
     )
     videos = []
     for line in (res.stdout or "").strip().splitlines():
@@ -215,13 +233,15 @@ def process_video(video_id, pl_title, pl_slug, pl_meta):
              "--format", "bestaudio/best",
              "--extract-audio", "--audio-format", "mp3", "--audio-quality", "5",
              "--output", out_tpl,
-             "--print-json", "--no-warnings",
-             *yt_dlp_cookie_args(),
+             "--print-json",
+             *yt_dlp_base_args(),
              yt_url],
-            capture_output=True, text=True,
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800,
         )
         if res.returncode != 0:
-            print(f"  ❌  yt-dlp: {res.stderr[:150]}")
+            err = (res.stderr or "").strip()
+            print(f"  ❌  yt-dlp: {err[:150]}")
+            FAILURES.append((video_id, "bot-gate" if BOT_GATE in err else err[:120]))
             return None
 
         try:
@@ -232,6 +252,7 @@ def process_video(video_id, pl_title, pl_slug, pl_meta):
         mp3_files = list(Path(tmp).glob("*.mp3"))
         if not mp3_files:
             print(f"  ❌  MP3 introuvable pour {video_id}")
+            FAILURES.append((video_id, "MP3 introuvable"))
             return None
 
         mp3_path  = str(mp3_files[0])
@@ -259,10 +280,34 @@ def process_video(video_id, pl_title, pl_slug, pl_meta):
         "duration_fmt":   fmt_duration(meta.get("duration", 0)),
         "audio_url":      audio_url,
         "file_size":      file_size,
-        "image_url":      meta.get("thumbnail", ""),
-        "authors":        pl_meta.get("authors", []),
+        "image_url":      stable_thumb(video_id, meta),
+        "authors":        detect_authors(meta, pl_meta),
         "subject":        pl_meta.get("subject", ""),
     }
+
+def stable_thumb(video_id, meta):
+    """Miniature à URL stable (celles de yt-dlp portent parfois des paramètres signés)."""
+    urls = {t.get("url", "") for t in meta.get("thumbnails") or []}
+    for name in ("maxresdefault.jpg", "sddefault.jpg"):
+        u = f"https://i.ytimg.com/vi/{video_id}/{name}"
+        if u in urls:
+            return u
+    return f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg"
+
+AUTHOR_NAMES = {}   # clé auteur -> nom affiché, rempli depuis config.json
+
+def detect_authors(meta, pl_meta):
+    """
+    Auteurs cités nommément dans le titre (puis la description) parmi ceux de
+    config.json ; à défaut, les auteurs par défaut de la playlist.
+    Évite les épisodes « sans auteur » dans les playlists à intervenants multiples.
+    """
+    for field in ("title", "description"):
+        text = (meta.get(field) or "").lower()
+        found = [k for k, name in AUTHOR_NAMES.items() if name and name.lower() in text]
+        if found:
+            return found
+    return list(pl_meta.get("authors", []))
 
 # ──────────────────── Main ───────────────────────────
 
@@ -277,6 +322,13 @@ def main():
     exclude_titles  = set(config.get("exclude_playlists", []))
     exclude_videos  = set(config.get("exclude_videos", []))
     pl_meta_map     = config.get("playlist_metadata", {})
+    AUTHOR_NAMES.update(config.get("authors", {}))
+
+    # Slug stable par playlist : si la playlist YouTube est renommée, on garde
+    # le slug déjà porté par ses épisodes (sinon la playlist se scinde en deux).
+    known_slug = {ep["playlist_id"]: ep["playlist_slug"]
+                  for ep in reversed(episodes) if ep.get("playlist_id")}
+    in_playlists = set()   # toutes les vidéos présentes dans une playlist thématique
 
     # ── Découverte automatique des playlists ──
     playlists = discover_playlists(channel_id, exclude_titles)
@@ -290,15 +342,15 @@ def main():
     for pl in playlists:
         pl_id   = pl["id"]
         pl_title = pl["title"]
-        pl_slug  = slugify(pl_title)
-        pl_meta  = pl_meta_map.get(pl_id, {})
-        pl_meta["_id"] = pl_id
+        pl_slug  = known_slug.get(pl_id) or slugify(pl_title)
+        pl_meta  = dict(pl_meta_map.get(pl_id, {}), _id=pl_id)
 
         print(f"📋 {pl_title}")
         videos = all_videos(pl_id) if init_mode else rss_videos(pl_id)
         print(f"  {len(videos)} vidéo(s)")
 
         for vid in videos:
+            in_playlists.add(vid["id"])
             if vid["id"] in seen_ids:
                 print(f"  ✓  {vid['title'][:55]}")
                 continue
@@ -322,7 +374,10 @@ def main():
     # ── Orphelines : vidéos uploadées sur la chaîne mais dans aucune playlist thématique ──
     print(f"\n🔎 Scan vidéos orphelines (uploads sans playlist thématique)…")
     all_uploads = uploads_videos(channel_id)
-    orphans = [v for v in all_uploads if v["id"] not in seen_ids and v["id"] not in exclude_videos]
+    # Une vidéo de playlist dont le téléchargement a échoué n'est pas orpheline.
+    orphans = [v for v in all_uploads
+               if v["id"] not in seen_ids and v["id"] not in in_playlists
+               and v["id"] not in exclude_videos]
 
     if orphans:
         orphans_meta = {}
@@ -366,6 +421,18 @@ def main():
     episodes.sort(key=lambda e: e.get("published_at", ""), reverse=True)
     save_json(EPISODES_FILE, episodes)
     print(f"\n✅  {added} nouvel(s) épisode(s) ajouté(s).")
+
+    # Un run qui n'importe rien parce que YouTube bloque doit être rouge, pas vert.
+    if FAILURES:
+        gated = sum(1 for _, r in FAILURES if r == "bot-gate")
+        print(f"\n❌  {len(FAILURES)} vidéo(s) non importée(s), dont {gated} bloquée(s) par YouTube (bot-gate) :")
+        for vid, reason in FAILURES:
+            print(f"    - {vid} : {reason}")
+        if os.environ.get("GITHUB_ACTIONS"):
+            hint = "Renouveler le secret YT_COOKIES." if gated else "Voir le journal."
+            print(f"::error title=Sync podcasts incomplète::{len(FAILURES)} vidéo(s) non importée(s), "
+                  f"dont {gated} bloquée(s) par YouTube. {hint}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
