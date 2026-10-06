@@ -5,6 +5,11 @@ sync.py — YouTube (chaîne complète) → Dropbox → episodes.json
 Usage:
   python scripts/sync.py           # Mode normal  : 15 dernières vidéos par playlist + orphelines classées
   python scripts/sync.py --init    # Mode initial : TOUTES les vidéos (run une seule fois)
+  python scripts/sync.py --pc1     # Sur PC1 : télécharge et dépose MP3 + fiche dans le
+                                   # dossier Dropbox local ; le run GitHub publie l'épisode
+                                   # (YouTube bloque les téléchargements depuis GitHub).
+                                   # Lancé par la tâche planifiée « Sync podcasts ARCA »
+                                   # (scripts/sync-pc1.ps1).
 
 Playlists découvertes automatiquement depuis la chaîne YouTube.
 Seules les playlists listées dans "exclude_playlists" sont ignorées.
@@ -137,6 +142,9 @@ def upload_to_dropbox(dbx, local_path, filename):
                     dbx.files_upload_session_append_v2(f.read(CHUNK_SIZE), cursor)
                     cursor.offset = f.tell()
 
+    return shared_link(dbx, remote)
+
+def shared_link(dbx, remote):
     try:
         res = dbx.sharing_create_shared_link_with_settings(remote)
     except ApiError as e:
@@ -223,8 +231,83 @@ def uploads_videos(channel_id):
 
 # ──────────────────── Traitement vidéo ───────────────
 
+# ──────────────────── Dépôt PC1 ──────────────────────
+#
+# YouTube bloque les téléchargements depuis les runners GitHub (bot-gate).
+# PC1 (IP résidentielle) lance `sync.py --pc1` : il télécharge l'audio et dépose
+# <id>.mp3 + <id>.json (fiche de métadonnées) dans le dossier Dropbox de l'app,
+# synchronisé localement. Le run GitHub, qui a les clés Dropbox, trouve le dépôt,
+# crée le lien de partage et ajoute l'épisode — sans rien télécharger.
+
+LOCAL_DIR      = None    # mode --pc1 : dossier Dropbox local (…/Applications/Podcast ARCA/Podcast ARCA)
+HEARTBEAT      = "_pc1.json"
+HEARTBEAT_DAYS = 3       # au-delà, un dépôt en attente fait passer le run GitHub en rouge
+DEPOSITED      = []      # mode --pc1 : vidéos déposées ce passage
+PENDING        = []      # mode GitHub : vidéos bloquées par YouTube, en attente du dépôt PC1
+
+def find_local_dir():
+    env = os.environ.get("PODCAST_DROPBOX_DIR", "").strip()
+    if env:
+        return Path(env)
+    info = Path(os.environ.get("LOCALAPPDATA", "")) / "Dropbox" / "info.json"
+    if info.exists():
+        for acc in json.loads(info.read_text(encoding="utf-8")).values():
+            d = Path(acc.get("path", "")) / "Applications" / "Podcast ARCA" / DROPBOX_DIR.strip("/")
+            if d.is_dir():
+                return d
+    raise RuntimeError("Dossier Dropbox « Applications/Podcast ARCA/Podcast ARCA » introuvable "
+                       "(définir PODCAST_DROPBOX_DIR).")
+
+def sidecar_meta(meta, file_size):
+    """Ce que le run GitHub relit pour construire l'épisode (format yt-dlp réduit)."""
+    return {
+        "id":          meta.get("id", ""),
+        "title":       meta.get("title", ""),
+        "description": meta.get("description", ""),
+        "upload_date": meta.get("upload_date", ""),
+        "duration":    meta.get("duration", 0),
+        "thumbnails":  [{"url": t.get("url", "")} for t in meta.get("thumbnails") or []
+                        if "i.ytimg.com/vi/" in (t.get("url") or "")],
+        "bytes":       file_size,
+    }
+
+def prefetched(video_id):
+    """Dépôt PC1 complet sur Dropbox ? → (meta, taille, lien), sinon None."""
+    dbx = make_dbx()
+    mp3 = f"{DROPBOX_DIR}/{video_id}.mp3"
+    try:
+        _, resp = dbx.files_download(f"{DROPBOX_DIR}/{video_id}.json")
+        meta = json.loads(resp.content.decode("utf-8"))
+        md = dbx.files_get_metadata(mp3)
+    except ApiError:
+        return None
+    if getattr(md, "size", -1) != meta.get("bytes"):
+        print(f"  …  dépôt PC1 de {video_id} pas encore entièrement synchronisé")
+        return None
+    return meta, md.size, shared_link(dbx, mp3)
+
+def pc1_heartbeat_age_days():
+    try:
+        _, resp = make_dbx().files_download(f"{DROPBOX_DIR}/{HEARTBEAT}")
+        at = datetime.fromisoformat(json.loads(resp.content.decode("utf-8"))["at"])
+        return (datetime.now(timezone.utc) - at).total_seconds() / 86400
+    except Exception:
+        return None
+
 def process_video(video_id, pl_title, pl_slug, pl_meta):
     yt_url = f"https://www.youtube.com/watch?v={video_id}"
+
+    if LOCAL_DIR is None:
+        pre = prefetched(video_id)
+        if pre:
+            meta, file_size, audio_url = pre
+            print(f"  📥  Dépôt PC1 trouvé sur Dropbox")
+            return build_episode(video_id, meta, pl_title, pl_slug, pl_meta, audio_url, file_size)
+    else:
+        mp3_local, js_local = LOCAL_DIR / f"{video_id}.mp3", LOCAL_DIR / f"{video_id}.json"
+        if mp3_local.exists() and js_local.exists():
+            print(f"  ✓  déjà déposé, en attente du run GitHub")
+            return None
 
     with tempfile.TemporaryDirectory() as tmp:
         out_tpl = os.path.join(tmp, "%(id)s.%(ext)s")
@@ -240,6 +323,10 @@ def process_video(video_id, pl_title, pl_slug, pl_meta):
         )
         if res.returncode != 0:
             err = (res.stderr or "").strip()
+            if BOT_GATE in err and LOCAL_DIR is None:
+                print(f"  ⏸  bloquée par YouTube — en attente du dépôt PC1")
+                PENDING.append(video_id)
+                return None
             print(f"  ❌  yt-dlp: {err[:150]}")
             FAILURES.append((video_id, "bot-gate" if BOT_GATE in err else err[:120]))
             return None
@@ -258,9 +345,24 @@ def process_video(video_id, pl_title, pl_slug, pl_meta):
         mp3_path  = str(mp3_files[0])
         file_size = os.path.getsize(mp3_path)
 
+        if LOCAL_DIR is not None:
+            # MP3 d'abord (via .part pour ne jamais exposer un fichier tronqué),
+            # fiche ensuite : le run GitHub exige les deux, tailles concordantes.
+            part = LOCAL_DIR / f"{video_id}.mp3.part"
+            shutil.copyfile(mp3_path, part)
+            os.replace(part, LOCAL_DIR / f"{video_id}.mp3")
+            meta.setdefault("id", video_id)
+            save_json(LOCAL_DIR / f"{video_id}.json", sidecar_meta(meta, file_size))
+            DEPOSITED.append(video_id)
+            print(f"  📤  Déposé dans Dropbox ({file_size // 1024} Ko)")
+            return None
+
         print(f"  ☁  Upload Dropbox…")
         audio_url = upload_to_dropbox(make_dbx(), mp3_path, f"{video_id}.mp3")
 
+    return build_episode(video_id, meta, pl_title, pl_slug, pl_meta, audio_url, file_size)
+
+def build_episode(video_id, meta, pl_title, pl_slug, pl_meta, audio_url, file_size):
     raw_date = meta.get("upload_date", "")
     published = (
         f"{raw_date[:4]}-{raw_date[4:6]}-{raw_date[6:8]}T00:00:00+00:00"
@@ -312,7 +414,11 @@ def detect_authors(meta, pl_meta):
 # ──────────────────── Main ───────────────────────────
 
 def main():
+    global LOCAL_DIR
     init_mode = "--init" in sys.argv
+    if "--pc1" in sys.argv:
+        LOCAL_DIR = find_local_dir()
+        print(f"🖥  Mode PC1 : dépôt dans {LOCAL_DIR}")
 
     config   = load_json(CONFIG_FILE)
     episodes = load_json(EPISODES_FILE)
@@ -418,9 +524,26 @@ def main():
     else:
         print("  Aucune orpheline.")
 
-    episodes.sort(key=lambda e: e.get("published_at", ""), reverse=True)
-    save_json(EPISODES_FILE, episodes)
-    print(f"\n✅  {added} nouvel(s) épisode(s) ajouté(s).")
+    if LOCAL_DIR is not None:
+        # Battement de cœur : le run GitHub sait que PC1 tourne toujours.
+        save_json(LOCAL_DIR / HEARTBEAT, {"at": datetime.now(timezone.utc).isoformat()})
+        print(f"\n📤  {len(DEPOSITED)} vidéo(s) déposée(s) pour le run GitHub.")
+    else:
+        episodes.sort(key=lambda e: e.get("published_at", ""), reverse=True)
+        save_json(EPISODES_FILE, episodes)
+        print(f"\n✅  {added} nouvel(s) épisode(s) ajouté(s).")
+
+    if PENDING:
+        age = pc1_heartbeat_age_days()
+        stale = age is None or age > HEARTBEAT_DAYS
+        seen = "jamais vu" if age is None else f"vu il y a {age:.1f} j"
+        print(f"\n⏸  {len(PENDING)} vidéo(s) bloquée(s) par YouTube, en attente du dépôt PC1 ({seen}).")
+        if os.environ.get("GITHUB_ACTIONS"):
+            level = "error" if stale else "warning"
+            print(f"::{level} title=Podcasts en attente du PC1::{len(PENDING)} vidéo(s) en attente ; "
+                  f"PC1 {seen}" + (" — vérifier la tâche planifiée « Sync podcasts ARCA »." if stale else "."))
+        if stale:
+            FAILURES.extend((v, "en attente du PC1, PC1 muet") for v in PENDING)
 
     # Un run qui n'importe rien parce que YouTube bloque doit être rouge, pas vert.
     if FAILURES:
@@ -429,7 +552,7 @@ def main():
         for vid, reason in FAILURES:
             print(f"    - {vid} : {reason}")
         if os.environ.get("GITHUB_ACTIONS"):
-            hint = "Renouveler le secret YT_COOKIES." if gated else "Voir le journal."
+            hint = "Vérifier la tâche planifiée PC1 (ou le secret YT_COOKIES)." if gated else "Voir le journal."
             print(f"::error title=Sync podcasts incomplète::{len(FAILURES)} vidéo(s) non importée(s), "
                   f"dont {gated} bloquée(s) par YouTube. {hint}")
         sys.exit(1)
