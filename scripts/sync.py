@@ -311,16 +311,20 @@ def process_video(video_id, pl_title, pl_slug, pl_meta):
 
     with tempfile.TemporaryDirectory() as tmp:
         out_tpl = os.path.join(tmp, "%(id)s.%(ext)s")
-        res = subprocess.run(
-            [sys.executable, "-m", "yt_dlp",
-             "--format", "bestaudio/best",
-             "--extract-audio", "--audio-format", "mp3", "--audio-quality", "5",
-             "--output", out_tpl,
-             "--print-json",
-             *yt_dlp_base_args(),
-             yt_url],
-            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800,
-        )
+        for attempt in range(2):   # 403 passagers sur les flux audio YouTube : une seconde chance
+            res = subprocess.run(
+                [sys.executable, "-m", "yt_dlp",
+                 "--format", "bestaudio/best",
+                 "--extract-audio", "--audio-format", "mp3", "--audio-quality", "5",
+                 "--output", out_tpl,
+                 "--print-json",
+                 *yt_dlp_base_args(),
+                 yt_url],
+                capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800,
+            )
+            if res.returncode == 0 or BOT_GATE in (res.stderr or ""):
+                break
+            time.sleep(10)
         if res.returncode != 0:
             err = (res.stderr or "").strip()
             if BOT_GATE in err and LOCAL_DIR is None:
