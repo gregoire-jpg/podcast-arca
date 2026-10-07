@@ -64,6 +64,8 @@ def yt_dlp_base_args():
     return args + yt_dlp_cookie_args()
 
 BOT_GATE = "confirm you"   # « Sign in to confirm you’re not a bot »
+NOT_YET_PUBLIC = ("video unavailable", "vidéo non disponible", "private video", "vidéo privée",
+                  "live event will begin", "premieres in", "premiere will begin")
 FAILURES = []              # (video_id, raison) — fait échouer le run à la fin
 
 def yt_dlp_cookie_args():
@@ -327,6 +329,11 @@ def process_video(video_id, pl_title, pl_slug, pl_meta):
             time.sleep(10)
         if res.returncode != 0:
             err = (res.stderr or "").strip()
+            if any(m in err.lower() for m in NOT_YET_PUBLIC):
+                # Privée, programmée ou direct à venir mais déjà listée dans la playlist :
+                # rien d'anormal, elle sera reprise au passage où elle deviendra publique.
+                print(f"  …  pas encore publique — reprise plus tard")
+                return None
             if BOT_GATE in err and LOCAL_DIR is None:
                 print(f"  ⏸  bloquée par YouTube — en attente du dépôt PC1")
                 PENDING.append(video_id)
