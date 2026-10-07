@@ -432,8 +432,14 @@ def main():
 
     # Slug stable par playlist : si la playlist YouTube est renommée, on garde
     # le slug déjà porté par ses épisodes (sinon la playlist se scinde en deux).
-    known_slug = {ep["playlist_id"]: ep["playlist_slug"]
-                  for ep in reversed(episodes) if ep.get("playlist_id")}
+    # Slug majoritaire : un épisode déplacé à la main dans une autre playlist ne
+    # doit pas entraîner le reste de sa playlist YouTube.
+    slug_votes = {}
+    for ep in episodes:
+        if ep.get("playlist_id"):
+            votes = slug_votes.setdefault(ep["playlist_id"], {})
+            votes[ep["playlist_slug"]] = votes.get(ep["playlist_slug"], 0) + 1
+    known_slug = {pid: max(v, key=v.get) for pid, v in slug_votes.items()}
     in_playlists = set()   # toutes les vidéos présentes dans une playlist thématique
 
     # ── Découverte automatique des playlists ──
