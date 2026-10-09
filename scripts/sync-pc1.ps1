@@ -16,8 +16,10 @@ New-Item -ItemType Directory -Force $logDir | Out-Null
 $log = Join-Path $logDir "sync-pc1.log"
 
 if ($Install) {
-    $action = New-ScheduledTaskAction -Execute "pwsh.exe" `
-        -Argument "-NoProfile -WindowStyle Hidden -File `"$PSCommandPath`""
+    # Windows PowerShell (chemin fixe) : pwsh du Microsoft Store change de chemin à chaque
+    # mise à jour et le planificateur ne le trouve pas par son nom (0x80070002).
+    $action = New-ScheduledTaskAction -Execute "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" `
+        -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$PSCommandPath`""
     # Avant chaque passage GitHub (00, 06, 12, 18 h UTC = 2, 8, 14, 20 h en été) : le dépôt a
     # le temps d'être synchronisé par Dropbox.
     $triggers = @("06:00", "12:00", "18:00", "23:00") | ForEach-Object { New-ScheduledTaskTrigger -Daily -At $_ }
@@ -34,9 +36,11 @@ try {
     Set-Location $repo
     $env:PYTHONIOENCODING = "utf-8"
     # episodes.json à jour : sinon on retéléchargerait ce que GitHub a déjà publié.
-    git pull --ff-only --quiet 2>&1 | Write-Output
-    python -m pip install --quiet --upgrade "yt-dlp[default]" dropbox 2>&1 | Where-Object { $_ -notmatch "notice" }
-    python scripts/sync.py --pc1
+    # Via cmd : Windows PowerShell 5.1 transforme toute ligne écrite sur stderr
+    # (avis pip, messages git) en fausse « NativeCommandError » dans le journal.
+    cmd /c "git pull --ff-only --quiet 2>&1"
+    cmd /c "python -m pip install --quiet --disable-pip-version-check --upgrade yt-dlp[default] dropbox 2>&1"
+    cmd /c "python scripts/sync.py --pc1 2>&1"
     Write-Output "Code de sortie : $LASTEXITCODE"
 } finally {
     Stop-Transcript | Out-Null
