@@ -398,12 +398,22 @@ def build_episode(video_id, meta, pl_title, pl_slug, pl_meta, audio_url, file_si
         "subject":        pl_meta.get("subject", ""),
     }
 
-def stable_thumb(video_id, meta):
-    """Miniature à URL stable (celles de yt-dlp portent parfois des paramètres signés)."""
-    urls = {t.get("url", "") for t in meta.get("thumbnails") or []}
+def url_exists(url):
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, method="HEAD"), timeout=15) as r:
+            return r.status == 200
+    except Exception:
+        return False
+
+def stable_thumb(video_id, meta=None):
+    """
+    Miniature à URL stable (celles de yt-dlp portent parfois des paramètres signés).
+    yt-dlp liste maxresdefault même quand YouTube ne l'a pas générée (404 = vignette
+    grise sur le site) : on vérifie, et hqdefault existe toujours.
+    """
     for name in ("maxresdefault.jpg", "sddefault.jpg"):
         u = f"https://i.ytimg.com/vi/{video_id}/{name}"
-        if u in urls:
+        if url_exists(u):
             return u
     return f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg"
 

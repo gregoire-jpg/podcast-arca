@@ -654,6 +654,17 @@
   function pad(n) { return n < 10 ? "0" + n : String(n); }
   function esc(s) { return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
+  // Miniature YouTube manquante (maxres/sd en 404 = vignette grise) : repli sur
+  // hqdefault, qui existe toujours. Écoute en capture : l'événement error ne remonte pas.
+  document.addEventListener("error", function (e) {
+    var img = e.target;
+    if (!img || img.tagName !== "IMG" || img.dataset.fallback) return;
+    var m = /i\.ytimg\.com\/vi\/([^/]+)\//.exec(img.src || "");
+    if (!m) return;
+    img.dataset.fallback = "1";
+    img.src = "https://i.ytimg.com/vi/" + m[1] + "/hqdefault.jpg";
+  }, true);
+
   // Clavier : Entrée / Espace sur une carte ou un épisode = clic.
   document.addEventListener("keydown", function (e) {
     if ((e.key === "Enter" || e.key === " ") && e.target.getAttribute && e.target.getAttribute("role") === "button") {
