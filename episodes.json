@@ -160,8 +160,7 @@
     "file_size": 13223541,
     "image_url": "https://i.ytimg.com/vi/h_QVFN7qWuE/maxresdefault.jpg",
     "authors": [
-      "stephane-feye",
-      "caroline-thuysbaert"
+      "remy-dechambre"
     ],
     "subject": "philosophie"
   },
@@ -216,8 +215,7 @@
     "file_size": 7558677,
     "image_url": "https://i.ytimg.com/vi/0GWfk5fRPVA/maxresdefault.jpg",
     "authors": [
-      "stephane-feye",
-      "caroline-thuysbaert"
+      "remy-dechambre"
     ],
     "subject": "philosophie"
   },
@@ -235,8 +233,7 @@
     "file_size": 8308749,
     "image_url": "https://i.ytimg.com/vi/mVxXSR819dI/maxresdefault.jpg",
     "authors": [
-      "stephane-feye",
-      "caroline-thuysbaert"
+      "remy-dechambre"
     ],
     "subject": "philosophie"
   },
@@ -273,8 +270,7 @@
     "file_size": 9870237,
     "image_url": "https://i.ytimg.com/vi/wgfvHWEs5Qk/maxresdefault.jpg",
     "authors": [
-      "stephane-feye",
-      "caroline-thuysbaert"
+      "remy-dechambre"
     ],
     "subject": "philosophie"
   },
@@ -513,7 +509,8 @@
     "file_size": 7615053,
     "image_url": "https://i.ytimg.com/vi/jpN7F0j5WHE/maxresdefault.jpg",
     "authors": [
-      "stephane-feye"
+      "stephane-feye",
+      "caroline-thuysbaert"
     ],
     "subject": "hermetisme"
   },
@@ -1322,7 +1319,9 @@
     "audio_url": "https://dl.dropboxusercontent.com/scl/fi/wlkde72vdkbwo6ykhd9oh/CP8sw4pGXfI.mp3?rlkey=118j0yrs34gzf5dyf5axxcxeg&dl=0",
     "file_size": 82579893,
     "image_url": "https://i.ytimg.com/vi/CP8sw4pGXfI/hqdefault.jpg?sqp=-oaymwEmCOADEOgC8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGGUgQyhgMA8=&rs=AOn4CLAdGzmUIEwDMsN22VgzCBnmCbU_-g",
-    "authors": [],
+    "authors": [
+      "Antoine de Lophem"
+    ],
     "subject": ""
   },
   {
@@ -1338,7 +1337,9 @@
     "audio_url": "https://dl.dropboxusercontent.com/scl/fi/94obyurgkm98k6wywh4k5/fkmi9HVsi4Q.mp3?rlkey=i4ndiz5ivdviqbbzf7sola8zz&dl=0",
     "file_size": 82947429,
     "image_url": "https://i.ytimg.com/vi/fkmi9HVsi4Q/maxresdefault.jpg",
-    "authors": [],
+    "authors": [
+      "Antoine de Lophem"
+    ],
     "subject": ""
   },
   {
