@@ -391,18 +391,15 @@
       }
       var tx = document.createElement('div'); tx.className = 've-txt';
       if (entry.note) {
-        var nr2 = renderNoteText(entry.texte || '', entry.note || '', '');
+        /* même numéro que dans la fiche du terme cité */
+        var off2 = noteOffset(target, Math.max(0, target.entrees.indexOf(entry)));
+        var nr2 = renderNoteText(entry.texte || '', entry.note || '', '', off2);
         tx.innerHTML = nr2.txt;
         ed.appendChild(tx);
         var nt = document.createElement('div'); nt.className = 've-note';
-        var nls = (entry.note || '').split('\n').filter(function(l){ return l.trim(); });
-        if (nls.length <= 1) {
-          nt.innerHTML = '<sup>' + (NOTE_SUPS[0]||'1') + '</sup>&nbsp;' + esc(entry.note);
-        } else {
-          nt.innerHTML = nls.map(function(l, j){
-            return '<span style="display:block"><sup>' + (NOTE_SUPS[j]||(j+1)) + '</sup>&nbsp;' + esc(l) + '</span>';
-          }).join('');
-        }
+        nt.innerHTML = noteLinesOf(entry).map(function(l, j){
+          return '<span style="display:block"><sup>' + noteNum(off2 + j + 1) + '</sup>&nbsp;' + esc(l) + '</span>';
+        }).join('');
         ed.appendChild(nt);
       } else {
         tx.innerHTML = formatParas(esc(entry.texte || ''));
@@ -469,40 +466,52 @@
   }
 
   /* ── Rendu des notes (supporte 1 ou N notes séparées par \n) ── */
-  var NOTE_SUPS = ['¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹'];
+  /* Numérotation propre au glossaire : les notes d'un terme se suivent de 1 à n,
+     d'une entrée à l'autre, à l'écran comme à l'impression. Le numéro n'est jamais
+     stocké : il vient de la place de l'appel [note] et de la ligne de la note. */
+  var NOTE_SUPS = ['⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹'];
 
-  function noteCallHtml(idx) {
-    return '<sup class="note-call">' + (NOTE_SUPS[idx] || (idx+1)) + '</sup>';
+  function noteNum(n) {
+    return String(n).split('').map(function(c){ return NOTE_SUPS[+c]; }).join('');
   }
 
-  function renderNoteText(rawTxt, noteStr, q) {
-    /* Retourne le HTML du texte avec appels de notes numérotés. */
-    if (!noteStr) {
-      return { txt: formatParas(q ? highlight(rawTxt, q) : esc(rawTxt)), notesHtml: '' };
-    }
-    var noteLines = noteStr.split('\n').filter(function(l){ return l.trim(); });
+  function noteCallHtml(n) {
+    return '<sup class="note-call">' + noteNum(n) + '</sup>';
+  }
+
+  function noteLinesOf(entry) {
+    return ((entry && entry.note) || '').split('\n').filter(function(l){ return l.trim(); });
+  }
+
+  /* Nombre de notes des entrées qui précèdent l'entrée idx dans son terme. */
+  function noteOffset(term, idx) {
+    var n = 0;
+    for (var i = 0; i < idx && i < term.entrees.length; i++) n += noteLinesOf(term.entrees[i]).length;
+    return n;
+  }
+
+  function renderNoteText(rawTxt, noteStr, q, start) {
+    /* Retourne le HTML du texte avec ses appels, et celui des notes ; start = notes déjà comptées. */
+    start = start || 0;
+    var noteLines = noteLinesOf({ note: noteStr });
     var parts = rawTxt.split('[note]');
-    var txtHtml = '';
+    var txtHtml = '', used = 0;
     for (var i = 0; i < parts.length; i++) {
       txtHtml += formatParas(q ? highlight(parts[i], q) : esc(parts[i]));
-      if (i < parts.length - 1) txtHtml += noteCallHtml(i);
+      /* un appel sans note en regard ne s'affiche pas */
+      if (i < parts.length - 1 && used < noteLines.length) txtHtml += noteCallHtml(start + (++used));
     }
-    /* Si pas de marqueur dans le texte mais note présente : appel en fin */
-    if (parts.length === 1 && noteLines.length > 0) {
-      txtHtml += noteCallHtml(0);
-    }
-    /* HTML des notes */
+    /* notes sans marqueur dans le texte : appels en fin */
+    while (used < noteLines.length) txtHtml += noteCallHtml(start + (++used));
     var notesHtml = '';
-    if (noteLines.length === 1) {
-      notesHtml = '<div class="term-note"><sup>' + (NOTE_SUPS[0]||'1') + '</sup> ' + esc(noteLines[0]) + '</div>';
-    } else {
+    if (noteLines.length) {
       notesHtml = '<div class="term-note">';
       for (var j = 0; j < noteLines.length; j++) {
-        notesHtml += '<span class="term-note-item"><sup>' + (NOTE_SUPS[j]||(j+1)) + '</sup> ' + esc(noteLines[j]) + '</span>';
+        notesHtml += '<span class="term-note-item"><sup>' + noteNum(start + j + 1) + '</sup> ' + esc(noteLines[j]) + '</span>';
       }
       notesHtml += '</div>';
     }
-    return { txt: txtHtml, notesHtml: notesHtml };
+    return { txt: txtHtml, notesHtml: notesHtml, count: noteLines.length };
   }
 
   function termCard(t) {
@@ -519,6 +528,7 @@
     if (t.entrees.length === 0) {
       html += '<div class="term-entry"><div class="term-text"><em>(définition à venir)</em></div></div>';
     } else {
+      var noteCount = 0;
       t.entrees.forEach(function(e, i){
         /* Chaque entrée reçoit un ID unique : term-{id}-{n} */
         html += '<div class="term-entry" id="entry-' + esc(t.id) + '-' + (i+1) + '">';
@@ -530,7 +540,8 @@
           html += '<div class="term-source">[' + srcDisplay + ']</div>';
         }
         /* Texte avec appels de notes numérotés */
-        var noteRender = renderNoteText(e.texte || '', e.note || '', q);
+        var noteRender = renderNoteText(e.texte || '', e.note || '', q, noteCount);
+        noteCount += noteRender.count;
         html += '<div class="term-text">' + noteRender.txt + '</div>';
         html += noteRender.notesHtml;
         html += '</div>';
@@ -581,22 +592,13 @@
       body += '<div class="entry">';
       if (term.entrees.length > 1) body += '<span class="num">' + (i+1) + ' —</span>';
       if (e.source) body += '<div class="src">[' + esc(e.source) + ']</div>';
-      var rawT = e.texte || '';
-      var rawT = e.texte || '';
-      if (e.note) {
-        var nrP = renderNoteText(rawT, e.note, '');
-        body += '<div class="txt">' + nrP.txt + '</div>';
-        var nlsP = e.note.split('\n').filter(function(l){ return l.trim(); });
-        if (nlsP.length <= 1) {
-          body += '<div class="note"><sup>\u00b9</sup>&nbsp;' + esc(e.note) + '</div>';
-        } else {
-          body += '<div class="note">' + nlsP.map(function(l, j){
-            var sups = ['\u00b9','\u00b2','\u00b3','\u2074','\u2075'];
-            return '<div><sup>' + (sups[j]||(j+1)) + '</sup>&nbsp;' + esc(l) + '</div>';
-          }).join('') + '</div>';
-        }
-      } else {
-        body += '<div class="txt">' + esc(rawT) + '</div>';
+      /* rendu et num\u00e9ros identiques \u00e0 ceux de la fiche */
+      var nrP = renderNoteText(e.texte || '', e.note || '', '', noteOffset(term, i));
+      body += '<div class="txt">' + nrP.txt + '</div>';
+      if (nrP.count) {
+        body += '<div class="note">' + noteLinesOf(e).map(function(l, j){
+          return '<div><sup>' + noteNum(noteOffset(term, i) + j + 1) + '</sup>&nbsp;' + esc(l) + '</div>';
+        }).join('') + '</div>';
       }
       body += '</div>';
     });
