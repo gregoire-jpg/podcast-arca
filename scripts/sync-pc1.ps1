@@ -42,6 +42,19 @@ try {
     cmd /c "python -m pip install --quiet --disable-pip-version-check --upgrade yt-dlp[default] dropbox 2>&1"
     cmd /c "python scripts/sync.py --pc1 2>&1"
     Write-Output "Code de sortie : $LASTEXITCODE"
+
+    # Site italien arcarivista.it : même blocage YouTube depuis GitHub, donc ici aussi.
+    # sync_rivista.py envoie lui-même le MP3 sur l'hébergement et l'enregistre en base
+    # (clé SSH dédiée ~/.ssh/arcarivista_podcast_sync, déjà autorisée sur le serveur).
+    $env:SSH_HOST = "b61u9a.ftp.infomaniak.com"
+    $env:SSH_USER = "b61u9a_gregoire"
+    $env:SSH_KEY  = Join-Path $HOME ".ssh\arcarivista_podcast_sync"
+    $ids = @(cmd /c "python scripts/sync_rivista.py plan 2>nul") | Where-Object { $_ -match '^[A-Za-z0-9_-]{11}$' }
+    if ($ids) {
+        Write-Output "Rivista : $($ids.Count) vidéo(s) à traiter"
+        cmd /c "python scripts/sync_rivista.py run $($ids -join ' ') 2>&1"
+        Write-Output "Rivista, code de sortie : $LASTEXITCODE"
+    } else { Write-Output "Rivista : rien de neuf." }
 } finally {
     Stop-Transcript | Out-Null
 }

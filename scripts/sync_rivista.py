@@ -21,7 +21,7 @@ Variables d'environnement :
   CHANNEL_ID        défaut UCTm9Iopq6Rpch_AkJtvEZrw
   SSH_HOST, SSH_USER, SSH_KEY (chemin de la clé privée, défaut ~/.ssh/deploy_key)
   REMOTE_DOCROOT    défaut sites/arcarivista.it (relatif au home SSH)
-  MIN_DURATION      défaut 181 s : en dessous (Shorts) → marqueur .skip, pas d'épisode
+  MIN_DURATION      défaut 181 s : en dessous, un vrai Short (is_short) → marqueur .skip
   MAX_PER_RUN       défaut 8 : borne les minutes Actions d'un passage
   AUDIO_BITRATE     défaut 64k (mono : parole)
   YT_COOKIES_FILE   cookies.txt Netscape (anti bot-gate), optionnel
@@ -32,6 +32,7 @@ import json
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -87,6 +88,16 @@ def remote_done_ids():
 def upload(paths):
     """rsync des fichiers vers ~/<docroot>/audio/ (dossier créé au besoin)."""
     if not paths:
+        return
+    if not shutil.which("rsync"):
+        # Windows (PC1) : pas de rsync → dossier créé par ssh, fichiers envoyés par scp,
+        # droits posés ensuite (scp garde ceux du fichier local).
+        ssh(f"mkdir -p {shlex.quote(REMOTE_AUDIO)}")
+        scp_opts = [o if o != "-p" else "-P" for o in SSH_OPTS]
+        subprocess.run(["scp", "-q", *scp_opts, *[str(p) for p in paths],
+                        f"{SSH_USER}@{SSH_HOST}:{REMOTE_AUDIO}/"], check=True, timeout=1800)
+        noms = " ".join(shlex.quote(f"{REMOTE_AUDIO}/{Path(p).name}") for p in paths)
+        ssh(f"chmod 644 {noms}")
         return
     ssh_cmd = "ssh " + " ".join(shlex.quote(o) for o in SSH_OPTS)
     subprocess.run(
@@ -212,6 +223,25 @@ def sidecar(video_id, meta, mp3):
     return path
 
 
+class _SansRedirection(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *a, **k):
+        return None
+
+
+def is_short(video_id):
+    """Vrai Short YouTube ? La durée ne suffit pas (« Lettera al novizio » dure 2 min et
+    est un épisode) : YouTube sert /shorts/<id> pour un Short (200) et redirige une
+    vidéo ordinaire (303). Cookie SOCS : sinon mur de consentement (302) en Europe.
+    En cas de doute (réseau), on garde la vidéo."""
+    req = urllib.request.Request(f"https://www.youtube.com/shorts/{video_id}", method="HEAD",
+                                 headers={"User-Agent": "Mozilla/5.0", "Cookie": "SOCS=CAI; CONSENT=YES+1"})
+    try:
+        with urllib.request.build_opener(_SansRedirection).open(req, timeout=10) as r:
+            return r.status == 200
+    except Exception:
+        return False
+
+
 def process(video_id, workdir):
     """Renvoie la liste des fichiers à envoyer, [] si la vidéo est à retenter plus tard.
     Lève RuntimeError en cas d'échec réel (bot-gate, réseau…)."""
@@ -223,8 +253,8 @@ def process(video_id, workdir):
         log(f"  … {video_id} : direct en cours ou à venir ({live}) — retenté au prochain passage")
         return []
     duration = int(meta.get("duration") or 0)
-    if duration and duration < MIN_DURATION:
-        log(f"  ⏭ {video_id} : {duration} s < {MIN_DURATION} s (Short) — écarté")
+    if duration and duration < MIN_DURATION and is_short(video_id):
+        log(f"  ⏭ {video_id} : Short ({duration} s) — écarté")
         marker = Path(workdir) / f"{video_id}.skip"
         marker.write_text(f"{meta.get('title') or ''}\n", encoding="utf-8")
         return [marker]

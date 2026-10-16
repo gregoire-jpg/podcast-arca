@@ -9,8 +9,9 @@ name: Sync YouTube → Arca Rivista (MP3)
 # (ni ffmpeg ni yt-dlp installés).
 
 on:
-  schedule:
-    - cron: "30 5 * * *"   # 1× par jour (7 h 30 l'été, 6 h 30 l'hiver à Bruxelles)
+  # Plus de passage planifié (16/10/2026) : YouTube bloque les téléchargements depuis
+  # GitHub (« Sign in to confirm you're not a bot »). La synchro tourne sur PC1, tâche
+  # « Sync podcasts ARCA » (scripts/sync-pc1.ps1, 6/12/18/23 h). Lancement manuel gardé.
   workflow_dispatch:
     inputs:
       all:
