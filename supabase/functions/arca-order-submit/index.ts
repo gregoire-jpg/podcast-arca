@@ -9,6 +9,7 @@
 import { arcaEnv } from "../_shared/env.ts";
 import { supaEnv } from "../_shared/supa.ts";
 import { isAdmin } from "../_shared/auth.ts";
+import { corsHeaders, preflight } from "../_shared/cors.ts";
 import { createStripePaymentLink, createPaypalOrder } from "../_shared/payments.ts";
 
 const PROMO_DEADLINE = new Date("2026-05-25T22:00:00Z");
@@ -23,7 +24,18 @@ function shortMrExp(barcode: any) {
   return barcode;
 }
 
+// Appelée directement par le navigateur (commande.html, POST JSON) : sans réponse au
+// préflight ni en-têtes CORS, le navigateur bloque l'envoi et la commande payée se perd.
 Deno.serve(async (req) => {
+  const pf = preflight(req);
+  if (pf) return pf;
+  const res = await handle(req);
+  const headers = new Headers(res.headers);
+  for (const [k, v] of Object.entries(corsHeaders)) headers.set(k, v);
+  return new Response(res.body, { status: res.status, headers });
+});
+
+async function handle(req: Request): Promise<Response> {
   try {
     const body: any = await req.json();
     const apiKey = arcaEnv("BREVO_API_KEY");
@@ -187,7 +199,7 @@ Deno.serve(async (req) => {
     console.error("Function error:", err);
     return new Response("Error: " + (err as Error).message, { status: 500 });
   }
-});
+}
 
 // ─────────────────────────────────────────────────────────────
 // Vérification d'un order PayPal côté serveur (anti-forgery)
