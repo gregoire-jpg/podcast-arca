@@ -62,6 +62,8 @@ function formDataFromOrder(o: any) {
     "paypal-order-id": o.stripe_session_id || o.paypal_order_id || "",
     "paypal-status": o.paye ? ("PAID — " + (o.paiement || "")) : "",
   };
+  // Même agrégat que le formulaire (syncAdresse) : l'e-mail affiche d.adresse.
+  d.adresse = [d.rue, d.complement, [d.cp, d.ville].filter(Boolean).join(" ")].filter(Boolean).join("\n");
   for (let i = 1; i <= 9; i++) d["qty-n" + i] = "0";
   (o.items || []).forEach((it: any) => { if (it && it.num) d["qty-n" + it.num] = String(it.qty || 0); });
 
