@@ -31,6 +31,9 @@ if ($Install) {
     return
 }
 
+# Code de sortie de la tâche : 0 seulement si tout a réussi. Sans cela le planificateur
+# affichait 0 (« réussi ») même quand sync.py plantait, et l'échec ne se voyait nulle part.
+$rc = 0
 Start-Transcript -Path $log -Force | Out-Null
 try {
     Set-Location $repo
@@ -39,9 +42,11 @@ try {
     # Via cmd : Windows PowerShell 5.1 transforme toute ligne écrite sur stderr
     # (avis pip, messages git) en fausse « NativeCommandError » dans le journal.
     cmd /c "git pull --ff-only --quiet 2>&1"
+    if ($LASTEXITCODE -ne 0) { Write-Output "git pull en echec ($LASTEXITCODE)"; $rc = 2 }
     cmd /c "python -m pip install --quiet --disable-pip-version-check --upgrade yt-dlp[default] dropbox 2>&1"
     cmd /c "python scripts/sync.py --pc1 2>&1"
     Write-Output "Code de sortie : $LASTEXITCODE"
+    if ($LASTEXITCODE -ne 0) { $rc = 1 }
 
     # Site italien arcarivista.it : même blocage YouTube depuis GitHub, donc ici aussi.
     # sync_rivista.py envoie lui-même le MP3 sur l'hébergement et l'enregistre en base
@@ -54,7 +59,13 @@ try {
         Write-Output "Rivista : $($ids.Count) vidéo(s) à traiter"
         cmd /c "python scripts/sync_rivista.py run $($ids -join ' ') 2>&1"
         Write-Output "Rivista, code de sortie : $LASTEXITCODE"
+        if ($LASTEXITCODE -ne 0) { $rc = 3 }
     } else { Write-Output "Rivista : rien de neuf." }
+} catch {
+    Write-Output "Erreur : $_"
+    $rc = 4
 } finally {
+    Write-Output "Resultat de la tache : $rc"
     Stop-Transcript | Out-Null
 }
+exit $rc

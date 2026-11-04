@@ -67,6 +67,10 @@ BOT_GATE = "confirm you"   # « Sign in to confirm you’re not a bot »
 NOT_YET_PUBLIC = ("video unavailable", "vidéo non disponible", "private video", "vidéo privée",
                   "live event will begin", "premieres in", "premiere will begin")
 FAILURES = []              # (video_id, raison) — fait échouer le run à la fin
+PLAYLIST_FAILURES = []     # (liste, raison) — passée et notée ; fait échouer le run à la fin
+
+class ListingError(Exception):
+    """Liste d'une playlist illisible (délai dépassé, coupure, erreur yt-dlp)."""
 
 def yt_dlp_cookie_args():
     """
@@ -166,10 +170,14 @@ def discover_playlists(channel_id, exclude_titles):
     url = f"https://www.youtube.com/channel/{channel_id}/playlists"
     print(f"🔍 Découverte des playlists sur la chaîne…")
 
-    res = subprocess.run(
-        [sys.executable, "-m", "yt_dlp", "-J", "--flat-playlist", *yt_dlp_base_args(), url],
-        capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180,
-    )
+    try:
+        res = subprocess.run(
+            [sys.executable, "-m", "yt_dlp", "-J", "--flat-playlist", *yt_dlp_base_args(), url],
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180,
+        )
+    except subprocess.TimeoutExpired:
+        print("  ⚠  yt-dlp : délai de 180 s dépassé")
+        return []
     if res.returncode != 0:
         print(f"  ⚠  yt-dlp error: {res.stderr[:200]}")
         return []
@@ -211,14 +219,30 @@ def rss_videos(playlist_id):
         return all_videos(playlist_id, limit=15)
 
 def all_videos(playlist_id, limit=None):
-    """Toutes les vidéos d'une playlist via yt-dlp (mode --init, ou repli RSS)."""
+    """
+    Toutes les vidéos d'une playlist via yt-dlp (mode --init, ou repli RSS).
+    Deux essais ; sinon ListingError : l'appelant passe à la suite et le note.
+    """
     extra = ["--playlist-end", str(limit)] if limit else []
-    res = subprocess.run(
-        [sys.executable, "-m", "yt_dlp", "--flat-playlist", "--print", "%(id)s\t%(title)s",
-         *extra, *yt_dlp_base_args(),
-         f"https://www.youtube.com/playlist?list={playlist_id}"],
-        capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=300,
-    )
+    cmd = [sys.executable, "-m", "yt_dlp", "--flat-playlist", "--print", "%(id)s\t%(title)s",
+           *extra, *yt_dlp_base_args(),
+           f"https://www.youtube.com/playlist?list={playlist_id}"]
+    reason = ""
+    for attempt in range(2):
+        try:
+            res = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8",
+                                 errors="replace", timeout=300)
+        except subprocess.TimeoutExpired:
+            reason = "yt-dlp : délai de 300 s dépassé"
+        else:
+            if res.returncode == 0 or (res.stdout or "").strip():
+                break
+            reason = "yt-dlp : " + ((res.stderr or "").strip().splitlines() or ["erreur"])[-1][:150]
+        if attempt == 0:
+            print(f"  ⚠  {reason} — nouvel essai")
+            time.sleep(15)
+    else:
+        raise ListingError(reason)
     videos = []
     for line in (res.stdout or "").strip().splitlines():
         parts = line.split("\t", 1)
@@ -314,16 +338,20 @@ def process_video(video_id, pl_title, pl_slug, pl_meta):
     with tempfile.TemporaryDirectory() as tmp:
         out_tpl = os.path.join(tmp, "%(id)s.%(ext)s")
         for attempt in range(2):   # 403 passagers sur les flux audio YouTube : une seconde chance
-            res = subprocess.run(
-                [sys.executable, "-m", "yt_dlp",
-                 "--format", "bestaudio/best",
-                 "--extract-audio", "--audio-format", "mp3", "--audio-quality", "5",
-                 "--output", out_tpl,
-                 "--print-json",
-                 *yt_dlp_base_args(),
-                 yt_url],
-                capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800,
-            )
+            try:
+                res = subprocess.run(
+                    [sys.executable, "-m", "yt_dlp",
+                     "--format", "bestaudio/best",
+                     "--extract-audio", "--audio-format", "mp3", "--audio-quality", "5",
+                     "--output", out_tpl,
+                     "--print-json",
+                     *yt_dlp_base_args(),
+                     yt_url],
+                    capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800,
+                )
+            except subprocess.TimeoutExpired:
+                res = subprocess.CompletedProcess([], 1, "", "téléchargement : délai de 1800 s dépassé")
+                continue
             if res.returncode == 0 or BOT_GATE in (res.stderr or ""):
                 break
             time.sleep(10)
@@ -479,7 +507,13 @@ def main():
         pl_meta  = dict(pl_meta_map.get(pl_id, {}), _id=pl_id)
 
         print(f"📋 {pl_title}")
-        videos = all_videos(pl_id) if init_mode else rss_videos(pl_id)
+        try:
+            videos = all_videos(pl_id) if init_mode else rss_videos(pl_id)
+        except ListingError as exc:
+            # Une playlist illisible n'arrête pas le passage : notée, on passe à la suivante.
+            print(f"  ❌  playlist illisible ({exc}) — passée")
+            PLAYLIST_FAILURES.append((f"{pl_title} ({pl_id})", str(exc)))
+            continue
         print(f"  {len(videos)} vidéo(s)")
 
         for vid in videos:
@@ -506,7 +540,15 @@ def main():
 
     # ── Orphelines : vidéos uploadées sur la chaîne mais dans aucune playlist thématique ──
     print(f"\n🔎 Scan vidéos orphelines (uploads sans playlist thématique)…")
-    all_uploads = uploads_videos(channel_id)
+    if PLAYLIST_FAILURES:
+        # Les vidéos d'une playlist illisible passeront ici pour orphelines « à classer ».
+        print("  (playlist(s) illisible(s) : des « à classer » ci-dessous peuvent en faire partie)")
+    try:
+        all_uploads = uploads_videos(channel_id)
+    except ListingError as exc:
+        print(f"  ❌  mises en ligne illisibles ({exc}) — orphelines non vérifiées")
+        PLAYLIST_FAILURES.append(("mises en ligne de la chaîne (orphelines)", str(exc)))
+        all_uploads = []
     # Une vidéo de playlist dont le téléchargement a échoué n'est pas orpheline.
     orphans = [v for v in all_uploads
                if v["id"] not in seen_ids and v["id"] not in in_playlists
@@ -548,6 +590,11 @@ def main():
             print(f"\n⏸  {len(to_classify)} orpheline(s) en attente de classement (ajouter à {ORPHANS_FILE.name}) :")
             for vid in to_classify:
                 print(f"    - [{vid['id']}] {vid['title'][:75]}")
+            if os.environ.get("GITHUB_ACTIONS"):
+                # Sinon le run reste vert (« Aucun nouvel épisode ») et la vidéo n'est jamais publiée.
+                print(f"::warning title=Podcasts : orphelines à classer::{len(to_classify)} vidéo(s) "
+                      f"hors playlist à classer dans orphans.json : "
+                      + ", ".join(f"{v['id']} ({v['title'][:40]})" for v in to_classify))
     else:
         print("  Aucune orpheline.")
 
@@ -572,6 +619,14 @@ def main():
         if stale:
             FAILURES.extend((v, "en attente du PC1, PC1 muet") for v in PENDING)
 
+    if PLAYLIST_FAILURES:
+        print(f"\n❌  {len(PLAYLIST_FAILURES)} liste(s) illisible(s), passée(s) ce passage :")
+        for name, reason in PLAYLIST_FAILURES:
+            print(f"    - {name} : {reason}")
+        if os.environ.get("GITHUB_ACTIONS"):
+            print(f"::error title=Playlists illisibles::{len(PLAYLIST_FAILURES)} liste(s) non lue(s) : "
+                  + "; ".join(n for n, _ in PLAYLIST_FAILURES))
+
     # Un run qui n'importe rien parce que YouTube bloque doit être rouge, pas vert.
     if FAILURES:
         gated = sum(1 for _, r in FAILURES if r == "bot-gate")
@@ -582,6 +637,8 @@ def main():
             hint = "Vérifier la tâche planifiée PC1 (ou le secret YT_COOKIES)." if gated else "Voir le journal."
             print(f"::error title=Sync podcasts incomplète::{len(FAILURES)} vidéo(s) non importée(s), "
                   f"dont {gated} bloquée(s) par YouTube. {hint}")
+        sys.exit(1)
+    if PLAYLIST_FAILURES:
         sys.exit(1)
 
 if __name__ == "__main__":
