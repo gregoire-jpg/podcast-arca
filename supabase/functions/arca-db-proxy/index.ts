@@ -9,7 +9,7 @@ import { supaEnv } from "../_shared/supa.ts";
 
 const ALLOWED: Record<string, Set<string>> = {
   public: new Set(["arca_orders", "arca_stock", "arca_stock_moves", "arca_restock_alerts"]),
-  citations: new Set(["citations", "auteurs", "auteurs_propositions", "inscrits_email", "annonces", "votes", "v_stats_citations", "v_stats_auteurs", "v_stats_app", "v_stats_app_semaines"]),
+  citations: new Set(["citations", "auteurs", "auteurs_propositions", "inscrits_email", "annonces", "votes", "v_stats_citations", "v_stats_auteurs", "v_stats_app", "v_stats_app_semaines", "v_stats_app_fidelite"]),
 };
 
 Deno.serve(async (req) => {
