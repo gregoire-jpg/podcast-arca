@@ -351,6 +351,10 @@ def process_video(video_id, pl_title, pl_slug, pl_meta):
                      "--extract-audio", "--audio-format", "mp3", "--audio-quality", "5",
                      "--output", out_tpl,
                      "--print-json",
+                     # Seules les vidéos publiques deviennent des épisodes. Le flux RSS
+                     # ne montre que celles-là, mais le repli yt-dlp (RSS en panne) liste
+                     # aussi les non répertoriées : on les écarte ici, quel que soit le chemin.
+                     "--match-filter", "availability=?public",
                      *yt_dlp_base_args(),
                      yt_url],
                     capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1800,
@@ -374,6 +378,11 @@ def process_video(video_id, pl_title, pl_slug, pl_meta):
                 return None
             print(f"  ❌  yt-dlp: {err[:150]}")
             FAILURES.append((video_id, "bot-gate" if is_bot_gate(err) else err[:120]))
+            return None
+
+        if not (res.stdout or "").strip():
+            # Code 0 sans rien imprimé : écartée par le filtre (non répertoriée).
+            print(f"  …  non publique (non répertoriée) — ignorée")
             return None
 
         try:
