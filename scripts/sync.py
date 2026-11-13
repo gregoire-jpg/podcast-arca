@@ -63,7 +63,13 @@ def yt_dlp_base_args():
         args += ["--js-runtimes", "node"]
     return args + yt_dlp_cookie_args()
 
-BOT_GATE = "confirm you"   # « Sign in to confirm you’re not a bot »
+# Message du bot-gate YouTube, dans la langue du compte des cookies :
+# « Sign in to confirm you’re not a bot » / « Connectez-vous pour confirmer que vous n'êtes pas un robot ».
+BOT_GATE_MARKERS = ("confirm you", "pas un robot", "not a bot")
+
+def is_bot_gate(err):
+    err = (err or "").lower()
+    return any(m in err for m in BOT_GATE_MARKERS)
 NOT_YET_PUBLIC = ("video unavailable", "vidéo non disponible", "private video", "vidéo privée",
                   "live event will begin", "premieres in", "premiere will begin")
 FAILURES = []              # (video_id, raison) — fait échouer le run à la fin
@@ -352,7 +358,7 @@ def process_video(video_id, pl_title, pl_slug, pl_meta):
             except subprocess.TimeoutExpired:
                 res = subprocess.CompletedProcess([], 1, "", "téléchargement : délai de 1800 s dépassé")
                 continue
-            if res.returncode == 0 or BOT_GATE in (res.stderr or ""):
+            if res.returncode == 0 or is_bot_gate(res.stderr):
                 break
             time.sleep(10)
         if res.returncode != 0:
@@ -362,12 +368,12 @@ def process_video(video_id, pl_title, pl_slug, pl_meta):
                 # rien d'anormal, elle sera reprise au passage où elle deviendra publique.
                 print(f"  …  pas encore publique — reprise plus tard")
                 return None
-            if BOT_GATE in err and LOCAL_DIR is None:
+            if is_bot_gate(err) and LOCAL_DIR is None:
                 print(f"  ⏸  bloquée par YouTube — en attente du dépôt PC1")
                 PENDING.append(video_id)
                 return None
             print(f"  ❌  yt-dlp: {err[:150]}")
-            FAILURES.append((video_id, "bot-gate" if BOT_GATE in err else err[:120]))
+            FAILURES.append((video_id, "bot-gate" if is_bot_gate(err) else err[:120]))
             return None
 
         try:
