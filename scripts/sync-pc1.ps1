@@ -61,6 +61,11 @@ try {
         Write-Output "Rivista, code de sortie : $LASTEXITCODE"
         if ($LASTEXITCODE -ne 0) { $rc = 3 }
     } else { Write-Output "Rivista : rien de neuf." }
+
+    # PDF des articles venus des travaux : exec() est interdit aux pages web d'Infomaniak,
+    # Typst ne tourne qu'en ligne de commande (sans ça, pas de bouton « Scarica il PDF »).
+    cmd /c "ssh -i `"$env:SSH_KEY`" -o BatchMode=yes -o LogLevel=ERROR $($env:SSH_USER)@$($env:SSH_HOST) php sites/arcarivista.it/api/cli/pdf-in-attesa.php 2>&1"
+    if ($LASTEXITCODE -ne 0) { Write-Output "Rivista PDF, code de sortie : $LASTEXITCODE"; $rc = 5 }
 } catch {
     Write-Output "Erreur : $_"
     $rc = 4
